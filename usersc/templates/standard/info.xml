@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+  <name>BS4</name>
+  <author>Dan Hoover</author>
+<!-- Feel free to include your github repo here -->
+  <website>https://bootswatch.com/cerulean/</website>
+
+<!-- the version of the template iteself -->
+  <version>1.0</version>
+
+<!-- release date of THIS version -->
+  <release>November 8, 2018</release>
+
+<!-- the last version of UserSpice you tested the template with -->
+  <tested>4.4</tested>
+
+<!-- The next options get a 0 for NO and a 1 for YES -->
+
+<!-- Database Navigation Included -->
+  <dbnav>1</dbnav>
+
+<!-- Compatible with Dropdowns-->
+  <dropnav>1</dropnav>
+
+<!-- Manual/File-based navigation included -->
+  <filenav>1</filenav>
+
+  <!-- Different looking website navigations. 4 options planned. -->
+  <navstyle>Default</navstyle>
+
+<!-- Boostrap 3? Bootstrap 4? HTML5?-->
+  <library>Boostrap 4</library>
+
+<navopts>Default</navopts>
+</template>
