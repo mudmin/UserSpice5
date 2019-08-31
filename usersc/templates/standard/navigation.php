@@ -3,8 +3,8 @@
 
 <!-- This file is a way of allowing the end user to customize stuff -->
 <!-- without getting in the middle of the whole template itself -->
+<?php require_once($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/assets/functions/style.php'); ?>
 <?php
-require_once($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/assets/functions/style.php');
 
 
 if (file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/info.xml')) {
@@ -16,7 +16,7 @@ if ($navstyle == 'Default') {
   ?>
   <!-- Set your logo and the "header" of the navigation here -->
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-    <a href="<?= $us_url_root ?>index.php"><img src="<?= $us_url_root ?>users/images/logo.png"></img></a>
+    <a href="<?= $us_url_root ?>index.php"><img src="<?= $us_url_root ?>users/images/logo.png"></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -59,7 +59,6 @@ if ($navstyle == 'Default') {
     </div>
   </div>
 </nav>
-<body>
 <?php
 
 } elseif ($navstyle == 'Left Side') {
@@ -82,7 +81,6 @@ if ($navstyle == 'Default') {
       $notifications = new Notification($user->data()->id, false, $dayLimit);
     } ?>
     <body>
-
       <div class="col-md-3 float-left col-1 pl-0 pr-0 width collapse show" id="sidebar" aria-expanded="true">
         <div class="list-group border-0 card text-center text-md-left">
           <?php if($user->isLoggedIn()){ //anyone is logged in?>
@@ -125,7 +123,7 @@ if ($navstyle == 'Default') {
 
       <div class="" style="background-color: #023c73;">
         <div class="text-center">
-          <a style="left:-35px;position: relative;" href="<?= $us_url_root ?>"><img style="" src="<?= $us_url_root ?>users/images/logo.png"></img></a>
+          <a style="left:-35px;position: relative;" href="<?= $us_url_root ?>"><img style="" src="<?= $us_url_root ?>users/images/logo.png"></a>
         </div>
       </div>
     <?php }
@@ -199,7 +197,7 @@ if ($navstyle == 'Default') {
         </button>
         <div class="" style="background-color: #023c73;">
           <div class="text-center">
-            <a style="right:-35px;position: relative;" href="<?= $us_url_root ?>"><img style="" src="<?= $us_url_root ?>users/images/logo.png"></img></a>
+            <a style="right:-35px;position: relative;" href="<?= $us_url_root ?>"><img style="" src="<?= $us_url_root ?>users/images/logo.png"></a>
           </div>
         </div>
       <?php }

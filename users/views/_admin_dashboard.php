@@ -9,7 +9,6 @@
 </div>
 </div>
 </header><!-- /header -->
-<script src="js/Chart.bundle.js"></script>
 <div class="content mt-3">
   <div class="row">
     <div class="col-6 text-left">

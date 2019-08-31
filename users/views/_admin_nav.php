@@ -100,7 +100,6 @@ Get groups and names
 // }
 ?>
 <div class="content mt-3">
-  <script type="text/javascript" src="<?=$us_url_root?>users/js/oce.js"></script>
   <h2>Navigation</h2>
   <p class="text-center">
     <a href="admin.php?view=nav&action=newDropdown" class="btn btn-primary" role="button">New Dropdown</a>
@@ -110,7 +109,7 @@ Get groups and names
   </p>
   <div>
     <table class="table table-bordered table-hover table-condensed" id="navTable">
-      <thead><tr><th>ID</th><th>Label</th><th>Parent</th><th>Link*</th><th>Dropdown*</th><th>Authorized Groups</th><th>Logged In*</th><th>Display Order*</th><th>Icon Class*</th><th>Action</th></tr>*Click to edit</thead>
+      <thead><tr><th>ID</th><th>Label</th><th>Parent</th><th>Link*</th><th>Dropdown*</th><th>Authorized Groups</th><th>Logged In*</th><th>Display Order*</th><th>Icon Class*</th><th>Action</th></tr></thead>
       <tbody>
         <?php
         $i=0;
@@ -152,22 +151,6 @@ Get groups and names
         </table>
       </div>
     </div>
-    <script>
-    function oceSuccess(data) {
-      var r = JSON.parse(data);
-      jQuery('#msg').html(r.msg);
-      jQuery('#msg').html(r.msg);
-
-    }
-    </script>
-
-    <script>
-    var oceOpts = {
-      url:'<?=$us_url_root?>users/parsers/editMenu.php',
-      selectOptions : {'0':'No','1':'Yes'},
-      allowNull : true}
-      jQuery('.oce').oneClickEdit(oceOpts, oceSuccess);
-      </script>
 
       <script type="text/javascript" src="js/pagination/datatables.min.js"></script>
       <script>

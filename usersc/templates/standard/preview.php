@@ -1,4 +1,4 @@
-<?php
+standard<?php
 require_once '../../../users/init.php';
 // require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
@@ -7,13 +7,15 @@ require_once '../../../users/init.php';
 if (!securePage($_SERVER['PHP_SELF'])) {
     die();
 }
+$db = DB::getInstance();
+$settings = $db->query("SELECT * FROM settings")->first();
 ?>
 
 <?php require_once($abs_us_root.$us_url_root.'users/includes/template/header1_must_include.php'); ?>
 
 
 <!-- Bootstrap Core CSS -->
-<link rel="stylesheet" href="<?=$us_url_root?>usersc/templates/bs4/assets/css/bootstrap.min.css">
+<link rel="stylesheet" href="<?=$us_url_root?>usersc/templates/standard/assets/css/bootstrap.min.css">
 
 <!-- Table Sorting and Such -->
 <link href="<?=$us_url_root?>users/css/datatables.css" rel="stylesheet">
@@ -28,7 +30,7 @@ if (typeof jQuery == 'undefined') {
 }
 </script>
 
-<script src="<?=$us_url_root?>usersc/templates/bs4/assets/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="<?=$us_url_root?>usersc/templates/standard/assets/js/bootstrap.min.js" type="text/javascript"></script>
 
 <?php
 //optional
@@ -42,7 +44,7 @@ if (typeof jQuery == 'undefined') {
 
 <!-- This file is a way of allowing the end user to customize stuff -->
 <!-- without getting in the middle of the whole template itself -->
-<?php require_once($abs_us_root.$us_url_root.'usersc/templates/bs4/assets/functions/style.php');?>
+<?php require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/style.php');?>
 
 <!-- Set your logo and the "header" of the navigation here -->
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -71,12 +73,12 @@ if ($user->isLoggedIn()) {
     // 2nd parameter- true/false for all notifications or only current
 	$notifications = new Notification($user->data()->id, false, $dayLimit);
 }
-require_once($abs_us_root.$us_url_root.'usersc/templates/bs4/assets/functions/nav.php');
+require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/nav.php');
 }
 
 
  if($settings->navigation_type==1) {
- require_once($abs_us_root.$us_url_root.'usersc/templates/bs4/assets/functions/dbnav.php');
+ require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/dbnav.php');
 } ?>
 
 
@@ -86,7 +88,7 @@ require_once($abs_us_root.$us_url_root.'usersc/templates/bs4/assets/functions/na
 </div>
 </nav>
 <?php
-require_once $abs_us_root . $us_url_root . 'usersc/templates/bs4/container_open.php'; //custom template container
+require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_open.php'; //custom template container
 ?>
 
 <main class="container">
@@ -912,8 +914,8 @@ require_once $abs_us_root . $us_url_root . 'usersc/templates/bs4/container_open.
     }, false);
 </script>
 
-<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/bs4/container_close.php'; //custom template container  ?>
+<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_close.php'; //custom template container  ?>
 
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/page_footer.php'; ?>
 
-<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/bs4/footer.php'; //custom template footer ?>
+<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/footer.php'; //custom template footer ?>

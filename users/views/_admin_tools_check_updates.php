@@ -17,7 +17,9 @@
   <h3 align="center">
     <?php
     require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php';
-    define('REMOTE_VERSION', 'http://userspice.com/version/version.txt');
+    $rc = @fsockopen("www.userspice.com", 80, $errno, $errstr, 1);
+    if (is_resource($rc))  {
+    define('REMOTE_VERSION', 'https://userspice.com/version/version.txt');
     $remoteVersion=trim(file_get_contents(REMOTE_VERSION));
     echo "You are running version ".$user_spice_ver."<br><br>";
     echo "The latest version is ".$remoteVersion."<br><br>";
@@ -26,6 +28,9 @@
     } else {
       echo "You are running the latest version!";
     }
+  }else{
+    echo "We are sorry. UserSpice.com is not reachable by this server. Please try back later.";
+  }
     ?>
   </h3>
 </div>

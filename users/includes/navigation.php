@@ -61,7 +61,7 @@ if ($user->isLoggedIn()) {
 						<li><a href="<?=$us_url_root?>users/messages.php"><i class="fa fa-envelope"></i> <span id="msgCount" class="badge" style="margin-top: -5px"><?php if($msgC > 0){ echo $msgC;}?></span></a></li>
 					<?php } ?>
 
-<?php require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_right_side.php'; ?>
+<?php //require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_right_side.php'; ?>
 
 					 <!-- Hamburger menu link -->
 					<?php if (checkMenu(2,$user->data()->id)){  //Links for permission level 2 (default admin) ?>
@@ -77,7 +77,7 @@ if ($user->isLoggedIn()) {
 							<li><a href="<?=$us_url_root?>"><i class="fa fa-fw fa-home"></i> Home</a></li> <!-- regular user menu link -->
 							<li><a href="<?=$us_url_root?>users/account.php"><i class="fa fa-fw fa-user"></i> Account</a></li>
 
-<?php require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_dropdown.php'; ?>
+<?php //require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_dropdown.php'; ?>
 							<!-- regular user menu link -->
 
 							<?php if (checkMenu(2,$user->data()->id)){  //Links for permission level 2 (default admin) ?>

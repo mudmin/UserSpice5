@@ -72,7 +72,21 @@
    ?>
 
    <h2>Spice Shaker Auto Installer</h2>
-   Spice Shaker allows you to download and automatically install Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users without an API key can make 200 requests a day.  Users with a (free) API key can make 2000.
+   Spice Shaker allows you to download and automatically install Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users without an API key can make 200 requests a day.  Users with a (free) API key can make 2000.<br>
+   <?php
+ $failed = 0;
+ if(!function_exists('curl_version')){
+   echo "<font color='red'>We see that you do not have CURL installed on your server.  Please make sure it is enabled.</font><br>";
+   $failed = 1;
+ }
+ if(!is_writable($abs_us_root.$us_url_root.'users/parsers/checkWrite.php')){
+   echo "<font color='red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</font><br>";
+   $failed = 1;
+ }
+
+ if($failed == 1){ ?>
+   Please check out <a href="https://userspice.com/spice-shaker-problems/">https://userspice.com/spice-shaker-problems/</a> for some tips to fix Spice Shaker on your server.
+ <?php } ?>
    <div class="content mt-3">
      <div class="row">
        <div class="col-6">
@@ -81,7 +95,7 @@
          <label for="gid">UserSpice API Key (
            <a href="https://userspice.com/developer-api-keys/">
              <?php if($settings->spice_api == ''){
-               echo "<font color='red'><strong>Spice Shaker will not work with out a FREE API Key.</font></strong>";
+               echo "<font color='red'><strong>Spice Shaker will not work with out a FREE API Key. Please refresh after pasting your key.</font></strong>";
              }
                ?>
                Get One Here</a>
@@ -120,6 +134,7 @@
     </div>
     <br><br>
      </div>
+
   <?php if(isset($result)){
     $dev = json_decode($result);
     $counter = 0;
@@ -146,7 +161,8 @@
             </div>
             <div class="card-footer" style="background: inherit; border-color: inherit;">
               <a href="#" class="btn btn-default install" style="display:none;">Please Wait</a>
-              <?php if(shakerIsInstalled($d->category,$d->reserved)){ ?>
+              <?php
+              if(shakerIsInstalled($d->category,$d->reserved)){ ?>
                 <button type="button" name="button" class="btn btn-danger installme"  data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
               <?php }else{ ?>
                 <button type="button" name="button" class="btn btn-primary installme"  data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Install</button>

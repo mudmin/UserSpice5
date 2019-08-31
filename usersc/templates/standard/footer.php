@@ -11,11 +11,11 @@ $(document).ready(function(){
 });
 </script>
 <script>
-  var $hamburger = $(".hamburger");
-  $hamburger.on("click", function(e) {
-    $hamburger.toggleClass("is-active");
-    // Do something else, like open/close menu
-  });
+var $hamburger = $(".hamburger");
+$hamburger.on("click", function(e) {
+  $hamburger.toggleClass("is-active");
+  // Do something else, like open/close menu
+});
 </script>
 <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
 <script>
@@ -27,14 +27,13 @@ $(document).ready(function(){
 // ga('create','UA-XXXXX-X','auto');ga('send','pageview');
 </script>
 
-<div class="containe-fluidr">
-        <div class="row">
-                <footer class="text-center footer">
-                        <footer><br>&copy;
-                          <?php echo date("Y"); ?>
-                           <?=$settings->copyright; ?></footer>
-                        <br>
-                </footer>
-        </div>
+<div class="containe-fluid">
+  <div class="row">
+    <footer class="text-center footer">
+      <br>
+      &copy; <?php echo date("Y"); ?> <?=$settings->copyright; ?>
+      <br><br>
+    </footer>
+  </div>
 </div>
 <?php require_once($abs_us_root.$us_url_root.'users/includes/html_footer.php');?>

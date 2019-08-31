@@ -24,7 +24,7 @@ ini_set('memory_limit','1024M');
 require_once '../users/init.php';
 include $abs_us_root.$us_url_root."users/includes/dashboard_language.php";
 $db = DB::getInstance();
-if (!securePage($_SERVER['PHP_SELF'])){die();} 
+if (!securePage($_SERVER['PHP_SELF'])){die();}
 $settings = $db->query("SELECT * FROM settings")->first();
 ?>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
@@ -183,7 +183,11 @@ $settings = $db->query("SELECT * FROM settings")->first();
     case "plugins_config":
     $plugin = Input::get('plugin');
     if(file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$plugin.'/configure.php')){
+      if(file_exists($abs_us_root.$us_url_root.'users/views/_configure_plugin_header.php')){
+        include $abs_us_root.$us_url_root.'users/views/_configure_plugin_header.php';
+      }
       include $abs_us_root.$us_url_root.'usersc/plugins/'.$plugin.'/configure.php';
+      echo "</div>";
     }
     break;
     case "reg":
