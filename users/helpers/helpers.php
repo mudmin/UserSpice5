@@ -308,8 +308,7 @@ function write_php_ini($array, $file)
 
 function safefilerewrite($fileName, $dataToSave)
 {
-$security1 = ';<?php';
-$security2 = ';die();';
+$security = ';<?php die();?>';
 
   if ($fp = fopen($fileName, 'w'))
     {
@@ -322,7 +321,7 @@ $security2 = ';die();';
 
         //file was locked so now we can store information
         if ($canWrite)
-        {            fwrite($fp, $security1.PHP_EOL.$security2.PHP_EOL.$dataToSave);
+        {            fwrite($fp, $security.PHP_EOL.$dataToSave);
             flock($fp, LOCK_UN);
         }
         fclose($fp);

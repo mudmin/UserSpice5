@@ -1578,7 +1578,9 @@ if(!function_exists('addPage')) {
                 $data['bottom'] = [];
                 $counter = 0;
                 foreach($hooks as $h){
-                  if($h->position == "post"){
+                  if($h->position == "pre"){
+                    $data['pre'][$counter] = $h->folder.'/'.$h->hook;
+                  }elseif($h->position == "post"){
                     $data['post'][$counter] = $h->folder.'/'.$h->hook;
                   }elseif($h->position == "form"){
                     $data['form'][$counter] = $h->folder.'/'.$h->hook;

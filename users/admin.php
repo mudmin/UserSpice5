@@ -30,7 +30,14 @@ $settings = $db->query("SELECT * FROM settings")->first();
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
 
 <?php $view = Input::get('view');?>
-<?php require_once $abs_us_root.$us_url_root.'users/views/_admin_menu.php'; ?>
+<?php require_once $abs_us_root.$us_url_root.'users/views/_admin_menu.php';
+if($view == '' || $view == 'dashboard'){
+if((time() - strtotime($settings->announce)) > 10800){
+$db->update('settings',1,['announce'=>date("Y-m-d H:i:s")]);
+require_once $abs_us_root.$us_url_root.'users/views/_admin_announcements.php';
+}
+}
+?>
 <div id="right-panel" class="right-panel">
 
   <div id="messages" class="sufee-alert alert with-close alert-primary alert-dismissible fade show d-none">
@@ -248,14 +255,12 @@ $settings = $db->query("SELECT * FROM settings")->first();
 </div><!-- /#right-panel -->
 
 <!-- Right Panel -->
-
-
-
 <script type="text/javascript">
 $(document).ready(function() {
-  $('[data-toggle="popover"]').popover();
+$('[data-toggle="popover"]').popover();
 
   function messages(data) {
+    console.log("messages found");
     $('#messages').removeClass();
     $('#message').text("");
     $('#messages').show();
@@ -384,53 +389,6 @@ $(document).ready(function() {
     }
   }
 }?>
-<?php
-if($view == '' || $view == 'dashboard'){
-  // UserSpice Announcements
-  $rc = @fsockopen("https://rss.userspice.com",80,$errCode,$errStr,1);
-  if (is_resource($rc))  {
-    $filename= 'https://rss.userspice.com/rss.xml';
-    $file_headers = @get_headers($filename);
-    if(($file_headers[0] != 'HTTP/1.1 200 OK') && ($file_headers[1] != 'HTTP/1.1 200 OK')){
-      //logger($user->data()->id,"Errors","UserSpice Announcements feed not found. Please tell UserSpice!");
-    } else {
-      $limit = 0;
-      $dis = $db->query("SELECT * FROM us_announcements")->results();
-      $dismissed = [];
-      foreach($dis as $d){
-        $dismissed[] = $d->dismissed;
-      }
-      $xmlDoc = new DOMDocument();
-      $xmlDoc->load('https://rss.userspice.com/rss.xml');
-      $x=$xmlDoc->getElementsByTagName('item');
-      for ($i=0; $i<=2; $i++) {
-        if($limit == 1){
-          continue;
-        }
 
-        $dis=$x->item($i)->getElementsByTagName('dis')
-        ->item(0)->childNodes->item(0)->nodeValue;
-
-        if(!in_array($dis,$dismissed) && $dis != 0){
-          $limit = 1;
-          $ignore=$x->item($i)->getElementsByTagName('ignore')
-          ->item(0)->childNodes->item(0)->nodeValue;
-          $title=$x->item($i)->getElementsByTagName('title')
-          ->item(0)->childNodes->item(0)->nodeValue;
-          $class=$x->item($i)->getElementsByTagName('class')
-          ->item(0)->childNodes->item(0)->nodeValue;
-          $link=$x->item($i)->getElementsByTagName('link')
-          ->item(0)->childNodes->item(0)->nodeValue;
-          $message=$x->item($i)->getElementsByTagName('message')
-          ->item(0)->childNodes->item(0)->nodeValue;
-          if(version_compare($ignore, $user_spice_ver) !=  1){
-            continue;
-          }
-        }
-      }
-    }
-  }
-}
-?>
 </body>
 </html>

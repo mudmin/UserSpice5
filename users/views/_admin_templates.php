@@ -64,7 +64,7 @@
         <br>
       </div>
       <div class="col-8">
-        <a href="admin.php?view=spice&type=template">Download Official Templates</a> or <a href="https://userspice.com/templates" class="button">Download More Templates</a>
+        <a href="admin.php?view=spice&type=template">Download Official Templates</a> or <a href="https://userspice.com/templates">Download More Templates</a>
       </div>
     </div>
     <div class="row">

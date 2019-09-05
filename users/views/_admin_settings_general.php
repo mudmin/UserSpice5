@@ -234,7 +234,7 @@ includeHook($hooks,'pre');
 
               <div class="card no-padding">
                 <div class="card-header"><h3>Language</h3>
-                    There may be more langauges available <a href="https://userspice.com/translations"><font color="blue">here</font></a>.<br>
+                    There may be more languages available <a href="https://userspice.com/translations"><font color="blue">here</font></a>.<br>
                 </div>
                 <div class="card-body">
 
