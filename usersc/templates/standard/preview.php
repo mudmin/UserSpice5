@@ -34,7 +34,7 @@ if (typeof jQuery == 'undefined') {
 
 <?php
 //optional
-//require_once $abs_us_root.$us_url_root.'usersc/includes/bootstrap_corrections.php'; ?>
+if(file_exists($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'.css')){?> <link href="<?=$us_url_root?>usersc/templates/<?=$settings->template?>.css" rel="stylesheet"> <?php } ?>
 
 </head>
 <?php require_once($abs_us_root.$us_url_root.'users/includes/template/header3_must_include.php'); ?>
@@ -48,7 +48,7 @@ if (typeof jQuery == 'undefined') {
 
 <!-- Set your logo and the "header" of the navigation here -->
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-       <a href="<?=$us_url_root?>"><img src="<?=$us_url_root?>users/images/logo.png"></img></a>
+       <a href="<?=$us_url_root?>"><img src="<?=$us_url_root?>users/images/logo.png"></a>
        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
          <span class="navbar-toggler-icon"></span>
        </button>

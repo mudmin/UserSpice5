@@ -7,5 +7,5 @@ $migrations = array(
   'VNEno3E4zaNz','qPEARSh49fob','2ZB9mg1l0JXe','B9t6He7qmFXa','86FkFVV4TGRg',
   'y4A1Y0u9n2Rt','Tm5xY22MM8eC','0YXdrInkjV86F','99plgnkjV86','0DaShInkjV86',
   '0DaShInkjVz1','y4A1Y0u9n2SS','0DaShInkjV87','0DaShInkjV88','2019-09-04a',
-  '2019-09-05c',
+  '2019-09-05a','2019-09-26a',
 );

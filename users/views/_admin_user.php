@@ -12,8 +12,12 @@
 </div>
 </div>
 </header>
-
+<style media="screen">
+  form label {font-weight:600}
+</style>
 <?php
+$hooks = getMyHooks(['page' =>'admin.php?view=user']);
+includeHook($hooks,'pre');
 $validation = new Validate();
 //PHP Goes Here!
 $query = $db->query("SELECT * FROM email");
@@ -36,7 +40,7 @@ if(!empty($_POST)) {
   if(!Token::check($token)){
     include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
   }else {
-
+    includeHook($hooks,'post');
     if(!empty($_POST['delete'])){
       $deletions = $_POST['delete'];
       if ($deletion_count = deleteUsers($deletions)){
@@ -77,12 +81,12 @@ if(!empty($_POST)) {
       }
 
       //Update display name
-      $displayname = Input::get("username");
+      $displayname = Input::get("unx");
       if ($userdetails->username != $displayname) {
 
         $fields=array('username'=>$displayname);
         $validation->check($_POST,array(
-          'username' => array(
+          'unx' => array(
             'display' => 'Username',
             'required' => true,
             'unique_update' => 'users,'.$userId,
@@ -100,12 +104,12 @@ if(!empty($_POST)) {
       }
 
       //Update first name
-      $fname = ucfirst(Input::get("fname"));
+      $fname = ucfirst(Input::get("fnx"));
       if ($userdetails->fname != $fname) {
 
         $fields=array('fname'=>$fname);
         $validation->check($_POST,array(
-          'fname' => array(
+          'fnx' => array(
             'display' => 'First Name',
             'required' => true,
             'min' => 1,
@@ -123,12 +127,12 @@ if(!empty($_POST)) {
       }
 
       //Update last name
-      $lname = ucfirst(Input::get("lname"));
+      $lname = ucfirst(Input::get("lnx"));
       if ($userdetails->lname != $lname){
 
         $fields=array('lname'=>$lname);
         $validation->check($_POST,array(
-          'lname' => array(
+          'lnx' => array(
             'display' => 'Last Name',
             'required' => true,
             'min' => 1,
@@ -146,9 +150,9 @@ if(!empty($_POST)) {
         }
       }
 
-      if(!empty($_POST['password'])) {
+      if(!empty($_POST['pwx'])) {
         $validation->check($_POST,array(
-          'password' => array(
+          'pwx' => array(
             'display' => 'New Password',
             'required' => true,
             'min' => $settings->min_pw,
@@ -157,13 +161,13 @@ if(!empty($_POST)) {
           'confirm' => array(
             'display' => 'Confirm New Password',
             'required' => true,
-            'matches' => 'password',
+            'matches' => 'pwx',
           ),
         ));
 
         if (empty($errors)) {
           //process
-          $new_password_hash = password_hash(Input::get('password', true), PASSWORD_BCRYPT, array('cost' => 12));
+          $new_password_hash = password_hash(Input::get('pwx', true), PASSWORD_BCRYPT, array('cost' => 12));
           $user->update(array('password' => $new_password_hash,),$userId);
           $successes[]='Password updated.';
           logger($user->data()->id,"User Manager","Updated password for $userdetails->fname.");
@@ -218,11 +222,11 @@ if(!empty($_POST)) {
       }
 
       //Update email
-      $email = Input::get("email");
+      $email = Input::get("emx");
       if ($userdetails->email != $email){
         $fields=array('email'=>$email);
         $validation->check($_POST,array(
-          'email' => array(
+          'emx' => array(
             'display' => 'Email',
             'required' => true,
             'valid_email' => true,
@@ -284,26 +288,6 @@ if(!empty($_POST)) {
           }else{
             $errors[] = lang("SQL_ERROR");
           }
-        }
-      }
-
-      //Toggle msg_exempt setting
-      $msg_exempt = Input::get("msg_exempt");
-      if (isset($msg_exempt) AND $msg_exempt == '1'){
-        if ($userdetails->msg_exempt == 0){
-          if (updateUser('msg_exempt', $userId, 1)){
-            $successes[] = lang("USER_MESSAGE_EXEMPT", array("now"));
-            logger($user->data()->id,"User Manager","Updated msg_exempt for $userdetails->fname from 0 to 1.");
-          }else{
-            $errors[] = lang("SQL_ERROR");
-          }
-        }
-      }elseif ($userdetails->msg_exempt == 1){
-        if (updateUser('msg_exempt', $userId, 0)){
-          $successes[] = lang("USER_MESSAGE_EXEMPT", array("no longer"));
-          logger($user->data()->id,"User Manager","Updated msg_exempt for $userdetails->fname from 1 to 0.");
-        }else{
-          $errors[] = lang("SQL_ERROR");
         }
       }
 
@@ -394,65 +378,52 @@ if(!empty($_POST)) {
   <div class="content mt-3">
     <?=resultBlock($errors,$successes);?>
     <?php if(!$validation->errors()=='') {?><div class="alert alert-danger"><?=display_errors($validation->errors());?></div><?php } ?>
-    <div class="row">
-      <div class="col-sm-12 col-sm-2"><!--left col-->
-        <?php echo $useravatar;?>
-      </div><!--/col-2-->
+    <?php includeHook($hooks,'body');?>
+        <div class="row">
+          <div class="col-8">
+            <h3><?=$userdetails->fname?> <?=$userdetails->lname?> - <?=$userdetails->username?></h3>
+            <label>User ID: </label> <?=$userdetails->id?><?php if($act==1) {?> <br>
+              <?php if($userdetails->email_verified==1) {?> Email Verified <input type="hidden" name="email_verified" value="1" />
+            <?php } elseif($userdetails->email_verified==0) {?> Email Unverified -
+              <label class="normal"><br><input type="checkbox" name="email_verified" value="1" />
+                Verify</label><?php } else {?>Error: No Validation<?php } } ?>
 
-      <div class="col-sm-12 col-sm-10">
-        <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId?>' method='post'>
+                  <br><label>Joined: </label> <?=$userdetails->join_date?>
 
-          <h3><?=$userdetails->fname?> <?=$userdetails->lname?> - <?=$userdetails->username?></h3>
-          <div class="panel panel-default">
-            <div class="panel-heading">User ID: <?=$userdetails->id?><?php if($act==1) {?> - <?php if($userdetails->email_verified==1) {?> Email Verified <input type="hidden" name="email_verified" value="1" /><?php } elseif($userdetails->email_verified==0) {?> Email Unverified - <label class="normal"><input type="checkbox" name="email_verified" value="1" /> Verify</label><?php } else {?>Error: No Validation<?php } } ?> <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?> <?php if(in_array($user->data()->id, $master_account)) {?><p class="pull-right"><label class="normal"><input type="checkbox" name="protected" value="1" <?php if($userdetails->protected==1){?>checked<?php } ?>/> Protected Account</label></p><?php } ?></div>
-              <div class="panel-body">
+                  <br><label>Last Login: </label> <?php if($userdetails->last_login != 0) { echo $userdetails->last_login; } else {?> <i>Never</i> <?php }?><br/>
+                </div>
+                <div class="col-4">
 
-                <label>Joined: </label> <?=$userdetails->join_date?><br/>
-
-                <label>Last Login: </label> <?php if($userdetails->last_login != 0) { echo $userdetails->last_login; } else {?> <i>Never</i> <?php }?><br/>
-
-                <label>Username:</label>
-                <input  class='form-control' type='text' name='username' value='<?=$userdetails->username?>' autocomplete="off" />
-
-                <label>Email:</label>
-                <input class='form-control' type='text' name='email' value='<?=$userdetails->email?>' autocomplete="off" />
-
-                <label>First Name:</label>
-                <input  class='form-control' type='text' name='fname' value='<?=$userdetails->fname?>' autocomplete="off" />
-
-                <label>Last Name:</label>
-                <input  class='form-control' type='text' name='lname' value='<?=$userdetails->lname?>' autocomplete="off" />
-
-              </div>
-            </div>
-
-
-            <div class="panel panel-default">
-              <div class="panel-heading">Functions <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?></div>
-              <div class="panel-body">
-                <center>
-                  <div class="btn-group"><button type="button" class="btn btn-warning" data-toggle="modal" data-target="#password">Password/PIN Settings</button></div>
-                  <?php if(file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_user_system_settings.php')){?>
-                    <div class="btn-group"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#systems">System Settings</button></div><?php } ?>
-                    <div class="btn-group"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#permissions">Permission Settings</button></div>
-                    <div class="btn-group"><button type="button" class="btn btn-default" data-toggle="modal" data-target="#misc">Misc Settings</button></div>
-                  </center>
+                  <?php echo $useravatar;?>
                 </div>
               </div>
+                <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId?>' method='post'>
 
-              <div id="password" class="modal fade" role="dialog">
-                <div class="modal-dialog">
+                  <div class="row">
+                    <div class="col-12 col-sm-6">
+                      <div class="form-group">
+                        <label>Username:</label>
+                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username?>' autocomplete="off" />
+                      </div>
 
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="modal-title">Update Password</h4>
-                    </div>
-                    <div class="modal-body">
+                      <div class="form-group">
+                        <label>Email:</label>
+                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email?>' autocomplete="off" />
+                      </div>
+
+                      <div class="form-group">
+                        <label>First Name:</label>
+                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname?>' autocomplete="off" />
+                      </div>
+
+                      <div class="form-group">
+                        <label>Last Name:</label>
+                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname?>' autocomplete="off" />
+                      </div>
+
                       <div class="form-group">
                         <label>New Password (<?=$settings->min_pw?> char min, <?=$settings->max_pw?> max.)</label>
-                        <input class='form-control' type='password' autocomplete="off" name='password' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
                       <div class="form-group">
@@ -460,197 +431,154 @@ if(!empty($_POST)) {
                         <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
-                      <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email?</label><br>
-                      <?php if(!is_null($userdetails->pin)) {?>
-                        <div class="form-group">
-                          <label><input  type="checkbox" id="resetPin" name="resetPin" value="1" /> Reset PIN</label>
-                        </div>
-                      <?php } ?>
-                    </div>
-                    <div class="modal-footer">
-                      <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
-                      <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
-                    </div>
-                  </div>
 
-                </div>
-              </div>
-
-              <div id="systems" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="modal-title">System Settings</h4>
-                    </div>
-                    <div class="modal-body">
-                      <?php if(file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_user_system_settings.php')){
-                        require_once $abs_us_root.$us_url_root.'usersc/includes/admin_user_system_settings.php';
-                      } ?>
-                    </div>
-                    <div class="modal-footer">
-                      <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
-                      <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              <div id="permissions" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="modal-title">Permission Settings</h4>
-                    </div>
-                    <div class="modal-body">
-                      <div class="panel panel-default">
-                        <div class="panel-heading">Remove These Permission(s): <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?></div>
-                        <div class="panel-body">
-                          <?php
-                          //NEW List of permission levels user is apart of
-
-                          $perm_ids = [];
-                          foreach($userPermission as $perm){
-                            $perm_ids[] = $perm->permission_id;
-                          }
-
-                          foreach ($permissionData as $v1){
-                            if(in_array($v1->id,$perm_ids)){ ?>
-                              <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission[]' value='<?=$v1->id;?>' <?php if(!hasPerm([$v1->id],$user->data()->id) && $settings->permission_restriction==1){ ?>disabled<?php } ?> /> <?=$v1->name;?></label>
-                              <?php
-                            }
-                          }
-                          ?>
-
-                        </div>
-                      </div>
-
-                      <div class="panel panel-default">
-                        <div class="panel-heading">Add These Permission(s): <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?></div>
-                        <div class="panel-body">
-                          <?php
-                          foreach ($permissionData as $v1){
-                            if(!in_array($v1->id,$perm_ids)){ ?>
-                              <label class="normal"><input type='checkbox' name='addPermission[]' id='addPermission[]' value='<?=$v1->id;?>' <?php if(!hasPerm([$v1->id],$user->data()->id) && $settings->permission_restriction==1){ ?>disabled<?php } ?>/> <?=$v1->name;?></label>
-                              <?php
-                            }
-                          }
-                          ?>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="modal-footer">
-                      <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
-                      <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              <div id="misc" class="modal fade" role="dialog">
-                <div class="modal-dialog">
-
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h4 class="modal-title">Misc Settings</h4>
-                    </div>
-                    <div class="modal-body">
                       <div class="form-group">
+                        <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email?</label><br>
+                      </div>
+                      <?php includeHook($hooks,'form');?>
+                      <div class="row">
+                        <div class="col-12 col-sm-6">
+                          <div class="panel-heading"><strong>Remove These Permission(s)</strong> <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?></div>
+                          <div class="panel-body">
+                            <?php
+                            //NEW List of permission levels user is apart of
 
+                            $perm_ids = [];
+                            foreach($userPermission as $perm){
+                              $perm_ids[] = $perm->permission_id;
+                            }
+
+                            foreach ($permissionData as $v1){
+                              if(in_array($v1->id,$perm_ids)){ ?>
+                                <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission[]' value='<?=$v1->id;?>' <?php if(!hasPerm([$v1->id],$user->data()->id) && $settings->permission_restriction==1){ ?>disabled<?php } ?> /> <?=$v1->name;?></label><br>
+                                <?php
+                              }
+                            }
+                            ?>
+
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                          <div class="panel-heading"><strong>Add These Permission(s)</strong> <?php if($protectedprof==1) {?><p class="pull-right">PROTECTED PROFILE - EDIT DISABLED</p><?php } ?></div>
+                          <div class="panel-body">
+                            <?php
+                            foreach ($permissionData as $v1){
+                              if(!in_array($v1->id,$perm_ids)){ ?>
+                                <label class="normal"><input type='checkbox' name='addPermission[]' value='<?=$v1->id;?>' <?php if(!hasPerm([$v1->id],$user->data()->id) && $settings->permission_restriction==1){ ?>disabled<?php } ?>/> <?=$v1->name;?></label><br>
+                                <?php
+                              }
+                            }
+                            ?>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <div class="form-group">
+                        <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><font color="blue">?</font></a></label>
+                        <select name="cloak_allowed" class="form-control">
+                          <option value="1" <?php if ($userdetails->cloak_allowed==1){echo "selected='selected'";} else { if(!in_array($user->data()->id,$master_account)){  ?>disabled<?php }} ?>>Yes</option>
+                          <option value="0" <?php if ($userdetails->cloak_allowed==0){echo "selected='selected'";} else { if(!in_array($user->data()->id,$master_account)){  ?>disabled<?php }} ?>>No</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label> Block<a class="nounderline" data-toggle="tooltip" title="Drop the banhammer on a troublemaker!"><font color="blue">?</font></a></label>
+                        <select name="active" class="form-control">
+                          <option value="1" <?php if ($userdetails->permissions==1){echo "selected='selected'";} else { if(!checkMenu(2,$user->data()->id)){  ?>disabled<?php }} ?>>No</option>
+                          <option value="0" <?php if ($userdetails->permissions==0){echo "selected='selected'";} else { if(!checkMenu(2,$user->data()->id)){  ?>disabled<?php }} ?>>Yes</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label> Force Password Reset<a class="nounderline" data-toggle="tooltip" title="The user will be required to create a new password on next login"><font color="blue">?</font></a></label>
+                        <select name="force_pr" class="form-control">
+                          <option <?php if ($userdetails->force_pr==0){echo "selected='selected'";} ?> value="0">No</option>
+                          <option <?php if ($userdetails->force_pr==1){echo "selected='selected'";} ?>value="1">Yes</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <?php if(!is_null($userdetails->pin)) {?>
+                          <label><input  type="checkbox" id="resetPin" name="resetPin" value="1" /> Reset PIN</label>
+                        <?php } ?>
+                      </div>
+
+                      <div class="form-group">
                         <?php if($settings->twofa==1 && $userdetails->twoEnabled==1) {?>
                           <label>Disable 2FA?
                             <input type="checkbox" name="twofa" value="1" /></label> <br />
                           <?php } ?>
-
-                          <label>Exempt Messages<a class="nounderline" data-toggle="tooltip" title="This prevents a user from being able to receive group or individual messages"><font color="blue">?</font></a>
-                            <input type="checkbox" name="msg_exempt" value="1" <?php if($userdetails->msg_exempt==1){?>checked<?php } ?>/></label> <br />
-
-                            <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><font color="blue">?</font></a>
-                              <input type="checkbox" name="dev_user" value="1" <?php if($userdetails->dev_user==1){?>checked<?php } ?>/></label><br />
-
-                              <label>Cloak into this user<a class="nounderline" data-toggle="tooltip" title="Automatically logs you in as this user"><font color="blue">?</font></a>
-                                <?php
-                                $rsn = '';
-                                if(isset($_SESSION['cloak_to'])){
-                                  $rsn = 'you are already cloaked';
-                                }
-                                if(in_array($userId,$master_account)){
-                                  $rsn = 'cloaking into this user is disabled because they are a master account.';
-                                }
-                                if($userId==$user->data()->id){
-                                  $rsn = 'cloaking into yourself will break the space-time continuum.';
-                                }
-                                if(in_array($user->data()->id,$master_account) && !in_array($userId,$master_account)){
-                                  $rsn = '';
-                                }
-                                if($user->data()->cloak_allowed!=1){
-                                  $rsn = 'your account has cloaking disabled. Enable it in User->Misc Settings->Is Aloowed To Cloak.';
-                                }
-                                ?>
-
-                                <input type="checkbox" name="cloak" value="1" <?php if($rsn !=''){echo "disabled";}?>></label><br>
-                                <?php if($rsn !=''){echo "<font color='blue'>Cloaking disabled because ".$rsn.'</font>';}?>
-
-                                <br><br><label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><font color="blue">?</font></a></label>
-                                <select name="cloak_allowed" class="form-control">
-                                  <option value="1" <?php if ($userdetails->cloak_allowed==1){echo "selected='selected'";} else { if(!in_array($user->data()->id,$master_account)){  ?>disabled<?php }} ?>>Yes</option>
-                                  <option value="0" <?php if ($userdetails->cloak_allowed==0){echo "selected='selected'";} else { if(!in_array($user->data()->id,$master_account)){  ?>disabled<?php }} ?>>No</option>
-                                </select>
-
-                                <label> Block<a class="nounderline" data-toggle="tooltip" title="Drop the banhammer on a troublemaker!"><font color="blue">?</font></a></label>
-                                <select name="active" class="form-control">
-                                  <option value="1" <?php if ($userdetails->permissions==1){echo "selected='selected'";} else { if(!checkMenu(2,$user->data()->id)){  ?>disabled<?php }} ?>>No</option>
-                                  <option value="0" <?php if ($userdetails->permissions==0){echo "selected='selected'";} else { if(!checkMenu(2,$user->data()->id)){  ?>disabled<?php }} ?>>Yes</option>
-                                </select>
-
-                                <label> Force Password Reset<a class="nounderline" data-toggle="tooltip" title="The user will be required to create a new password on next login"><font color="blue">?</font></a></label>
-                                <select name="force_pr" class="form-control">
-                                  <option <?php if ($userdetails->force_pr==0){echo "selected='selected'";} ?> value="0">No</option>
-                                  <option <?php if ($userdetails->force_pr==1){echo "selected='selected'";} ?>value="1">Yes</option>
-                                </select>
-
-                                <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user"><font color="blue">?</font></a>
-                                  <input type='checkbox' name='delete[<?php echo "$userId"; ?>]' id='delete[<? echo "$userId"; ?>]' value='<?php echo "$userId"; ?>' <?php if (!checkMenu(2,$user->data()->id) || $userId == 1){  ?>disabled<?php } ?>></label>
-                                </div>
-                                <div class="modal-footer">
-                                  <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
-                                  <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
-                                </div>
-                              </div>
-
-                            </div>
-                          </div>
                         </div>
 
+                        <div class="form-group">
+                          <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><font color="blue">?</font></a></label>
+                          <select name="dev_user" class="form-control">
+                            <option <?php if ($userdetails->dev_user==0){echo "selected='selected'";} ?> value="0">No</option>
+                            <option <?php if ($userdetails->dev_user==1){echo "selected='selected'";} ?>value="1">Yes</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+
+                          <?php
+                          $rsn = '';
+                          if(isset($_SESSION['cloak_to'])){
+                            $rsn = 'you are already cloaked';
+                          }
+                          if(in_array($userId,$master_account)){
+                            $rsn = 'cloaking into this user is disabled because they are a master account.';
+                          }
+                          if($userId==$user->data()->id){
+                            $rsn = 'cloaking into yourself will break the space-time continuum.';
+                          }
+                          if(in_array($user->data()->id,$master_account) && !in_array($userId,$master_account)){
+                            $rsn = '';
+                          }
+                          if($user->data()->cloak_allowed!=1){
+                            $rsn = 'your account has cloaking disabled. Enable it in User->Misc Settings->Is Allowed To Cloak.';
+                          }
+                          ?>
+
+                          <label>Cloak into this user<a class="nounderline" data-toggle="tooltip" title="Automatically logs you in as this user"><font color="blue">?</font></a>
+                          </label>
+                          <select name="cloak" class="form-control">
+                            <option selected='selected' disabled>--Select--</option>
+                            <option value="1" <?php if($rsn !=''){echo "disabled";}?>>Yes</option>
+                          </select>
+                          <?php if($rsn !=''){echo "<font color='blue'>Cloaking disabled because ".$rsn.'</font>';}?>
+                        </div>
+                        <div class="form-group">
+                          <?php if($protectedprof==1) {?><br>PROTECTED PROFILE - EDIT DISABLED<?php } ?>
+                          <?php if(in_array($user->data()->id, $master_account)) {?>
+                            <label class="normal">Protected Account</label>
+                            <select name="protected" class="form-control">
+                              <option <?php if ($userdetails->protected==0){echo "selected='selected'";} ?> value="0">No</option>
+                              <option <?php if ($userdetails->protected==1){echo "selected='selected'";} ?>value="1">Yes</option>
+                            </select>
+                          <?php } ?>
+                        </div>
+                        <div class="form-group">
+                          <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><font color="blue">?</font></a></label>
+                          <select name='delete[<?php echo "$userId"; ?>]' id='delete[<? echo "$userId"; ?>]' class="form-control">
+                            <option selected='selected' disabled>No</option>
+                            <option value="<?=$userId?>"  <?php if (!checkMenu(2,$user->data()->id) || !in_array($user->data()->id,$master_account)){  echo "disabled";} ?>>Yes - Cannot be undone!</option>
+                          </select>
+                        </div>
                         <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
                         <div class="pull-right">
                           <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
                           <div class="btn-group"><a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=users">Cancel</a></div><br /><Br />
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <?php includeHook($hooks,'bottom');?>
 
-                      </form>
 
-                    </div><!--/col-9-->
-                  </div><!--/row-->
 
-                </div>
-
-                <script src="js/jwerty.js"></script>
-                <script>
-                jwerty.key('esc', function () {
-                  $('.modal').modal('hide');
-                });
-                </script>
-
-                <?php if($protectedprof==1) {?>
-                  <script>$('#adminUser').find('input:enabled, select:enabled, textarea:enabled').attr('disabled', 'disabled');</script>
-                <?php } ?>
+          <?php if($protectedprof==1) {?>
+            <script>$('#adminUser').find('input:enabled, select:enabled, textarea:enabled').attr('disabled', 'disabled');</script>
+          <?php } ?>

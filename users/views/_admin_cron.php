@@ -11,15 +11,6 @@
 </div>
 </div>
 </header>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/css/bootstrap-editable.css" integrity="sha256-YsJ7Lkc/YB0+ssBKz0c0GTx0RI+BnXcKH5SpnttERaY=" crossorigin="anonymous" />
-<style>
-.editableform-loading {
-  background: url('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/img/loading.gif') center center no-repeat !important;
-}
-.editable-clear-x {
-  background: url('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/img/clear.png') center center no-repeat !important;
-}
-</style>
 <?php
 $errors = $successes = [];
 $form_valid=TRUE;
@@ -89,7 +80,8 @@ if (!empty($_POST)) {
         <table class="table table-bordered">
           <tr>
             <tr>
-              <th><center>Cron ID / Status</center></th>
+              <th><center>ID</center></th>
+              <th><center>Status</center></th>
               <th><center>Cron Name</center></th>
               <th><center>Cron File</center></th>
               <th><center>Sort</center></th>
@@ -102,11 +94,12 @@ if (!empty($_POST)) {
             {
               foreach ($query->results() as $row){ ?>
                 <tr <?php if($row->active==0) {?> bgcolor="#CDCDCD"<?php } ?>>
-                  <td><center><?=$row->id;?>
-                    - <a href="#" data-name="active" id="active" class="cronactive nounderline" data-type="select" value="<?=$row->active;?>" data-pk="<?=$row->id;?>" data-url="parsers/cron_post.php" data-title="Select Status for <?=$row->name;?>"><?php if($row->active==0) {?>Inactive<?php } if($row->active==1) {?>Active <?php } ?></a></center></td>
-                    <td><center><a href="#" data-name="name" class="cronname nounderline" data-type="text" data-pk="<?=$row->id;?>" data-url="parsers/cron_post.php" data-title="Rename Cron ID <?=$row->id;?>"><?=$row->name;?></a></center></td>
-                    <td><center><a href="#" data-name="file" class="cronfile nounderline" data-type="text" data-pk="<?=$row->id;?>" data-url="parsers/cron_post.php" data-title="Change File for <?=$row->name;?>"><?=$row->file;?></a></center></td>
-                    <td><center><a href="#" data-name="sort" class="cronsort nounderline" data-type="text" data-pk="<?=$row->id;?>" data-url="parsers/cron_post.php" data-title="Change sort for <?=$row->name;?>"><?=$row->sort;?></a></center></td>
+                  <td><center><?=$row->id;?></center></td>
+                  <td><center>
+                  <p data-field="active" id="active" class="cronactive nounderline" data-input="select" data-id="<?=$row->id;?>"><?php if($row->active==0) {?>Inactive<?php } if($row->active==1) {?>Active <?php } ?></p></center></td>
+                    <td><center><p data-field="name" class="cronname nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Rename Cron ID <?=$row->id;?>"><?=$row->name;?></p></center></td>
+                    <td><center><p data-field="file" class="cronfile nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Change File for <?=$row->name;?>"><?=$row->file;?></p></center></td>
+                    <td><center><p data-field="sort" class="cronsort nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Change sort for <?=$row->name;?>"><?=$row->sort;?></p></center></td>
                     <td><center><?=echousername($row->createdby);?></center></td>
                     <td><center>
                       <?php $ranQ = $db->query("SELECT datetime,user_id FROM crons_logs WHERE cron_id = ? ORDER BY datetime DESC",array($row->id));
@@ -114,7 +107,11 @@ if (!empty($_POST)) {
                       if($ranCount > 0) {
                         $ranResult = $ranQ->first();?>
                         <?=$ranResult->datetime;?> (<?=echousername($ranResult->user_id);?>)<?php } else { ?><i>Never</i><?php } ?></center></td>
-                        <td><?php if($row->active==1) {?><center><a href="cron/<?=$row->file;?>?from=users/cron_manager.php"><i class="fa fa-refresh"></i></a></center><?php } ?></td>
+                        <td>
+                        <center>
+                          <button type="button" name="button" id="deleteCron" data-value="<?=$row->id?>" class="btn btn-danger">Delete</button>
+                        </center>
+                        </td>
                       </tr><?php
                     } }
                     else
@@ -172,21 +169,60 @@ if (!empty($_POST)) {
 
               </div>
 
-              <script src="../users/js/jwerty.js"></script>
-              <script src="../users/js/bootstrap-editable.js"></script>
+              <script type="text/javascript" src="<?=$us_url_root?>users/js/oce.js"></script>
               <script type="text/javascript">
-              $.fn.editable.defaults.mode = "inline"
+              function messages(data) {
+                data = JSON.parse(data);
+                $('#messages').removeClass();
+                $('#message').text("");
+                $('#messages').show();
+                if(data.success == "true"){
+                  $('#messages').addClass("sufee-alert alert with-close alert-success alert-dismissible fade show");
+                }else{
+                  $('#messages').addClass("sufee-alert alert with-close alert-danger alert-dismissible fade show");
+                }
+                $('#message').text(data.msg);
+                $('#messages').delay(3000).fadeOut('slow');
+
+              }
+
+              function success(resp){
+              console.log(resp);
+              messages(resp);
+
+              }
+
               $(document).ready(function() {
-                $('.cronname').editable();
-                $('.cronactive').editable();
-                $('.cronfile').editable();
-                $('.cronsort').editable();
-              });
-              $(".cronactive").editable({
-                value: "bar", // The option with this value should be selected
-                source: [
-                  {value: "1", text: "Active"},
-                  {value: "0", text: "Inactivate"},
-                ]
+                var options = {url:'parsers/cron_post.php'};
+              $('.txt').oneClickEdit(options,success);
+
+
+              var active = {
+                  url:'parsers/cron_post.php',
+                  selectOptions : {0:'Inactive', 1:'Active'}
+                }
+                $('.cronactive').oneClickEdit(active,success);
+
+
+                $( "#deleteCron" ).click(function() { //use event delegation
+                  var deleteMe = $(this).attr("data-value");;
+                  var formData = {
+                    'value' 				: deleteMe,
+                    'field'         : 'deleteMe'
+                  };
+
+                  $.ajax({
+                    type 		: 'POST',
+                    url 		: 'parsers/cron_post.php',
+                    data 		: formData,
+                    dataType 	: 'json',
+                  })
+
+                  .done(function(data) {
+                    console.log("refreshing");
+                      window.location.assign(document.URL);
+
+                  })
+                });
               });
             </script>

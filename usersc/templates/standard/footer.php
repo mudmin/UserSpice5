@@ -27,13 +27,7 @@ $hamburger.on("click", function(e) {
 // ga('create','UA-XXXXX-X','auto');ga('send','pageview');
 </script>
 
-<div class="containe-fluid">
-  <div class="row">
-    <footer class="text-center footer">
-      <br>
-      &copy; <?php echo date("Y"); ?> <?=$settings->copyright; ?>
-      <br><br>
-    </footer>
-  </div>
-</div>
+<footer>
+<p align="center">&copy; <?php echo date("Y"); ?> <?=$settings->copyright; ?></p>
+</footer>
 <?php require_once($abs_us_root.$us_url_root.'users/includes/html_footer.php');?>

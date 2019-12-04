@@ -14,6 +14,7 @@
   <script src="js/jquery.js"></script>
   <script src="js/popper.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
+
 <style>
 .btn-circle.btn-lg {
   width: 40px;
@@ -23,6 +24,8 @@
   line-height: 1.33;
   border-radius: 25px;
 }
+
+form label {font-weight:600}
 
 .feedback{position: fixed;}
 

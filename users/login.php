@@ -44,32 +44,40 @@ if (!empty($_POST['login_hook'])) {
 
   //Check to see if recaptcha is enabled
   if($settings->recaptcha == 1){
-    //require_once $abs_us_root.$us_url_root.'users/includes/recaptcha.config.php';
+  if(!function_exists('post_captcha')){
+    function post_captcha($user_response) {
+    global $settings;
+    $fields_string = '';
+    $fields = array(
+        'secret' => $settings->recap_private,
+        'response' => $user_response
+    );
+    foreach($fields as $key=>$value)
+    $fields_string .= $key . '=' . $value . '&';
+    $fields_string = rtrim($fields_string, '&');
 
-    //reCAPTCHA 2.0 check
-    $response = null;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+    curl_setopt($ch, CURLOPT_POST, count($fields));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
 
-    // check secret key
-    $reCaptcha = new \ReCaptcha\ReCaptcha($settings->recap_private);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($result, true);
+}
+}
 
-    // if submitted check response
-    if ($_POST["g-recaptcha-response"]) {
-      $response = $reCaptcha->verify($_POST["g-recaptcha-response"],$_SERVER["REMOTE_ADDR"]);
-    }
-    if ($response != null && $response->isSuccess()) {
-      $reCaptchaValid=TRUE;
-    }else{
-      $reCaptchaValid=FALSE;
-      $errors[] = lang("CAPTCHA_ERROR");
-      $reCapErrors = $response->getErrorCodes();
-      foreach($reCapErrors as $error) {
-        logger(1,"Recapatcha","Error with reCaptcha: ".$error);
-      }
-    }
-  }else{
-    $reCaptchaValid=TRUE;
-  }
+// Call the function post_captcha
+$res = post_captcha($_POST['g-recaptcha-response']);
 
+if (!$res['success']) {
+    // What happens when the reCAPTCHA is not properly set up
+    echo 'reCAPTCHA error: Check to make sure your keys match the registered domain and are in the correct locations. You may also want to doublecheck your code for typos or syntax errors.';
+}else{
+ $reCaptchaValid=TRUE;
+}
+}
   if($reCaptchaValid || $settings->recaptcha == 0){ //if recaptcha valid or recaptcha disabled
 
     $validate = new Validate();
@@ -93,7 +101,7 @@ if (!empty($_POST['login_hook'])) {
                 if($user->data()->oauth_tos_accepted == 0){
                   Redirect::to($us_url_root.'users/user_agreement_acknowledge.php');
                 }
-
+              }
 
               if (!empty($dest)) {
                 $redirect=htmlspecialchars_decode(Input::get('redirect'));
@@ -112,7 +120,7 @@ if (!empty($_POST['login_hook'])) {
                   Redirect::to($dest);
                 }
               }
-            }
+
           } else {
             $msg = lang("SIGNIN_FAIL");
             $msg2 = lang("SIGNIN_PLEASE_CHK");

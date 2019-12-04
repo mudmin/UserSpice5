@@ -169,35 +169,42 @@ if(Input::exists()){
 
         if($validation->passed() && $agreement_checkbox){
                 //Logic if ReCAPTCHA is turned ON
-        if($settings->recaptcha == 1 || $settings->recaptcha == 2){
-                        //require_once($abs_us_root.$us_url_root."users/includes/recaptcha.config.php");
-                        //reCAPTCHA 2.0 check
-                        $response = null;
+        if($settings->recaptcha > 0){
+          if(!function_exists('post_captcha')){
+              function post_captcha($user_response) {
+              global $settings;
+              $fields_string = '';
+              $fields = array(
+                  'secret' => $settings->recap_private,
+                  'response' => $user_response
+              );
+              foreach($fields as $key=>$value)
+              $fields_string .= $key . '=' . $value . '&';
+              $fields_string = rtrim($fields_string, '&');
 
-                        // check secret key
-                        $reCaptcha = new \ReCaptcha\ReCaptcha($settings->recap_private);
+              $ch = curl_init();
+              curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+              curl_setopt($ch, CURLOPT_POST, count($fields));
+              curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+              curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
 
-                        // if submitted check response
-                        if ($_POST["g-recaptcha-response"]) {
-                                $response = $reCaptcha->verify($_POST["g-recaptcha-response"],$_SERVER["REMOTE_ADDR"]);
-                        }
-                        if ($response != null && $response->isSuccess()) {
-                                // account creation code goes here
-                                $reCaptchaValid=TRUE;
-                                $form_valid=TRUE;
-                        }else{
-                                $reCaptchaValid=FALSE;
-                                $form_valid=FALSE;
-                                $validation->addError([lang("ERR_CAP")]);
-                                $reCapErrors = $response->getErrorCodes();
-                                // $count=0;
-                                foreach($reCapErrors as $error) {
-                                  // if($count==0) $error_message = $error;
-                                  // else $error_message .= "<br>".$error;
-                                  logger(1,"Recapatcha","Error with reCaptcha: ".$error);
-                                }
-                        }
+              $result = curl_exec($ch);
+              curl_close($ch);
 
+              return json_decode($result, true);
+          }
+        }
+
+          // Call the function post_captcha
+          $res = post_captcha($_POST['g-recaptcha-response']);
+
+          if (!$res['success']) {
+              // What happens when the reCAPTCHA is not properly set up
+              echo 'reCAPTCHA error: Check to make sure your keys match the registered domain and are in the correct locations. You may also want to doublecheck your code for typos or syntax errors.';
+          }else{
+           $reCaptchaValid=TRUE;
+           $form_valid = TRUE;
+          }
                 } //else for recaptcha
 
                 if($reCaptchaValid || $settings->recaptcha == 0){
@@ -247,9 +254,22 @@ if(Input::exists()){
                         $db->update('users',$theNewId,['twoKey' => $twoKey]);
                         }
                         include($abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php');
-                        if($act==1) logger($theNewId,"User","Registration completed and verification email sent.");
-                        if($act==0) logger($theNewId,"User","Registration completed.");
-                        Redirect::to($us_url_root.'users/joinThankYou.php');
+
+                        if($act == 1) {
+                          logger($theNewId,"User","Registration completed and verification email sent.");
+                          $query = $db->query("SELECT * FROM email");
+                          $results = $query->first();
+                          $act = $results->email_act;
+                          require $abs_us_root.$us_url_root.'users/views/_joinThankYou_verify.php';
+                        }else{
+                          logger($theNewId,"User","Registration completed.");
+                          if(file_exists($abs_us_root.$us_url_root.'usersc/views/_joinThankYou.php')){
+                            require_once $abs_us_root.$us_url_root.'usersc/views/_joinThankYou.php';
+                          }else{
+                            require $abs_us_root.$us_url_root.'users/views/_joinThankYou.php';
+                          }
+                        }
+
                 }
 
         } //Validation and agreement checbox
@@ -275,7 +295,7 @@ includeHook($hooks,'bottom');
 <!-- footers -->
 <?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; // the final html footer copyright row + the external js calls ?>
 
-<?php if($settings->recaptcha == 1 || $settings->recaptcha == 2){ ?>
+<?php if($settings->recaptcha > 0){ ?>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script>
     function submitForm() {

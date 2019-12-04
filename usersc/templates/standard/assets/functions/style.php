@@ -49,7 +49,7 @@ nav a {
 
 i {
     text-align:left;
-    vertical-align:middle;
+    /* /* vertical-align:middle; */ */
     position: relative;
 }
 .badge:after{

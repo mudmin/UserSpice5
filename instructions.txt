@@ -1,0 +1,13 @@
+1. Copy the contents of this zip to your web folder
+
+2. Make sure you have your database username and password handy. You can either create a DB in advance or allow UserSpice to try to do it for you.
+
+3. Navigate to the web folder you copied to the files to with your web browser and follow the on screen instructions.
+
+4. Documentation can be found at https://UserSpice.com/kb
+
+5. You can get help online at our Discord Server https://discord.gg/PMNquvh
+
+6. After installing, you can login as administrator with the credentials admin and password
+You can also login as a "regular" user with the credentials user and password
+Please change these credentials.

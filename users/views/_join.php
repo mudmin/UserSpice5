@@ -30,7 +30,7 @@ Special thanks to John Bovey for the password strenth feature.
     includeHook($hooks,'body');
     ?>
 
-    <form class="form-signup" action="<?=$form_action;?>" method="<?=$form_method;?>">
+    <form class="form-signup" action="<?=$form_action;?>" method="<?=$form_method;?>" id="payment-form">
 
       <h2 class="form-signin-heading"> <?=lang("SIGNUP_TEXT","");?></h2>
 
@@ -190,13 +190,14 @@ Special thanks to John Bovey for the password strenth feature.
 
           <label><input type="checkbox" id="agreement_checkbox" name="agreement_checkbox"> <?=lang("JOIN_ACCEPTTC");?></label>
         <?php } //if TOS enabled ?>
-      </div>
-
       <input type="hidden" value="<?=Token::generate();?>" name="csrf">
-      <button class="submit btn btn-primary " type="submit" id="next_button"><i class="fa fa-plus-square"></i> <?=lang("SIGNUP_TEXT");?></button>
+      <br><button class="submit btn btn-primary " type="submit" id="next_button"><i class="fa fa-plus-square"></i> <?=lang("SIGNUP_TEXT");?></button>
+      <br><br><br><br>
       <?php if($settings->recaptcha == 1|| $settings->recaptcha == 2){ ?>
         <div class="g-recaptcha" data-sitekey="<?=$settings->recap_public; ?>" data-bind="next_button" data-callback="submitForm"></div>
       <?php } ?>
-    </form><br />
+    </div>
+    </form>
+
   </div>
 </div>

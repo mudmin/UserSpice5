@@ -2,6 +2,7 @@
 require_once '../init.php';
 $db = DB::getInstance();
 $errors = $successes = [];
+$auto = Input::get('auto');
 
 include($abs_us_root.$us_url_root.'users/includes/migrations.php');
 
@@ -59,6 +60,9 @@ if(!$db->error()) {
           <?php }else{ ?>
             Finished applying <?=$count?> updates (<?=$eCount?> errors).<br>
           <?php }
+          if($auto == 1){
+            Redirect::to($us_url_root."users/admin.php?view=updates&sysup=1&err=Update+applied");
+          }
           if(isset($user) && $user->isLoggedIn()){ ?>
             <a href="<?=$us_url_root?>users/admin.php">Return to the Admin Dashboard</a>
           <?php }else{ ?>

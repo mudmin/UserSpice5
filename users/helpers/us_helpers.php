@@ -72,35 +72,6 @@ if(!function_exists('get_gravatar')) {
 }
 
 
-//Check if a permission level ID exists in the DB
-if(!function_exists('permissionIdExists')) {
-  function permissionIdExists($id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT id FROM permissions WHERE id = ? LIMIT 1",array($id));
-    $num_returns = $query->count();
-
-    if ($num_returns > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
-
-//Check if a user ID exists in the DB
-if(!function_exists('userIdExists')) {
-  function userIdExists($id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT * FROM users WHERE id = ?",array($id));
-    $num_returns = $query->count();
-    if ($num_returns > 0){
-      return true;
-    }else{
-      return false;
-    }
-  }
-}
-
 //Retrieve list of groups that can access a menu
 if(!function_exists('fetchGroupsByMenu')) {
   function fetchGroupsByMenu($menu_id) {
@@ -142,25 +113,7 @@ if(!function_exists('addGroupsMenus')) {
   }
 }
 
-//Retrieve information for a single permission level
-if(!function_exists('fetchPermissionDetails')) {
-  function fetchPermissionDetails($id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT id, name FROM permissions WHERE id = ? LIMIT 1",array($id));
-    $results = $query->first();
-    $row = array('id' => $results->id, 'name' => $results->name);
-    return ($row);
-  }
-}
 
-//Change a permission level's name
-if(!function_exists('updatePermissionName')) {
-  function updatePermissionName($id, $name) {
-    $db = DB::getInstance();
-    $fields=array('name'=>$name);
-    $db->update('permissions',$id,$fields);
-  }
-}
 
 //Checks if a username exists in the DB
 if(!function_exists('usernameExists')) {
@@ -172,93 +125,6 @@ if(!function_exists('usernameExists')) {
   }
 }
 
-//Retrieve information for all users
-if(!function_exists('fetchAllUsers')) {
-  function fetchAllUsers($orderBy=[], $desc=[], $disabled=true) {
-    $db = DB::getInstance();
-    $q = "SELECT * FROM users";
-    if(!$disabled) {
-      $q.=" WHERE permissions=1";
-    }
-    if(!empty($orderBy)){
-      if ($desc === TRUE){
-        $q.= " ORDER BY $orderBy DESC";
-      }else{
-        $q.= " ORDER BY $orderBy";
-      }
-    }
-    $query = $db->query($q);
-    $results = $query->results();
-    return ($results);
-  }
-}
-
-//Retrieve complete user information by username, token or ID
-if(!function_exists('fetchUserDetails')) {
-  function fetchUserDetails($username=NULL,$token=NULL, $id=NULL){
-    if($username!=NULL) {
-      $column = "username";
-      $data = $username;
-    }elseif($id!=NULL) {
-      $column = "id";
-      $data = $id;
-    }
-    $db = DB::getInstance();
-    $query = $db->query("SELECT * FROM users WHERE $column = $data LIMIT 1");
-    $results = $query->first();
-    return ($results);
-  }
-}
-
-//Retrieve list of permission levels a user has
-if(!function_exists('fetchUserPermissions')) {
-  function fetchUserPermissions($user_id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT * FROM user_permission_matches WHERE user_id = ?",array($user_id));
-    $results = $query->results();
-    return ($results);
-  }
-}
-
-//Retrieve list of users who have a permission level
-if(!function_exists('fetchPermissionUsers')) {
-  function fetchPermissionUsers($permission_id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT id, user_id FROM user_permission_matches WHERE permission_id = ?",array($permission_id));
-    $results = $query->results();
-    return ($results);
-    $row[$user] = array('id' => $id, 'user_id' => $user);
-    if (isset($row)){
-      return ($row);
-    }
-  }
-}
-
-//Unmatch permission level(s) from user(s)
-if(!function_exists('removePermission')) {
-  function removePermission($permissions, $members) {
-    $db = DB::getInstance();
-    if(is_array($members)){
-      $memberString = '';
-      foreach($members as $member){
-        $memberString .= $member.',';
-      }
-      $memberString = rtrim($memberString,',');
-
-      $q = $db->query("DELETE FROM user_permission_matches WHERE permission_id = ? AND user_id IN ({$memberString})",[$permissions]);
-    }elseif(is_array($permissions)){
-      $permissionString = '';
-      foreach($permissions as $permission){
-        if(is_numeric($permission)) {
-          $permissionString .= $permission.',';
-        }
-      }
-      $permissionString = rtrim($permissionString,',');
-      $q = $db->query("DELETE FROM user_permission_matches WHERE user_id = ? AND permission_id IN ({$permissionString})",[$members]);
-    }
-    return $q->count();
-  }
-}
 
 //Retrieve a list of all .php files in root files folder
 if(!function_exists('getPageFiles')) {
@@ -286,170 +152,6 @@ if(!function_exists('getUSPageFiles')) {
   }
 }
 
-//Delete a page from the DB
-if(!function_exists('deletePages')) {
-  function deletePages($pages) {
-    $db = DB::getInstance();
-    if(!$query = $db->query("DELETE FROM pages WHERE id IN ({$pages})")){
-      throw new Exception('There was a problem deleting pages.');
-    }else{
-      return true;
-    }
-  }
-}
-
-//Fetch information on all pages
-if(!function_exists('fetchAllPages')) {
-  function fetchAllPages() {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT id, page, title, private, re_auth FROM pages ORDER BY id DESC");
-    $pages = $query->results();
-    //return $pages;
-
-    if (isset($row)){
-      return ($row);
-    }else{
-      return $pages;
-    }
-  }
-}
-
-//Fetch information for a specific page
-if(!function_exists('fetchPageDetails')) {
-  function fetchPageDetails($id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT id, page, title, private, re_auth FROM pages WHERE id = ?",array($id));
-    $row = $query->first();
-    return $row;
-  }
-}
-
-//Check if a page ID exists
-if(!function_exists('pageIdExists')) {
-  function pageIdExists($id) {
-    $db = DB::getInstance();
-    $query = $db->query("SELECT private FROM pages WHERE id = ? LIMIT 1",array($id));
-    $num_returns = $query->count();
-    if ($num_returns > 0){
-      return true;
-    }else{
-      return false;
-    }
-  }
-}
-
-//Toggle private/public setting of a page
-if(!function_exists('updatePrivate')) {
-  function updatePrivate($id, $private) {
-    $db = DB::getInstance();
-    if($private == 0) $result = $db->query("UPDATE pages SET private = ?,re_auth = ? WHERE id = ?",array($private,0,$id));
-    else $result = $db->query("UPDATE pages SET private = ? WHERE id = ?",array($private,$id));
-    return $result;
-  }
-}
-
-//Add a page to the DB
-if(!function_exists('createPages')) {
-  function createPages($pages) {
-    $db = DB::getInstance();
-    foreach($pages as $page){
-      $setting = $db->query("SELECT page_default_private FROM settings")->first();
-      $fields=array('page'=>$page, 'private'=>$setting->page_default_private);
-      $db->insert('pages',$fields);
-    }
-  }
-}
-
-//Match permission level(s) with page(s)
-if(!function_exists('addPage')) {
-  function addPage($page, $permission) {
-    $db = DB::getInstance();
-    $i = 0;
-    if (is_array($permission)){
-      foreach($permission as $id){
-        $query = $db->query("INSERT INTO permission_page_matches (
-          permission_id, page_id ) VALUES ( $id , $page )");
-          $i++;
-        }
-      } elseif (is_array($page)){
-        foreach($page as $id){
-          $query = $db->query("INSERT INTO permission_page_matches (
-            permission_id, page_id ) VALUES ( $permission , $id )");
-            $i++;
-          }
-        } else {
-          $query = $db->query("INSERT INTO permission_page_matches (
-            permission_id, page_id ) VALUES ( $permission , $page )");
-            $i++;
-          }
-          return $i;
-        }
-      }
-
-      //Retrieve list of permission levels that can access a page
-      if(!function_exists('fetchPagePermissions')) {
-        function fetchPagePermissions($page_id) {
-          $db = DB::getInstance();
-          $query = $db->query("SELECT id, permission_id FROM permission_page_matches WHERE page_id = ? ",array($page_id));
-          $results = $query->results();
-          return($results);
-        }
-      }
-
-      //Retrieve list of pages that a permission level can access
-      if(!function_exists('fetchPermissionPages')) {
-        function fetchPermissionPages($permission_id) {
-          $db = DB::getInstance();
-
-          $query = $db->query(
-            "SELECT m.id as id, m.page_id as page_id, p.page as page, p.private as private
-            FROM permission_page_matches AS m
-            INNER JOIN pages AS p ON m.page_id = p.id
-            WHERE m.permission_id = ?",[$permission_id]);
-            $results = $query->results();
-            return ($results);
-          }
-        }
-
-        //Unmatched permission and page
-        if(!function_exists('removePage')) {
-          function removePage($pages, $permissions) {
-            $db = DB::getInstance();
-            if(is_array($permissions)){
-              $ids = '';
-              for($i = 0; $i < count($permissions);$i++){
-                $ids .= $permissions[$i].',';
-              }
-              $ids = rtrim($ids,',');
-              if($query = $db->query("DELETE FROM permission_page_matches WHERE permission_id IN ({$ids}) AND page_id = ?",array($pages))){
-                return $query->count();
-              }
-            }elseif(is_array($pages)){
-              $ids = '';
-              for($i = 0; $i < count($pages);$i++){
-                $ids .= $pages[$i].',';
-              }
-              $ids = rtrim($ids,',');
-              if($query = $db->query("DELETE FROM permission_page_matches WHERE page_id IN ({$ids}) AND permission_id = ?",array($permissions))){
-                return $query->count();
-              }
-            }
-          }
-        }
-
-        //Delete a defined array of users
-        if(!function_exists('deleteUsers')) {
-          function deleteUsers($users) {
-            $db = DB::getInstance();
-            $i = 0;
-            foreach($users as $id){
-              $query1 = $db->query("DELETE FROM users WHERE id = ?",array($id));
-              $query2 = $db->query("DELETE FROM user_permission_matches WHERE user_id = ?",array($id));
-              $i++;
-            }
-            return $i;
-          }
-        }
 
         // retrieve ?dest=page and check that it exists in the legitimate pages in the
         // database or is in the Config::get('whitelisted_destinations')
@@ -474,71 +176,6 @@ if(!function_exists('addPage')) {
           }
         }
 
-
-        //Does user have permission
-        //This is the old school UserSpice Permission System
-        if(!function_exists('checkPermission')) {
-          function checkPermission($permission) {
-            $db = DB::getInstance();
-            global $user;
-            //Grant access if master user
-            $access = 0;
-
-            foreach($permission[0] as $perm){
-              if ($access == 0){
-                $query = $db->query("SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?",array($user->data()->id,$perm->permission_id));
-                $results = $query->count();
-                if ($results > 0){
-                  $access = 1;
-                }
-              }
-            }
-            if ($access == 1){
-              return true;
-            }
-            if ($user->data()->id == 1){
-              return true;
-            }else{
-              return false;
-            }
-          }
-        }
-
-        if(!function_exists('checkMenu')) {
-          function checkMenu($permission, $id = 0) {
-            $db = DB::getInstance();
-            global $user;
-            if ($id == 0 && $user->isLoggedIn()) $id = $user->data()->id;
-            //Grant access if master user
-            $access = 0;
-
-            if ($access == 0){
-              $query = $db->query("SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?",array($id,$permission));
-              $results = $query->count();
-              if ($results > 0){
-                $access = 1;
-              }
-            }
-            if ($access == 1){
-              return true;
-            }
-            if ($user->isLoggedIn() && $user->data()->id == 1){
-              return true;
-            }else{
-              return false;
-            }
-          }
-        }
-
-        //Retrieve information for all permission levels
-        if(!function_exists('fetchAllPermissions')) {
-          function fetchAllPermissions() {
-            $db = DB::getInstance();
-            $query = $db->query("SELECT id, name FROM permissions");
-            $results = $query->results();
-            return ($results);
-          }
-        }
 
         //Displays error and success messages
         if(!function_exists('resultBlock')) {
@@ -648,67 +285,6 @@ if(!function_exists('addPage')) {
           }
         }
 
-        //Check if a permission level name exists in the DB
-        if(!function_exists('permissionNameExists')) {
-          function permissionNameExists($permission) {
-            $db = DB::getInstance();
-            $query = $db->query("SELECT id FROM permissions WHERE
-              name = ?",array($permission));
-              $results = $query->results();
-              if($results) return true;
-              else return false;
-            }
-          }
-
-          if(!function_exists('addPermission')) {
-            //Match permission level(s) with user(s)
-            function addPermission($permission_ids, $members) {
-              $db = DB::getInstance();
-              $i = 0;
-              if(is_array($permission_ids)){
-                foreach($permission_ids as $permission_id){
-                  if(is_numeric($permission_id)) {
-                    if($db->query("INSERT INTO user_permission_matches (user_id,permission_id) VALUES (?,?)",[$members,$permission_id])){
-                      $i++;
-                    }
-                  }
-                }
-              }elseif(is_array($members)){
-                foreach($members as $member){
-                  if(is_numeric($member)) {
-                    if($db->query("INSERT INTO user_permission_matches (user_id,permission_id) VALUES (?,?)",[$member,$permission_ids])){
-                      $i++;
-                    }
-                  }
-                }
-              }
-              return $i;
-            }
-          }
-
-          if(!function_exists('deletePermission')) {
-            //Delete a permission level from the DB
-            function deletePermission($permission) {
-              global $errors;
-              $i = 0;
-              $db = DB::getInstance();
-              foreach($permission as $id){
-                if ($id == 1){
-                  $errors[] = lang("CANNOT_DELETE_NEWUSERS");
-                }
-                elseif ($id == 2){
-                  $errors[] = lang("CANNOT_DELETE_ADMIN");
-                }else{
-                  $query1 = $db->query("DELETE FROM permissions WHERE id = ?",array($id));
-                  $query2 = $db->query("DELETE FROM user_permission_matches WHERE permission_id = ?",array($id));
-                  $query3 = $db->query("DELETE FROM permission_page_matches WHERE permission_id = ?",array($id));
-                  $i++;
-                }
-              }
-              return $i;
-            }
-          }
-
           if(!function_exists('isValidEmail')) {
             //Checks if an email is valid
             function isValidEmail($email){
@@ -778,72 +354,6 @@ if(!function_exists('addPage')) {
             }
           }
 
-          if(!function_exists('echouser')) {
-            function echouser($id){
-              $db = DB::getInstance();
-              $settingsQ = $db->query("SELECT echouser FROM settings");
-              $settings = $settingsQ->first();
-
-              if($settings->echouser == 0){
-                $query = $db->query("SELECT fname,lname FROM users WHERE id = ? LIMIT 1",array($id));
-                $count=$query->count();
-                if ($count > 0) {
-                  $results=$query->first();
-                  echo $results->fname." ".$results->lname;
-                } else {
-                  echo "Unknown";
-                }
-              }
-
-              if($settings->echouser == 1){
-                $query = $db->query("SELECT username FROM users WHERE id = ? LIMIT 1",array($id));
-                $count=$query->count();
-                if ($count > 0) {
-                  $results=$query->first();
-                  echo ucfirst($results->username);
-                } else {
-                  echo "-";
-                }
-              }
-
-              if($settings->echouser == 2){
-                $query = $db->query("SELECT username,fname,lname FROM users WHERE id = ? LIMIT 1",array($id));
-                $count=$query->count();
-                if ($count > 0) {
-                  $results=$query->first();
-                  echo ucfirst($results->username).'('.$results->fname.' '.$results->lname.')';
-                } else {
-                  echo "Unknown";
-                }
-              }
-
-              if($settings->echouser == 3){
-                $query = $db->query("SELECT username,fname FROM users WHERE id = ? LIMIT 1",array($id));
-                $count=$query->count();
-                if ($count > 0) {
-                  $results=$query->first();
-                  echo ucfirst($results->username).'('.$results->fname.')';
-                } else {
-                  echo "Unknown";
-                }
-              }
-            }
-          }
-
-          if(!function_exists('echousername')) {
-            function echousername($id){
-              $db = DB::getInstance();
-              $query = $db->query("SELECT username FROM users WHERE id = ? LIMIT 1",array($id));
-              $count=$query->count();
-              if ($count > 0) {
-                $results=$query->first();
-                return ($results->username);
-              } else {
-                return "Unknown";
-              }
-            }
-          }
-
           if(!function_exists('generateForm')) {
             function generateForm($table,$id, $skip=[]){
               $db = DB::getInstance();
@@ -894,56 +404,6 @@ if(!function_exists('addPage')) {
             }
           }
 
-          if(!function_exists('hasPerm')) {
-            function hasPerm($permissions, $id=null,$deny_master_account=false) {
-              if(is_null($id)) {
-                global $user;
-                if($user->isLoggedIn()) $id=$user->data()->id;
-                else return false;
-              }
-              if($id=='') return false;
-              $db = DB::getInstance();
-              global $user;
-              global $master_account;
-              //Grant access if master user
-              $access = 0;
-              if($id==null) $id=$user->data()->id;
-
-              foreach($permissions as $permission){
-
-                if ($access == 0){
-                  $query = $db->query("SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?",array($id,$permission));
-                  $results = $query->count();
-                  if ($results > 0){
-                    $access = 1;
-                  }
-                }
-              }
-              if ($access == 1){
-                return true;
-              }
-              if (in_array($user->data()->id, $master_account) && !$deny_master_account){
-                return true;
-              }else{
-                return false;
-              }
-            }
-          }
-
-          if(!function_exists('echopage')) {
-            function echopage($id){
-              $db = DB::getInstance();
-              $query = $db->query("SELECT page FROM pages WHERE id = ? LIMIT 1",array($id));
-              $count=$query->count();
-
-              if ($count > 0) {
-                $results=$query->first();
-                echo $results->page;
-              } else {
-                echo "Unknown";
-              }
-            }
-          }
 
           if(!function_exists('mqtt')) {
             function mqtt($id,$topic,$message){
@@ -973,14 +433,6 @@ if(!function_exists('addPage')) {
             }
           }
 
-          if(!function_exists('updateUser')) {
-            //Update User
-            function updateUser($column, $id, $value) {
-              $db = DB::getInstance();
-              $result = $db->query("UPDATE users SET $column = ? WHERE id = ?",array($value,$id));
-              return $result;
-            }
-          }
 
           if(!function_exists('clean')) {
             //Cleaning function
@@ -1006,29 +458,6 @@ if(!function_exists('addPage')) {
               return strtr(rawurlencode($str), $revert);
             }
           }
-
-          if(!function_exists('fetchUserName')) {
-            //Fetchs CONCAT of Fname Lname
-            function fetchUserName($username=NULL,$token=NULL, $id=NULL){
-              if($username!=NULL) {
-                $column = "username";
-                $data = $username;
-              }elseif($id!=NULL) {
-                $column = "id";
-                $data = $id;
-              }
-              $db = DB::getInstance();
-              $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = $data LIMIT 1");
-              $count = $query->count();
-              if ($count > 0) {
-                $results = $query->first();
-                return ($results->name);
-              } else {
-                return "Unknown";
-              }
-            }
-          }
-
 
           if(!function_exists('logger')) {
             function logger($user_id,$logtype,$lognote) {
@@ -1243,17 +672,6 @@ if(!function_exists('addPage')) {
                   chages we make to this helper and avoids you from editing core files. */
                 }
                 else return false;
-              }
-            }
-
-            if(!function_exists('isAdmin')) {
-              function isAdmin() {
-                global $user;
-                if(($user->isLoggedIn() && hasPerm([2],$user->data()->id)) || (isset($_SESSION['cloak_from']) && hasPerm([2],$_SESSION['cloak_from']))){
-                  return true;
-                } else {
-                  return false;
-                }
               }
             }
 
@@ -1653,4 +1071,89 @@ if(!function_exists('addPage')) {
                   return false;
                 }
               }
+            }
+
+            if(!function_exists('updateReAuth')) {
+            	function updateReAuth($id, $re_auth) {
+            		$db = DB::getInstance();
+            		$result = $db->query("UPDATE pages SET re_auth = ? WHERE id = ?",array($re_auth,$id));
+            		return $result;
+            	}
+            }
+
+            if(!function_exists('reAuth')) {
+            	function reAuth(){
+            		$abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+            		$self_path=explode("/", $_SERVER['PHP_SELF']);
+            		$self_path_length=count($self_path);
+            		$file_found=FALSE;
+
+            		for($i = 1; $i < $self_path_length; $i++){
+            			array_splice($self_path, $self_path_length-$i, $i);
+            			$us_url_root=implode("/",$self_path)."/";
+
+            			if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
+            				$file_found=TRUE;
+            				break;
+            			}else{
+            				$file_found=FALSE;
+            			}
+            		}
+
+            		$urlRootLength=strlen($us_url_root);
+            		$page=substr($_SERVER['PHP_SELF'],$urlRootLength,strlen($_SERVER['PHP_SELF'])-$urlRootLength);
+            		$db = DB::getInstance();
+            		$id = null;
+            		$query = $db->query("SELECT id, page, re_auth FROM pages WHERE page = ?",[$page]);
+            		$count = $query->count();
+            		if ($count > 0){
+            			$results = $query->first();
+            			$pageDetails = array( 'id' =>$results->id, 'page' => $results->page, 're_auth' => $results->re_auth);
+            			$pageID = $results->id;
+            			if($_SERVER["REMOTE_ADDR"]=="127.0.0.1" || $_SERVER["REMOTE_ADDR"]=="::1" || $_SERVER["REMOTE_ADDR"]=="localhost"){
+            				$local = True;
+            			}else{
+            				$local = False;
+            			}
+            			if (empty($pageDetails)){
+            				return true;
+            			}elseif ($pageDetails['re_auth'] == 0){//If page is public, allow access
+            				return true;
+            			} elseif ($page=='users/admin_verify.php' || $page=='usersc/admin_verify.php') {
+            				return true;
+            			} elseif ($page=='users/admin_pin.php' || $page=='usersc/admin_pin.php') {
+            				return true;
+            				} elseif ($local) {
+            					return true;
+            			} else{ //Authorization is required.  Insert your authorization code below.
+            				if(!isset($_SESSION['cloak_to'])) verifyadmin($page);
+            			}
+            		}
+            	}
+            }
+
+            if(!function_exists('verifyadmin')) {
+            	function verifyadmin($page) {
+            		global $user;
+            		global $us_url_root;
+            		$actual_link = encodeURIComponent("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+            		$db = DB::getInstance();
+            		$settings=$db->query("SELECT * FROM settings WHERE id=1")->first();
+            		$null=$settings->admin_verify_timeout-1;
+            		if(isset($_SESSION['last_confirm']) && $_SESSION['last_confirm']!='' && !is_null($_SESSION['last_confirm'])) $last_confirm=$_SESSION['last_confirm'];
+            		else $last_confirm=date("Y-m-d H:i:s",strtotime('-'.$null.' day',strtotime(date("Y-m-d H:i:s"))));
+            		$current=date("Y-m-d H:i:s");
+            		$ctFormatted = date("Y-m-d H:i:s", strtotime($current));
+            		$dbPlus = date("Y-m-d H:i:s", strtotime('+'.$settings->admin_verify_timeout.' minutes', strtotime($last_confirm)));
+            		if (strtotime($ctFormatted) > strtotime($dbPlus)){
+            			$q = $db->query("SELECT pin FROM users WHERE id = ?",[$user->data()->id]);
+            			if(is_null($q->first()->pin)) Redirect::to($us_url_root.'users/admin_pin.php?actual_link='.$actual_link.'&page='.$page);
+            			else Redirect::to($us_url_root.'users/admin_verify.php?actual_link='.$actual_link.'&page='.$page);
+            		}
+            		else
+            		{
+            			$db = DB::getInstance();
+            			$_SESSION['last_confirm']=$current;
+            		}
+            	}
             }

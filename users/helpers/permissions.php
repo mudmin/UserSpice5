@@ -460,6 +460,18 @@ if(!function_exists('checkPermission')) {
 	}
 }
 
+//Check if a permission level name exists in the DB
+if(!function_exists('permissionNameExists')) {
+	function permissionNameExists($permission) {
+		$db = DB::getInstance();
+		$query = $db->query("SELECT id FROM permissions WHERE
+			name = ?",array($permission));
+			$results = $query->results();
+			if($results) return true;
+			else return false;
+		}
+	}
+
 if(!function_exists('addPermission')) {
 	//Match permission level(s) with user(s)
 	function addPermission($permission_ids, $members) {
@@ -507,6 +519,9 @@ if(!function_exists('deletePermission')) {
 
 if(!function_exists('hasPerm')) {
 	function hasPerm($permissions, $id=null) {
+		if(!is_array($permissions)){
+			$permissions = [$permissions];
+		}
 		if(is_null($id)) {
 			global $user;
 			if($user->isLoggedIn()) $id=$user->data()->id;

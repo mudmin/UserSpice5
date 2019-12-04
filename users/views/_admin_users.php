@@ -22,10 +22,12 @@ $act = $results->email_act;
 $form_valid=TRUE;
 $permOpsQ = $db->query("SELECT * FROM permissions");
 $permOps = $permOpsQ->results();
+$hooks = getMyHooks(['page' =>'admin.php?view=users']);
+
 // dnd($permOps);
 $validation = new Validate();
 if (!empty($_POST)) {
-
+includeHook($hooks,'post');
   //Manually Add User
   if(!empty($_POST['addUser'])) {
     $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
@@ -188,13 +190,14 @@ if (!empty($_POST)) {
     <h2>Manage Users</h2>
     <?=resultBlock($errors,$successes);?>
     <hr />
+    <?php includeHook($hooks,'pre'); ?>
     <a class="pull-right" href="#" data-toggle="modal" data-target="#adduser"><font color="blue"><i class="fa fa-plus"></i> Manually Add User</a></font>
     <div class="alluinfo">&nbsp;</div>
     <div class="allutable">
       <table id="paginate" class='table table-hover table-list-search'>
         <thead>
           <tr>
-            <th></th><th></th><th>Username</th><th>Name</th><th>Email</th>
+            <th></th><th></th><th>Username</th><th>Name</th><th>Email</th><?php includeHook($hooks,'body');?>
             <th>Last Sign In</th><?php if($act==1) {?><th>Verified</th><?php } ?><th>Status</th>
           </tr>
         </thead>
@@ -209,6 +212,7 @@ if (!empty($_POST)) {
               <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->username?></a></td>
               <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->fname?> <?=$v1->lname?></a></td>
               <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->email?></a></td>
+              <?php includeHook($hooks,'bottom');?>
               <td><?php if($v1->last_login != 0) { echo $v1->last_login; } else {?> <i>Never</i> <?php }?></td>
               <?php if($act==1) {?><td>
                 <?php if($v1->email_verified == 1){
@@ -257,6 +261,7 @@ if (!empty($_POST)) {
               </div>
 
               <?php include($abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php'); ?>
+              <?php includeHook($hooks,'form');?>
               <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
               <br />
             </div>

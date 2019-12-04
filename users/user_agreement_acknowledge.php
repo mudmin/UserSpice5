@@ -41,12 +41,11 @@ if(!empty($_POST)){
 	}
 }
 ?>
-<div id="page-wrapper">
-	<div class="container-fluid">
 		<div class="row">
 			<div class="col-sm-12">
 					<h1><?=lang("JOIN_CHANGED");?></h1>
 					<form class="" action="" method="post">
+					<button class="submit btn btn-primary " type="submit" id="next_button"><i class="fa fa-plus-square"></i> <?=lang("JOIN_ACCEPT");?></button>
 						<label for="confirm"><?=lang("JOIN_TC");?></label>
 						<textarea id="agreement" name="agreement" rows="20" class="form-control" disabled >
 							<?php
@@ -67,8 +66,7 @@ if(!empty($_POST)){
 
 			</div> <!-- /.col -->
 		</div> <!-- /.row --><br>
-	</div> <!-- /.container -->
-</div> <!-- /.wrapper -->
+
 
 
 <!-- footers -->

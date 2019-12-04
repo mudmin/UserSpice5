@@ -1,11 +1,19 @@
 <?php
 $db = DB::getInstance();
 $settings = $db->query("SELECT * FROM settings")->first();
-
+if($settings->template == "wp"){$ignoreTemplateFix = true;}else{$ignoreTemplateFix = false;}
+if(isset($template_override)){
+  $settings->template = $template_override;
+  if(!file_exists($abs_us_root.$us_url_root."usersc/templates/$template_override/info.xml")){
+    die("You have selected a template_override that doesn't exist");
+  }
+  $ignoreTemplateFix = true;
+}
 if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/header.php')){
 require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/header.php';
 }else{
   //assume template has been deleted
+  if(!$ignoreTemplateFix){
   if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/standard/header.php')){
     $db->update('settings',1,['template'=>'standard']);
     $settings->template = "standard";
@@ -32,6 +40,7 @@ require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->tem
       die("You do not appear to have a valid template installed");
     }
   }
+}//end $ignoreTemplateFix for wordpress compatibility
 }
 require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/navigation.php'; //custom template nav
 require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/container_open.php'; //custom template container

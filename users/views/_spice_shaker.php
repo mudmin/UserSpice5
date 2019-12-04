@@ -72,7 +72,7 @@
    ?>
 
    <h2>Spice Shaker Auto Installer</h2>
-   Spice Shaker allows you to download and automatically install Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users without an API key can make 200 requests a day.  Users with a (free) API key can make 2000.<br>
+   Spice Shaker allows you to download and automatically install Updates, Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users with a (free) API key can make 2000 requests a day.<br>
    <?php
  $failed = 0;
  if(!function_exists('curl_version')){
