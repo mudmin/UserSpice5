@@ -192,7 +192,7 @@ if(!empty($_POST)) {
           'sitename' => $settings->site_name,
           'fname' => $userdetails->fname,
           'email' => rawurlencode($userdetails->email),
-          'vericode' => $userdetails->vericode,
+          'vericode' => $vericode,
           'reset_vericode_expiry' => $settings->reset_vericode_expiry
         );
         $to = rawurlencode($userdetails->email);
@@ -200,7 +200,7 @@ if(!empty($_POST)) {
         $body = email_body('_email_adminPwReset.php',$params);
         email($to,$subject,$body);
         $successes[] = "Password reset sent.";
-        logger($user->data()->id,"User Manager","Sent password reset email to $userdetails->fname, Vericode expires in $settings->reset_vericode_expiry minutes.");
+        logger($user->data()->id,"User Manager","Sent password reset email to $userdetails->fname, Vericode expires at $vericode_expiry.");
       }
 
       //Block User
@@ -379,6 +379,7 @@ if(!empty($_POST)) {
     <?=resultBlock($errors,$successes);?>
     <?php if(!$validation->errors()=='') {?><div class="alert alert-danger"><?=display_errors($validation->errors());?></div><?php } ?>
     <?php includeHook($hooks,'body');?>
+      <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId?>' method='post'>
         <div class="row">
           <div class="col-8">
             <h3><?=$userdetails->fname?> <?=$userdetails->lname?> - <?=$userdetails->username?></h3>
@@ -397,7 +398,7 @@ if(!empty($_POST)) {
                   <?php echo $useravatar;?>
                 </div>
               </div>
-                <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId?>' method='post'>
+
 
                   <div class="row">
                     <div class="col-12 col-sm-6">
@@ -433,7 +434,7 @@ if(!empty($_POST)) {
 
 
                       <div class="form-group">
-                        <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email?</label><br>
+                        <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email? Will expire in <?=$settings->reset_vericode_expiry?> minutes.</label><br>
                       </div>
                       <?php includeHook($hooks,'form');?>
                       <div class="row">

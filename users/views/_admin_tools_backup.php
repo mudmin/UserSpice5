@@ -21,6 +21,7 @@ $tablev = $table_view->results();
 $errors = $successes = [];
 //:: Admin Backup
 $lang = array_merge($lang,array(
+  "AB_CREATE_BACKUP"      => "Create Backup",
   "AB_SETSAVED"      => "Settings Successfully Saved",
   "AB_PATHCREATE"    => "Destination path created.",
   "AB_PATHERROR"     => "Destination path could not be created due to unknown error.",
@@ -380,37 +381,38 @@ $pagename = lang('AB_PAGENAME');
 
 ?>
 <div class="content mt-3">
-  <h4 align="center"><font color="green"><span class="text-success" id="ajax"></span></font></h4>
-  <h2><?=$pagename?></h2>
+  <h2 class="mb-3"><?=$pagename?><small><span class="text-success float-right" id="ajax"></span></small></h2>
   <?php resultBlock($errors,$successes); ?>
   <div class="row">
 
     <div class="col-sm-12">
       <?php if(extension_loaded('zip') == false){
-        echo "<strong>".lang('AB_ZIP')."</strong><br>";}?>
-      <form class="form-horizontal form-label-left" action="<?=$us_url_root?>users/admin.php?view=backup" name="backup" method="POST">
+        echo "<p class='text-dark'><strong>".lang('AB_ZIP')."</strong></p>";}?>
+        <div class="card">
+          <div class="card-header"><h4><?=lang('AB_CREATE_BACKUP')?></h4></div>
+          <div class="card-body">
+      <form action="<?=$us_url_root?>users/admin.php?view=backup" name="backup" method="POST">
+      <div class="row">
 
         <!-- backup_dest Option -->
+        <div class="col">
         <div class="form-group">
-          <label for="backup_dest" class="control-label col-md-3 col-sm-12" style="margin-top: 10px;">
+          <label for="backup_dest">
             <?=lang('AB_BACKUP_DEST');?>
-          </label><br>
+          </label>
 
-          <div class="col-sm-6 col-12" style="margin-top: 10px;">
             <input class="form-control" type="text" name="backup_dest" id="backup_dest" placeholder="Backup Destination" value="<?=$settings->backup_dest?>">
             <span class="text-danger"><?=lang('AB_BACKUP_DEST_INFO');?></span>
-          </div><br>
-
-        </div><br>
+        </div>
+        </div>
 
         <!-- backup_source Option -->
+        <div class="col">
         <div class="form-group">
 
-          <label for="backup_source" class="control-label col-sm-12" style="margin-top: 10px;">
+          <label for="backup_source" class="control-label col-sm-12">
             <?=lang('AB_BACKUP_SOURCE');?>
-          </label><br>
-
-          <div class="col-sm-6 col-12" style="margin-top: 10px;">
+          </label>
 
             <select id="backup_source" class="form-control" name="backup_source">
 
@@ -426,18 +428,16 @@ $pagename = lang('AB_PAGENAME');
 
             </select>
 
-          </div>
-
+        </div>
         </div>
 
         <?php // if($settings->backup_source =='db_table') { ?>
 
-
-          <div class="form-group" id="tableOnly">
-            <font color="blue"><strong><label for="backup_source" class="control-label col-sm-12" style="margin-top: 10px;">
-              <?=lang('AB_SELECT_TBL');?>
-            </label></strong></font>
-            <div class="col-sm-6">
+          <div class="col" id="tableOnly">
+          <div class="form-group">
+          <label for="backup_table" class="text-primary">
+            <?=lang('AB_SELECT_TBL');?>
+          </label>
               <select id="backup_table" class="form-control" name="backup_table">
 
                 <?php foreach($tablev as $v) { ?>
@@ -445,26 +445,29 @@ $pagename = lang('AB_PAGENAME');
                 <?php } ?>
 
               </select>
-            </div>
+          </div>
           </div>
 
 
           <?php // } ?>
 
-          <div class="clearfix"></div>
-
-          <div class="ln_solid"></div>
-          <br>
-
-          <button class='btn btn-success' type='submit' name="backup" value='Backup' onclick="window.location='<?=$_SERVER['PHP_SELF']; ?>';"><i class="fa fa-database"></i><?=lang('AB_BACKUP_BTN');?></button>
-
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+            <button class='btn btn-success' type='submit' name="backup" value='Backup' onclick="window.location='<?=$_SERVER['PHP_SELF']; ?>';"><i class="fa fa-database"></i><?=lang('AB_BACKUP_BTN');?></button>
+            </div>
+          </div>
         </form>
-        <hr>
+        </div>
+        </div>
 
 
         <!-- Existing Backups -->
-
-        <h2><?=lang('AB_EXIST_BACKUP');?><span class="badge bg-green" style="color: white;"><?=sizeof($allBackupFiles)?></span></h2>
+        <div class="card">
+          <div class="card-header">
+            <h4><?=lang('AB_EXIST_BACKUP');?><span class="badge badge-success"><?=sizeof($allBackupFiles)?></span></h4>
+          </div>
+          <div class="card-body">
 
         <form name="delete" action="<?=$us_url_root?>users/admin.php?view=backup" method="post">
 
@@ -510,15 +513,11 @@ $pagename = lang('AB_PAGENAME');
 
             </table>
 
-            <br><br>
-
-            <div class="clearfix"></div>
-
-            <div class="ln_solid"></div>
-
             <button class="btn btn-danger" onclick="window.location='<?=$us_url_root?>users/admin.php?view=backup';" type="submit" name="deleteFile" value="delete"><i class="fa fa-trash"></i><?=lang('AB_DELETE_B');?></button>
 
           </form>
+          </div>
+        </div>
 
         </div>
 

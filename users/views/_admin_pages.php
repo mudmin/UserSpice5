@@ -165,8 +165,8 @@ $csrf = Token::generate();
 
 <div class="content mt-3">
   <form class="" action="<?=$us_url_root?>users/admin.php?view=pages" name="" method="post">
-    <h1>Manage Page Access</h1>
-    UserSpice is currently monitoring the following folders: <strong>
+    <h2>Manage Page Access</h2>
+    <p class="text-dark pt-2">UserSpice is currently monitoring the following folders: <strong>
 
 
       <?php
@@ -182,9 +182,11 @@ $csrf = Token::generate();
       ?>
     </strong>
     <?php if(in_array($user->data()->id, $master_account)){?>
-      <a href="#folder_modal" data-toggle="modal">(Change)</a>
+      <a href="#folder_modal" data-toggle="modal" class="btn btn-outline-dark">Change</a>
     <?php } ?>
-    <hr>
+    </p>
+    <div class="card">
+  <div class="card-body">
     <table id="paginate" class='table table-hover table-list-search'>
       <thead>
         <th>Id</th><th>Page</th><th>Page Name</th><th>ReAuth</th><th>Access</th>
@@ -199,11 +201,11 @@ $csrf = Token::generate();
         foreach ($dbpages as $page){
           ?>
           <tr><td><?=$dbpages[$count]->id?></td>
-            <td><a class="nounderline" href ='admin.php?view=page&id=<?=$dbpages[$count]->id?>'><?=$dbpages[$count]->page?></a></td>
-            <td><a class="nounderline" href ='admin.php?view=page&id=<?=$dbpages[$count]->id?>'><?=$dbpages[$count]->title?></a></td>
+            <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id?>'><?=$dbpages[$count]->page?></a></td>
+            <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id?>'><?=$dbpages[$count]->title?></a></td>
             <td>
               <?php if($dbpages[$count]->re_auth == 1){
-                echo "<i class='fa fa-thumbs-o-up'></i>";
+                echo "<i class='fa fa-check'></i>";
               } ?>
             </td>
             <td>
@@ -223,6 +225,8 @@ $csrf = Token::generate();
           }?>
         </tbody>
       </table>
+      </div>
+    </div>
     </div>
     <!-- /.row -->
 

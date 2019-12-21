@@ -2,11 +2,9 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <ol class="breadcrumb text-right">
           <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
           <li>Manage</li>
           <li class="active">Dashboard Access</li>
-        </ol>
       </ol>
     </div>
   </div>
@@ -28,7 +26,7 @@ padding: 10px;
 <div class="content mt-3">
 <?php
 if(!in_array($user->data()->id, $master_account)){Redirect::to('admin.php');}
-$features = $db->query("SELECT DISTINCT feature, access FROM us_management ORDER BY feature")->results();
+$features = $db->query("SELECT DISTINCT id, feature, access FROM us_management ORDER BY feature")->results();
 $adminID = $db->query("SELECT id FROM pages WHERE page = ?",["users/admin.php"])->first();
 $matches = $db->query("SELECT * FROM permission_page_matches WHERE page_id = ? AND (permission_id != 1 AND permission_id != 2)",[$adminID->id])->results();
 $perms = [];
@@ -60,38 +58,50 @@ $token = Token::generate();
 ?>
 
 <h2>Grant Dashboard Access</h2>
-<p>Please Note:  Allowing users other than trusted admins should not be taken lightly. You are giving these users the opportunity to do some very
+<p class="text-dark">Please Note:  Allowing users other than trusted admins should not be taken lightly. You are giving these users the opportunity to do some very
 powerful things to your site.</p>
-<p>This is a TWO step process.  You must go into Page Management and allow the other access level(s) that you want to give access to, permission
+<p class="text-dark">This is a TWO step process.  You must go into Page Management and allow the other access level(s) that you want to give access to, permission
 to access the admin.php page.  Then you can come in here and grant that access level permission to a particular section of the dashboard.
 Please note, some actions are limited by default to users of the master account or admins (permission level 2) and cannot be overriden on this
-page. You have been warned!</p>
+page.</p><p class="text-danger">You have been warned!</p>
+<div class="card">
+  <div class="card-body">
 <form class="" action="" method="post">
+<div class="d-block text-right pb-3">
+<input type="submit" name="submit" value="Update Permissions" class="btn btn-primary">
+</div>
 <input type="hidden" name="csrf" value="<?=$token?>" />
 <table class="table table-striped table-hover">
   <thead>
     <tr>
-      <th>Feature</th><th class="text-right">
-        <input type="submit" name="submit" value="Update Permissions" class="btn btn-primary">
-      </th>
+      <th>Feature</th><?php for($i=1; $i<=count($perms); $i++){ echo '<th></th>'; } ?>
     </tr>
+    </thead>
     <tbody>
       <?php foreach($features as $f){
         $row = explode(",",$f->access);
         ?>
         <tr>
           <td><?=$f->feature?></td>
-            <?php foreach($perms as $key=>$value){?>
-              <td class="text-center">
-              <input class="" type="checkbox" name="<?=$f->feature?>[]" value="<?=$key?>" <?php if(in_array($key,$row)){echo "checked";}?>><br><?=$value?>
+            <?php foreach($perms as $key=>$value){
+              $isChecked = in_array($key,$row) ? "checked" : "";
+              $elId = $f->id . '-' . $key;
+              ?>
+              <td>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="<?=$f->feature?>[]" value="<?=$key?>" <?=$isChecked ?> id="<?=$elId?>">
+                <label class="form-check-label pl-1" for="<?=$elId?>"><?=$value?></label>
+              </div>
               </td>
             <?php } ?>
-
         </tr>
       <?php } ?>
     </tbody>
-  </thead>
 </table>
-<p class="text-right">  <input type="submit" name="submit" value="Update Permissions" class="btn btn-primary"></p>
+<div class="d-block text-right pt-1">
+<input type="submit" name="submit" value="Update Permissions" class="btn btn-primary">
+</div>
 </form>
+</div>
+</div>
 </div>

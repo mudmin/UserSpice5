@@ -5,12 +5,11 @@
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title">Choose Folders to Monitor</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Currently Monitoring: <?php echo oxfordList($filter,['final'=>'and']); ?></p>
-        <strong>Remove a folder from monitoring:</strong>
+        <p class="text-dark"><strong>Remove a folder from monitoring:</strong>
         <table class="table table-striped">
           <tbody>
             <?php $count=0; foreach($filter as $f){
@@ -39,17 +38,17 @@
         </table>
         <div class="form-group">
           <form class="inline-form" action="admin.php?view=pages" method="POST" id="newFormForm">
-            <strong>Add a folder to monitoring:</strong><br>
-            Must end with a <strong>/</strong>, for example:<br>
-            <strong>users/cron/</strong><br>
+            <strong>Add a folder to monitoring:</strong>
+            
             <input type="hidden" name="csrf" value="<?=$csrf;?>" />
-            <input size="50" type="text" name="newFolder" value="" class="form-control"><br />
-            <div class="btn-group pull-right"><input class='btn btn-primary' type='submit' name="addFolder" value='Monitor Folder' class='submit' /></div><br />
+            <input size="50" type="text" name="newFolder" value="" class="form-control">
+            <small  class="form-text text-muted">Must end with a <strong>/</strong>, for example: <strong>users/cron/</strong></small>
+            <div class="btn-group pull-right"><input class='btn btn-primary' type='submit' name="addFolder" value='Monitor Folder' class='submit' /></div>
           </form>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
       </div>
     </div>
 

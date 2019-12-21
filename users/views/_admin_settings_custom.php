@@ -8,15 +8,14 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <ol class="breadcrumb text-right">
-          <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-          <li class="active">Custom Settings</li>
-        </ol>
+        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
+        <li class="active">Custom Settings</li>
       </ol>
     </div>
   </div>
 </div>
 </div>
+</header>
 <?php
 if(file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_panel_custom_settings_post.php')){
   require_once($abs_us_root.$us_url_root.'usersc/includes/admin_panel_custom_settings_post.php');

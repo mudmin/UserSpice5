@@ -9,7 +9,7 @@ if (!in_array($user->data()->id, $master_account)) {
 $type = Input::get('type');
 $url = Input::get('url');
 $hash = Input::get('hash');
-$api = "http://userspice.com/bugs/api.php";
+$api = "https://userspice.com/bugs/api.php";
 // dump($_POST);
 $zipFile = "temp.zip";
 if ($type == 'plugin') {
