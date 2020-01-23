@@ -29,6 +29,7 @@ if(!empty($_POST) && $settings->spice_api != ''){
     'os'=>Input::sanitize(php_uname('s')."-".php_uname('v')),
     'sw'=>Input::sanitize($_SERVER['SERVER_SOFTWARE']),
     'brief'=>Input::get('brief'),
+    'bt'=>Input::get('bugtype'),
     'problem'=>Input::get('problem'),
     'call'=>"bugreport"
   );
@@ -69,7 +70,7 @@ if(!empty($_POST) && $settings->spice_api != ''){
     <a href="https://userspice.com/developer-api-keys/"><font color='red'><strong>The Bug Report feature will not work with out a FREE API Key.</font></strong>
       Get One Here</a>
       <form class="" action="" method="post">
-        <input type="password" autocomplete="off" class="form-control" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>" placeholder="Paste your key here">
+        <input type="password" autocomplete="new-password" class="form-control" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>" placeholder="Paste your key here">
         <input type="submit" name="submitKey" value="Save Key">
       </form>
 
@@ -84,6 +85,12 @@ if(!empty($_POST) && $settings->spice_api != ''){
     <form class="" action="admin.php?view=bugs" method="post">
       <label for="">Please give a brief summary of the problem</label>
       <input class="form-control" type="text" name="brief" value="" required>
+      <label for="">What type of bug report is this?</label>
+      <select class="form-control" name="bugtype" required>
+        <option value="" disabled selected="selected">--Please Choose--</option>
+        <option value="triage">General UserSpice Bug</option>
+        <option value="plugin">Plugin/Widget/Template issue</option>
+      </select>
       <label for="">Please give as much detail about how to recreate your problem as possible.</label>
       <textarea class="form-control" name="problem" rows="8" cols="80" required></textarea><br>
       <?php if($settings->spice_api != ''){ ?>

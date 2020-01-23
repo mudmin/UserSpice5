@@ -70,58 +70,55 @@ if (!empty($_POST)) {
   ?>
   <div class="content mt-3">
     <?=resultBlock($errors,$successes);?>
-    <?php if($settings->cron_ip == 'off'){echo "<strong>Your cron jobs are currently disabled by the system. With great power, comes the need for great responsibility. Please see the note at the bottom of this page.</strong>";} ?>
     <h2>Cron Manager</h2>
-    <div style="float: right; margin-bottom: 10px">
+    <?php if($settings->cron_ip == 'off'){echo "<p class='text-dark'><b>Your cron jobs are currently disabled by the system. With great power, comes the need for great responsibility. Please see the note at the bottom of this page.</b></p>";} ?>
+    <div class="card">
+      <div class="card-body">
+    <div class="float-right mb-2">
       <div class="btn-group"><button class="btn btn-info" data-toggle="modal" data-target="#addcron"><i class="fa fa-plus"></i> add</button></div>
-    </div><br /><br /><br />
-    <center>
-      <div>
+    </div>
         <table class="table table-bordered">
-          <tr>
             <tr>
-              <th><center>ID</center></th>
-              <th><center>Status</center></th>
-              <th><center>Cron Name</center></th>
-              <th><center>Cron File</center></th>
-              <th><center>Sort</center></th>
-              <th><center>Created By</center></th>
-              <th><center>Last Ran</center></th>
-              <th><center>Functions</center></th>
+              <th class="text-center">ID</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Cron Name</th>
+              <th class="text-center">Cron File</th>
+              <th class="text-center">Sort</th>
+              <th class="text-center">Created By</th>
+              <th class="text-center">Last Ran</th>
+              <th class="text-center">Functions</th>
             </tr>
             <?php
             if($count > 0)
             {
               foreach ($query->results() as $row){ ?>
-                <tr <?php if($row->active==0) {?> bgcolor="#CDCDCD"<?php } ?>>
-                  <td><center><?=$row->id;?></center></td>
-                  <td><center>
-                  <p data-field="active" id="active" class="cronactive nounderline" data-input="select" data-id="<?=$row->id;?>"><?php if($row->active==0) {?>Inactive<?php } if($row->active==1) {?>Active <?php } ?></p></center></td>
-                    <td><center><p data-field="name" class="cronname nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Rename Cron ID <?=$row->id;?>"><?=$row->name;?></p></center></td>
-                    <td><center><p data-field="file" class="cronfile nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Change File for <?=$row->name;?>"><?=$row->file;?></p></center></td>
-                    <td><center><p data-field="sort" class="cronsort nounderline txt" data-input="input" data-id="<?=$row->id;?>" data-title="Change sort for <?=$row->name;?>"><?=$row->sort;?></p></center></td>
-                    <td><center><?=echousername($row->createdby);?></center></td>
-                    <td><center>
+                <tr <?php if($row->active==0) {?> class="bg-light"<?php } ?>>
+                  <td class="text-center"><?=$row->id;?></td>
+                  <td class="text-center">
+                  <p data-field="active" id="active" class="cronactive nounderline" data-input="select" data-id="<?=$row->id;?>"><?php if($row->active==0) {?>Inactive<?php } if($row->active==1) {?>Active <?php } ?></p></td>
+                    <td><p data-field="name" class="cronname nounderline txt text-center" data-input="input" data-id="<?=$row->id;?>" data-title="Rename Cron ID <?=$row->id;?>"><?=$row->name;?></p></td>
+                    <td><p data-field="file" class="cronfile nounderline txt text-center" data-input="input" data-id="<?=$row->id;?>" data-title="Change File for <?=$row->name;?>"><?=$row->file;?></p></td>
+                    <td><p data-field="sort" class="cronsort nounderline txt text-center" data-input="input" data-id="<?=$row->id;?>" data-title="Change sort for <?=$row->name;?>"><?=$row->sort;?></p></td>
+                    <td class="text-center"><?=echousername($row->createdby);?></td>
+                    <td class="text-center">
                       <?php $ranQ = $db->query("SELECT datetime,user_id FROM crons_logs WHERE cron_id = ? ORDER BY datetime DESC",array($row->id));
                       $ranCount = $ranQ->count();
                       if($ranCount > 0) {
                         $ranResult = $ranQ->first();?>
-                        <?=$ranResult->datetime;?> (<?=echousername($ranResult->user_id);?>)<?php } else { ?><i>Never</i><?php } ?></center></td>
-                        <td>
-                        <center>
+                        <?=$ranResult->datetime;?> (<?=echousername($ranResult->user_id);?>)<?php } else { ?><i>Never</i><?php } ?></td>
+                        <td class="text-center">
                           <button type="button" name="button" id="deleteCron" data-value="<?=$row->id?>" class="btn btn-danger">Delete</button>
-                        </center>
                         </td>
                       </tr><?php
                     } }
                     else
                     { ?>
-                      <tr><td colspan='7'><center>No Cron Jobs</center></td></tr>
+                      <tr><td colspan='7' class="text-center">No Cron Jobs</td></tr>
                     <?php }
                     ?>
                   </table>
                 </div>
-              </center>
+              </div>
               <br />
               <?php if($settings->cron_ip == 'off'){ ?>
                 <strong>Note:</strong>
@@ -143,12 +140,11 @@ if (!empty($_POST)) {
                 <!-- Modal content-->
                 <div class="modal-content">
                   <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">Cron Addition</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                   </div>
+                  <form class="form-signup" action="admin.php?view=cron" method="POST">
                   <div class="modal-body">
-                    <form class="form-signup" action="admin.php?view=cron" method="POST">
-                      <div class="panel-body">
 
                         <label>Cron Name: </label><input type="text" class="form-control" id="name" name="name" placeholder="Cron Name" required>
 
@@ -158,16 +154,16 @@ if (!empty($_POST)) {
                         <br />
                       </div>
                       <div class="modal-footer">
-                        <div class="btn-group">	<input type="hidden" name="csrf" value="<?=Token::generate();?>" />
-                          <input class='btn btn-info' type='submit' name="addCron" value='Add Cron' class='submit' /></div>
+                        <div class="btn-group">
+                          <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
+                          <input class='btn btn-info mr-2' type='submit' name="addCron" value='Add Cron' class='submit' />
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                        </div>
                         </form>
-                        <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-              </div>
 
               <script type="text/javascript" src="<?=$us_url_root?>users/js/oce.js"></script>
               <script type="text/javascript">

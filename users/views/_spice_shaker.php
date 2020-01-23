@@ -1,4 +1,7 @@
-<?php if(!in_array($user->data()->id,$master_account)){Redirect::to('admin.php');}?>
+<?php if(!in_array($user->data()->id,$master_account)){Redirect::to('admin.php');}
+$diag = Input::get('diag');
+
+?>
 <div class="col-sm-8">
   <div class="page-header float-right">
     <div class="page-title">
@@ -17,10 +20,16 @@
 
 <div class="content mt-3">
   <?php
+  if($diag){
+    echo "<h6>Diagnostic Mode Activated</h6><br>";
+    echo "<h6><font color='red'>Please Note:</font> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
+  }
   $type = Input::get('type');
+  if($diag && $type == '' && !isset($_POST['goSearch'])){$_POST['goSearch'] = 1 && $_POST['search'] = 'demo plugin';}
   $api = "https://userspice.com/bugs/api.php";
   // $api = "http://localhost/bugs/api.php";
   if($settings->spice_api != ''){
+  if($diag){ echo "<h6>API Key found.</h6><br>"; }
   if(!empty($_POST['type'])){
     //create a new cURL resource
     $ch = curl_init($api);
@@ -31,7 +40,7 @@
         'call' => 'loadtype'
     );
     $payload = json_encode($data);
-
+    if($diag){ echo "<h6>Attempting CURL Request. Will show results below if they exist.</h6><br>"; }
       //attach encoded JSON string to the POST fields
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
       //set the content type to application/json
@@ -40,6 +49,15 @@
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       //execute the POST request
     $result = curl_exec($ch);
+    if($diag){
+      echo substr($result,0,150)."<br>";
+      $info = curl_getinfo($ch);
+      echo 'Took '. $info['total_time']. ' seconds to send a request<br>';
+      if(curl_errno($ch))
+      {
+          echo 'Curl error: ' . curl_error($ch);
+      }
+     }
       //close cURL resource
     curl_close($ch);
 
@@ -56,6 +74,7 @@
         'call' => 'search'
     );
     $payload = json_encode($data);
+    if($diag){ echo "<h6>Attempting CURL Request. Will show results below if they exist.</h6><br>"; }
       //attach encoded JSON string to the POST fields
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
       //set the content type to application/json
@@ -64,14 +83,35 @@
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       //execute the POST request
     $result = curl_exec($ch);
+      if($diag){
+        echo substr($result,0,150)."<br>";
+        $info = curl_getinfo($ch);
+        echo '<h6>Took '. $info['total_time']. ' seconds to send a request</h6><br>';
+        if(curl_errno($ch))
+        {
+            echo 'Curl error: ' . curl_error($ch);
+        }
+       }
       //close cURL resource
     curl_close($ch);
 
   }
 }//end if key check
+else{
+  if($diag){ echo "<h6>No API Key found.</h6><br>"; }
+}
    ?>
 
-   <h2>Spice Shaker Auto Installer</h2>
+   <h2>Spice Shaker Auto Installer
+     <?php if(!$diag){ ?>
+       <button type="button" onclick="window.location.href = 'admin.php?view=spice&diag=1';" name="button" class="btn btn-primary">Enter Diagnostic Mode</button>
+     <?php }else{ ?>
+       <button type="button" onclick="window.location.href = 'admin.php?view=spice';" name="button" class="btn btn-primary">Leave Diagnostic Mode</button>
+     <?php } ?>
+   </h2>
+   <?php if($diag){?>
+     <br><h3>Please Install/Update the demo plugin and look at the messages above and in your logs to diagnose API issues.</h3><br>
+   <?php } ?>
    Spice Shaker allows you to download and automatically install Updates, Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users with a (free) API key can make 2000 requests a day.<br>
    <?php
  $failed = 0;
@@ -100,7 +140,7 @@
                ?>
                Get One Here</a>
            )</label>
-         <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
+         <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
        </div>
      </div>
      <div class="col-4">
@@ -124,7 +164,7 @@
   <div class="row">
     <div class="col-4 offset-2">
       <form class="" action="" method="post">
-        <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="off">
+        <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
     </div>
     <div class="col-3">
       <?php if($settings->spice_api != ''){?>
@@ -155,7 +195,7 @@
               <img class="img-fluid" src="<?=$src?>" alt="Avatar" />
             </div>
             <div class="card-body" style="overflow-y: auto">
-              <h4 class="card-title"><?=$d->project?> v<?=$d->version." (".$d->status.")";?></h4>
+              <h6 class="card-title"><?=$d->project?> v<?=$d->version." (".$d->status.")";?></h6>
               <p><strong><?=ucfirst($d->category)?></strong></p>
               <p class="card-text"><?=$d->descrip?></p>
             </div>
@@ -181,7 +221,9 @@
     <p align="center"><font color="red"><strong>No results found</font></strong></p>
     <?php
   }
-  }?>
+  }
+
+  ?>
   </div>
   <script type="text/javascript">
   $( ".installme" ).click(function(event) {
@@ -192,6 +234,7 @@
     'type' 			:  $(this).attr('data-type'),
     'url' 			:  $(this).attr('data-url'),
     'hash' 			:  $(this).attr('data-hash'),
+    'diag'      :  "<?=$diag?>",
   };
 
   $.ajax({

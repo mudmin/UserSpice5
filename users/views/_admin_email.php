@@ -168,12 +168,12 @@ if(!empty($_POST)){
 <div class="content mt-3">
 <form name='update' action='admin.php?view=email' method='post'>
 <h2 class="mb-3">Email Server Settings</h2>
-  <p>
+  <p class="text-dark">
     These settings control all things email-related for the server including emailing your users and verifying the user's email address.
     You must obtain and verify all settings below for YOUR email server or hosting provider. Encryption with TLS is STRONGLY recommended,
     followed by SSL. No encryption is like shouting your login credentials out into a crowded field and is not supported for now.
   </p>
-<p>It is <strong>HIGHLY</strong> recommended that you test your email settings before turning on the feature to require new users to verify their email</p>
+<p class="text-dark">It is <strong>HIGHLY</strong> recommended that you test your email settings before turning on the feature to require new users to verify their email</p>
 
 <?=resultBlock($errors,$successes);?>
 <div class="row">
@@ -184,29 +184,29 @@ if(!empty($_POST)){
 
 	<div class="form-group">
   <label>Website Name:</label>
-  <input required size='50' class='form-control' type='text' name='website_name' value='<?=$results->website_name?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="new-password" name='website_name' value='<?=$results->website_name?>' />
   </div>
   <div class="form-group">
   <label>SMTP Server:</label>
-  <input required size='50' class='form-control' type='text' name='smtp_server' value='<?=$results->smtp_server?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="new-password" name='smtp_server' value='<?=$results->smtp_server?>' />
   </div>
   <div class="form-group">
   <label>SMTP Port:</label>
-  <input required size='50' class='form-control' type='text' name='smtp_port' value='<?=$results->smtp_port?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="new-password" name='smtp_port' value='<?=$results->smtp_port?>' />
   </div>
   <label>Email Login/Username:</label>
-  <input required size='50' class='form-control' type='password' name='email_login' value='<?=$results->email_login?>' />
+  <input required size='50' class='form-control' type='password' autocomplete="new-password" name='email_login' value='<?=$results->email_login?>' />
   <div class="form-group">
   <label>Email Password:</label>
-  <input required size='50' class='form-control' type='password' name='email_pass' value='<?=$results->email_pass?>' />
+  <input required size='50' class='form-control' type='password' autocomplete="new-password" name='email_pass' value='<?=$results->email_pass?>' />
   </div>
   <div class="form-group">
   <label>From Name (For Sent Emails):</label>
-  <input required size='50' class='form-control' type='text' name='from_name' value='<?=$results->from_name?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="new-password" name='from_name' value='<?=$results->from_name?>' />
   </div>
   <div class="form-group">
   <label>From Email (For Sent Emails):</label>
-  <input required size='50' class='form-control' type='text' name='from_email' value='<?=$results->from_email?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="new-password" name='from_email' value='<?=$results->from_email?>' />
   </div>
 </div>
 </div>
@@ -272,7 +272,9 @@ if(!empty($_POST)){
   </div>
   <div class="form-group">
   <label>Root URL of your UserSpice install <a href="#!" tabindex="-1" title="Note" data-trigger="click" class="nounderline" data-toggle="popover" data-content="Including http or https protocol (VERY Important). Default location would be: <?=$urlProtocol.$_SERVER['HTTP_HOST'].$us_url_root?>"><i class="fa fa-question-circle"></i></a></label>
-  <br>Put http://yourdomain.com/ with the final / below
+  <small class="form-text text-muted">
+  Put http://yourdomain.com/ with the final / below
+  </small>
   <input required  size='50' class='form-control' type='text' name='verify_url' value='<?=$results->verify_url?>' />
   </div>
   <div class="form-group">

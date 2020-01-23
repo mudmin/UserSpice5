@@ -159,7 +159,7 @@ class Validate
 							}
 
 							if ($rule==">"  &&  $value<=$rule_value){
-								$str = lang("VAL_LESS");
+								$str = lang("VAL_GREATER");
 								$this->addError(["{$display} $str {$rule_value_display}",$item]);
 							}
 
@@ -291,10 +291,10 @@ class Validate
 
 		foreach($this->_errors as $error) {
 			if (is_array($error))
-			$html    .= "<LI CLASS='text-danger'>{$error[0]}</LI>
+			$html    .= "<LI CLASS=''>{$error[0]}</LI>
 			<SCRIPT>jQuery('document').ready(function(){jQuery('#{$error[1]}').parent().closest('div').addClass('has-error');});</SCRIPT>";
 			else
-			$html .= "<LI CLASS='text-danger'>{$error}</LI>";
+			$html .= "<LI CLASS=''>{$error}</LI>";
 		}
 
 		$html .= "</UL>";

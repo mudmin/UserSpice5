@@ -22,6 +22,25 @@ function rrmdir($dir) {
     rmdir($dir);
   }
 }
+
+function randomstring($len){
+	$len = $len++;
+	$string = "";
+	$chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	for($i=0;$i<$len;$i++)
+	$string.=substr($chars,rand(0,strlen($chars)),1);
+	return $string;
+}
+
+//read the entire string
+$str=file_get_contents('../users/init.php');
+
+//replace something in the file string - this is a VERY simple example
+$str=str_replace('pmqesoxiw318374csb', randomString(20),$str);
+$str=str_replace("'session_name' => 'user'", "'session_name' => '".randomString(20)."'",$str);
+
+//write the entire string
+file_put_contents('../users/init.php', $str);
 rrmdir("install");
 ?>
 </p>

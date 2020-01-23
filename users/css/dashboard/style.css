@@ -1132,10 +1132,10 @@ header.fixed-top {
   font-size: 18px;
   height: 43px;
   line-height: 44px;
-  /* margin: -2px 20px 0 -57px; */
   margin: 3px 0 0 -37px;
   text-align: center;
-  width: 43px; }
+  width: 43px;
+  padding-top: 13px;  }
 
 .open .menutoggle i:before {
   content: "\f0a4"; }
@@ -2244,3 +2244,7 @@ header .form-inline {
 	top: .5rem;}
 
 /*# sourceMappingURL=style.css.map */
+
+.is-fullscreen {
+	background-color: #000 !important;
+}

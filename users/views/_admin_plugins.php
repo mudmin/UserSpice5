@@ -26,7 +26,6 @@ foreach ($dirs as $d) {
   if (!array_key_exists($thisPlugin, $usplugins)) {
     $usplugins[$thisPlugin] = 2;
     write_php_ini($usplugins, $abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php');
-    include $abs_us_root . $us_url_root . 'usersc/plugins/' . $thisPlugin . '/install.php';
   }
 }
 

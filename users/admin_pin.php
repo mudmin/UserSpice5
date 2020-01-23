@@ -107,10 +107,10 @@ if (!empty($_POST)) {
       <div class="row">
         <form class="verify-admin" action="admin_pin.php" method="POST" id="payment-form">
           <div class="col-md-3">
-            <input class="form-control" type="password" name="pin" id="pin" placeholder="Please enter your PIN code" autocomplete="off" required autofocus>
+            <input class="form-control" type="password" name="pin" id="pin" placeholder="Please enter your PIN code" autocomplete="new-password" required autofocus>
           </div>
           <div class="col-md-4">
-            <div class="input-group"><input class="form-control" type="password" name="pin_confirm" id="pin_confirm" placeholder="Please confirm your PIN code" autocomplete="off">
+            <div class="input-group"><input class="form-control" type="password" name="pin_confirm" id="pin_confirm" placeholder="Please confirm your PIN code" autocomplete="new-password">
               <span class="input-group-btn">
                 <input class='btn btn-primary' type='submit' name='addPin' value='Save PIN' />
               </span></div>

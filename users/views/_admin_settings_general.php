@@ -29,18 +29,18 @@ includeHook($hooks,'pre');
             <!-- Site Name -->
             <div class="form-group">
               <label for="site_name">Free API Key (<a href="https://userspice.com/developer-api-keys/">Get One Here</a>) <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle"></i></a></label>
-                <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
+                <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
               </div>
             <!-- Site Name -->
             <div class="form-group">
               <label for="site_name">Site Name <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="Modify this to change the name of your site, including in the <title> tag, the maintenance page and some system emails."><i class="fa fa-question-circle"></i></a></label>
-                <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Site Name" name="site_name" id="site_name" value="<?=$settings->site_name?>">
+                <input type="text" autocomplete="new-password" class="form-control ajxtxt" data-desc="Site Name" name="site_name" id="site_name" value="<?=$settings->site_name?>">
               </div>
 
               <!-- Copyright Option -->
               <div class="form-group">
                 <label for="copyright">Copyright Message <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="This message will be at the bottom of every page. The copyright symbol and year are automatically added."><i class="fa fa-question-circle"></i></a></label>
-                <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Copyright Message" name="copyright" id="copyright" value="<?=$settings->copyright?>">
+                <input type="text" autocomplete="new-password" class="form-control ajxtxt" data-desc="Copyright Message" name="copyright" id="copyright" value="<?=$settings->copyright?>">
               </div>
 
               <!-- Site Offline -->
@@ -154,7 +154,7 @@ includeHook($hooks,'pre');
                   <a name="cron"></a>
                   <div class="form-group">
                     <label for="cron_ip">Only allow cron jobs from the following IP <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="Cron jobs are automated server tasks that can make your life easier.  You may want to make sure, though, that they originate from you and not someone else.  You can whitelist an ip address here."><i class="fa fa-question-circle"></i></a></label>
-                    <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Cron Job IP" name="cron_ip" id="cron_ip" value="<?=$settings->cron_ip?>" placeholder="<?php if($settings->cron_ip == ''){echo 'No security is IP is set';}?>">
+                    <input type="text" autocomplete="new-password" class="form-control ajxtxt" data-desc="Cron Job IP" name="cron_ip" id="cron_ip" value="<?=$settings->cron_ip?>" placeholder="<?php if($settings->cron_ip == ''){echo 'No security is IP is set';}?>">
                   </div>
                 </div>
               </div>
@@ -182,7 +182,7 @@ includeHook($hooks,'pre');
 
                   <div class="form-group">
                     <label for="redirect_uri_after_login">Redirect After Login <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="The folder and file that you wish to redirect the user to after login. Default: users/account.php. Note that admins get redirected to this dashboard by default unless you intercept that call with something in usersc/scripts/custom_login_script.php"><i class="fa fa-question-circle"></i></a></label>
-                    <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Redirect After Login" name="redirect_uri_after_login" id="redirect_uri_after_login" value="<?=$settings->redirect_uri_after_login?>">
+                    <input type="text" autocomplete="new-password" class="form-control ajxtxt" data-desc="Redirect After Login" name="redirect_uri_after_login" id="redirect_uri_after_login" value="<?=$settings->redirect_uri_after_login?>">
                   </div>
 
                   <!-- echouser Option -->
@@ -226,12 +226,12 @@ includeHook($hooks,'pre');
 
                   <div class="form-group">
                     <label for="min_pw">Invisible Recaptcha Public (Site) Key</label> <?php if(in_array($user->data()->id, $master_account)) {?><a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" id="recapatcha_public_show"><span class="fa fa-eye"></span> show</a><?php } ?>
-                    <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="Recaptcha Site Key" name="recap_public" id="recap_public" value="<?=$settings->recap_public?>">
+                    <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="Recaptcha Site Key" name="recap_public" id="recap_public" value="<?=$settings->recap_public?>">
                   </div>
 
                   <div class="form-group">
                     <label for="max_pw">Invisible Recaptcha Private (Secret) Key</label> <?php if(in_array($user->data()->id, $master_account)) {?><a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" id="recapatcha_private_show"><span class="fa fa-eye"></span> show</a><?php } ?>
-                    <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="Recaptcha Private Key" name="recap_private" id="recap_private" value="<?=$settings->recap_private?>">
+                    <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="Recaptcha Private Key" name="recap_private" id="recap_private" value="<?=$settings->recap_private?>">
                   </div>
                 </div>
               </div>

@@ -9,6 +9,7 @@ if (!in_array($user->data()->id, $master_account)) {
 $type = Input::get('type');
 $url = Input::get('url');
 $hash = Input::get('hash');
+$diag = Input::get('diag');
 $api = "https://userspice.com/bugs/api.php";
 // dump($_POST);
 $zipFile = "temp.zip";
@@ -26,12 +27,19 @@ if ($type == 'plugin') {
   $return = $us_url_root . "users/admin.php?err=Language(s)+Installed.";
 } else {
   $data['error'] = "Something is wrong";
+  if($diag){logger($user->data()->id, "DIAG", "Invalid request type");}
   echo json_encode($data);
   die();
 }
-
+if($diag){logger($user->data()->id, "DIAG", "Attempting to create zip file");}
 $zip_resource = fopen($zipFile, "w");
+if($diag){
+  if(!$zip_resource){
+  logger($user->data()->id, "DIAG", "Did not have permission to create zip file");
+}
+}
 
+if($diag){logger($user->data()->id, "DIAG", "Attempting CURL request to download file contents");}
 $ch_start = curl_init();
 curl_setopt($ch_start, CURLOPT_URL, $url);
 curl_setopt($ch_start, CURLOPT_FAILONERROR, true);
@@ -45,6 +53,7 @@ curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 0);
 curl_setopt($ch_start, CURLOPT_FILE, $zip_resource);
 $page = curl_exec($ch_start);
 if (!$page) {
+  if($diag){logger($user->data()->id, "DIAG", "CURL Error :- " . curl_error($ch_start));}
   echo "Error :- " . curl_error($ch_start);
 }
 curl_close($ch_start);
@@ -52,6 +61,7 @@ curl_close($ch_start);
 $zip = new ZipArchive;
 
 if ($zip->open($zipFile) != "true") {
+  if($diag){logger($user->data()->id, "DIAG", "Error :- Unable to open the Zip File");}
   echo "Error :- Unable to open the Zip File";
 }
 $newCrc = base64_encode(hash_file("sha256", $zip->filename));
@@ -75,12 +85,23 @@ $result = curl_exec($ch);
 $result = substr($result, 1, -1);
 curl_close($ch);
 if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the hash against the api call and the one supplied by ajax
-  $zip->extractTo($extractPath);
-  $zip->close();
-  $msg = [];
-  $msg['success'] = true;
-  $msg['url'] = $return;
+  if($diag){
+    logger($user->data()->id, "DIAG", "The security hash matches...unzipping");
+  }
+  if ($zip->extractTo($extractPath) === TRUE) {
+    $zip->close();
+    $msg = [];
+    $msg['success'] = true;
+    $msg['url'] = $return;
+  }else{
+    $msg = [];
+    $msg['success'] = false;
+    $msg['error'] = "Unable to open zip.";
+    logger($user->data()->id, "DIAG", "Unable to open zip file");
+  }
+
 } else {
+  if($diag){logger($user->data()->id, "DIAG", "The security hash DOES NOT MATCH"); }
   $msg = [];
   $msg['success'] = false;
   $msg['error'] = "The hash does not match.  This means one of 2 things. Either the file on the server has been tampered with or (more likely) the file was

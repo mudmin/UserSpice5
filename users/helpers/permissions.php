@@ -119,7 +119,7 @@ if(!function_exists('deletePages')) {
 if(!function_exists('fetchAllPages')) {
 	function fetchAllPages() {
 		$db = DB::getInstance();
-		$query = $db->query("SELECT id, page, title, private, re_auth FROM pages ORDER BY id DESC");
+		$query = $db->query("SELECT id, page, title, private, re_auth, core FROM pages ORDER BY id DESC");
 		$pages = $query->results();
 		//return $pages;
 

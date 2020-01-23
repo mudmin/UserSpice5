@@ -100,13 +100,13 @@ if(Input::exists()){
                 'display' => lang("GEN_FNAME"),
                 'required' => true,
                 'min' => 1,
-                'max' => 60,
+                'max' => 100,
           ),
           'lname' => array(
                 'display' => lang("GEN_LNAME"),
                 'required' => true,
                 'min' => 1,
-                'max' => 60,
+                'max' => 100,
           ),
           'email' => array(
                 'display' => lang("GEN_EMAIL"),
@@ -146,6 +146,8 @@ if(Input::exists()){
                   'required' => true,
                   'valid_email' => true,
                   'unique' => 'users',
+                  'min' => 5,
+                  'max' => 100,
             ),
 
             'password' => array(

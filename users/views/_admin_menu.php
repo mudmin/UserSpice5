@@ -146,9 +146,9 @@ function activeDropdown($View, $dropId, $Area = false){
 <?php //dump($plugins); ?>
 
           <li class="menu-item-has-children dropdown <?=activeDropdown($view, 'addons')[0];?>">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="<?=activeDropdown($view, 'addons')[1];?>"> <i class="menu-icon fa fa-plus"></i>Addons</a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="<?=activeDropdown($view, 'addons')[1];?>"> <i class="menu-icon fa fa-plus"></i>Plugins</a>
             <ul class="sub-menu children dropdown-menu <?=activeDropdown($view, 'addons')[0];?>">
-              <?php if(checkAccess('view','plugins')){?>   <li <?=($view == 'plugins') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-plug"></i><a href="admin.php?view=plugins">All Plugins</a></li><?php } ?>
+              <?php if(checkAccess('view','plugins')){?>   <li <?=($view == 'plugins') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-plug"></i><a href="admin.php?view=plugins">Plugin Manager</a></li><?php } ?>
               <?php foreach($plugins as $t){
                 $xml=simplexml_load_file($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml');
                 if(file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/configure.php') && isset($usplugins[$t]) && ($usplugins[$t] == 1)){?>

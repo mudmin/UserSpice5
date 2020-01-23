@@ -687,8 +687,9 @@ if(!function_exists('getUSPageFiles')) {
 
             if(!function_exists('currentPageStrict')) {
               function currentPageStrict() {
+                global $abs_us_root, $us_url_root;
                 $uri=$_SERVER['PHP_SELF'];
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+
 
                 $self_path=explode("/", $_SERVER['PHP_SELF']);
                 $self_path_length=count($self_path);
@@ -696,7 +697,7 @@ if(!function_exists('getUSPageFiles')) {
 
                 for($i = 1; $i < $self_path_length; $i++){
                   array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
+                  // $us_url_root=implode("/",$self_path)."/";
 
                   if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
                     $file_found=TRUE;
@@ -856,7 +857,7 @@ if(!function_exists('getUSPageFiles')) {
 
             if(!function_exists('currentFile')) {
               function currentFile() {
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+                global $abs_us_root, $us_url_root;
 
                 $self_path=explode("/", $_SERVER['PHP_SELF']);
                 $self_path_length=count($self_path);
@@ -864,7 +865,6 @@ if(!function_exists('getUSPageFiles')) {
 
                 for($i = 1; $i < $self_path_length; $i++){
                   array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
 
                   if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
                     $file_found=TRUE;
@@ -905,18 +905,21 @@ if(!function_exists('getUSPageFiles')) {
             }
 
             if(!function_exists('pluginActive')) {
-              function pluginActive($plugin) {
+              function pluginActive($plugin,$checkOnly = false) {
                 global $db,$user,$us_url_root;
                 $check = $db->query("SELECT id FROM us_plugins WHERE plugin = ? and status = ?",array($plugin,"active"))->count();
                 if($check != 1) {
                   logger($user->data()->id,"Errors","Attempted to access disabled $plugin");
-                  Redirect::to($us_url_root.'users/admin.php?view=plugins&err=Plugin+is+disabled');
+                  if(!$checkOnly){
+                    Redirect::to($us_url_root.'users/admin.php?view=plugins&err=Plugin+is+disabled');
+                  }
                   return false;
                 }else{
                   return true;
                 }
               }
             }
+
 
             if(!function_exists('languageSwitcher')) {
               function languageSwitcher() {

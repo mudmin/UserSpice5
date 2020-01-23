@@ -351,7 +351,7 @@ if(!empty($_POST)) {
   }
 
   //Delete backup
-  if(!empty($_POST['deleteFile'])){
+  if(!empty($_POST['delete'])){
 
     $deletions = $_POST['delete'];
     $backup_dest = "@".$settings->backup_dest;//::from 4.2.9a

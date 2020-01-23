@@ -99,7 +99,7 @@ if(!empty($_POST)) {
                     'display' => lang("GEN_FNAME"),
                     'required' => true,
                     'min' => 1,
-                    'max' => 25
+                    'max' => 60
                 )
             ));
             if($validation->passed()){
@@ -124,7 +124,7 @@ if(!empty($_POST)) {
                     'display' => lang("GEN_LNAME"),
                     'required' => true,
                     'min' => 1,
-                    'max' => 25
+                    'max' => 60
                 )
             ));
             if($validation->passed()){
@@ -154,8 +154,8 @@ if(!empty($_POST)) {
                     'required' => true,
                     'valid_email' => true,
                     'unique_update' => 'users,'.$userId,
-                    'min' => 3,
-                    'max' => 75
+                    'min' => 5,
+                    'max' => 100
                 )
             ));
             if($validation->passed()){
@@ -257,7 +257,7 @@ $userdetails=$user2->data();
                 </div>
                 <div class="col-sm-12 col-md-10">
                     <h1><?=lang("SET_UPDATE");?></h1>
-                    <?=lang("SET_GRAVITAR");?><br>
+                    <?php if(!pluginActive('profile_pic',true)){echo lang("SET_GRAVITAR");}?><br>
                     <?php if(!$errors=='') {?><div class="alert alert-danger"><?=display_errors($errors);?></div><?php } ?>
                     <?php if(!$successes=='') {?><div class="alert alert-success"><?=display_successes($successes);?></div><?php }
 										includeHook($hooks,'body');

@@ -22,12 +22,13 @@ tfoot input {
 }
 </style>
 <div class="content mt-3">
-  <h2>System Logs</h2>
+  <h2 class="mb-3">System Logs</h2>
   <!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
   <?php resultBlock($errors, $successes);
   $logs = $db->query("SELECT * FROM logs ORDER BY id DESC LIMIT 5000")->results();
   ?>
-  <hr>
+  <div class="card">
+  <div class="card-body">
   <table id="paginate" class='table table-hover table-striped table-list-search display'>
     <thead>
       <th>ID</th>
@@ -50,6 +51,8 @@ tfoot input {
       <?php } ?>
     </tbody>
   </table>
+  </div>
+</div>
   </div>
 
 <script type="text/javascript" src="js/pagination/datatables.min.js"></script>

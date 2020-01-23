@@ -404,32 +404,32 @@ if(!empty($_POST)) {
                     <div class="col-12 col-sm-6">
                       <div class="form-group">
                         <label>Username:</label>
-                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username?>' autocomplete="off" />
+                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username?>' autocomplete="new-password" />
                       </div>
 
                       <div class="form-group">
                         <label>Email:</label>
-                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email?>' autocomplete="off" />
+                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email?>' autocomplete="new-password" />
                       </div>
 
                       <div class="form-group">
                         <label>First Name:</label>
-                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname?>' autocomplete="off" />
+                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname?>' autocomplete="new-password" />
                       </div>
 
                       <div class="form-group">
                         <label>Last Name:</label>
-                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname?>' autocomplete="off" />
+                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname?>' autocomplete="new-password" />
                       </div>
 
                       <div class="form-group">
                         <label>New Password (<?=$settings->min_pw?> char min, <?=$settings->max_pw?> max.)</label>
-                        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                        <input class='form-control' type='password' autocomplete="new-password" name='pwx' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
                       <div class="form-group">
                         <label>Confirm Password</label>
-                        <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                        <input class='form-control' type='password' autocomplete="new-password" name='confirm' <?php if((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected==1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
 
@@ -564,7 +564,7 @@ if(!empty($_POST)) {
                           <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><font color="blue">?</font></a></label>
                           <select name='delete[<?php echo "$userId"; ?>]' id='delete[<? echo "$userId"; ?>]' class="form-control">
                             <option selected='selected' disabled>No</option>
-                            <option value="<?=$userId?>"  <?php if (!checkMenu(2,$user->data()->id) || !in_array($user->data()->id,$master_account)){  echo "disabled";} ?>>Yes - Cannot be undone!</option>
+                            <option value="<?=$userId?>"  <?php if (!checkMenu(2,$user->data()->id) && !in_array($user->data()->id,$master_account)){  echo "disabled";} ?>>Yes - Cannot be undone!</option>
                           </select>
                         </div>
                         <input type="hidden" name="csrf" value="<?=Token::generate();?>" />

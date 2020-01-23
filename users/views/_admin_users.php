@@ -61,19 +61,21 @@ includeHook($hooks,'post');
           'display' => 'First Name',
           'required' => true,
           'min' => 1,
-          'max' => 60,
+          'max' => 100,
         ),
         'lname' => array(
           'display' => 'Last Name',
           'required' => true,
           'min' => 1,
-          'max' => 60,
+          'max' => 100,
         ),
         'email' => array(
           'display' => 'Email',
           'required' => true,
           'valid_email' => true,
           'unique' => 'users',
+          'min' => 5,
+          'max' => 100,
         ),
 
         'password' => array(
@@ -239,14 +241,14 @@ includeHook($hooks,'post');
       <div class="modal-body">
         <form class="form-signup" action="admin.php?view=users" method="POST">
           <div class="panel-body">
-            <?php if($settings->auto_assign_un==0) {?><label>Username: </label>&nbsp;&nbsp;<span id="usernameCheck" class="small"></span><input type="text" class="form-control" id="username" name="username" placeholder="Username" autocomplete="off" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required><?php } ?>
-              <label>First Name: </label><input type="text" class="form-control" id="fname" name="fname" placeholder="First Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $fname;} ?>" required autocomplete="off">
-              <label>Last Name: </label><input type="text" class="form-control" id="lname" name="lname" placeholder="Last Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $lname;} ?>" required autocomplete="off">
-              <label>Email: </label><input  class="form-control" type="text" name="email" id="email" placeholder="Email Address" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="off">
+            <?php if($settings->auto_assign_un==0) {?><label>Username: </label>&nbsp;&nbsp;<span id="usernameCheck" class="small"></span><input type="text" class="form-control" id="username" name="username" placeholder="Username" autocomplete="new-password" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required><?php } ?>
+              <label>First Name: </label><input type="text" class="form-control" id="fname" name="fname" placeholder="First Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $fname;} ?>" required autocomplete="new-password">
+              <label>Last Name: </label><input type="text" class="form-control" id="lname" name="lname" placeholder="Last Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $lname;} ?>" required autocomplete="new-password">
+              <label>Email: </label><input  class="form-control" type="text" name="email" id="email" placeholder="Email Address" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="new-password">
               <label>Password: </label>
               <div class="input-group" data-container="body">
                 <span class="input-group-addon password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
-                <input  class="form-control" type="password" name="password" id="password" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> placeholder="Password" required autocomplete="off" aria-describedby="passwordhelp">
+                <input  class="form-control" type="password" name="password" id="password" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> placeholder="Password" required autocomplete="new-password" aria-describedby="passwordhelp">
                 <?php if($settings->force_pr==1) { ?>
                   <span class="input-group-addon" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">Why can't I edit this?</a></span>
                 <?php } ?>
@@ -254,7 +256,7 @@ includeHook($hooks,'post');
               <label>Confirm Password: </label>
               <div class="input-group" data-container="body">
                 <span class="input-group-addon password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
-                <input  type="password" id="confirm" name="confirm" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> class="form-control" autocomplete="off" placeholder="Confirm Password" required >
+                <input  type="password" id="confirm" name="confirm" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> class="form-control" autocomplete="new-password" placeholder="Confirm Password" required >
                 <?php if($settings->force_pr==1) { ?>
                   <span class="input-group-addon" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">Why can't I edit this?</a></span>
                 <?php } ?>

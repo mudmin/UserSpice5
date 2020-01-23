@@ -13,6 +13,12 @@
 </header>
 
 <?php
+$hide = Input::get('hide');
+if($hide == 'core'){
+  $c = true;
+}else{
+  $c = false;
+}
 
 $errors = [];
 $successes = [];
@@ -165,7 +171,13 @@ $csrf = Token::generate();
 
 <div class="content mt-3">
   <form class="" action="<?=$us_url_root?>users/admin.php?view=pages" name="" method="post">
-    <h2>Manage Page Access</h2>
+    <h2>Manage Page Access
+      <?php if($c){?>
+           <button type="button" onclick="window.location.href = 'admin.php?view=pages';" name="button" class="btn btn-primary">Show All Pages</button>
+      <?php }else{ ?>
+           <button type="button" onclick="window.location.href = 'admin.php?view=pages&hide=core';" name="button" class="btn btn-primary">Hide Default Pages</button>
+      <?php } ?>
+    </h2>
     <p class="text-dark pt-2">UserSpice is currently monitoring the following folders: <strong>
 
 
@@ -199,6 +211,7 @@ $csrf = Token::generate();
         //Display list of pages
         $count=0;
         foreach ($dbpages as $page){
+          if($c && $page->core == 1){continue;}
           ?>
           <tr><td><?=$dbpages[$count]->id?></td>
             <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id?>'><?=$dbpages[$count]->page?></a></td>

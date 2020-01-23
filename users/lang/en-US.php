@@ -9,7 +9,7 @@ you to update it and thank you for your hard work!
 
 PLEASE NOTE: DO NOT ADD RANDOM KEYS in the middle of the translations.  In order to make it easier to tell what language keys are missing, from this point forward, we are going to add all new language keys at the BOTTOM of this file. The number of lines in your language file will tell you which keys still need to be translated.  If you have questions please ask on the forums or on Discord.
 
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -119,8 +119,6 @@ $lang = array_merge($lang,array(
 		"GEN_UPDATED"			=> "Updated",
 		"GEN_UPDATE"			=> "Update",
 		"GEN_BY"					=> "by",
-		"GEN_ENABLE"			=> "Enable",
-		"GEN_DISABLE"			=> "Disable",
 		"GEN_FUNCTIONS"		=> "Functions",
 		"GEN_NUMBER"			=> "number",
 		"GEN_NUMBERS"			=> "numbers",
@@ -390,7 +388,7 @@ $lang = array_merge($lang,array(
 
 ///////////////////////////////////////////////////////////////
 
-//Backend Translations for UserSpice 5
+//Backend Translations for UserSpice
 $lang = array_merge($lang,array(
 "BE_DASH"    			=> "Dashboard",
 "BE_SETTINGS"     => "Settings",
