@@ -36,7 +36,7 @@ $lang = array();
 $lang = array_merge($lang,array(
 "THIS_LANGUAGE"	=>"Deutsch",
 "THIS_CODE"			=>"de-DE",
-"MISSING_TEXT"	=>"Missing Text",
+"MISSING_TEXT"	=>"Fehlender Text",
 ));
 // Signup
 $lang = array_merge($lang,array(
