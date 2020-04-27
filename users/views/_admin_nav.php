@@ -29,7 +29,9 @@ if (!empty($_GET['action'])) {
     */
     $fields=array('menu_title'=>$menu_title,'parent'=>'-1','dropdown'=>'1','logged_in'=>'1','display_order'=>'99999','label'=>'New Dropdown','link'=>'#','icon_class'=>'');
     $db->insert('menus',$fields);
+    $lastId = $db->lastId();
     logger($user->data()->id,"Menu Manager","Added new dropdown");
+    Redirect::to($us_url_root."users/admin.php?view=nav_item&id=$lastId&action=edit");
   } elseif ($action=='newItem') {
     /*
     Inserts default "item" entry
