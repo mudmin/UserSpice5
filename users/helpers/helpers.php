@@ -168,6 +168,7 @@ $opts = array(
 	$mail->Password = htmlspecialchars_decode($results->email_pass);    // SMTP password
 	$mail->SMTPSecure = $results->transport;                            // Enable TLS encryption, `ssl` also accepted
 	$mail->Port = $results->smtp_port;                                  // TCP port to connect to
+	$mail->CharSet = 'UTF-8';   
 
 	if(isset($opts['email']) && isset($opts['name'])){
 	  $mail->setFrom($opts['email'], $opts['name']);
