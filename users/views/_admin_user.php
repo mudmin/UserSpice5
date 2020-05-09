@@ -20,13 +20,12 @@ $hooks = getMyHooks(['page' =>'admin.php?view=user']);
 includeHook($hooks,'pre');
 $validation = new Validate();
 //PHP Goes Here!
-$query = $db->query("SELECT * FROM email");
-$results = $query->first();
-$act = $results->email_act;
+$email = $db->query("SELECT email_act FROM email")->first();
+$act = $email->email_act;
 $errors = [];
 $successes = [];
 $userId = Input::get('id');
-$email = $db->query("SELECT * FROM email")->first();
+
 //Check if selected user exists
 if(!userIdExists($userId)){
   Redirect::to($us_url_root.'users/admin.php?view=users&err=That user does not exist.'); die();
@@ -362,7 +361,14 @@ if(!empty($_POST)) {
       }
     }
     $userdetails = fetchUserDetails(NULL, NULL, $userId);
-  } }
+  }
+
+  if($errors == [] && Input::get("return") != ""){
+    Redirect::to('admin.php?view=users&err=Saved');
+  }elseif($errors == []){
+    Redirect::to('admin.php?view=user&err=Saved&id='.$userId);
+  }
+}
 
 
   $userPermission = fetchUserPermissions($userId);
@@ -382,7 +388,7 @@ if(!empty($_POST)) {
       <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId?>' method='post'>
         <div class="row">
           <div class="col-8">
-            <h3><?=$userdetails->fname?> <?=$userdetails->lname?> - <?=$userdetails->username?></h3>
+            <h3><span id="fname"><?=$userdetails->fname?> </span><span id="lname"><?=$userdetails->lname?> </span><span id="slash">- </span><span id="username"><?=$userdetails->username?></span></h3>
             <label>User ID: </label> <?=$userdetails->id?><?php if($act==1) {?> <br>
               <?php if($userdetails->email_verified==1) {?> Email Verified <input type="hidden" name="email_verified" value="1" />
             <?php } elseif($userdetails->email_verified==0) {?> Email Unverified -
@@ -402,22 +408,22 @@ if(!empty($_POST)) {
 
                   <div class="row">
                     <div class="col-12 col-sm-6">
-                      <div class="form-group">
+                      <div class="form-group" id="username-group">
                         <label>Username:</label>
                         <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username?>' autocomplete="new-password" />
                       </div>
 
-                      <div class="form-group">
+                      <div class="form-group" id="email-group">
                         <label>Email:</label>
                         <input class='form-control' type='text' name='emx' value='<?=$userdetails->email?>' autocomplete="new-password" />
                       </div>
 
-                      <div class="form-group">
+                      <div class="form-group" id="fname-group">
                         <label>First Name:</label>
                         <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname?>' autocomplete="new-password" />
                       </div>
 
-                      <div class="form-group">
+                      <div class="form-group" id="lname-group">
                         <label>Last Name:</label>
                         <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname?>' autocomplete="new-password" />
                       </div>
@@ -569,8 +575,9 @@ if(!empty($_POST)) {
                         </div>
                         <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
                         <div class="pull-right">
-                          <div class="btn-group"><input class='btn btn-primary' type='submit' value='Update' class='submit' /></div>
-                          <div class="btn-group"><a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=users">Cancel</a></div><br /><Br />
+                          <a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=users">Cancel</a>
+                          <input class='btn btn-secondary' name = "return" type='submit' value='Update & Close' class='submit' />
+                          <input class='btn btn-primary' type='submit' value='Update' class='submit' />
                         </div>
                       </div>
                     </div>

@@ -548,7 +548,7 @@ if(!function_exists('hasPerm')) {
 		if ($access == 1){
 			return true;
 		}
-		if (in_array($user->data()->id, $master_account)){
+		if (in_array($id, $master_account)){
 			return true;
 		}else{
 			return false;

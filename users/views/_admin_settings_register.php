@@ -33,17 +33,6 @@
             </div>
 
             <div class="form-group">
-              <label for="show_tos">Show Terms of Service/User Agreement <a href="#!" data-toggle="popover" class="nounderline" title="Note" data-content="Enabling this from disabled will require oauth users to reacknowledge TOS" ><i class="fa fa-question-circle"></i></a></label>
-              <span style="float:right;">
-                <label class="switch switch-text switch-success">
-                  <input id="show_tos" type="checkbox" class="switch-input toggle" data-desc="Terms of Service Requirement" <?php if($settings->show_tos==1) echo 'checked="true"'; ?>>
-                  <span data-on="Yes" data-off="No" class="switch-label"></span>
-                  <span class="switch-handle"></span>
-                </label>
-              </span>
-            </div>
-
-            <div class="form-group">
               <label for="join_vericode_expiry">Registration Vericode Expiry (in hours) <a href="#!" class="nounderline" data-toggle="popover" title="Note" data-content="Length of time in hours for expiration of vericodes to email. Maximum: 999999999 (thats nine 9s!). Default: 24"><i class="fa fa-question-circle"></i></a></label>
               <div class="input-group">
                 <input type="number" step="1" min="1" max="999999999" class="form-control ajxnum" data-desc="Registration Vericode Expiry" name="join_vericode_expiry" id="join_vericode_expiry" value="<?=$settings->join_vericode_expiry?>">

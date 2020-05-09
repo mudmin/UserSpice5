@@ -62,7 +62,7 @@ $diag = Input::get('diag');
     curl_close($ch);
 
   }
-  if(!empty($_POST['goSearch'])){
+  if(!empty($_POST['goSearch']) || !empty($_GET['search'])){
     $search = Input::get('search');
     // dnd($search);
     //create a new cURL resource

@@ -84,8 +84,8 @@ $userdetails = fetchUserDetails(NULL, NULL, $get_info_id); //Fetch user details
 		<?php includeHook($hooks,'body');?>
 	</div>
 	<div class="col-sm-12 col-md-9">
-		<h1><?=echousername($user->data()->id)?></h1>
-		<p><?=ucfirst($user->data()->fname)." ".ucfirst($user->data()->lname)?> / <?=echouser($user->data()->id)?></p>
+		<h1 id="username"><?=echousername($user->data()->id)?></h1>
+		<p><span id="fname"><?=ucfirst($user->data()->fname)." ".ucfirst($user->data()->lname)?> </span><span id="slash">/</span> <span id="lname"><?=echouser($user->data()->id)?></span></p>
 		<p><?=lang("ACCT_SINCE")?>: <?=$signupdate?></p>
 		<p><?=lang("ACCT_LOGINS")?>: <?=$user->data()->logins?></p>
 		<?php if($settings->session_manager==1) {?><p><?=lang("ACCT_SESSIONS")?>: <?=UserSessionCount()?> <sup><a class="nounderline" data-toggle="tooltip" title="<?=lang("ACCT_MNG_SES")?>">?</a></sup></p><?php }

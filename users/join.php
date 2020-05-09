@@ -73,17 +73,6 @@ if(Input::exists()){
         } else {
           $username=Input::get('username');
         }
-        $agreement_checkbox = Input::get('agreement_checkbox');
-
-        if ($agreement_checkbox=='on'){
-                $agreement_checkbox=TRUE;
-        }else{
-          if($settings->show_tos == 1){
-                $agreement_checkbox=FALSE;
-          }else{
-            $agreement_checkbox=TRUE;
-          }
-        }
 
         $validation = new Validate();
         if($settings->auto_assign_un==0) {
@@ -164,12 +153,7 @@ if(Input::exists()){
           ));
         }
 
-        //if the agreement_checkbox is not checked, add error
-        if (!$agreement_checkbox){
-                $validation->addError([lang("ERR_TC")]);
-        }
-
-        if($validation->passed() && $agreement_checkbox){
+        if($validation->passed()){
                 //Logic if ReCAPTCHA is turned ON
         if($settings->recaptcha > 0){
           if(!function_exists('post_captcha')){
@@ -251,6 +235,7 @@ if(Input::exists()){
                         } catch (Exception $e) {
                                 die($e->getMessage());
                         }
+                        if($form_valid == TRUE){ //this allows the plugin hook to kill the post but it must delete the created user
                         if($settings->twofa == 1){
                         $twoKey = $google2fa->generateSecretKey();
                         $db->update('users',$theNewId,['twoKey' => $twoKey]);
@@ -274,8 +259,8 @@ if(Input::exists()){
                         die();
 
                 }
-
-        } //Validation and agreement checbox
+              }
+        } //Validation
 } //Input exists
 
 ?>

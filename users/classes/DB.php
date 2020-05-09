@@ -89,6 +89,7 @@ class DB {
 				$this->_lastId = $this->_pdo->lastInsertId();
 			} else{
 				$this->_error = true;
+				$this->_results = [];
 				$this->_errorInfo = $this->_query->errorInfo();
 			}
 		}
