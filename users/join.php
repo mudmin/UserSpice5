@@ -194,7 +194,7 @@ if(Input::exists()){
                 } //else for recaptcha
 
                 if($reCaptchaValid || $settings->recaptcha == 0){
-
+                        $form_valid = TRUE;
                         //add user to the database
                         $user = new User();
                         $join_date = date("Y-m-d H:i:s");
