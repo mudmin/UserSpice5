@@ -232,9 +232,7 @@ include "../users/includes/user_spice_ver.php";
             You have errors listed in the System Requirement Check that must be corrected
             before continuing. If you have an unwritable <?= $config_file ?>, it is suggested that you chmod
             that file to 666 for installation and then chmod it to 644 after installation. <a
-                    href="//userspice.com/installation-issues/" target="_blank">please read this guide</a>, or if
-            you are comfortable importing a SQL dump and editing an init.php file manually, you can follow
-            the "if install fails" instructions in the root folder.
+                    href="//userspice.com/installation-issues/" target="_blank">please read this guide</a>.
         </div>
     <?php } ?>
 

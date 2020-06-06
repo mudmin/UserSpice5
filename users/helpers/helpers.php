@@ -21,13 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //NOTE: Plugin data is called at the bottom of this file
 $lang = [];
-require_once("us_helpers.php");
-require_once("backup_util.php");
-require_once("class.treeManager.php");
-require_once("menus.php");
-require_once("permissions.php");
-require_once("users.php");
-require_once("dbmenu.php");
+if(file_exists($abs_us_root.$us_url_root.'usersc/includes/custom_functions.php')){
+require_once $abs_us_root.$us_url_root.'usersc/includes/custom_functions.php';
+}
+
+require_once($abs_us_root.$us_url_root."users/helpers/us_helpers.php");
+require_once($abs_us_root.$us_url_root."users/helpers/backup_util.php");
+require_once($abs_us_root.$us_url_root."users/helpers/class.treeManager.php");
+require_once($abs_us_root.$us_url_root."users/helpers/menus.php");
+require_once($abs_us_root.$us_url_root."users/helpers/permissions.php");
+require_once($abs_us_root.$us_url_root."users/helpers/users.php");
+require_once($abs_us_root.$us_url_root."users/helpers/dbmenu.php");
 
 define("ABS_US_ROOT",$abs_us_root);
 define("US_URL_ROOT",$us_url_root);
@@ -40,9 +44,6 @@ if(file_exists($abs_us_root.$us_url_root.'usersc/vendor/autoload.php')){
   require_once($abs_us_root.$us_url_root."usersc/vendor/autoload.php");
 }
 
-if(file_exists($abs_us_root.$us_url_root.'usersc/includes/custom_functions.php')){
-require_once $abs_us_root.$us_url_root.'usersc/includes/custom_functions.php';
-}
 require $abs_us_root.$us_url_root.'users/classes/phpmailer/PHPMailerAutoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -168,19 +169,20 @@ $opts = array(
 	$mail->Password = htmlspecialchars_decode($results->email_pass);    // SMTP password
 	$mail->SMTPSecure = $results->transport;                            // Enable TLS encryption, `ssl` also accepted
 	$mail->Port = $results->smtp_port;                                  // TCP port to connect to
+  $mail->CharSet = 'UTF-8';
 
 	if(isset($opts['email']) && isset($opts['name'])){
-  $mail->setFrom($opts['email'], $opts['name']);
-}else{
-  $mail->setFrom($results->from_email, $results->from_name);
-}
+    $mail->setFrom($opts['email'], $opts['name']);
+  }else{
+    $mail->setFrom($results->from_email, $results->from_name);
+  }
 
 	$mail->addAddress(rawurldecode($to));                   // Add a recipient, name is optional
   if($results->isHTML == 'true'){$mail->isHTML(true); }                  // Set email format to HTML
 
 	$mail->Subject = $subject;
 	$mail->Body    = $body;
-
+  if (!empty($attachment)) $mail->addAttachment($attachment);
 	$result = $mail->send();
 
 	return $result;

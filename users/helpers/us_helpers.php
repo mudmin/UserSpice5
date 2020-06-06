@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // UserSpice Specific Functions
 
-$user_agent = $_SERVER['HTTP_USER_AGENT'];
+$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MISSING';
 
 
 function ipCheck() {

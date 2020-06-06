@@ -132,6 +132,7 @@ if(Input::exists()){
         Redirect::to(htmlspecialchars_decode($redirect_uri));
       }
     }
+    if(Input::get("return") != "" && $errors == []){ Redirect::to('admin.php?view=pages');}
   }
   $pagePermissions = fetchPagePermissions($pageId);
   $permissionData = fetchAllPermissions();
@@ -230,7 +231,8 @@ if(Input::exists()){
                 </div>
 
                 <input type="hidden" name="csrf" value="<?=Token::generate();?>" >
+                <a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=pages">Cancel</a>
+                <input class='btn btn-secondary' name = "return" type='submit' value='Update & Close' class='submit' />
                 <input class='btn btn-primary' type='submit' value='Update' class='submit' />
-                <a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=pages">Cancel</a><br><br>
-              </form>
+                </form>
             </div>

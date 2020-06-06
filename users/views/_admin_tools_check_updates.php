@@ -14,13 +14,29 @@
 
 <div class="content mt-3">
   <h2>Checking for updates...</h2>
+  <?php
+
+      if($settings->bleeding_edge == 1){
+        echo "<p>You are on the BLEEDING EDGE update cycle (Thank You!).  This means you will get updates a few days to a few weeks before everyone else.
+        There may be bugs. Please backup and report bugs as you find them.</p>";
+      }else{
+        echo "<p>You are on the STABLE update cylce.  You will receive updates after they have been passed to our Bleeding Edge users. To become a BE user, go into your
+        settings table and flip bleeding_edge from 0 to 1.</p>";
+      }
+  ?>
+
   <h4 align="center">
     <?php
     require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php';
     $rc = @fsockopen("www.userspice.com", 80, $errno, $errstr, 1);
     if (is_resource($rc))  {
-    define('REMOTE_VERSION', 'https://userspice.com/version/version.txt');
+    if($settings->bleeding_edge == 1){
+      define('REMOTE_VERSION', 'https://userspice.com/version/beversion.txt');
+    }else{
+      define('REMOTE_VERSION', 'https://userspice.com/version/version.txt');
+    }
     $remoteVersion=trim(file_get_contents(REMOTE_VERSION));
+    $remoteVersion = preg_replace('/[^\\d.]+/', '', $remoteVersion);
     echo "You are running version ".$user_spice_ver."<br><br>";
     echo "The latest version is ".$remoteVersion."<br><br>";
     if(version_compare($remoteVersion, $user_spice_ver) ==  1){

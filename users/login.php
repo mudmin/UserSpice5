@@ -78,7 +78,7 @@ if (!$res['success']) {
  $reCaptchaValid=TRUE;
 }
 }
-  if($reCaptchaValid || $settings->recaptcha == 0){ //if recaptcha valid or recaptcha disabled
+  if($reCaptchaValid || $settings->recaptcha == 0 || $settings->recaptcha == 2 ){ //if recaptcha valid or recaptcha disabled
 
     $validate = new Validate();
     $validation = $validate->check($_POST, array(
@@ -95,13 +95,6 @@ if (!$res['success']) {
           $dest = sanitizedDest('dest');
               # if user was attempting to get to a page before login, go there
               $_SESSION['last_confirm']=date("Y-m-d H:i:s");
-
-              //check for need to reAck terms of service
-              if($settings->show_tos == 1){
-                if($user->data()->oauth_tos_accepted == 0){
-                  Redirect::to($us_url_root.'users/user_agreement_acknowledge.php');
-                }
-              }
 
               if (!empty($dest)) {
                 $redirect=htmlspecialchars_decode(Input::get('redirect'));
@@ -151,12 +144,12 @@ if (!$res['success']) {
               <input type="hidden" name="dest" value="<?= $dest ?>" />
 
               <div class="form-group">
-                <label for="username"><?=lang("SIGNIN_UORE")?></label>
+                <label for="username" id="username-label" ><?=lang("SIGNIN_UORE")?></label>
                 <input  class="form-control" type="text" name="username" id="username" placeholder="<?=lang("SIGNIN_UORE")?>" required autofocus autocomplete="username">
               </div>
 
               <div class="form-group">
-                <label for="password"><?=lang("SIGNIN_PASS")?></label>
+                <label for="password" id="password-label"><?=lang("SIGNIN_PASS")?></label>
                 <input type="password" class="form-control"  name="password" id="password"  placeholder="<?=lang("SIGNIN_PASS")?>" required autocomplete="current-password">
               </div>
               <?php   includeHook($hooks,'form');?>
