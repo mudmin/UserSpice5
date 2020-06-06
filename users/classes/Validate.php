@@ -262,6 +262,19 @@ class Validate
 						}
 						break;
 
+						case 'is_in_database':
+						$table  = is_array($rule_value) ? $rule_value[0] : $rule_value;
+						$fields = is_array($rule_value) ? $rule_value[1] : [$item, '=', $value];
+
+						if ($this->_db->get($table, $fields)) {
+						$str = lang("VAL_EXISTS");
+						$str1 = lang("VAL_DB");
+						if ($this->_db->count()==0)
+						$this->addError(["{$display} $str {$display}",$item]);
+						} else
+						$this->addError([$str1,$item]);
+						break;
+
 						case 'is_valid_north_american_phone':
 						$numeric_only_phone = preg_replace("/[^0-9]/", "", $value); //Strip out all non-numeric characters
 						$str = lang("VAL_NA_PHONE");

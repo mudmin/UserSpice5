@@ -57,11 +57,15 @@ if(!function_exists('fetchUserDetails')) {
 //Delete a defined array of users
 if(!function_exists('deleteUsers')) {
 	function deleteUsers($users) {
+		global $abs_us_root, $us_url_root;
 		$db = DB::getInstance();
 		$i = 0;
 		foreach($users as $id){
 			$query1 = $db->query("DELETE FROM users WHERE id = ?",array($id));
 			$query2 = $db->query("DELETE FROM user_permission_matches WHERE user_id = ?",array($id));
+			if(file_exists($abs_us_root.$us_url_root."usersc/scripts/after_user_deletion.php")){
+				include $abs_us_root.$us_url_root."usersc/scripts/after_user_deletion.php";
+			}
 			$i++;
 		}
 		return $i;
@@ -102,7 +106,7 @@ if(!function_exists('echouser')) {
 			$count=$query->count();
 			if ($count > 0) {
 				$results=$query->first();
-				echo ucfirst($results->username).'('.$results->fname.' '.$results->lname.')';
+				echo ucfirst($results->username).' ('.$results->fname.' '.$results->lname.')';
 			} else {
 				echo "Unknown";
 			}
@@ -113,7 +117,7 @@ if(!function_exists('echouser')) {
 			$count=$query->count();
 			if ($count > 0) {
 				$results=$query->first();
-				echo ucfirst($results->username).'('.$results->fname.')';
+				echo ucfirst($results->username).' ('.$results->fname.')';
 			} else {
 				echo "Unknown";
 			}

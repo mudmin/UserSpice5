@@ -243,6 +243,7 @@ if(!empty($_POST)) {
 		}
 	}
  }
+ Redirect::to('user_settings.php?err=Saved');
 }
 // mod to allow edited values to be shown in form after update
 $user2 = new User();
@@ -265,51 +266,51 @@ $userdetails=$user2->data();
 
                     <form name='updateAccount' action='user_settings.php' method='post'>
 
-                        <div class="form-group">
-                            <label><?=lang("GEN_UNAME");?></label>
+                        <div class="form-group" id="username-group">
+                            <label id="username-label"><?=lang("GEN_UNAME");?></label>
                             <?php if (($settings->change_un == 0) || (($settings->change_un == 2) && ($userdetails->un_changed == 1)) ) {?>
 															<div class="input-group">
-																 <input  class='form-control' type='text' name='username' value='<?=$userdetails->username?>' readonly/>
+																 <input  class='form-control' type='text' id="username" name='username' value='<?=$userdetails->username?>' readonly/>
 																 <span class="input-group-addon" data-toggle="tooltip" title="<?php if($settings->change_un==0) {?><?=lang("SET_NOCHANGE");?><?php } if(($settings->change_un == 2) && ($userdetails->un_changed == 1)) {?><?=lang("SET_ONECHANGE");?><?php } ?>"><?=lang("SET_WHY");?></span>
 															 </div>
                             <?php }else{ ?>
-														<input  class='form-control' type='text' name='username' value='<?=$userdetails->username?>' autocomplete="off">
+														<input  class='form-control' type='text' id="username" name='username' value='<?=$userdetails->username?>' autocomplete="off">
                             <?php } ?>
                         </div>
 
-                        <div class="form-group">
-                            <label><?=lang("GEN_FNAME");?></label>
-                            <input  class='form-control' type='text' name='fname' value='<?=$userdetails->fname?>' autocomplete="off" />
+                        <div class="form-group" id="fname-group">
+                            <label id="fname-label"><?=lang("GEN_FNAME");?></label>
+                            <input  class='form-control' type='text' id='fname' name='fname' value='<?=$userdetails->fname?>' autocomplete="off" />
                         </div>
 
-                        <div class="form-group">
-                            <label><?=lang("GEN_LNAME");?></label>
-                            <input  class='form-control' type='text' name='lname' value='<?=$userdetails->lname?>' autocomplete="off" />
+                        <div class="form-group" id="lname-group">
+                            <label id="lname-label"><?=lang("GEN_LNAME");?></label>
+                            <input  class='form-control' type='text' id="lname-label" name='lname' value='<?=$userdetails->lname?>' autocomplete="off" />
                         </div>
 
-                        <div class="form-group">
-                            <label><?=lang("GEN_EMAIL");?></label>
-                            <input class='form-control' type='text' name='email' value='<?=$userdetails->email?>' autocomplete="off" />
+                        <div class="form-group" id="email-group">
+                            <label id="email-label"><?=lang("GEN_EMAIL");?></label>
+                            <input class='form-control' type='text' id="email" name='email' value='<?=$userdetails->email?>' autocomplete="off" />
 														<?php if(!IS_NULL($userdetails->email_new)) {?><br /><div class="alert alert-danger">
 															<?=lang("SET_NOTE1")?> <?=$userdetails->email_new?> <?=lang("SET_NOTE2");?>
 														</div><?php } ?>
                         </div>
 
-												<div class="form-group">
-                            <label><?=lang("EML_CONF");?></label>
-                            <input class='form-control' type='text' name='confemail' autocomplete="off" />
+												<div class="form-group" id="confemail-group">
+                            <label id="confemail-label"><?=lang("EML_CONF");?></label>
+                            <input class='form-control' type='text' id="confemail" name='confemail' autocomplete="off" />
                         </div>
 
-												<div class="form-group">
-												<label><?=lang("PW_NEW");?></label>
+												<div class="form-group" id="password-group">
+												<label id="password-label"><?=lang("PW_NEW");?> (<?=lang("GEN_MIN");?> <?=$settings->min_pw?> <?=lang("GEN_AND");?> <?=lang("GEN_MAX");?> <?=$settings->max_pw?> <?=lang("GEN_CHAR");?>)</label>
 	                      <div class="input-group" data-container="body">
 	                        <span class="btn btn-secondary input-group-addon password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
-	                        <input  class="form-control" type="password" autocomplete="off" name="password" id="password" aria-describedby="passwordhelp" autocomplete="off">
+	                        <input  class="form-control" type="password"  name="password" id="password" aria-describedby="passwordhelp" autocomplete="off">
 													<span class="btn btn-secondary input-group-addon" id="addon2" data-container="body" data-toggle="tooltip" data-placement="top" title="<?=$settings->min_pw?> <?=lang("GEN_CHAR");?> <?=lang("GEN_MIN");?>, <?=$settings->max_pw?> <?=lang("GEN_MAX");?>.">?</span>
 	                      </div></div>
 
-	                      <div class="form-group">
-													<label><?=lang("PW_CONF");?></label>
+	                      <div class="form-group" id="confirm-group">
+													<label id="confirm-label"><?=lang("PW_CONF");?></label>
 	                      <div class="input-group" data-container="body">
 	                        <span class="btn btn-secondary input-group-addon password_view_control" id="addon3"><span class="fa fa-eye"></span></span>
 	                        <input  type="password" autocomplete="off" id="confirm" name="confirm" class="form-control" autocomplete="off">
@@ -317,14 +318,14 @@ $userdetails=$user2->data();
 											 </div></div>
 
 											 <?php if(!is_null($userdetails->pin)) {?>
-												 <div class="form-group">
-													 <label><?=lang("SET_PIN");?>
+												 <div class="form-group" id="resetpin-group">
+													 <label id="resetpin-label"><?=lang("SET_PIN");?>
 													 <input  type="checkbox" id="resetPin" name="resetPin" value="1" /></label>
 													</div>
 												<?php } ?>
 
-											 <div class="form-group">
-													 <label><?=lang("PW_OLD");?><?php if(!is_null($userdetails->password)) {?>, <?=lang("SET_PW_REQ");?><?php } ?></label>
+											 <div class="form-group" id="old-group">
+													 <label id="old-label"><?=lang("PW_OLD");?><?php if(!is_null($userdetails->password)) {?>, <?=lang("SET_PW_REQ");?><?php } ?></label>
 													 <div class="input-group" data-container="body">
 														 <span class="btn btn-secondary input-group-addon password_view_control" id="addon6"><span class="fa fa-eye"></span></span>
 														 <input class='form-control' type='password' id="old" name='old' <?php if(is_null($userdetails->password)) {?>disabled<?php } ?> autocomplete="off" />

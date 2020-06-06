@@ -23,8 +23,6 @@ $form_valid=TRUE;
 $permOpsQ = $db->query("SELECT * FROM permissions");
 $permOps = $permOpsQ->results();
 $hooks = getMyHooks(['page' =>'admin.php?view=users']);
-
-// dnd($permOps);
 $validation = new Validate();
 if (!empty($_POST)) {
 includeHook($hooks,'post');
@@ -189,13 +187,19 @@ includeHook($hooks,'post');
   ?>
 
   <div class="content mt-3">
+  <div class="row">
+    <div class="col-12 mb-2">
     <h2>Manage Users</h2>
     <?=resultBlock($errors,$successes);?>
-    <hr />
     <?php includeHook($hooks,'pre'); ?>
-    <a class="pull-right" href="#" data-toggle="modal" data-target="#adduser"><font color="blue"><i class="fa fa-plus"></i> Manually Add User</a></font>
-    <div class="alluinfo">&nbsp;</div>
-    <div class="allutable">
+    <div class="w-100 text-right">
+    <button class="btn btn-outline-dark"data-toggle="modal" data-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
+    </div>
+    </div>
+    <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+      <div class="allutable">
       <table id="paginate" class='table table-hover table-list-search'>
         <thead>
           <tr>
@@ -209,11 +213,11 @@ includeHook($hooks,'post');
           foreach ($userData as $v1) {
             ?>
             <tr>
-              <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->id?></a></td>
-              <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?php if($v1->force_pr==1) {?><font color="red"><i class="fa fa-lock"></i></font><?php } ?></a></td>
-              <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->username?></a></td>
-              <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->fname?> <?=$v1->lname?></a></td>
-              <td><a class="nounderline" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->email?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->id?></a></td>
+              <td><a class="nounderline text-danger" href='admin.php?view=user&id=<?=$v1->id?>'><?php if($v1->force_pr==1) {?><i class="fa fa-lock"></i><?php } ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->username?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->fname?> <?=$v1->lname?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->email?></a></td>
               <?php includeHook($hooks,'bottom');?>
               <td><?php if($v1->last_login != 0) { echo $v1->last_login; } else {?> <i>Never</i> <?php }?></td>
               <?php if($act==1) {?><td>
@@ -229,55 +233,80 @@ includeHook($hooks,'post');
       <?php if($showAllUsers!=1) {?><a href="?view=users&showAllUsers=1" class="btn btn-primary nounderline pull-right">Show All Users</a><?php } ?>
       <?php if($showAllUsers==1) {?><a href="?view=users" class="btn btn-primary nounderline pull-right">Show Active Users Only</a><?php } ?>
     </div>
+      </div>
+    </div>
+    </div>
+    </div>
   </div>
 
 <div id="adduser" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title">User Addition</h4>
+        <button type="button" class="close float-right" data-dismiss="modal">&times;</button>
       </div>
+      <form class="form-signup mb-0" action="admin.php?view=users" method="POST">
       <div class="modal-body">
-        <form class="form-signup" action="admin.php?view=users" method="POST">
-          <div class="panel-body">
-            <?php if($settings->auto_assign_un==0) {?><label>Username: </label>&nbsp;&nbsp;<span id="usernameCheck" class="small"></span><input type="text" class="form-control" id="username" name="username" placeholder="Username" autocomplete="new-password" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required><?php } ?>
-              <label>First Name: </label><input type="text" class="form-control" id="fname" name="fname" placeholder="First Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $fname;} ?>" required autocomplete="new-password">
-              <label>Last Name: </label><input type="text" class="form-control" id="lname" name="lname" placeholder="Last Name" value="<?php if (!$form_valid && !empty($_POST)){ echo $lname;} ?>" required autocomplete="new-password">
-              <label>Email: </label><input  class="form-control" type="text" name="email" id="email" placeholder="Email Address" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="new-password">
-              <label>Password: </label>
+            <?php if($settings->auto_assign_un==0) {?>
+              <div class="form-group" id="username-group">
+              <label>Username <span id="usernameCheck" class="small ml-2"></span></label>
+              <input type="text" class="form-control" id="username" name="username" autocomplete="new-password" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required><?php } ?>
+              </div>
+              <div class="form-group" id="fname-group">
+              <label>First Name</label>
+              <input type="text" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)){ echo $fname;} ?>" required autocomplete="new-password">
+              </div>
+              <div class="form-group" id="lname-group">
+              <label>Last Name</label>
+              <input type="text" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)){ echo $lname;} ?>" required autocomplete="new-password">
+              </div>
+              <div class="form-group" id="email-group">
+              <label>Email</label>
+              <input  class="form-control" type="email" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="new-password">
+              </div>
+              <div class="form-group">
+              <label>Password</label>
               <div class="input-group" data-container="body">
-                <span class="input-group-addon password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
+              <div class="input-group-append">
+                <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
+              </div>
                 <input  class="form-control" type="password" name="password" id="password" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> placeholder="Password" required autocomplete="new-password" aria-describedby="passwordhelp">
                 <?php if($settings->force_pr==1) { ?>
-                  <span class="input-group-addon" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">Why can't I edit this?</a></span>
+                  <div class="input-group-append">
+                  <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
+                  </div>
                 <?php } ?>
               </div>
-              <label>Confirm Password: </label>
+              </div>
+              <div class="form-group">
+              <label>Confirm Password</label>
               <div class="input-group" data-container="body">
-                <span class="input-group-addon password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
+                <div class="input-group-prepend">
+                <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
+                </div>
                 <input  type="password" id="confirm" name="confirm" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> class="form-control" autocomplete="new-password" placeholder="Confirm Password" required >
                 <?php if($settings->force_pr==1) { ?>
-                  <span class="input-group-addon" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">Why can't I edit this?</a></span>
+                  <div class="input-group-append">
+                  <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
+                  </div>
                 <?php } ?>
+              </div>
               </div>
 
               <?php include($abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php'); ?>
               <?php includeHook($hooks,'form');?>
               <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
-              <br />
             </div>
             <div class="modal-footer">
-              <div class="btn-group">
                 <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
-                <input class='btn btn-primary' type='submit' id="addUser" name="addUser" value='Add User' class='submit' /></div>
-                <div class="btn-group"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
+                <input class='btn btn-primary' type='submit' id="addUser" name="addUser" value='Add User' class='submit' />
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </form>
           </div>
         </div>
       </div>
-    </div>
 
 
     <script type="text/javascript" src="js/pagination/datatables.min.js"></script>
