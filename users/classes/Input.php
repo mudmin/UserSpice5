@@ -44,7 +44,7 @@ class Input {
 			/*
 			If the $_GET item is an array, process each item independently, and return array of sanitized items.
 			*/
-			return self::sanitize($_POST[$item]);
+			return self::sanitize($_GET[$item]);
 		}
 		return '';
 	}
