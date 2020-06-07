@@ -51,8 +51,8 @@ class Input {
 
 	public static function sanitize($item){
 		if (is_array($item)){
-			foreach ($item as $itemValue){
-				$postItems[]=self::sanitize($itemValue);
+			foreach ($item as $key => $itemValue){
+				$postItems[$key]=self::sanitize($itemValue);
 			}
 			return $postItems;
 		}else{
