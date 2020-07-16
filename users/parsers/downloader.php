@@ -10,11 +10,13 @@ $type = Input::get('type');
 $url = Input::get('url');
 $hash = Input::get('hash');
 $diag = Input::get('diag');
+$reserved = Input::get('reserved');
 $api = "https://userspice.com/bugs/api.php";
-// dump($_POST);
+
 $zipFile = "temp.zip";
 if ($type == 'plugin') {
   $extractPath = "../../usersc/plugins";
+  $reserved = Input::get('reserved');
   $return = $us_url_root . "users/admin.php?view=plugins";
 } elseif ($type == 'widget') {
   $extractPath = "../../usersc/widgets";
@@ -83,6 +85,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);
 $result = substr($result, 1, -1);
+
 curl_close($ch);
 if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the hash against the api call and the one supplied by ajax
   if($diag){
@@ -90,6 +93,13 @@ if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the ha
   }
   if ($zip->extractTo($extractPath) === TRUE) {
     $zip->close();
+
+    if(isset($reserved) && pluginActive($reserved,true)){
+      if(file_exists($extractPath."/".$reserved."/migrate.php")){
+        include $extractPath."/".$reserved."/migrate.php";
+      }
+    }
+
     $msg = [];
     $msg['success'] = true;
     $msg['url'] = $return;
@@ -101,7 +111,7 @@ if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the ha
   }
 
 } else {
-  if($diag){logger($user->data()->id, "DIAG", "The security hash DOES NOT MATCH"); }
+  if($diag){logger($user->data()->id, "DIAG", "The security hash DOES NOT MATCH newCRC $newCrc hash $hash result $result"); }
   $msg = [];
   $msg['success'] = false;
   $msg['error'] = "The hash does not match.  This means one of 2 things. Either the file on the server has been tampered with or (more likely) the file was

@@ -76,10 +76,15 @@ if(Input::exists()){
 
         $validation = new Validate();
         if($settings->auto_assign_un==0) {
+        if(pluginActive("userInfo",true)){
+          $is_not_email = false;
+        }else{
+          $is_not_email = true;
+        }
         $validation->check($_POST,array(
           'username' => array(
                 'display' => lang("GEN_UNAME"),
-                'is_not_email' => true,
+                'is_not_email' => $is_not_email,
                 'required' => true,
                 'min' => $settings->min_un,
                 'max' => $settings->max_un,
@@ -231,8 +236,11 @@ if(Input::exists()){
                                         'vericode_expiry' => $vericode_expiry,
                                         'oauth_tos_accepted' => true
                                 ));
+
                         includeHook($hooks,'post');
                         } catch (Exception $e) {
+                                $eventhooks =  getMyHooks(['page'=>'joinFail']);
+                                includeHook($eventhooks,'body');
                                 die($e->getMessage());
                         }
                         if($form_valid == TRUE){ //this allows the plugin hook to kill the post but it must delete the created user

@@ -52,7 +52,7 @@ foreach ($paths as $path){
 }
 
 $dbpages = fetchAllPages(); //Retrieve list of pages in pages table
-
+$delMsgs = "";
 $count = 0;
 $dbcount = count($dbpages);
 $creations = array();
@@ -90,6 +90,10 @@ if (count($creations) > 0) {
 }
 // //Delete pages from DB if not found
 if (count($deletions) > 0) {
+  foreach($deletions as $d){
+    $delName = $db->query("SELECT page FROM pages WHERE id = ?",[$d])->first();
+    $delMsgs .= $delName->page."\\n";
+  }
   deletePages($deletes);
 }
 
@@ -240,6 +244,17 @@ $csrf = Token::generate();
       </table>
       </div>
     </div>
+
+    <?php
+    if($delMsgs != ""){
+      ?>
+      <script type="text/javascript">
+        alert("The following pages have been deleted from your database because they are either no longer present or because you used securePage on a file that was not monitored by UserSpice. You can add additional folders at the top of this page.\n \n<?=$delMsgs?>");
+      </script>
+
+    <?php
+
+  } ?>
     </div>
     <!-- /.row -->
 

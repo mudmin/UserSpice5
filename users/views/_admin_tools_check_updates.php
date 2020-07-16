@@ -124,7 +124,7 @@ if(isset($result->next_ver) && $result->next_ver != ""){
 
   	if($zip->open($zipFile) != "true")
   	{
-     //unlink($zipFile);
+     unlink($zipFile);
   	 echo "Error :- Unable to open the Zip File";
      logger(1,"$result->next_ver","Unable to open the Zip File");
   	}
@@ -139,37 +139,49 @@ if(isset($result->next_ver) && $result->next_ver != ""){
       logger(1,"$result->next_ver","Extracting zip file");
       $zip->close();
       echo "<br><strong><font color='blue'>$result->message</font></strong>";
-      //unlink($zipFile);
+      unlink($zipFile);
       logger(1,"$result->next_ver",$result->message);
       logger(1,"$result->next_ver","Running migration script(s)");
       Redirect::to($us_url_root.'users/updates/index.php?auto=1');
     }else{
-      //unlink($zipFile);
+      unlink($zipFile);
       logger(1,"$result->next_ver","Hash match failed");
       echo "<br>The hash does not match.  This means one of 2 things. Either the file on the server has been tampered with or (more likely) the file was
             updated and we forgot to update the hash.  Please fill out a bug report. You can still download this plugin at $url if you wish.";
     }
     echo "<br>Deleting zip file";
     logger(1,"$result->next_ver","Deleting zip file");
-    //unlink($zipFile);
+    unlink($zipFile);
   }
 }
 }
 }//end if key check
-
-
-
-    ?>
+?>
   </h4>
   <?php if($remoteVersion != $user_spice_ver && $settings->spice_api != ""){?>
   <br>
   <div class="text-center">
     <form class="" action="admin.php?view=updates" method="post">
-      <input type="submit" name="sysup" value="Download & Install Updates" class="btn btn-primary">
+      <input type="submit" name="sysup" value="Download & Install Updates" class="btn btn-primary"><br>
+      It's always a good idea to <strong><a href="<?=$us_url_root?>usersc/admin.php?view=backup">backup UserSpice</a></strong> before updating.
     </form>
   </div>
 <br>
 <?php }elseif($settings->spice_api == ""){
   echo "<h4 align='center'>You cannot download automatic updates because you have not entered your free API key in the dashboard</h4><br>";
 } ?>
+</div>
+
+<div class="row">
+  <div class="col-12 text-center">
+    Any messages below this are from ACTIVE plugins that are checking to make sure they have the latest database updates.
+    <?php $plugins = $db->query("SELECT * FROM us_plugins WHERE last_check < ? AND status = ?",[date("Y-m-d H:i:s",strtotime("-3 hours")),'active'])->results();
+    foreach($plugins as $p){
+      echo "<br>Checking $p->plugin ";
+      if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $p->plugin . '/migrate.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/plugins/' . $p->plugin . '/migrate.php';
+      }
+      $db->update('us_plugins',$p->id,['last_check'=>date("Y-m-d H:i:s")]);
+    } ?>
+  </div>
 </div>

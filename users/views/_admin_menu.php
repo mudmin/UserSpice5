@@ -136,11 +136,12 @@ function activeDropdown($View, $dropId, $Area = false){
             <ul class="sub-menu children dropdown-menu <?=activeDropdown($view, 'tools')[0];?>">
               <?php if(checkAccess('view','backup')){?> <li <?=($view == 'backup') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-floppy-o"></i><a href="admin.php?view=backup"><?=lang("BE_BACKUP")?></a></li><?php } ?>
               <?php if(in_array($user->data()->id,$master_account)){?> <li <?=($view == 'bugs') ? 'class="active"' : '' ;?>><i class=" menu-icon fa fa-bug"></i><a href="admin.php?view=bugs">Bug Reporter</a></li><?php } ?>
-              <?php if(checkAccess('view','updates')){?> <li <?=($view == 'updates') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-arrow-circle-o-up"></i><a href="admin.php?view=updates"><?=lang("BE_UPDATE")?></a></li><?php } ?>
               <?php if(checkAccess('view','cron')){?> <li <?=($view == 'cron') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-terminal"></i><a href="admin.php?view=cron"><?=lang("BE_CRON")?></a></li><?php } ?>
               <?php if(checkAccess('view','ip')){?> <li <?=($view == 'ip') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-warning"></i><a href="admin.php?view=ip"><?=lang("BE_IP")?></a></li><?php } ?>
               <?php if(checkAccess('view','logs')){?> <li <?=($view == 'logs') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-list-ol"></i><a href="admin.php?view=logs">System Logs</a></li><?php } ?>
               <?php if(checkAccess('view','templates')){?> <li <?=($view == 'templates') ? 'class="active"' : '' ;?>><i class=" menu-icon fa fa-eye"></i><a href="admin.php?view=templates">Templates</a></li><?php } ?>
+              <?php if(checkAccess('view','updates')){?> <li <?=($view == 'updates') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-arrow-circle-o-up"></i><a href="admin.php?view=updates"><?=lang("BE_UPDATE")?></a></li><?php } ?>
+
             </ul>
           </li>
 <?php //dump($plugins); ?>

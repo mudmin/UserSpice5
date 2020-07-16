@@ -46,6 +46,11 @@ if (!empty($_POST)) {
     if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/activate.php')) {
       include $abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/activate.php';
     }
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/migrate.php')) {
+      include $abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/migrate.php';
+    }
+    $pluginId = $db->query("SELECT id FROM us_plugins WHERE plugin = ?",[$plugin])->first();
+    $db->update('us_plugins',$pluginId->id,['last_check'=>date("Y-m-d H:i:s")]);
     Redirect::to('admin.php?view=plugins&err=' . $plugin . ' activated' . $jump);
   }
 

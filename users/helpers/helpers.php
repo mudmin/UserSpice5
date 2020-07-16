@@ -52,6 +52,7 @@ require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php';
 
 
 // Readeable file size
+if(!function_exists('size')) {
 function size($path) {
     $bytes = sprintf('%u', filesize($path));
 
@@ -66,28 +67,36 @@ function size($path) {
 
     return $bytes;
 }
+}
 
 //escapes strings and sets character set
+if(!function_exists('sanitize')) {
 function sanitize($string) {
 	return htmlentities($string, ENT_QUOTES, 'UTF-8');
 }
+}
 
 //returns the name of the current page
+if(!function_exists('currentPage')) {
 function currentPage() {
 	$uri = $_SERVER['PHP_SELF'];
 	$path = explode('/', $uri);
 	$currentPage = end($path);
 	return $currentPage;
 }
+}
 
 
+if(!function_exists('currentFolder')) {
 function currentFolder() {
 	$uri = $_SERVER['PHP_SELF'];
 	$path = explode('/', $uri);
 	$currentFolder=$path[count($path)-2];
 	return $currentFolder;
 }
+}
 
+if(!function_exists('format_date')) {
 function format_date($date,$tz){
 	//return date("m/d/Y ~ h:iA", strtotime($date));
 	$format = 'Y-m-d H:i:s';
@@ -95,18 +104,24 @@ function format_date($date,$tz){
 	// $dt->setTimezone(new DateTimeZone($tz));
 	return $dt->format("m/d/y ~ h:iA");
 }
+}
 
+if(!function_exists('abbrev_date')) {
 function abrev_date($date,$tz){
 	$format = 'Y-m-d H:i:s';
 	$dt = DateTime::createFromFormat($format,$date);
 	// $dt->setTimezone(new DateTimeZone($tz));
 	return $dt->format("M d,Y");
 }
+}
 
+if(!function_exists('money')) {
 function money($ugly){
 	return '$'.number_format($ugly,2,'.',',');
 }
+}
 
+if(!function_exists('name_from_id')) {
 function name_from_id($id){
 	$db = DB::getInstance();
 	$query = $db->query("SELECT username FROM users WHERE id = ? LIMIT 1",array($id));
@@ -118,9 +133,11 @@ function name_from_id($id){
 		return "-";
 	}
 }
+}
 
+if(!function_exists('display_errors')) {
 function display_errors($errors = array()){
-	$html = '<ul class="bg-danger">';
+	$html = '<ul class="bg-danger dangerblock">';
 	foreach($errors as $error){
 		if(is_array($error)){
 			//echo "<br>"; Patch from user SavaageStyle - leaving here in case of rollback
@@ -133,7 +150,9 @@ function display_errors($errors = array()){
 	$html .= '</ul>';
 	return $html;
 }
+}
 
+if(!function_exists('display_successes')) {
 function display_successes($successes = array()){
 	$html = '<ul>';
 	foreach($successes as $success){
@@ -147,7 +166,9 @@ function display_successes($successes = array()){
 	$html .= '</ul>';
 	return $html;
 }
+}
 
+if(!function_exists('email')) {
 function email($to,$subject,$body,$opts=[],$attachment=false){
 /*you can now pass in
 $opts = array(
@@ -160,7 +181,7 @@ $opts = array(
 	$results = $query->first();
 
 	$mail = new PHPMailer;
-
+  $mail->CharSet = 'UTF-8';
 	$mail->SMTPDebug = $results->debug_level;               // Enable verbose debug output
   if($results->isSMTP == 1){$mail->isSMTP();}             // Set mailer to use SMTP
 	$mail->Host = $results->smtp_server;  									// Specify SMTP server
@@ -169,7 +190,7 @@ $opts = array(
 	$mail->Password = htmlspecialchars_decode($results->email_pass);    // SMTP password
 	$mail->SMTPSecure = $results->transport;                            // Enable TLS encryption, `ssl` also accepted
 	$mail->Port = $results->smtp_port;                                  // TCP port to connect to
-  $mail->CharSet = 'UTF-8';
+
 
 	if(isset($opts['email']) && isset($opts['name'])){
     $mail->setFrom($opts['email'], $opts['name']);
@@ -187,7 +208,9 @@ $opts = array(
 
 	return $result;
 }
+}
 
+if(!function_exists('email_body')) {
 function email_body($template,$options = array()){
 	$abs_us_root=$_SERVER['DOCUMENT_ROOT'];
 
@@ -211,10 +234,11 @@ function email_body($template,$options = array()){
 	require $abs_us_root.$us_url_root.'users/views/'.$template;
 	return ob_get_clean();
 }
-
+}
 
 
 //preformatted var_dump function
+if(!function_exists('dump')) {
 function dump($var,$adminOnly=false,$localhostOnly=false){
     if($adminOnly && isAdmin() && !$localhostOnly){
         echo "<pre>";
@@ -237,8 +261,10 @@ function dump($var,$adminOnly=false,$localhostOnly=false){
         echo "</pre>";
     }
 }
+}
 
 //preformatted dump and die function
+if(!function_exists('dnd')) {
 function dnd($var,$adminOnly=false,$localhostOnly=false){
     if($adminOnly && isAdmin() && !$localhostOnly){
         echo "<pre>";
@@ -265,21 +291,28 @@ function dnd($var,$adminOnly=false,$localhostOnly=false){
         die();
     }
 }
+}
 
+if(!function_exists('bold')) {
 function bold($text){
 	echo "<span><ext padding='1em' align='center'><h4><span style='background:white'>";
 	echo $text;
 	echo "</h4></span></text>";
 }
-
-function err($text){
-	echo "<span><text padding='1em' align='center'><font color='red'><h4></span>";
-	echo $text;
-	echo "</h4></span></font></text>";
 }
 
+if(!function_exists('err')) {
+function err($text){
+	echo "<text padding='1em' align='center'><font color='red'><h4><span class='errSpan'>";
+	echo $text;
+	echo "</span></h4></font></text>";
+}
+}
+
+if(!function_exists('redirect')) {
 function redirect($location){
 	header("Location: {$location}");
+}
 }
 
 
@@ -293,8 +326,9 @@ foreach($usplugins as $k=>$v){
   }
 }
 
-function write_php_ini($array, $file)
-{
+
+if(!function_exists('write_ini_file')) {
+function write_php_ini($array, $file){
     $res = array();
     foreach($array as $key => $val)
     {
@@ -307,9 +341,10 @@ function write_php_ini($array, $file)
     }
     safefilerewrite($file, implode("\r\n", $res));
 }
+}
 
-function safefilerewrite($fileName, $dataToSave)
-{
+if(!function_exists('safefilerewrite')) {
+function safefilerewrite($fileName, $dataToSave){
 $security = ';<?php die();?>';
 
   if ($fp = fopen($fileName, 'w'))
@@ -328,4 +363,5 @@ $security = ';<?php die();?>';
         }
         fclose($fp);
     }
+}
 }

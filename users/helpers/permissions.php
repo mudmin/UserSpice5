@@ -337,6 +337,10 @@ if(!function_exists('securePage')) {
 				);
 				$db->insert('audit',$fields);
 				require_once $abs_us_root.$us_url_root.'usersc/scripts/did_not_have_permission.php';
+				if($eventhooks =  getMyHooks(['page'=>'noAccess'])){
+					includeHook($eventhooks,'body');
+				}
+
 				Redirect::to($homepage);
 				return false;
 			}

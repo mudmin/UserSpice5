@@ -10,7 +10,7 @@ $sqlfile = "install/includes/sql.sql";
 
 //Navigation Settings
 $step1 = "Welcome";
-$step2 = "Custom Settings";
+$step2 = "Setup";
 $step3 = "Cleanup";
 
 //System Requirements
@@ -19,7 +19,6 @@ $php_ver = "5.6.0";
 //Cleanup Files
 $files = array (
 "index.php",
-"recovery.php",
 "step2.php",
 "step3.php",
 );

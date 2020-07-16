@@ -39,18 +39,23 @@ if(!function_exists('fetchAllUsers')) {
 
 //Retrieve complete user information by username, token or ID
 if(!function_exists('fetchUserDetails')) {
-	function fetchUserDetails($username=NULL,$token=NULL, $id=NULL){
-		if($username!=NULL) {
-			$column = "username";
-			$data = $username;
-		}elseif($id!=NULL) {
-			$column = "id";
-			$data = $id;
-		}
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM users WHERE $column = $data LIMIT 1");
-		$results = $query->first();
-		return ($results);
+	function fetchUserDetails($username=null, $token=null, $id=null)
+	{
+	    if ($username!=null) {
+	        $column = "username";
+	        $data = $username;
+	    } elseif ($id!=null) {
+	        $column = "id";
+	        $data = $id;
+	    }
+	    $db = DB::getInstance();
+	    $query = $db->query("SELECT * FROM users WHERE $column = $data LIMIT 1");
+	    if ($query->count()==1) {
+	        $results = $query->first();
+	    } else {
+	        $results = null;
+	    }
+	    return ($results);
 	}
 }
 

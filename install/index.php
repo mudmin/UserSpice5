@@ -2,7 +2,7 @@
 include "../users/includes/user_spice_ver.php";
  ?>
 
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center mt-4">
         <div class="col-6">
             <div class="list-group list-group-horizontal-xl">
@@ -29,7 +29,7 @@ include "../users/includes/user_spice_ver.php";
     </div>
 
     <div class="row mt-4">
-        <div class="col-12">
+        <div class="col-12 col-sm-10 offset-sm-1">
           <h1>Welcome to <?= $app_name . " " . $user_spice_ver ?></h1>
           <?php
           define('REMOTE_VERSION', 'http://userspice.com/version/version.txt');
@@ -164,6 +164,51 @@ include "../users/includes/user_spice_ver.php";
                 </tr>
                 </thead>
                 <tbody>
+                  <tr>
+                      <td>
+                          CURL Enabled (For Updates and Plugins)
+                      </td>
+                      <td>
+                          YES
+                      </td>
+                      <td class="font-weight-bold">
+                          <?php if (extension_loaded("CURL") == true) {
+                              echo '<span class="text-success">YES</span>';
+                          } else {
+                              echo '<span class="text-danger">NO</span>';
+                          } ?>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          Zip Enabled (For Updates and Plugins)
+                      </td>
+                      <td>
+                          YES
+                      </td>
+                      <td class="font-weight-bold">
+                          <?php if (extension_loaded("ZIP") == true) {
+                              echo '<span class="text-success">YES</span>';
+                          } else {
+                              echo '<span class="text-danger">NO</span>';
+                          } ?>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          UserSpice Folder Writeable
+                      </td>
+                      <td>
+                          YES
+                      </td>
+                      <td class="font-weight-bold">
+                          <?php if (@is_writeable("../z_us_root.php") == true) {
+                              echo '<span class="text-success">YES</span>';
+                          } else {
+                              echo '<span class="text-danger">NO</span>';
+                          } ?>
+                      </td>
+                  </tr>
                 <?php
 
                 function get_php_setting($val) {
@@ -173,7 +218,7 @@ include "../users/includes/user_spice_ver.php";
 
                 $php_recommended_settings = array(
                     array('Safe Mode', 'safe_mode', 'OFF'),
-                    array('Display Errors', 'display_errors', 'ON'),
+                    array('Display Errors (Recommended during Development)', 'display_errors', 'ON'),
                     array('File Uploads', 'file_uploads', 'ON'),
                     array('Register Globals', 'register_globals', 'OFF'),
                     array('Output Buffering', 'output_buffering', 'OFF'),
@@ -202,13 +247,13 @@ include "../users/includes/user_spice_ver.php";
                 ?>
                 <tr>
                     <td>PHP > 7.1.0</td>
-                    <td>Yes</td>
+                    <td>YES</td>
                     <td class="font-weight-bold">
                         <?php if (version_compare(phpversion(), '7.1.0', '<')) {
-                            echo '<span class="text-danger">No</span>';
+                            echo '<span class="text-danger">NO</span>';
                             $phpWarn = 1;
                         } else {
-                            echo '<span class="text-success">Yes</span>';
+                            echo '<span class="text-success">YES</span>';
                             $phpWarn = 0;
                         } ?>
                     </td>

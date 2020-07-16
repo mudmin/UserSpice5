@@ -2,7 +2,8 @@
 
 require_once '../users/init.php';
 $user = new User();
-
+$eventhooks =  getMyHooks(['page'=>'logout']);
+includeHook($eventhooks,'body');
 if(file_exists($abs_us_root.$us_url_root.'usersc/scripts/just_before_logout.php')){
 	require_once $abs_us_root.$us_url_root.'usersc/scripts/just_before_logout.php';
 }else{

@@ -68,7 +68,10 @@
                                       }
                                     }
                                     // View
-																		print '<select class="form-control" id="timezone" name="timezone" required data-live-search="true">';
+																		?>
+																		<select required class="form-control" id="timezone" name="timezone" data-live-search="true">
+																		<?php
+																		print '<option disabled selected="selected">--Select Timezone--</option>';
                                     foreach($timezones as $region => $list)
                                     {
                                       print '<optgroup label="' . $region . '">' . "\n";
@@ -111,7 +114,8 @@
                           </div>
                           <div class="form-group row">
                               <div class="col-sm-12 text-right">
-                                <input class="btn btn-dark" type="submit" name="test" value="Try These Settings (This will take a moment)">
+                                <input style="display:none;" id="sub" class="btn btn-primary" type="submit" name="test" value="Try These Settings (This will take a moment)">
+																<a href="#" id="nosub" class="btn btn-warning">Please Select a Timezone</a>
                               </div>
                           </div>
                       </div>
@@ -197,14 +201,9 @@ $pdo = new PDO($dsn, $dbu, $dbp, $opt) or die('could not connect');
 }
 
 if ($success) {
-    echo '<div class="alert alert-success" role="alert">Database connection <strong>successful</strong>!</div>';
-    $link = mysqli_connect($dbh, $dbu, $dbp, $dbn);
+    $link = @mysqli_connect($dbh, $dbu, $dbp, $dbn);
     if (!$link) {
-
-    echo "Error: Unable to connect to MySQL." . PHP_EOL;
-    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
-    $dbError =  mysqli_connect_errno();
+		    $dbError =  mysqli_connect_errno();
     if($dbError == '1049'){?>
       <form class="" action="" method="post">
         <input type="hidden" name="test" value="1">
@@ -213,9 +212,16 @@ if ($success) {
         <input type="hidden" name="dbp" value="<?=$dbp?>">
         <input type="hidden" name="dbn" value="<?=$dbn?>">
         <strong>
-        <br>Your credentials appear to be correct but the database name is not found.<br> If you would like to attempt to create it, please hit "Yes". Otherwise, edit your information and try again.<br>
-        <input type="submit" name="tryToCreate" value="Yes" class='btn btn-success'>
-      <?php }
+        <br>
+				<div class="alert alert-primary" role="alert">Your credentials appear to be correct but the database name is not found.<br> If you would like to attempt to create it, please hit "Yes".
+					Otherwise, edit your information and try again.</div>
+        <div class="text-center"><input type="submit" name="tryToCreate" value="Yes, Create it For Me" class='btn btn-success btn-lg'></div>
+      <?php }else{
+				echo '<div class="alert alert-warning" role="alert">Database connection <strong>partially successful</strong>! Please see the errors below and make corrections as necessary.</div>';
+		    echo "Error: Unable to connect to MySQL." . PHP_EOL;
+		    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
+		    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+			}
 
   }else{
     $go = 1;
@@ -245,8 +251,11 @@ if($go === 1){
     }
      echo '<div class="alert alert-success" role="alert">If you do not see a bunch of errors above this line, your tables imported successfully</div>';
     ?>
+<div class="text-center">
+	<input class="btn btn-success btn-lg" type="submit" name="submit" value="Finalize Install">
+	<br><br>
+</div>
 
-<input class="btn btn-success" type="submit" name="submit" value="Finalize Install">
 </form>
 <?php
 }
@@ -261,11 +270,35 @@ if($go === 1){
               </div>
     	</div>
     </div>
+
+
 <?php require_once("install/includes/footer.php"); ?>
+<script type="text/javascript">
+$( document ).ready(function() {
+ var tz = $("#timezone").val();
+ if(tz != null){
+	 console.log("not");
+	 $("#sub").show();
+	 $("#nosub").hide();
+ }
+});
+$("#timezone").change(function () {
+			 var tz = this.value;
+			 if(tz != ""){
+				 $("#sub").show();
+				 $("#nosub").hide();
+			 }else{
+				 $("#sub").hide();
+				 $("#nosub").show();
+			 }
+	 });
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/css/bootstrap-select.min.css" integrity="sha256-jwJEU4p1YdtymLFwAjYfam5Pj5NOnylms63k7LYQ9Jk=" crossorigin="anonymous" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/js/bootstrap-select.min.js" integrity="sha256-FXzZGmaRFZngOjUKy3lWZJq/MflaMpffBbu3lPT0izE=" crossorigin="anonymous"></script>
 <script>
 $(function () {
     $('select').selectpicker();
 });
+
+
 </script>

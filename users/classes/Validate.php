@@ -119,9 +119,11 @@ class Validate
 						break;
 
 						case 'is_not_email':
+						if($rule_value){
 						$str = lang("VAL_NO_EMAIL");
 						if(filter_var($value,FILTER_VALIDATE_EMAIL))
 						$this->addError(["{$display} $str",$item]);
+						}
 						break;
 
 						case 'valid_email_beta':

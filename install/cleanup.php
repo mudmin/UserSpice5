@@ -41,7 +41,7 @@ $str=str_replace("'session_name' => 'user'", "'session_name' => '".randomString(
 
 //write the entire string
 file_put_contents('../users/init.php', $str);
-rrmdir("install");
+rmdir("install");
 ?>
 </p>
 <p align="center">If you made it this far, everything SHOULD be good to go. If you see any errors above, you will want to navigate to the install folder, and delete it manually.  Don't forget to check out UserSpice.com if you need any help. Click the button below to make sure you have the latest updates to your database.</p>

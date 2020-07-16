@@ -34,7 +34,9 @@ if(Input::exists()){
         include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
     }
 }
-
+if($eventhooks =  getMyHooks(['page'=>'forgotPassword'])){
+  includeHook($eventhooks,'body');
+}
 if (Input::get('forgotten_password')) {
     $email = Input::get('email');
     $fuser = new User($email);

@@ -29,8 +29,8 @@ includeHook($hooks,'pre');
             <!-- Site Name -->
             <div class="form-group">
               <label >Free API Key (<a class="text-primary" href="https://userspice.com/developer-api-keys/" target="_blank">Get One Here</a>) <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle"></i></a></label>
-                <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
-              </div>
+              <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
+            </div>
             <!-- Site Name -->
             <div class="form-group">
               <label >Site Name <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Modify this to change the name of your site, including in the <title> tag, the maintenance page and some system emails."><i class="fa fa-question-circle"></i></a></label>
@@ -41,6 +41,16 @@ includeHook($hooks,'pre');
               <div class="form-group">
                 <label>Copyright Message <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="This message will be at the bottom of every page. The copyright symbol and year are automatically added."><i class="fa fa-question-circle"></i></a></label>
                 <input type="text" autocomplete="new-password" class="form-control ajxtxt" data-desc="Copyright Message" name="copyright" id="copyright" value="<?=$settings->copyright?>">
+              </div>
+
+
+              <!-- Error Message Timeout Length -->
+              <div class="form-group">
+                <label>Error Message Timeout (seconds) <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="This hides those red error messages at the top of your page on urls with err= in them."><i class="fa fa-question-circle"></i></a></label>
+                <div class="input-group">
+                  <input type="number" step="1" min="0"  class="form-control ajxnum" data-desc="Error message timeout time" name="err_tim" id="err_time" value="<?=$settings->err_time?>">
+                  <span class="input-group-addon">seconds</span>
+                </div>
               </div>
 
               <!-- Site Offline -->
@@ -56,17 +66,6 @@ includeHook($hooks,'pre');
               </div>
 
 
-              <!-- Track Guests -->
-              <div class="form-group">
-                <label>Track Guests <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Want details on how many visitors are visiting your site? Keep this on! Site getting laggy, stumbling and having issues? Disable this to see if it fixes it for higher volume sites.Â Default: Yes."><i class="fa fa-question-circle"></i></a></label>
-                <span class="float-right">
-                  <label class="switch switch-text switch-success">
-                    <input id="track_guest" type="checkbox" class="switch-input toggle" data-desc="Track Guests" <?php if($settings->track_guest==1) echo 'checked="true"'; ?>>
-                    <span data-on="Yes" data-off="No" class="switch-label"></span>
-                    <span class="switch-handle"></span>
-                  </label>
-                </span>
-              </div>
 
               <!-- Navigation Type Option -->
               <div class="form-group">
@@ -239,7 +238,7 @@ includeHook($hooks,'pre');
 
               <div class="card no-padding">
                 <div class="card-header"><h3>Language</h3>
-                    There may be more languages available <a class="text-primary" href="https://userspice.com/translations" target="_blank">here</a>.<br>
+                  There may be more languages available <a class="text-primary" href="https://userspice.com/translations" target="_blank">here</a>.<br>
                 </div>
                 <div class="card-body">
 
