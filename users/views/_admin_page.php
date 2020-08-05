@@ -129,7 +129,7 @@ if(Input::exists()){
         $redirect_uri=$_SESSION['redirect_after_uri'];
         unset($_SESSION['redirect_after_save']);
         unset($_SESSION['redirect_after_uri']);
-        Redirect::to(htmlspecialchars_decode($redirect_uri));
+        Redirect::to(html_entity_decode($redirect_uri));
       }
     }
     if(Input::get("return") != "" && $errors == []){ Redirect::to('admin.php?view=pages');}

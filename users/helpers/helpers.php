@@ -187,9 +187,12 @@ $opts = array(
 	$mail->Host = $results->smtp_server;  									// Specify SMTP server
 	$mail->SMTPAuth = $results->useSMTPauth;                // Enable SMTP authentication
 	$mail->Username = $results->email_login;                 // SMTP username
-	$mail->Password = htmlspecialchars_decode($results->email_pass);    // SMTP password
-	$mail->SMTPSecure = $results->transport;                            // Enable TLS encryption, `ssl` also accepted
-	$mail->Port = $results->smtp_port;                                  // TCP port to connect to
+	$mail->Password = html_entity_decode($results->email_pass);    // SMTP password
+	$mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
+	$mail->Port = $results->smtp_port;                       // TCP port to connect to
+  if($attachment != false){
+    $mail->addAttachment($attachment);
+  }
 
 
 	if(isset($opts['email']) && isset($opts['name'])){
@@ -212,26 +215,14 @@ $opts = array(
 
 if(!function_exists('email_body')) {
 function email_body($template,$options = array()){
-	$abs_us_root=$_SERVER['DOCUMENT_ROOT'];
-
-	$self_path=explode("/", $_SERVER['PHP_SELF']);
-	$self_path_length=count($self_path);
-	$file_found=FALSE;
-
-	for($i = 1; $i < $self_path_length; $i++){
-		array_splice($self_path, $self_path_length-$i, $i);
-		$us_url_root=implode("/",$self_path)."/";
-
-		if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
-			$file_found=TRUE;
-			break;
-		}else{
-			$file_found=FALSE;
-		}
-	}
+  global $abs_us_root, $us_url_root;
 	extract($options);
 	ob_start();
-	require $abs_us_root.$us_url_root.'users/views/'.$template;
+  if(file_exists($abs_us_root.$us_url_root.'usersc/views/'.$template)){
+    require $abs_us_root.$us_url_root.'usersc/views/'.$template;
+  }elseif(file_exists($abs_us_root.$us_url_root.'users/views/'.$template)){
+    require $abs_us_root.$us_url_root.'users/views/'.$template;
+  }
 	return ob_get_clean();
 }
 }
@@ -264,33 +255,12 @@ function dump($var,$adminOnly=false,$localhostOnly=false){
 }
 
 //preformatted dump and die function
-if(!function_exists('dnd')) {
-function dnd($var,$adminOnly=false,$localhostOnly=false){
-    if($adminOnly && isAdmin() && !$localhostOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
+if (!function_exists('dnd')) {
+    function dnd($var, $adminOnly = false, $localhostOnly = false)
+    {
+        dump($var, $adminOnly, $localhostOnly);
         die();
     }
-    if($localhostOnly && isLocalhost() && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-        die();
-    }
-    if($localhostOnly && isLocalhost() && $adminOnly && isAdmin()){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-        die();
-    }
-    if(!$localhostOnly && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-        die();
-    }
-}
 }
 
 if(!function_exists('bold')) {

@@ -37,7 +37,7 @@ $current=date("Y-m-d H:i:s");
 $ctFormatted = date("Y-m-d H:i:s", strtotime($current));
 $dbPlus = date("Y-m-d H:i:s", strtotime('+'.$settings->admin_verify_timeout.' minutes', strtotime($last_confirm)));
 if (strtotime($ctFormatted) < strtotime($dbPlus)){
-  Redirect::to(htmlspecialchars_decode($actual_link));
+  Redirect::to(html_entity_decode($actual_link));
 }
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
@@ -54,7 +54,7 @@ if (!empty($_POST)) {
       logger($user->data()->id,"Admin Verification","Access granted to $page via password verification.");
       unset($_SESSION['reauth_count']);
       if(!empty($actual_link)){
-        Redirect::to(htmlspecialchars_decode($actual_link));
+        Redirect::to(html_entity_decode($actual_link));
       }
     } else {
       $errors[] = lang("INCORRECT_ADMINPW");

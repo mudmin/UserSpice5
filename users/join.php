@@ -214,7 +214,7 @@ if(Input::exists()){
                         if($act == 1) {
                                 //Verify email address settings
                                 $to = rawurlencode($email);
-                                $subject = 'Welcome to '.$settings->site_name;
+                                $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
                                 $body = email_body('_email_template_verify.php',$params);
                                 email($to,$subject,$body);
                                 $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
@@ -239,15 +239,12 @@ if(Input::exists()){
 
                         includeHook($hooks,'post');
                         } catch (Exception $e) {
-                                $eventhooks =  getMyHooks(['page'=>'joinFail']);
-                                includeHook($eventhooks,'body');
+                                if($eventhooks =  getMyHooks(['page'=>'joinFail'])){
+                                  includeHook($eventhooks,'body');
+                                }
                                 die($e->getMessage());
                         }
                         if($form_valid == TRUE){ //this allows the plugin hook to kill the post but it must delete the created user
-                        if($settings->twofa == 1){
-                        $twoKey = $google2fa->generateSecretKey();
-                        $db->update('users',$theNewId,['twoKey' => $twoKey]);
-                        }
                         include($abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php');
 
                         if($act == 1) {

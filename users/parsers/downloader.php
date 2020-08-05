@@ -85,6 +85,10 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);
 $result = substr($result, 1, -1);
+$result = substr($result, 0, strpos($result, '=='));
+$result .= "==";
+
+
 
 curl_close($ch);
 if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the hash against the api call and the one supplied by ajax

@@ -41,7 +41,7 @@ $errors = array();
 if(Input::exists('post')){
     $email = Input::get('email');
     $fuser = new User($email);
-
+    $check = $db->query("SELECT id FROM users WHERE email = ? AND email_verified = 1",[$email])->count();
     $validate = new Validate();
     $validation = $validate->check($_POST,array(
     'email' => array(
@@ -53,6 +53,10 @@ if(Input::exists('post')){
     if($validation->passed()){ //if email is valid, do this
 
         if($fuser->exists()){
+          if($check > 0){
+            $string = lang("VER_SUC");
+            Redirect::to($us_url_root."users/login.php?err=".$string);
+          }
           $vericode=randomstring(15);
           $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
           $db->update('users',$fuser->data()->id,['vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);

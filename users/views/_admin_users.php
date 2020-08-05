@@ -163,7 +163,7 @@ includeHook($hooks,'post');
               'join_vericode_expiry' => $settings->join_vericode_expiry
             );
             $to = rawurlencode($email);
-            $subject = 'Welcome to '.$settings->site_name;
+            $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
             $body = email_body('_email_adminUser.php',$params);
             email($to,$subject,$body);
           }
@@ -250,7 +250,7 @@ includeHook($hooks,'post');
       <div class="modal-body">
             <?php if($settings->auto_assign_un==0) {?>
               <div class="form-group" id="username-group">
-              <label>Username <span id="usernameCheck" class="small ml-2"></span></label>
+              <label>Username (<?=$settings->min_un?>-<?=$settings->max_un?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
               <input type="text" class="form-control" id="username" name="username" autocomplete="new-password" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required>
               </div>
             <?php } ?>
@@ -267,7 +267,7 @@ includeHook($hooks,'post');
               <input  class="form-control" type="email" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="new-password">
               </div>
               <div class="form-group">
-              <label>Password</label>
+              <label>Password (<?=$settings->min_pw?>-<?=$settings->max_pw?> chars)</label>
               <div class="input-group" data-container="body">
               <div class="input-group-append">
                 <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>

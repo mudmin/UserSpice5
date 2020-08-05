@@ -22,25 +22,53 @@ class DB {
 	private $_pdo, $_query, $_error = false, $_errorInfo, $_results=[], $_resultsArray=[], $_count = 0, $_lastId, $_queryCount=0;
 
 	private function __construct($config = []){
+
 		if (!$opts = Config::get('mysql/options'))
 			$opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
 		try{
 			if($config == []){
+				//grab the default db from the init.php file
 				$this->_pdo = new PDO('mysql:host=' .
 					Config::get('mysql/host') .';dbname='.
 					Config::get('mysql/db') . ';charset=utf8',
 					Config::get('mysql/username'),
 					Config::get('mysql/password'),
 					$opts);
-			}else{
-				if(!is_array($config)){
+			}elseif(!is_array($config) || count($config) == 1){
+				//this allows you to pass DB::getDB('dbname') OR DB::getDB(['dbname']) to get
+				//a second db on the same server with the same username and password
+					if(is_array($config)){$config = $config[0];}
 				$this->_pdo = new PDO('mysql:host=' .
-					Config::get($config[0].'/host') .';dbname='.
-					Config::get($config[0].'/db') . ';charset=utf8',
-					Config::get($config[0].'/username'),
-					Config::get($config[0].'/password'),
+					Config::get('mysql/host') .';dbname='.
+					($config) . ';charset=utf8',
+					Config::get('mysql/username'),
+					Config::get('mysql/password'),
 					$opts);
-				}else{
+			}elseif(in_array('init',$config)){
+				//this allows you to get another db from your init file that is added to your init.php config
+				//array and call it like this DB::getDB(['mysql2','init']);
+				//your init file can have as many of these sets of db creds as you would like added like this
+				// 'mysql'      => array(
+				// 'host'         => '127.0.0.1',
+				// 'username'     => 'root',
+				// 'password'     => '',
+				// 'db'           => '513',
+				// ),
+				// 'mysql2'      => array(
+				// 'host'         => 'localhost',
+				// 'username'     => 'root',
+				// 'password'     => '',
+				// 'db'           => 'dbname',
+				// ),
+				//be sure to give each one a unique name like mysql2, mysql3
+
+				$this->_pdo = new PDO('mysql:host=' .
+				Config::get($config[0].'/host') .';dbname='.
+				Config::get($config[0].'/db') . ';charset=utf8',
+				Config::get($config[0].'/username'),
+				Config::get($config[0].'/password'),
+				$opts);
+			}else{
 					$this->_pdo = new PDO('mysql:host=' .
 					$config[0].';dbname='.
 					$config[1]. ';charset=utf8',
@@ -48,8 +76,7 @@ class DB {
 					$config[3],
 						$opts);
 				}
-			}
-		} catch(PDOException $e){
+			}catch(PDOException $e){
 			die($e->getMessage());
 		}
 	}
@@ -287,7 +314,7 @@ class DB {
 	}
 
 	public function first($assoc = false){
-		return (!$assoc || $assoc && $this->count()>0)  ?  $this->results($assoc)[0]  :  [];
+				return ($this->count()>0)  ?  $this->results($assoc)[0]  :  [];
 	}
 
 	public function count(){

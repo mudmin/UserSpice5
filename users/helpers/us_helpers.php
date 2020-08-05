@@ -914,9 +914,14 @@ if(!function_exists('getUSPageFiles')) {
               function pluginActive($plugin,$checkOnly = false) {
                 global $user,$us_url_root;
                 $db = DB::getInstance();
+                if(isset($user) && $user->data()->id){
+                  $id = $user->data()->id;
+                }else{
+                  $id = 0;
+                }
                 $check = $db->query("SELECT id FROM us_plugins WHERE plugin = ? and status = ?",array($plugin,"active"))->count();
                 if($check != 1) {
-                  logger($user->data()->id,"Errors","Attempted to access disabled $plugin");
+                  logger($id,"Errors","Attempted to access disabled $plugin");
                   if(!$checkOnly){
                     Redirect::to($us_url_root.'users/admin.php?view=plugins&err=Plugin+is+disabled');
                   }

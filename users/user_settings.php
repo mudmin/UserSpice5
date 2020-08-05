@@ -35,8 +35,7 @@ if($user->isLoggedIn() && !checkMenu(2,$user->data()->id)){
 
 $emailQ = $db->query("SELECT * FROM email");
 $emailR = $emailQ->first();
-// dump($emailR);
-// dump($emailR->email_act);
+
 //PHP Goes Here!
 $errors=[];
 $successes=[];
@@ -166,7 +165,7 @@ if(!empty($_POST)) {
                 if($emailR->email_act==1){
 									$vericode=randomstring(15);
 				          $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
-				          $db->update('users',$userId,['email_new'=>$email,'vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);
+				          $db->update('users',$userId,['email_verified'=>0,'email_new'=>$email,'vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);
 										//Send the email
 										$options = array(
 				              'fname' => $user->data()->fname,
@@ -329,14 +328,19 @@ $userdetails=$user2->data();
 													 <div class="input-group" data-container="body">
 														 <span class="btn btn-secondary input-group-addon password_view_control" id="addon6"><span class="fa fa-eye"></span></span>
 														 <input class='form-control' type='password' id="old" name='old' <?php if(is_null($userdetails->password)) {?>disabled<?php } ?> autocomplete="off" />
-														 <span class="btn btn-secondary input-group-addon" id="addon5" data-container="body" data-toggle="tooltip" data-placement="top" title="<?php lang("SET_PW_REQI");?>">?</span>
+														 <span class="btn btn-secondary input-group-addon" id="addon5" data-container="body" data-toggle="tooltip" data-placement="top" title="<?=lang("SET_PW_REQI");?>">?</span>
 													 </div>
 											 </div>
 											 <?php includeHook($hooks,'form');?>
                         <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
-
-                        <p><input class='btn btn-primary' type='submit' value='<?=lang("GEN_UPDATE");?>' class='submit' /></p>
-                        <p><a class="btn btn-info" href="../users/account.php"><?=lang("GEN_CANCEL");?></a></p>
+												<div class="row">
+													<div class="col-6 text-left">
+														<a class="btn btn-secondary" href="../users/account.php"><?=lang("GEN_CANCEL");?></a>
+													</div>
+													<div class="col-6 text-right">
+														<input class='btn btn-primary' type='submit' value='<?=lang("GEN_UPDATE");?>' class='submit' />
+													</div>
+												</div>
 
                     </form>
                     <?php

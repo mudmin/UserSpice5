@@ -24,9 +24,6 @@ require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 $hooks =  getMyHooks();
 includeHook($hooks,'pre');
-if($settings->twofa == 1){
-  $google2fa = new PragmaRX\Google2FA\Google2FA();
-}
 ?>
 <?php
 if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
@@ -100,7 +97,7 @@ if (!$res['success']) {
               $_SESSION['last_confirm']=date("Y-m-d H:i:s");
 
               if (!empty($dest)) {
-                $redirect=htmlspecialchars_decode(Input::get('redirect'));
+                $redirect=html_entity_decode(Input::get('redirect'));
                 if(!empty($redirect) || $redirect!=='') Redirect::to($redirect);
                 else Redirect::to($dest);
               } elseif (file_exists($abs_us_root.$us_url_root.'usersc/scripts/custom_login_script.php')) {

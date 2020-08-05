@@ -41,7 +41,7 @@ else $last_confirm=date("Y-m-d H:i:s",strtotime("-3 hours",strtotime(date("Y-m-d
 $ctFormatted = date("Y-m-d H:i:s", strtotime($current));
 $dbPlus = date("Y-m-d H:i:s", strtotime('+2 hours', strtotime($last_confirm)));
 if (strtotime($ctFormatted) < strtotime($dbPlus)){
-  Redirect::to(htmlspecialchars_decode($actual_link));
+  Redirect::to(html_entity_decode($actual_link));
 }
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
@@ -79,7 +79,7 @@ if (!empty($_POST)) {
         logger($user->data()->id,"Admin Verification","User set PIN Code");
         $_SESSION['last_confirm']=date("Y-m-d H:i:s");
         if(!empty($actual_link)){
-          Redirect::to(htmlspecialchars_decode($actual_link));
+          Redirect::to(html_entity_decode($actual_link));
         }
       } else {
         $errors[] = 'There was an error updating the user: '.$db->errorString();

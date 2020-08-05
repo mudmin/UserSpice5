@@ -24,6 +24,16 @@ require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 
 if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
+if(isset($user) && $user->isLoggedIn()){
+  Redirect::to($us_url_root."users/account.php");
+}
+
+$em = $db->query("SELECT * FROM email")->first();
+
+if($em->email_login == "yourEmail@gmail.com"){
+  echo "<br><h3 align='center'>".lang("ERR_EM_VER")."</h3>";
+  die();
+}
 $error_message = null;
 $errors = array();
 $email_sent=FALSE;

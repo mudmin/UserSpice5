@@ -6,6 +6,7 @@
   if(!hasPerm([2],$user->data()->id)){
   die("You do not have permission to be here.");
   }
+
 $msg = [];
 
 $type = Input::get('type');
@@ -13,6 +14,9 @@ $field = Input::get('field');
 $value = Input::get('value');
 $desc = Input::get('desc');
 $token = Input::get('token');
+
+$hooks =  getMyHooks(['page'=>'admin_settings.php']);
+includeHook($hooks,'pre');
 
 
 if($type == 'resetPW'){
@@ -55,4 +59,5 @@ if($type == 'txt'){
     $msg['msg'] = $desc." Updated!";
   }
 
+includeHook($hooks,'bottom');
 echo json_encode($msg);
