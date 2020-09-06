@@ -173,7 +173,9 @@ function email($to,$subject,$body,$opts=[],$attachment=false){
 /*you can now pass in
 $opts = array(
   'email' => 'from_email@aol.com',
-  'name'  => 'Bob Smith'
+  'name'  => 'Bob Smith',
+  'CC'    => 'cc@example.com',
+  'BCC'   => 'bcc@example.com'
 );
 */
 	$db = DB::getInstance();
@@ -190,16 +192,24 @@ $opts = array(
 	$mail->Password = html_entity_decode($results->email_pass);    // SMTP password
 	$mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
 	$mail->Port = $results->smtp_port;                       // TCP port to connect to
-  if($attachment != false){
-    $mail->addAttachment($attachment);
-  }
 
+	if($attachment != false){
+          $mail->addAttachment($attachment);
+        }
 
-	if(isset($opts['email']) && isset($opts['name'])){
-    $mail->setFrom($opts['email'], $opts['name']);
-  }else{
-    $mail->setFrom($results->from_email, $results->from_name);
-  }
+        if(isset($opts['email']) && isset($opts['name'])){
+          $mail->setFrom($opts['email'], $opts['name']);
+        }else{
+          $mail->setFrom($results->from_email, $results->from_name);
+        }
+
+        if(isset($opts['CC'])){
+          $mail->addCC($opts['CC']);
+        }
+
+        if(isset($opts['BCC'])){
+          $mail->addBCC($opts['BCC']);
+        }
 
 	$mail->addAddress(rawurldecode($to));                   // Add a recipient, name is optional
   if($results->isHTML == 'true'){$mail->isHTML(true); }                  // Set email format to HTML
