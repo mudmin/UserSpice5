@@ -165,7 +165,7 @@ if(!empty($_POST)) {
                 if($emailR->email_act==1){
 									$vericode=randomstring(15);
 				          $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
-				          $db->update('users',$userId,['email_verified'=>0,'email_new'=>$email,'vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);
+				          $db->update('users',$userId,['email_new'=>$email,'vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);
 										//Send the email
 										$options = array(
 				              'fname' => $user->data()->fname,

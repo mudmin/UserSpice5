@@ -9,7 +9,7 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="text-dark"><strong>Remove a folder from monitoring:</strong>
+        <p class="text-dark"><strong>Remove a folder from monitoring:</strong></p>
         <table class="table table-striped">
           <tbody>
             <?php $count=0; foreach($filter as $f){
@@ -39,7 +39,7 @@
         <div class="form-group">
           <form class="inline-form" action="admin.php?view=pages" method="POST" id="newFormForm">
             <strong>Add a folder to monitoring:</strong>
-            
+
             <input type="hidden" name="csrf" value="<?=$csrf;?>" />
             <input size="50" type="text" name="newFolder" value="" class="form-control">
             <small  class="form-text text-muted">Must end with a <strong>/</strong>, for example: <strong>users/cron/</strong></small>

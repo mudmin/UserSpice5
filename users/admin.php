@@ -28,15 +28,6 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 $settings = $db->query("SELECT * FROM settings")->first();
 ?>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
-<?php
-$page=currentFile();
-$titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));
-if ($titleQ->count() > 0) {
-    $pageTitle = $titleQ->first()->title;
-}
-else $pageTitle = '';
-?>
-<title><?= (($pageTitle != '') ? $pageTitle : ''); ?> <?=$settings->site_name?></title>
 <?php $view = Input::get('view');?>
 <?php require_once $abs_us_root.$us_url_root.'users/views/_admin_menu.php';
 if($view == '' || $view == 'dashboard'){

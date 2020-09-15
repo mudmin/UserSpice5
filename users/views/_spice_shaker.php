@@ -20,6 +20,9 @@ $diag = Input::get('diag');
 
 <div class="content mt-3">
   <?php
+  if ($settings->spice_api != '' && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",$settings->spice_api)) {
+    echo "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
+  }
   if($diag){
     echo "<h6>Diagnostic Mode Activated</h6><br>";
     echo "<h6><font color='red'>Please Note:</font> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
@@ -161,19 +164,19 @@ $diag = Input::get('diag');
             </form>
           </div>
         </div>
-        <div class="row">
-          <div class="col-4 offset-2">
-            <form class="" action="" method="post">
-              <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
-            </div>
-            <div class="col-3">
-              <?php if($settings->spice_api != ''){?>
-                <input type="submit" name="goSearch" value="Search" required>
-              <?php } ?>
-            </form>
-          </div>
-          <br><br>
-        </div>
+        <form class="" action="" method="post">
+         <div class="row mb-5">
+           <div class="col-4 offset-2">
+               <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
+           </div>
+           <div class="col-3">
+               <?php if($settings->spice_api != ''){?>
+                 <input type="submit" name="goSearch" value="Search" required>
+               <?php } ?>
+           </div>
+
+         </div>
+         </form>
 
         <?php if(isset($result)){
           $dev = json_decode($result);
@@ -225,7 +228,7 @@ $diag = Input::get('diag');
           }
 
           ?>
-        </div>
+      
         <script type="text/javascript">
         $( ".installme" ).click(function(event) {
           $(".installme").hide();

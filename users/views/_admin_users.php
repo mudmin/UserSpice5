@@ -193,7 +193,7 @@ includeHook($hooks,'post');
     <?=resultBlock($errors,$successes);?>
     <?php includeHook($hooks,'pre'); ?>
     <div class="w-100 text-right">
-    <button class="btn btn-outline-dark"data-toggle="modal" data-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
+    <button class="btn btn-outline-dark" data-toggle="modal" data-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
     </div>
     </div>
     <div class="col-12">
@@ -237,7 +237,7 @@ includeHook($hooks,'post');
     </div>
     </div>
     </div>
-  </div>
+
 
 <div id="adduser" class="modal fade" role="dialog">
   <div class="modal-dialog">

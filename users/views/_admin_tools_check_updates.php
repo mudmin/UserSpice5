@@ -90,6 +90,7 @@ if(isset($result->next_ver) && $result->next_ver != ""){
     }
   }else{ //do the update
     echo "Update found... $result->next_ver released on $result->released.<br>";
+    unlink($abs_us_root.$us_url_root."usupdate.zip");
     $zipFile = $abs_us_root.$us_url_root."usupdate.zip";
     echo "Creating zip file...";
     logger(1,"$result->next_ver","Creating zip file");

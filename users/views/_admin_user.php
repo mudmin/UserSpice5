@@ -601,7 +601,6 @@ if (!empty($_POST)) {
                         </div>
                       </div>
                     </div>
-                  </div>
                 </form>
                 <?php includeHook($hooks, 'bottom'); ?>
 

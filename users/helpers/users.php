@@ -137,6 +137,16 @@ if (!function_exists('echouser')) {
                 echo 'Unknown';
             }
         }
+        if($settings->echouser == 4){
+         $query = $db->query("SELECT fname,lname FROM users WHERE id = ? LIMIT 1",array($id));
+         $count=$query->count();
+         if ($count > 0) {
+           $results=$query->first();
+           echo ucfirst($results->fname)." ".substr(ucfirst($results->lname),0,1);
+         } else {
+           echo "Unknown";
+         }
+       }
     }
 }
 

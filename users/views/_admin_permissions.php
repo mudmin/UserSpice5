@@ -69,9 +69,9 @@ $count = 0;
         <input type='text' name='name' />  <input type="hidden" name="csrf" value="<?=Token::generate();?>" >
 
         <input class='btn btn-primary' type='submit' name='Submit' value='Create New Permission Level' /><br><br>
-
+      </p>
       </form>
-    </p>
+
 
     <br>
     <table class='table table-hover table-list-search'>

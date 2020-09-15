@@ -914,7 +914,7 @@ if(!function_exists('getUSPageFiles')) {
               function pluginActive($plugin,$checkOnly = false) {
                 global $user,$us_url_root;
                 $db = DB::getInstance();
-                if(isset($user) && $user->data()->id){
+                if(isset($user) && $user->isLoggedIn()){
                   $id = $user->data()->id;
                 }else{
                   $id = 0;

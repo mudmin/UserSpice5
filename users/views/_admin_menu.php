@@ -1,4 +1,13 @@
 <!doctype html>
+<?php
+$page=currentFile();
+$titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));
+if ($titleQ->count() > 0) {
+    $pageTitle = $titleQ->first()->title;
+}
+else $pageTitle = '';
+?>
+<title><?= (($pageTitle != '') ? $pageTitle : ''); ?> <?=$settings->site_name?></title>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
@@ -139,6 +148,7 @@ function activeDropdown($View, $dropId, $Area = false){
               <?php if(checkAccess('view','cron')){?> <li <?=($view == 'cron') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-terminal"></i><a href="admin.php?view=cron"><?=lang("BE_CRON")?></a></li><?php } ?>
               <?php if(checkAccess('view','ip')){?> <li <?=($view == 'ip') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-warning"></i><a href="admin.php?view=ip"><?=lang("BE_IP")?></a></li><?php } ?>
               <?php if(checkAccess('view','logs')){?> <li <?=($view == 'logs') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-list-ol"></i><a href="admin.php?view=logs">System Logs</a></li><?php } ?>
+              <?php if(checkAccess('view','logs')){?> <li <?=($view == 'security_logs') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-list-ol"></i><a href="admin.php?view=security_logs">Security Logs</a></li><?php } ?>
               <?php if(checkAccess('view','templates')){?> <li <?=($view == 'templates') ? 'class="active"' : '' ;?>><i class=" menu-icon fa fa-eye"></i><a href="admin.php?view=templates">Templates</a></li><?php } ?>
               <?php if(checkAccess('view','updates')){?> <li <?=($view == 'updates') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-arrow-circle-o-up"></i><a href="admin.php?view=updates"><?=lang("BE_UPDATE")?></a></li><?php } ?>
 
@@ -153,18 +163,19 @@ function activeDropdown($View, $dropId, $Area = false){
               <?php foreach($plugins as $t){
                 $xml=simplexml_load_file($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml');
                 if(file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/configure.php') && isset($usplugins[$t]) && ($usplugins[$t] == 1)){?>
-                <li><i class=" menu-icon fa fa-bolt"></i>
-                  <a href="<?=$us_url_root.'users/admin.php?view=plugins_config&plugin='.$t?>" >
-                    <?php
-                    if($xml->button != ''){
-                      echo $xml->button;
-                    }else{
-                      echo $t;
-                    } ?>
-                    </a>
-                <?php } ?>
-                </li>
-            <?php  }?>
+                     <li><i class=" menu-icon fa fa-bolt"></i>
+                         <a href="<?=$us_url_root.'users/admin.php?view=plugins_config&amp;plugin='.$t?>">
+                         <?php
+                             if($xml->button != ''){
+                               echo $xml->button;
+                             }else{
+                               echo $t;
+                             } ?>
+                         </a>
+                     </li>
+                 <?php }
+               }
+               ?>
 
             </ul>
           </li>

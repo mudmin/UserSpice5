@@ -30,6 +30,10 @@ includeHook($hooks,'pre');
             <div class="form-group">
               <label >Free API Key (<a class="text-primary" href="https://userspice.com/developer-api-keys/" target="_blank">Get One Here</a>) <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle"></i></a></label>
               <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
+              <?php
+              if ($settings->spice_api != '' && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",$settings->spice_api)) {
+                echo "<font color='red'>The API Key does not appear to be valid.</font><br>";
+              } ?>
             </div>
             <!-- Site Name -->
             <div class="form-group">
@@ -192,6 +196,7 @@ includeHook($hooks,'pre');
                       <option value="1" <?php if($settings->echouser==1) echo 'selected="selected"'; ?> >Username</option>
                       <option value="2" <?php if($settings->echouser==2) echo 'selected="selected"'; ?> >Username (FName LName)</option>
                       <option value="3" <?php if($settings->echouser==3) echo 'selected="selected"'; ?> >Username (FName)</option>
+                      <option value="4" <?php if($settings->echouser==4) echo 'selected="selected"'; ?> >FName First Initial of LName</option>
                     </select>
                   </div>
                 </div>
