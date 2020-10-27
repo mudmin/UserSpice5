@@ -403,32 +403,32 @@ if (!empty($_POST)) {
                     <div class="col-12 col-sm-6">
                       <div class="form-group" id="username-group">
                         <label>Username:</label>
-                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username; ?>' autocomplete="new-password" />
+                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="email-group">
                         <label>Email:</label>
-                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email; ?>' autocomplete="new-password" />
+                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="fname-group">
                         <label>First Name:</label>
-                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname; ?>' autocomplete="new-password" />
+                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="lname-group">
                         <label>Last Name:</label>
-                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname; ?>' autocomplete="new-password" />
+                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group">
                         <label>New Password (<?=$settings->min_pw; ?> char min, <?=$settings->max_pw; ?> max.)</label>
-                        <input class='form-control' type='password' autocomplete="new-password" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
                       <div class="form-group">
                         <label>Confirm Password</label>
-                        <input class='form-control' type='password' autocomplete="new-password" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                        <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
                       </div>
 
 

@@ -1131,7 +1131,7 @@ header.fixed-top {
   cursor: pointer;
   font-size: 18px;
   height: 43px;
-  line-height: 44px;
+  line-height: 0px;
   margin: 3px 0 0 -37px;
   text-align: center;
   width: 43px;

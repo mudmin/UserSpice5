@@ -45,7 +45,7 @@ if(Input::exists('get')){
 	if($validation->passed()){ //if email is valid, do this
 		//get the user info based on the email
 		$verify = new User(Input::get('email'));
-		if($verify->data()->email_verified == 1 && $verify->data()->vericode == $vericode){
+		if($verify->data()->email_verified == 1 && $verify->data()->vericode == $vericode && $verify->data()->email_new == ""){
 			//email is already verified - Basically if the system already shows the email as verified and they click the link again, we're going to pass it regardless of the expiry because
 			//the hassle of telling people verification failed (after previously successful is worse than what could go wrong)
 			require $abs_us_root.$us_url_root.'users/views/_verify_success.php';
@@ -82,8 +82,14 @@ if(Input::exists('get')){
 <?php
 
 if ($verify_success){
+	if($eventhooks =  getMyHooks(['page'=>'verifySuccess'])){
+	  includeHook($eventhooks,'body');
+	}
 	require $abs_us_root.$us_url_root.'users/views/_verify_success.php';
 }else{
+	if($eventhooks =  getMyHooks(['page'=>'verifyFail'])){
+		includeHook($eventhooks,'body');
+	}
 	require $abs_us_root.$us_url_root.'users/views/_verify_error.php';
 }
 

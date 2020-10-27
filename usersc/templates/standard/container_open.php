@@ -1,3 +1,3 @@
 <div>
   <!-- feel free to change between container or container fluid -->
-  <div class="container">
+  <div class="<?=$settings->container_open_class; ?>">

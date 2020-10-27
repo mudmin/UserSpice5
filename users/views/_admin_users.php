@@ -2,7 +2,7 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
+        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
         <li>Manage</li>
         <li class="active">Users</li>
       </ol>
@@ -16,143 +16,149 @@
 
 //PHP Goes Here!
 $errors = $successes = [];
-$query = $db->query("SELECT * FROM email");
+$query = $db->query('SELECT * FROM email');
 $results = $query->first();
 $act = $results->email_act;
-$form_valid=TRUE;
-$permOpsQ = $db->query("SELECT * FROM permissions");
+$form_valid = true;
+$permOpsQ = $db->query('SELECT * FROM permissions');
 $permOps = $permOpsQ->results();
-$hooks = getMyHooks(['page' =>'admin.php?view=users']);
+$hooks = getMyHooks(['page' => 'admin.php?view=users']);
 $validation = new Validate();
 if (!empty($_POST)) {
-includeHook($hooks,'post');
-  //Manually Add User
-  if(!empty($_POST['addUser'])) {
-    $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
-    $join_date = date("Y-m-d H:i:s");
-    $fname = Input::get('fname');
-    $lname = Input::get('lname');
-    $email = Input::get('email');
-    if($settings->auto_assign_un==1) {
-      $username=username_helper($fname,$lname,$email);
-      if(!$username) $username=NULL;
-    } else {
-      $username=Input::get('username');
-    }
-    $token = $_POST['csrf'];
+    includeHook($hooks, 'post');
+    //Manually Add User
+    if (!empty($_POST['addUser'])) {
+        $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
+        $join_date = date('Y-m-d H:i:s');
+        $fname = Input::get('fname');
+        $lname = Input::get('lname');
+        $email = Input::get('email');
+        if ($settings->auto_assign_un == 1) {
+            $username = username_helper($fname, $lname, $email);
+            if (!$username) {
+                $username = null;
+            }
+        } else {
+            $username = Input::get('username');
+        }
+        $token = $_POST['csrf'];
 
-    if(!Token::check($token)){
-      include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
-    }
+        if (!Token::check($token)) {
+            include $abs_us_root.$us_url_root.'usersc/scripts/token_error.php';
+        }
 
-    $form_valid=FALSE; // assume the worst
-    if($settings->auto_assign_un==0) {
-      $validation->check($_POST,array(
-        'username' => array(
+        $form_valid = false; // assume the worst
+        if ($settings->auto_assign_un == 0) {
+            $validation->check($_POST, [
+        'username' => [
           'display' => 'Username',
           'required' => true,
           'min' => $settings->min_un,
           'max' => $settings->max_un,
           'unique' => 'users',
-        ),
-        'fname' => array(
+        ],
+        'fname' => [
           'display' => 'First Name',
           'required' => true,
           'min' => 1,
           'max' => 100,
-        ),
-        'lname' => array(
+        ],
+        'lname' => [
           'display' => 'Last Name',
           'required' => true,
           'min' => 1,
           'max' => 100,
-        ),
-        'email' => array(
+        ],
+        'email' => [
           'display' => 'Email',
           'required' => true,
           'valid_email' => true,
           'unique' => 'users',
           'min' => 5,
           'max' => 100,
-        ),
+        ],
 
-        'password' => array(
+        'password' => [
           'display' => 'Password',
           'required' => true,
           'min' => $settings->min_pw,
           'max' => $settings->max_pw,
-        ),
-        'confirm' => array(
+        ],
+        'confirm' => [
           'display' => 'Confirm Password',
           'required' => true,
           'matches' => 'password',
-        ),
-      )); }
-      if($settings->auto_assign_un==1) {
-        $validation->check($_POST,array(
-          'fname' => array(
+        ],
+      ]);
+        }
+        if ($settings->auto_assign_un == 1) {
+            $validation->check($_POST, [
+          'fname' => [
             'display' => 'First Name',
             'required' => true,
             'min' => 1,
             'max' => 60,
-          ),
-          'lname' => array(
+          ],
+          'lname' => [
             'display' => 'Last Name',
             'required' => true,
             'min' => 1,
             'max' => 60,
-          ),
-          'email' => array(
+          ],
+          'email' => [
             'display' => 'Email',
             'required' => true,
             'valid_email' => true,
             'unique' => 'users',
-          ),
+          ],
 
-          'password' => array(
+          'password' => [
             'display' => 'Password',
             'required' => true,
             'min' => $settings->min_pw,
             'max' => $settings->max_pw,
-          ),
-          'confirm' => array(
+          ],
+          'confirm' => [
             'display' => 'Confirm Password',
             'required' => true,
             'matches' => 'password',
-          ),
-        ));
-      }
-      if($validation->passed()) {
-        $form_valid=TRUE;
-        try {
-          // echo "Trying to create user";
-          $fields=array(
+          ],
+        ]);
+        }
+        if ($validation->passed()) {
+            $form_valid = true;
+            try {
+                // echo "Trying to create user";
+                $fields = [
             'username' => $username,
             'fname' => ucfirst(Input::get('fname')),
             'lname' => ucfirst(Input::get('lname')),
             'email' => Input::get('email'),
-            'password' =>
-            password_hash(Input::get('password'), PASSWORD_BCRYPT, array('cost' => 12)),
+            'password' => password_hash(Input::get('password'), PASSWORD_BCRYPT, ['cost' => 12]),
             'permissions' => 1,
-            'account_owner' => 1,
             'join_date' => $join_date,
             'email_verified' => 1,
-            'active' => 1,
             'vericode' => randomstring(15),
             'force_pr' => $settings->force_pr,
             'vericode_expiry' => $vericode_expiry,
-            'oauth_tos_accepted' => true
-          );
-          $db->insert('users',$fields);
-          $theNewId=$db->lastId();
-          // bold($theNewId);
-          $perm = Input::get('perm');
-          $addNewPermission = array('user_id' => $theNewId, 'permission_id' => 1);
-          $db->insert('user_permission_matches',$addNewPermission);
-          include($abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php');
-          if(isset($_POST['sendEmail'])) {
-            $userDetails = fetchUserDetails(NULL, NULL, $theNewId);
-            $params = array(
+            'oauth_tos_accepted' => true,
+          ];
+
+                $activeCheck = $db->query('SELECT active FROM users');
+                if (!$activeCheck->error()) {
+                    $fields['active'] = 1;
+                }
+
+                $db->insert('users', $fields);
+                $theNewId = $db->lastId();
+                // bold($theNewId);
+                $perm = Input::get('perm');
+                $addNewPermission = ['user_id' => $theNewId, 'permission_id' => 1];
+                $db->insert('user_permission_matches', $addNewPermission);
+                include $abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php';
+                if (isset($_POST['sendEmail'])) {
+                    $userDetails = fetchUserDetails(null, null, $theNewId);
+                    $params = [
               'username' => $username,
               'password' => Input::get('password'),
               'sitename' => $settings->site_name,
@@ -160,25 +166,26 @@ includeHook($hooks,'post');
               'fname' => Input::get('fname'),
               'email' => rawurlencode($userDetails->email),
               'vericode' => $userDetails->vericode,
-              'join_vericode_expiry' => $settings->join_vericode_expiry
-            );
-            $to = rawurlencode($email);
-            $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
-            $body = email_body('_email_adminUser.php',$params);
-            email($to,$subject,$body);
-          }
-          logger($user->data()->id,"User Manager","Added user $username.");
-          Redirect::to($us_url_root.'users/admin.php?view=user&id='.$theNewId);
-        } catch (Exception $e) {
-          die($e->getMessage());
+              'join_vericode_expiry' => $settings->join_vericode_expiry,
+            ];
+                    $to = rawurlencode($email);
+                    $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
+                    $body = email_body('_email_adminUser.php', $params);
+                    email($to, $subject, $body);
+                }
+                logger($user->data()->id, 'User Manager', "Added user $username.");
+                Redirect::to($us_url_root.'users/admin.php?view=user&id='.$theNewId);
+            } catch (Exception $e) {
+                die($e->getMessage());
+            }
         }
-
-      }
     }
-  }
-  $userData = fetchAllUsers("permissions DESC,id",[],false); //Fetch information for all users
+}
+  $userData = fetchAllUsers('permissions DESC,id', false, false); //Fetch information for all users
   $showAllUsers = Input::get('showAllUsers');
-  if($showAllUsers==1) $userData = fetchAllUsers("permissions DESC,id",[],true);
+  if ($showAllUsers == 1) {
+      $userData = fetchAllUsers('permissions DESC,id', false, true);
+  }
   $random_password = random_password();
 
   foreach ($validation->errors() as $error) {
@@ -190,8 +197,8 @@ includeHook($hooks,'post');
   <div class="row">
     <div class="col-12 mb-2">
     <h2>Manage Users</h2>
-    <?=resultBlock($errors,$successes);?>
-    <?php includeHook($hooks,'pre'); ?>
+    <?=resultBlock($errors, $successes); ?>
+    <?php includeHook($hooks, 'pre'); ?>
     <div class="w-100 text-right">
     <button class="btn btn-outline-dark" data-toggle="modal" data-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
     </div>
@@ -203,35 +210,38 @@ includeHook($hooks,'post');
       <table id="paginate" class='table table-hover table-list-search'>
         <thead>
           <tr>
-            <th></th><th></th><th>Username</th><th>Name</th><th>Email</th><?php includeHook($hooks,'body');?>
-            <th>Last Sign In</th><?php if($act==1) {?><th>Verified</th><?php } ?><th>Status</th>
+            <th></th><th></th><th>Username</th><th>Name</th><th>Email</th><?php includeHook($hooks, 'body'); ?>
+            <th>Last Sign In</th><?php if ($act == 1) {?><th>Verified</th><?php } ?><th>Status</th>
           </tr>
         </thead>
         <tbody>
           <?php
           //Cycle through users
           foreach ($userData as $v1) {
-            ?>
+              ?>
             <tr>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->id?></a></td>
-              <td><a class="nounderline text-danger" href='admin.php?view=user&id=<?=$v1->id?>'><?php if($v1->force_pr==1) {?><i class="fa fa-lock"></i><?php } ?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->username?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->fname?> <?=$v1->lname?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id?>'><?=$v1->email?></a></td>
-              <?php includeHook($hooks,'bottom');?>
-              <td><?php if($v1->last_login != 0) { echo $v1->last_login; } else {?> <i>Never</i> <?php }?></td>
-              <?php if($act==1) {?><td>
-                <?php if($v1->email_verified == 1){
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->id; ?></a></td>
+              <td><a class="nounderline text-danger" href='admin.php?view=user&id=<?=$v1->id; ?>'><?php if ($v1->force_pr == 1) {?><i class="fa fa-lock"></i><?php } ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->username; ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->fname; ?> <?=$v1->lname; ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->email; ?></a></td>
+              <?php includeHook($hooks, 'bottom'); ?>
+              <td><?php if ($v1->last_login != 0) {
+                  echo $v1->last_login;
+              } else {?> <i>Never</i> <?php } ?></td>
+              <?php if ($act == 1) {?><td>
+                <?php if ($v1->email_verified == 1) {
                   echo "<i class='fa fa-thumbs-o-up'></i>";
-                } ?>
+              } ?>
               </td><?php } ?>
-              <td><i class="fa fa-fw fa-<?php if($v1->permissions==1) {?>un<?php } ?>lock"></i></td>
+              <td><i class="fa fa-fw fa-<?php if ($v1->permissions == 1) {?>un<?php } ?>lock"></i></td>
             </tr>
-          <?php } ?>
+          <?php
+          } ?>
         </tbody>
       </table>
-      <?php if($showAllUsers!=1) {?><a href="?view=users&showAllUsers=1" class="btn btn-primary nounderline pull-right">Show All Users</a><?php } ?>
-      <?php if($showAllUsers==1) {?><a href="?view=users" class="btn btn-primary nounderline pull-right">Show Active Users Only</a><?php } ?>
+      <?php if ($showAllUsers != 1) {?><a href="?view=users&showAllUsers=1" class="btn btn-primary nounderline pull-right">Show All Users</a><?php } ?>
+      <?php if ($showAllUsers == 1) {?><a href="?view=users" class="btn btn-primary nounderline pull-right">Show Active Users Only</a><?php } ?>
     </div>
       </div>
     </div>
@@ -248,32 +258,40 @@ includeHook($hooks,'post');
       </div>
       <form class="form-signup mb-0" action="admin.php?view=users" method="POST">
       <div class="modal-body">
-            <?php if($settings->auto_assign_un==0) {?>
+            <?php if ($settings->auto_assign_un == 0) {?>
               <div class="form-group" id="username-group">
-              <label>Username (<?=$settings->min_un?>-<?=$settings->max_un?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
-              <input type="text" class="form-control" id="username" name="username" autocomplete="new-password" value="<?php if (!$form_valid && !empty($_POST)){ echo $username;} ?>" required>
+              <label>Username (<?=$settings->min_un; ?>-<?=$settings->max_un; ?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
+              <input type="text" class="form-control" id="username" name="username" autocomplete="off" value="<?php if (!$form_valid && !empty($_POST)) {
+              echo $username;
+          } ?>" required>
               </div>
             <?php } ?>
               <div class="form-group" id="fname-group">
               <label>First Name</label>
-              <input type="text" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)){ echo $fname;} ?>" required autocomplete="new-password">
+              <input type="text" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)) {
+              echo $fname;
+          } ?>" required autocomplete="off">
               </div>
               <div class="form-group" id="lname-group">
               <label>Last Name</label>
-              <input type="text" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)){ echo $lname;} ?>" required autocomplete="new-password">
+              <input type="text" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)) {
+              echo $lname;
+          } ?>" required autocomplete="off">
               </div>
               <div class="form-group" id="email-group">
               <label>Email</label>
-              <input  class="form-control" type="email" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)){ echo $email;} ?>" required autocomplete="new-password">
+              <input  class="form-control" type="email" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)) {
+              echo $email;
+          } ?>" required autocomplete="off">
               </div>
               <div class="form-group">
-              <label>Password (<?=$settings->min_pw?>-<?=$settings->max_pw?> chars)</label>
+              <label>Password (<?=$settings->min_pw; ?>-<?=$settings->max_pw; ?> chars)</label>
               <div class="input-group" data-container="body">
               <div class="input-group-append">
                 <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
               </div>
-                <input  class="form-control" type="password" name="password" id="password" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> placeholder="Password" required autocomplete="new-password" aria-describedby="passwordhelp">
-                <?php if($settings->force_pr==1) { ?>
+                <input  class="form-control" type="password" name="password" id="password" <?php if ($settings->force_pr == 1) { ?>value="<?=$random_password; ?>" readonly<?php } ?> placeholder="Password" required autocomplete="off" aria-describedby="passwordhelp">
+                <?php if ($settings->force_pr == 1) { ?>
                   <div class="input-group-append">
                   <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
                   </div>
@@ -286,8 +304,8 @@ includeHook($hooks,'post');
                 <div class="input-group-prepend">
                 <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
                 </div>
-                <input  type="password" id="confirm" name="confirm" <?php if($settings->force_pr==1) { ?>value="<?=$random_password?>" readonly<?php } ?> class="form-control" autocomplete="new-password" placeholder="Confirm Password" required >
-                <?php if($settings->force_pr==1) { ?>
+                <input  type="password" id="confirm" name="confirm" <?php if ($settings->force_pr == 1) { ?>value="<?=$random_password; ?>" readonly<?php } ?> class="form-control" autocomplete="off" placeholder="Confirm Password" required >
+                <?php if ($settings->force_pr == 1) { ?>
                   <div class="input-group-append">
                   <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
                   </div>
@@ -295,13 +313,13 @@ includeHook($hooks,'post');
               </div>
               </div>
 
-              <?php include($abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php'); ?>
-              <?php includeHook($hooks,'form');?>
+              <?php include $abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php'; ?>
+              <?php includeHook($hooks, 'form'); ?>
               <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
             </div>
             <div class="modal-footer">
-                <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
-                <input class='btn btn-primary' type='submit' id="addUser" name="addUser" value='Add User' class='submit' />
+                <input type="hidden" name="csrf" value="<?=Token::generate(); ?>" />
+                <input class='btn btn-primary submit' type='submit' id="addUser" name="addUser" value='Add User' />
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </form>
@@ -339,7 +357,7 @@ includeHook($hooks,'post');
     });
     </script>
 
-    <?php if($settings->auto_assign_un==0) { ?>
+    <?php if ($settings->auto_assign_un == 0) { ?>
       <script type="text/javascript">
       $(document).ready(function(){
         var x_timer;
