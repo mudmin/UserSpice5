@@ -1,3 +1,3 @@
 <?php
-$user_spice_ver="5.1.7";
+$user_spice_ver="5.1.8";
 ?>

@@ -3,7 +3,26 @@
 //UserSpice functions for Pages and Permissions
 //Do not deactivate!
 
-//Check if a permission level ID exists in the DB
+
+//check if a user ONLY has permission 1
+if(!function_exists('isStandardUser')){
+  function isStandardUser($user_id){
+    $db = DB::getInstance();
+    $q = $db->query("SELECT permission_id FROM user_permission_matches WHERE user_id = ? ORDER BY permission_id DESC",[$user_id]);
+    $c = $q->count();
+    if($c != 1){
+      return false;
+    }else{
+      $f = $q->first();
+      if($f->permission_id != 1){
+        return false;
+      }else{
+        return true;
+      }
+    }
+  }
+}
+
 if (!function_exists('permissionIdExists')) {
     function permissionIdExists($id)
     {
@@ -363,12 +382,10 @@ if (!function_exists('fetchPermissionPages')) {
         $db = DB::getInstance();
 
         $query = $db->query(
-            'SELECT m.id as id, m.page_id as page_id, p.page as page, p.private as private
+        'SELECT m.id as id, m.page_id as page_id, p.page as page, p.private as private
 		FROM permission_page_matches AS m
 		INNER JOIN pages AS p ON m.page_id = p.id
-		WHERE m.permission_id = ?',
-            [$permission_id]
-        );
+		WHERE m.permission_id = ?', [$permission_id]);
         $results = $query->results();
 
         return $results;
@@ -547,9 +564,9 @@ if (!function_exists('hasPerm')) {
             $permissions = [$permissions];
         }
 
-        if ((int) $id === null && $user->isLoggedIn()) {
+        if ($id === null && $user->isLoggedIn()) {
             $id = $user->data()->id;
-        } elseif ((int) $id === null && !$user->isLoggedIn()) {
+        } else {
             return $access;
         }
 
@@ -564,6 +581,7 @@ if (!function_exists('hasPerm')) {
             }
         } else {
             logger($id, 'hasPerm', 'Database error while checking permission', $query->errorString());
+
             return $access;
         }
 
