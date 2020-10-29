@@ -3,24 +3,24 @@
 //UserSpice functions for Pages and Permissions
 //Do not deactivate!
 
-
 //check if a user ONLY has permission 1
-if(!function_exists('isStandardUser')){
-  function isStandardUser($user_id){
-    $db = DB::getInstance();
-    $q = $db->query("SELECT permission_id FROM user_permission_matches WHERE user_id = ? ORDER BY permission_id DESC",[$user_id]);
-    $c = $q->count();
-    if($c != 1){
-      return false;
-    }else{
-      $f = $q->first();
-      if($f->permission_id != 1){
-        return false;
-      }else{
-        return true;
-      }
+if (!function_exists('isStandardUser')) {
+    function isStandardUser($user_id)
+    {
+        $db = DB::getInstance();
+        $q = $db->query('SELECT permission_id FROM user_permission_matches WHERE user_id = ? ORDER BY permission_id DESC', [$user_id]);
+        $c = $q->count();
+        if ($c != 1) {
+            return false;
+        } else {
+            $f = $q->first();
+            if ($f->permission_id != 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
     }
-  }
 }
 
 if (!function_exists('permissionIdExists')) {
@@ -566,7 +566,7 @@ if (!function_exists('hasPerm')) {
 
         if ($id === null && $user->isLoggedIn()) {
             $id = $user->data()->id;
-        } else {
+        } elseif ($id === null && !$user->isLoggedIn()) {
             return $access;
         }
 
@@ -612,6 +612,25 @@ if (!function_exists('echopage')) {
             echo $results->page;
         } else {
             echo 'Unknown';
+        }
+    }
+}
+
+if (!function_exists('isStandardUser')) {
+    function isStandardUser($user_id)
+    {
+        $db = DB::getInstance();
+        $q = $db->query('SELECT permission_id FROM user_permission_matches WHERE user_id = ? ORDER BY permission_id DESC', [$user_id]);
+        $c = $q->count();
+        if ($c != 1) {
+            return false;
+        } else {
+            $f = $q->first();
+            if ($f->permission_id != 1) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 }
