@@ -3,26 +3,7 @@
 //UserSpice functions for Pages and Permissions
 //Do not deactivate!
 
-//check if a user ONLY has permission 1
-if (!function_exists('isStandardUser')) {
-    function isStandardUser($user_id)
-    {
-        $db = DB::getInstance();
-        $q = $db->query('SELECT permission_id FROM user_permission_matches WHERE user_id = ? ORDER BY permission_id DESC', [$user_id]);
-        $c = $q->count();
-        if ($c != 1) {
-            return false;
-        } else {
-            $f = $q->first();
-            if ($f->permission_id != 1) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-}
-
+//Check if a permission level ID exists in the DB
 if (!function_exists('permissionIdExists')) {
     function permissionIdExists($id)
     {
