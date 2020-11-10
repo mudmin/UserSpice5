@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2020 at 04:21 AM
+-- Generation Time: Nov 06, 2020 at 06:17 PM
 -- Server version: 10.4.14-MariaDB
--- PHP Version: 7.4.9
+-- PHP Version: 7.4.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -16,6 +16,10 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `sql`
+--
 
 -- --------------------------------------------------------
 
@@ -178,19 +182,6 @@ CREATE TABLE `logs` (
   `logtype` varchar(25) NOT NULL,
   `lognote` mediumtext NOT NULL,
   `ip` varchar(75) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `logs_exempt`
---
-
-CREATE TABLE `logs_exempt` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `createdby` int(11) NOT NULL,
-  `created` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -585,8 +576,8 @@ CREATE TABLE `users` (
   `force_pr` tinyint(1) NOT NULL DEFAULT 0,
   `logins` int(11) UNSIGNED NOT NULL DEFAULT 0,
   `last_login` datetime DEFAULT NULL,
-  `join_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `modified` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `join_date` datetime,
+  `modified` datetime
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -950,13 +941,6 @@ ALTER TABLE `logs`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `logs_exempt`
---
-ALTER TABLE `logs_exempt`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `logs_exempt_type` (`name`);
-
---
 -- Indexes for table `menus`
 --
 ALTER TABLE `menus`
@@ -1175,12 +1159,6 @@ ALTER TABLE `keys`
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `logs_exempt`
---
-ALTER TABLE `logs_exempt`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
