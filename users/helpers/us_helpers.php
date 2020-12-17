@@ -39,19 +39,19 @@ if (!function_exists('ipCheckBan')) {
         if ($ban > 0) {
             $unban = $db->query('SELECT id FROM us_ip_whitelist WHERE ip = ?', [$ip])->count();
             if ($unban == 0) {
+              //on blacklist and not on whitelist
                 logger(0, 'IP Logging', 'Blacklisted '.$ip.' attempted visit');
-
-                return false;
-            } else {
                 if ($eventhooks = getMyHooks(['page' => 'hitBanned'])) {
                     includeHook($eventhooks, 'body');
                 }
-
                 return true;
+            }else{
+              //blacklisted but also whitelisted and whitelist prevails
+              return false;
             }
         } else {
-            //  logger(0,'User','Blacklisted '.$ip.' attempted visit');
-            return false;
+          //not on blacklist
+          return false;
         }
     }
 }

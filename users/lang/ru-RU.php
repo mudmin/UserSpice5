@@ -8,7 +8,7 @@
 	ВАЖНО: не добавляйте новые переводы в середину массива - это усложняет отслеживание изменений.
 	Все новые строки добавляются в конец массива. Обсуждения проходят в Discord.
 
-	UserSpice 5
+	UserSpice
 	An Open Source PHP User Management System
 	by the UserSpice Team at http://UserSpice.com
 
@@ -129,8 +129,6 @@ $lang = array_merge($lang,array(
 	"GEN_UPDATED"	=> "Обновлено",
 	"GEN_UPDATE"	=> "Обновить",
 	"GEN_BY"		=> "к",
-	"GEN_ENABLE"	=> "Включить",
-	"GEN_DISABLE"	=> "Отключить",
 	"GEN_FUNCTIONS"	=> "Функции",
 	"GEN_NUMBER"	=> "номер",
 	"GEN_NUMBERS"	=> "цифры",

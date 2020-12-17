@@ -43,20 +43,20 @@ if (!function_exists('fetchAllUsers')) {
 
 //Retrieve complete user information by username, token or ID
 if (!function_exists('fetchUserDetails')) {
-    function fetchUserDetails($username = null, string $token = null, $id = null)
+    function fetchUserDetails($username = null, $token = null, $id = null)
     {
         $db = DB::getInstance();
         $column = $data = $results = null;
 
-        if ($username !== null) {
+        if ($username != null) {
             $column = 'username';
-            $data = (string) $username;
-        } elseif ((int) $id !== null) {
+            $data = $username;
+        } elseif ($id != null) {
             $column = 'id';
-            $data = (int) $id;
+            $data = $id;
         }
 
-        if ($column !== null && $data !== null) {
+        if (!is_null($column) && !is_null($data)) {
             $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$data]);
             if ($query->count() == 1) {
                 $results = $query->first();
@@ -69,20 +69,18 @@ if (!function_exists('fetchUserDetails')) {
 
 //Delete a defined array of users
 if (!function_exists('deleteUsers')) {
-    function deleteUsers($users = [])
+    function deleteUsers($users)
     {
         global $abs_us_root, $us_url_root;
         $db = DB::getInstance();
         $i = 0;
         foreach ($users as $id) {
-            if ((int) $id !== null) {
-                $query1 = $db->query('DELETE FROM users WHERE id = ?', [(int) $id]);
-                $query2 = $db->query('DELETE FROM user_permission_matches WHERE user_id = ?', [(int) $id]);
-                if (file_exists($abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php')) {
-                    include $abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php';
-                }
-                ++$i;
+            $query1 = $db->query('DELETE FROM users WHERE id = ?', [$id]);
+            $query2 = $db->query('DELETE FROM user_permission_matches WHERE user_id = ?', [$id]);
+            if (file_exists($abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php')) {
+                include $abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php';
             }
+            ++$i;
         }
 
         return $i;
@@ -163,10 +161,6 @@ if (!function_exists('echouser')) {
 if (!function_exists('echousername')) {
     function echousername($id)
     {
-        if ((int) $id === null) {
-            return 'Unknown';
-        }
-
         $db = DB::getInstance();
         $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
         $count = $query->count();
@@ -182,14 +176,8 @@ if (!function_exists('echousername')) {
 
 if (!function_exists('updateUser')) {
     //Update User
-    function updateUser(string $column, $id, $value)
+    function updateUser($column, $id, $value)
     {
-        if ((int) $id !== null) {
-            $id = (int) $id;
-        } else {
-            return null;
-        }
-
         $db = DB::getInstance();
         $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
 
@@ -201,30 +189,23 @@ if (!function_exists('fetchUserName')) {
     //Fetchs CONCAT of Fname Lname
     function fetchUserName($username = null, $token = null, $id = null)
     {
-        $column = $data = $results = null;
-
-        if ((string) $username != null) {
+        if ($username != null) {
             $column = 'username';
-            $data = (string) $username;
-        } elseif ((int) $id != null) {
+            $data = $username;
+        } elseif ($id != null) {
             $column = 'id';
-            $data = (int) $id;
+            $data = $id;
         }
+        $db = DB::getInstance();
+        $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = $data LIMIT 1");
+        $count = $query->count();
+        if ($count > 0) {
+            $results = $query->first();
 
-        if (!is_null($column) && !is_null($data)) {
-            $db = DB::getInstance();
-            $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = $data LIMIT 1");
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-
-                $results = $results->name;
-            } else {
-                $results = 'Unknown';
-            }
+            return $results->name;
+        } else {
+            return 'Unknown';
         }
-
-        return $results;
     }
 }
 

@@ -7,7 +7,7 @@ allow us to autoformat numbers on the sites.
 PLEASE put your name somewhere at the top of the language file so we can get in touch with
 you to update it and thank you for your hard work!
 
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -115,8 +115,6 @@ $lang = array_merge($lang,array(
 		"GEN_UPDATED"			=> "actualizare",
 		"GEN_UPDATE"			=> "Actualizați",
 		"GEN_BY"					=> "de",
-		"GEN_ENABLE"			=> "Permite",
-		"GEN_DISABLE"			=> "Dezactivați",
 		"GEN_FUNCTIONS"		=> "Funcţii",
 		"GEN_NUMBER"			=> "număr",
 		"GEN_NUMBERS"			=> "numerele",

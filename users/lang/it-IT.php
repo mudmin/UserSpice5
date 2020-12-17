@@ -9,7 +9,7 @@ you to update it and thank you for your hard work!
 
 PLEASE NOTE: DO NOT ADD RANDOM KEYS in the middle of the translations. In order to make it easier to tell what language keys are missing, from this point forward, we are going to add all new language keys at the BOTTOM of this file. The number of lines in your language file will tell you which keys still need to be translated. If you have questions please ask on the forums or on Discord.
 
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -119,8 +119,6 @@ $lang = array_merge($lang, array(
     "GEN_UPDATED" 		=> "Aggiornato",
     "GEN_UPDATE" 		=> "Aggiornare",
     "GEN_BY" 			=> "per",
-    "GEN_ENABLE" 		=> "Attivare",
-    "GEN_DISABLE" 		=> "Disattivare",
     "GEN_FUNCTIONS" 	=> "Funzioni",
     "GEN_NUMBER" 		=> "numero",
     "GEN_NUMBERS" 		=> "numeri",
@@ -299,7 +297,7 @@ $lang = array_merge($lang, array(
     "EML_HOW" 		=> "Se sei stato tu, clicca sul link per continuare con il processo di reimpostazione.",
     "EML_EML" 		=> "Una richiesta di modificare la tua email &egrave; stata fatta dal tuo account utente.",
     "EML_VER_EML" 	=> "Grazie per esserti registrato. Una volta verificato il tuo indirizzo email, sarai pronto per accedere! Clicca sul seguente link per verificare il tuo indirizzo email."
-    
+
 ));
 
 //Verification
@@ -331,7 +329,7 @@ $lang = array_merge($lang, array(
     "SET_NOTE2" 		=> ".</p><p>Si prega di utilizzare l'e-mail di verifica per completare questa richiesta.</p> <p>Se hai bisogno di una nuova email di verifica, ridigita l'email precedente e invia nuovamente la richiesta.</p>",
     "SET_PW_REQ" 		=> "obbligatorio per cambiare password, e-mail o reimpostare il PIN",
     "SET_PW_REQI" 		=> "Obbligatorio per cambiare password"
-    
+
 ));
 
 //Errors
@@ -346,7 +344,7 @@ $lang = array_merge($lang, array(
     "ERR_GOOG" 			=> "<strong>ATTENZIONE: </ strong> se hai effettuato l'accesso con il tuo account Google/Facebook dall'inizio, dovrai usare il link di cancellazione del codice d'accesso per cambiare la tua password ... a meno che tu non sia veramente bravo a indovinare.",
     "ERR_EM_VER" 		=> "La verifica via email non &egrave; abilitata. Per favore, contatta l'amministratore del sito.",
     "ERR_EMAIL_STR" 	=> "C'&egrave; qualcosa di strano. Per favore ricontrolla la tua email. Ci scusiamo per l'inconveniente"
-    
+
 ));
 
 //Maintenance Page

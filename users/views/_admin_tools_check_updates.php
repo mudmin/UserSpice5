@@ -90,7 +90,9 @@ if ($settings->spice_api != '') {
                 }
             } else { //do the update
                 echo "Update found... $result->next_ver released on $result->released.<br>";
+                if(file_exists($abs_us_root.$us_url_root.'usupdate.zip')){
                 unlink($abs_us_root.$us_url_root.'usupdate.zip');
+                }
                 $zipFile = $abs_us_root.$us_url_root.'usupdate.zip';
                 echo 'Creating zip file...';
                 logger(1, "$result->next_ver", 'Creating zip file');
@@ -123,7 +125,9 @@ if ($settings->spice_api != '') {
                 $zip = new ZipArchive();
 
                 if ($zip->open($zipFile) != 'true') {
+                    if(file_exists($zipFile)){
                     unlink($zipFile);
+                    }
                     echo 'Error :- Unable to open the Zip File';
                     logger(1, "$result->next_ver", 'Unable to open the Zip File');
                 }
@@ -138,19 +142,25 @@ if ($settings->spice_api != '') {
                     logger(1, "$result->next_ver", 'Extracting zip file');
                     $zip->close();
                     echo "<br><strong><font color='blue'>$result->message</font></strong>";
+                    if(file_exists($zipFile)){
                     unlink($zipFile);
+                    }
                     logger(1, "$result->next_ver", $result->message);
                     logger(1, "$result->next_ver", 'Running migration script(s)');
                     Redirect::to($us_url_root.'users/updates/index.php?auto=1');
                 } else {
+                    if(file_exists($zipFile)){
                     unlink($zipFile);
+                    }
                     logger(1, "$result->next_ver", 'Hash match failed');
                     echo "<br>The hash does not match.  This means one of 2 things. Either the file on the server has been tampered with or (more likely) the file was
             updated and we forgot to update the hash.  Please fill out a bug report. You can still download this plugin at $url if you wish.";
                 }
                 echo '<br>Deleting zip file';
                 logger(1, "$result->next_ver", 'Deleting zip file');
+                if(file_exists($zipFile)){
                 unlink($zipFile);
+                }
             }
         }
     }
@@ -162,7 +172,7 @@ if ($settings->spice_api != '') {
   <div class="text-center">
     <form class="" action="admin.php?view=updates" method="post">
       <input type="submit" name="sysup" value="Download & Install Updates" class="btn btn-primary"><br>
-      It's always a good idea to <strong><a href="<?=$us_url_root; ?>usersc/admin.php?view=backup">backup UserSpice</a></strong> before updating.
+      It's always a good idea to <strong><a href="<?=$us_url_root; ?>users/admin.php?view=backup">backup UserSpice</a></strong> before updating.
     </form>
   </div>
 <br>

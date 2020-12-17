@@ -26,8 +26,8 @@ class Cookie {
 		return $_COOKIE[$name];
 	}
 
-	public static function put($name, $value, $expiry, $path="/", $domain="", $secure=true, $httponly=true){
-		if (setcookie($name, $value, time() + $expiry, $path, $domain, $secure, $httponly)) {
+	public static function put($name, $value, $expiry, $path="/", $domain="", $secure=true, $httponly=true, $samesite = true){
+		if (setcookie($name, $value, time() + $expiry, $path, $domain, $secure, $httponly, $samesite)) {
 			return true;
 		}
 		return false;

@@ -20,7 +20,7 @@
 
         <div class="card no-padding">
           <div class="card-body">
-
+            Please note that you can install the <a href="admin.php?view=spice&search=userinfo">User Info</a> plugin to alter your registration fields.<br><br>
             <div class="form-group">
               <label for="registration">Allow New User Registration <a href="#!" class="nounderline" data-toggle="popover" data-content="Registration Switcher! Also controls OAuth (Social Logins). Default: Enabled." title="Note"><i class="fa fa-question-circle"></i></a></label>
               <span style="float:right;">

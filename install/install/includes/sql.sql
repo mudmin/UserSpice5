@@ -554,7 +554,7 @@ CREATE TABLE `users` (
   `pin` varchar(255) DEFAULT NULL,
   `fname` varchar(255) NOT NULL,
   `lname` varchar(255) NOT NULL,
-  `language` varchar(255) DEFAULT '''en-US''',
+  `language` varchar(255) DEFAULT 'en-US',
   `email_verified` tinyint(1) NOT NULL DEFAULT 0,
   `vericode` varchar(15) DEFAULT NULL,
   `vericode_expiry` datetime DEFAULT NULL,
