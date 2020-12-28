@@ -27,6 +27,7 @@ $new=Input::get('new');
 if($new!=1) if($user->isLoggedIn()) $user->logout();
 
 $verify_success=FALSE;
+$headrequestmethod = ($_SERVER[REQUEST_METHOD] === 'HEAD');
 
 $errors = array();
 if(Input::exists('get')){
@@ -56,17 +57,21 @@ if(Input::exists('get')){
 			$vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
 
 			echo lang("ERR_EMAIL_STR");
-			$verify->update(array('email_verified' => 0,'vericode' => randomstring(15),'vericode_expiry' => $vericode_expiry),$verify->data()->id);
+			if (!$headrequestmethod) {
+				$verify->update(array('email_verified' => 0,'vericode' => randomstring(15),'vericode_expiry' => $vericode_expiry),$verify->data()->id);
+			}
 			require $abs_us_root.$us_url_root.'users/views/_verify_resend.php';
 		}else{
 		if ($verify->exists() && $verify->data()->vericode == $vericode && (strtotime($verify->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) > 0)){
-			//check if this email account exists in the DB
-			if($new==1 && !$verify->data()->email_new == NULL)	$verify->update(array('email_verified' => 1,'vericode' => randomstring(15),'vericode_expiry' => date("Y-m-d H:i:s"),'email' => $verify->data()->email_new,'email_new' => NULL),$verify->data()->id);
-			else $verify->update(array('email_verified' => 1,'vericode' => randomstring(15),'vericode_expiry' => date("Y-m-d H:i:s")),$verify->data()->id);
 			$verify_success=TRUE;
-			logger($verify->data()->id,"User","Verification completed via vericode.");
-			$msg = lang("REDIR_EM_SUCC");
-			if($new==1){Redirect::to($us_url_root.'users/user_settings.php?msg=Email Updated Successfully');}
+			if (!$headrequestmethod) {
+				//check if this email account exists in the DB
+				if($new==1 && !$verify->data()->email_new == NULL)	$verify->update(array('email_verified' => 1,'vericode' => randomstring(15),'vericode_expiry' => date("Y-m-d H:i:s"),'email' => $verify->data()->email_new,'email_new' => NULL),$verify->data()->id);
+				else $verify->update(array('email_verified' => 1,'vericode' => randomstring(15),'vericode_expiry' => date("Y-m-d H:i:s")),$verify->data()->id);
+				logger($verify->data()->id,"User","Verification completed via vericode.");
+				$msg = lang("REDIR_EM_SUCC");
+				if($new==1){Redirect::to($us_url_root.'users/user_settings.php?msg=Email Updated Successfully');}
+			}
 		}
 	}
 	}else{
