@@ -321,70 +321,64 @@ $lang = array_merge($lang,array(
 
 	//User Settings
 	$lang = array_merge($lang,array(
-	"SET_PIN"	=> "Reset PIN",
-	"SET_WHY"	=> "Why can't I change this?",
-	"SET_PW_MATCH"	=> "Must match the New Password",
-
-	"SET_PIN_NEXT"	=> "You can set a new PIN the next time you require verification",
-	"SET_UPDATE"	=> "Update your user settings",
-	"SET_NOCHANGE"	=> "The Administrator has disabled changing usernames.",
-	"SET_ONECHANGE"	=> "The Administrator set username changes to occur only once and you have done so already.",
-
-	"SET_GRAVITAR"	=> "<strong>Want to change your profile picture? </strong><br> Visit <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> and setup an account with the same email you used on this site. It works across millions of sites. It's fast and easy!",
-
-	"SET_NOTE1"	=> "<p><strong>Please note</strong> there is a pending request to update your email to",
-
-	"SET_NOTE2"	=> ".</p><p>Please use the verification email to complete this request.</p>
-				<p>If you need a new verification email, please re-enter the email above and submit the request again.</p>",
-
-	"SET_PW_REQ" 	=> "required for changing password, email, or resetting PIN",
-	"SET_PW_REQI" 	=> "Required to change your password",
+	"SET_PIN"	=> "Stel PIN terug",
+	"SET_WHY"	=> "Waarom kan ek dit nie verander nie?",
+	"SET_PW_MATCH"	=> "Moet ooreenstem met die nuwe wagwoord",
+	"SET_PIN_NEXT"	=> "U kan 'n nuwe PIN instel die volgende keer as u verifikasie benodig",
+	"SET_UPDATE"	=> "Dateer u gebruikersinstellings op",
+	"SET_NOCHANGE"	=> "Die administrateur het veranderende gebruikersname uitgeskakel.",
+	"SET_ONECHANGE"	=> "Die administrateur het ingestel dat gebruikersnaamveranderings slegs een keer plaasvind en u het dit al gedoen.",
+	"SET_GRAVITAR"	=> "<strong> Wil u profielfoto verander? </strong> <br>Besoek <a href='https://af.gravatar.com/'>https://en.gravatar.com/</a> en stel 'n rekening op met dieselfde e-pos as wat u op hierdie webwerf gebruik het. Dit werk op miljoene webwerwe. Dit is vinnig en maklik! ",
+	"SET_NOTE1"	=> "<p> <strong> Let wel </strong> daar is 'n hangende versoek om u e-pos op te dateer na",
+	"SET_NOTE2"	=> ". </p> <p> Gebruik die verifikasie-e-pos om hierdie versoek te voltooi. </p>
+				<p> As u 'n nuwe verifikasie-e-posadres benodig, voer dan weer die e-pos hierbo in en dien die versoek weer in. </p>",
+	"SET_PW_REQ" 	=> "benodig om wagwoord, e-posadres te verander of PIN te herstel",
+	"SET_PW_REQI" 	=> "Vereis om u wagwoord te verander",
 
 		));
 
 	//Errors
 	$lang = array_merge($lang,array(
-	"ERR_FAIL_ACT"	=> "Failed to kill active sessions, Error: ",
-	"ERR_EMAIL"	=> "Email NOT sent due to error. Please contact site administrator.",
-	"ERR_EM_DB"	=> "That email does not exist in our database",
-	"ERR_TC"	=> "Please read and accept terms and conditions",
-	"ERR_CAP"	=> "You failed the Captcha Test, Robot!",
-	"ERR_PW_SAME"	=> "Your old password cannot be the same as your new",
-	"ERR_PW_FAIL"	=> "Current password verification failed. Update failed. Please try again.",
-	"ERR_GOOG"	=> "<strong>NOTE:</strong> If you originally signed up with your Google/Facebook account, you will need to use the forgot password link to change your password...unless you're really good at guessing.",
-	"ERR_EM_VER"	=> "Email verification is not enabled. Please contact the System Administrator.",
-	"ERR_EMAIL_STR"	=> "Something is strange. Please re-verify your email. We are sorry for the inconvenience",
-
+	"ERR_FAIL_ACT"	=> "Kon nie aktiewe sessies doodmaak nie, fout: ",
+	"ERR_EMAIL"	=> "E-pos word NIE gestuur as gevolg van 'n fout nie. Kontak die webwerfadministrateur.",
+	"ERR_EM_DB"	=> "Die e-posadres bestaan nie in ons databasis nie",
+	"ERR_TC"	=> "Lees en aanvaar asseblief die bepalings en voorwaardes",
+	"ERR_CAP"	=> "U het die Captcha-toets misluk, Robot!",
+	"ERR_PW_SAME"	=> "U ou wagwoord kan nie dieselfde wees as u nuwe nie",
+	"ERR_PW_FAIL"	=> "Huidige wagwoordverifikasie het misluk. Opdatering het misluk. Probeer asseblief weer.",
+	"ERR_GOOG"	=> "<strong> OPMERKING: </strong> As u oorspronklik by u Google / Facebook-rekening aangemeld het, moet u die skakel vir vergeet wagwoord gebruik om u wagwoord te verander ... tensy u regtig goed is met raai. ",
+	"ERR_EM_VER"	=> "E-posverifikasie is nie geaktiveer nie. Kontak asseblief die stelseladministrateur.",
+	"ERR_EMAIL_STR"	=> "Iets is vreemd. Verifieer asseblief u e-pos weer. Ons is jammer oor die ongerief",
 		));
 
 	//Maintenance Page
 	$lang = array_merge($lang,array(
-	"MAINT_HEAD"	=> "We will be back soon!",
-	"MAINT_MSG"	=> "Sorry for the inconvenience but we are performing some maintenance at the moment.<br> We will be back online shortly!",
-	"MAINT_BAN"	=> "Sorry. You have been banned. If you feel this is an error, please contact the administrator.",
-	"MAINT_TOK"	=> "There was an error with your form. Please go back and try again. Please note that submitting the form by refreshing the page will cause an error. If this continues to happen, please contact the administrator.",
-	"MAINT_OPEN"	=> "An Open Source PHP User Management Framework.",
-	"MAINT_PLEASE"	=> "You have successfully installed UserSpice!<br>To view our getting started documentation, please visit"
+	"MAINT_HEAD"	=> "Ons sal binnekort weer terugkom!",
+	"MAINT_MSG"	=> "Jammer vir die ongerief, maar ons is op die oomblik besig met onderhoud. <br> Ons sal binnekort weer aanlyn wees!",
+	"MAINT_BAN"	=> "Jammer. U is verban. Kontak die administrateur as u meen dat dit 'n fout is.",
+	"MAINT_TOK"	=> "Daar was 'n fout met u vorm. Gaan terug en probeer weer. Let daarop dat die indien van die vorm deur die bladsy te verfris 'n fout sal veroorsaak. As dit aanhou gebeur, kontak die administrateur.",
+	"MAINT_OPEN"	=> "\'n Open source PHP-gebruikersbestuurraamwerk.",
+	"MAINT_PLEASE"	=> "U het UserSpice suksesvol geïnstalleer! <br>  Om aan die slag te kom met dokumentasie, Besoek graag "
 		));
 
 	//dataTables Added in 4.4.08
 	//NOTE: do not change the words like _START_ between the two _ symbols!
 	$lang = array_merge($lang,array(
-	"DAT_SEARCH"	=> "Search",
-	"DAT_FIRST"	=> "First",
-	"DAT_LAST"	=> "Last",
-	"DAT_NEXT"	=> "Next",
-	"DAT_PREV"	=> "Previous",
-	"DAT_NODATA"	=> "No data available in table",
-	"DAT_INFO"	=> "Showing _START_ to _END_ of _TOTAL_ entries",
-	"DAT_ZERO"	=> "Showing 0 to 0 of 0 entries",
-	"DAT_FILTERED"	=> "(filtered from _MAX_ total entries)",
-	"DAT_MENU_LENG"	=> "Show _MENU_ entries",
-	"DAT_LOADING"	=> "Loading...",
-	"DAT_PROCESS"	=> "Processing...",
-	"DAT_NO_REC"	=> "No matching records found",
-	"DAT_ASC"	=> "Activate to sort column ascending",
-	"DAT_DESC"	=> "Activate to sort column descending",
+	"DAT_SEARCH"	=> "Soek",
+	"DAT_FIRST"	=> "Eerste",
+	"DAT_LAST"	=> "Laaste",
+	"DAT_NEXT"	=> "Volgende",
+	"DAT_PREV"	=> "Vorige",
+	"DAT_NODATA"	=> "Geen data beskikbaar in tabel",
+	"DAT_INFO"	=> "Wys _START_ tot _END_ van _TOTAL_ inskrywings",
+	"DAT_ZERO"	=> "Vertoon 0 tot 0 van 0 inskrywings",
+	"DAT_FILTERED"	=> "(gefilter uit _MAX_ totale inskrywings)",
+	"DAT_MENU_LENG"	=> "Wys _MENU_ inskrywings",
+	"DAT_LOADING"	=> "Laai ...",
+	"DAT_PROCESS"	=> "Verwerk ...",
+	"DAT_NO_REC"	=> "Geen ooreenstemmende rekords gevind nie",
+	"DAT_ASC"	=> "Aktiveer om kolom oplopend te sorteer",
+	"DAT_DESC"	=> "Aktiveer om kolom dalend te sorteer",
 		));
 
 
