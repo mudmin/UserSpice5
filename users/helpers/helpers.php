@@ -169,7 +169,9 @@ if (!function_exists('email')) {
     /*you can now pass in
     $opts = array(
     'email' => 'from_email@aol.com',
-    'name'  => 'Bob Smith'
+    'name'  => 'Bob Smith',
+    'cc'    => 'cc@example.com',
+    'bcc'   => 'bcc@example.com'
   );
   */
   $db = DB::getInstance();
@@ -188,31 +190,38 @@ if (!function_exists('email')) {
   $mail->Password = html_entity_decode($results->email_pass);    // SMTP password
   $mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
   $mail->Port = $results->smtp_port;                       // TCP port to connect to
-  if ($attachment !== null) {
-    $mail->addAttachment($attachment);
+
+  if($attachment != false){
+            $mail->addAttachment($attachment);
+          }
+
+          if(isset($opts['email']) && isset($opts['name'])){
+            $mail->setFrom($opts['email'], $opts['name']);
+          }else{
+            $mail->setFrom($results->from_email, $results->from_name);
+          }
+
+          if(isset($opts['cc'])){
+            $mail->addCC($opts['cc']);
+          }
+
+          if(isset($opts['bcc'])){
+            $mail->addBCC($opts['bcc']);
+          }
+
+  	$mail->addAddress(rawurldecode($to));
+    if($results->isHTML == 'true'){
+      $mail->isHTML(true);
+    }
+
+  	$mail->Subject = $subject;
+  	$mail->Body    = $body;
+    if (!empty($attachment)) $mail->addAttachment($attachment);
+  	$result = $mail->send();
+
+  	return $result;
   }
-
-  if (isset($opts['email']) && isset($opts['name'])) {
-    $mail->setFrom($opts['email'], $opts['name']);
-  } else {
-    $mail->setFrom($results->from_email, $results->from_name);
   }
-
-  $mail->addAddress(rawurldecode($to));                   // Add a recipient, name is optional
-  if ($results->isHTML == 'true') {
-    $mail->isHTML(true);
-  }                  // Set email format to HTML
-
-  $mail->Subject = $subject;
-  $mail->Body = $body;
-  if ($attachment !== null) {
-    $mail->addAttachment($attachment);
-  }
-  $result = $mail->send();
-
-  return $result;
-}
-}
 
 if (!function_exists('email_body')) {
   function email_body($template, $options = [])

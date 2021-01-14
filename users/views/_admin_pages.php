@@ -255,8 +255,7 @@ $csrf = Token::generate();
 
     <?php
     } ?>
-    </div>
-    <!-- /.row -->
+
 
     <script type="text/javascript" src="js/pagination/datatables.min.js"></script>
     <script>

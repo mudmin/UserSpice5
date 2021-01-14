@@ -20,7 +20,7 @@ if (!function_exists('userIdExists')) {
 
 //Retrieve information for all users
 if (!function_exists('fetchAllUsers')) {
-    function fetchAllUsers(string $orderBy = null, bool $desc = false, bool $disabled = true)
+    function fetchAllUsers($orderBy = [], $desc = [], $disabled = true)
     {
         $db = DB::getInstance();
         $q = 'SELECT * FROM users';

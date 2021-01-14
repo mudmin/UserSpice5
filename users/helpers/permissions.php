@@ -234,7 +234,7 @@ if (!function_exists('securePage')) {
         global $user,$master_account, $us_url_root,$abs_us_root;
         $urlRootLength = strlen($us_url_root);
         $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
-        $dest = encodeURIComponent("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+        $dest = encodeURIComponent("//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
         $db = DB::getInstance();
         $id = null;
         $private = null;

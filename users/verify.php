@@ -48,6 +48,8 @@ if(Input::exists('get')){
 		if($verify->data()->email_verified == 1 && $verify->data()->vericode == $vericode && $verify->data()->email_new == ""){
 			//email is already verified - Basically if the system already shows the email as verified and they click the link again, we're going to pass it regardless of the expiry because
 			//the hassle of telling people verification failed (after previously successful is worse than what could go wrong)
+			$eventhooks =  getMyHooks(['page'=>'verifySuccess']);
+			includeHook($eventhooks,'body');
 			require $abs_us_root.$us_url_root.'users/views/_verify_success.php';
 
 
@@ -57,6 +59,8 @@ if(Input::exists('get')){
 
 			echo lang("ERR_EMAIL_STR");
 			$verify->update(array('email_verified' => 0,'vericode' => randomstring(15),'vericode_expiry' => $vericode_expiry),$verify->data()->id);
+			$eventhooks =  getMyHooks(['page'=>'verifyResend']);
+			includeHook($eventhooks,'body');
 			require $abs_us_root.$us_url_root.'users/views/_verify_resend.php';
 		}else{
 		if ($verify->exists() && $verify->data()->vericode == $vericode && (strtotime($verify->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) > 0)){
@@ -66,11 +70,15 @@ if(Input::exists('get')){
 			$verify_success=TRUE;
 			logger($verify->data()->id,"User","Verification completed via vericode.");
 			$msg = lang("REDIR_EM_SUCC");
+			$eventhooks =  getMyHooks(['page'=>'verifySuccess']);
+			includeHook($eventhooks,'body');
 			if($new==1){Redirect::to($us_url_root.'users/user_settings.php?msg=Email Updated Successfully');}
 		}
 	}
 	}else{
 		$errors = $validation->errors();
+		$eventhooks =  getMyHooks(['page'=>'verifyFail']);
+		includeHook($eventhooks,'body');
 	}
 }
 

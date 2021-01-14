@@ -2,10 +2,10 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-        <li>Manage</li>
-        <li class="active">Navigation</li>
-      </ol>
+          <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
+          <li>Settings</li>
+          <li class="active">Navigation</li>
+        </ol>
     </div>
   </div>
 </div>

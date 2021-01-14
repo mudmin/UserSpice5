@@ -233,6 +233,11 @@ if (Input::exists()) {
             }
             try {
                 // echo "Trying to create user";
+                if(isset($_SESSION['us_lang'])){
+                  $newLang = $_SESSION['us_lang'];
+                }else{
+                  $newLang = $settings->default_language;
+                }
                 $fields = [
                                         'username' => $username,
                                         'fname' => ucfirst(Input::get('fname')),
@@ -245,6 +250,7 @@ if (Input::exists()) {
                                         'vericode' => $vericode,
                                         'vericode_expiry' => $vericode_expiry,
                                         'oauth_tos_accepted' => true,
+                                        'language'=>$newLang,
                                 ];
                 $activeCheck = $db->query('SELECT active FROM users');
                 if (!$activeCheck->error()) {

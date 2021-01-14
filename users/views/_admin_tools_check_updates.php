@@ -124,7 +124,7 @@ if ($settings->spice_api != '') {
 
                 $zip = new ZipArchive();
 
-                if ($zip->open($zipFile) != 'true') {
+                if ($zip->open($zipFile) !== true) {
                     if(file_exists($zipFile)){
                     unlink($zipFile);
                     }

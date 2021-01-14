@@ -1,6 +1,7 @@
 <?php
 
 // Get user IP
+	if(!function_exists("getIP")){
 	function getIP() {
 	/*
 	This function will try to find out if user is coming behind proxy server. Why is this important?
@@ -29,8 +30,10 @@
 		}
 		return $ip;
 	}
+}
 
 // Pie Chart for Page Permission Counts
+if(!function_exists("fetchUserjsonPIE")){
 function fetchUserjsonPIE()
 	{
 	// Example query
@@ -42,8 +45,10 @@ function fetchUserjsonPIE()
 	return $results;
 	return $count;
 	}
+}
 
 // Bar Chart for Login Counts
+if(!function_exists("fetchUserjsonLG2")){
 function fetchUserjsonLG2()
 	{
 	// Example query
@@ -54,8 +59,10 @@ function fetchUserjsonLG2()
 	return $count;
 	return $results;
 	}
+}
 
 // Bar Chart for Signup Counts
+if(!function_exists("fetchUserjsonLG")){
 function fetchUserjsonLG()
 	{
 	// Example query
@@ -70,9 +77,11 @@ function fetchUserjsonLG()
 	$stmt->close();
 	return ($row);
 	}
+}
 
 
 // complex query gets audit
+	if(!function_exists("fetchAllLatest")){
 	function fetchAllLatest($userid,$start,$end,$eventcode)
 		{
 		$db = DB::getInstance();
@@ -100,8 +109,10 @@ function fetchUserjsonLG()
 			return $results;
 			return $num_returns;
 		}
+	}
 
 // simplest count function
+if(!function_exists("countStuff")){
 function countStuff($what)
 	{
 	$db = DB::getInstance();
@@ -111,17 +122,20 @@ function countStuff($what)
 	return $result;
 	return $num_returns;
 	}
-
+}
 
 // greedy count function with a modifier
+if(!function_exists("countLoginsSince")){
 function countLoginsSince($eventcode,$since) {
 	$db = DB::getInstance();
 	$stmt = $db->query("SELECT * FROM audit WHERE audit_eventcode = ? AND audit_timestamp > ?",[$eventcode,$since]);
 	$num_returns = $stmt->count();
 	return $num_returns;
 	}
+}
 
 // handy ago() function for UserSpice timestamps
+if(!function_exists("ago")){
 function ago($time) {
     $timediff=time()-$time;
     $days=intval($timediff/86400);
@@ -138,8 +152,10 @@ function ago($time) {
 
     return $timestring;
 }
+}
 
 //Retrieve information for admin audit
+if(!function_exists("fetchAllAudit")){
 	function fetchAllAudit()
 		{
 		$db = DB::getInstance();
@@ -160,8 +176,10 @@ function ago($time) {
 			return $results;
 			return $count;
 		}
+	}
 
 		//Retrieve information for user audit
+	if(!function_exists("fetchUserAudit")){
 	function fetchUserAudit($userid)
 		{
 		$db = DB::getInstance();
@@ -183,7 +201,9 @@ function ago($time) {
 			return $results;
 			return $num_returns;
 		}
+}
 
+if(!function_exists("writeAudit")){
  function writeAudit($userid,$userip,$othus,$event,$action,$itemid=0)
 	{
 	$db = DB::getInstance();
@@ -203,7 +223,7 @@ function ago($time) {
 	$result = $stmt->results();
 	return $result;
 	}
-
+}
 
 
 	?>

@@ -182,6 +182,13 @@ $token = Token::generate();
   <?php echo resultBlock($errors,$successes); ?>
 
   <h2>Configure Details for Permission Level: <?=$permissionDetails['name']?></h2><br>
+  <?php if($permissionId == 1 || $permissionId  == 2){ ?>
+    <b>
+      <font color="red">WARNING:</font>
+    </b>
+    Although you can rename this permission level, please do not try to change its purpose.  #1 is the default "User" permission for all users and #2 is the "Admin"
+    permission. Changing the purpose of these permissions <b>WILL</b> break things.<br><br>
+  <?php } ?>
   <form name='adminPermission' action='admin.php?view=permission&id=<?=$permissionId?>' method='post'>
     <div class="row">
       <div class="col-sm-12">
