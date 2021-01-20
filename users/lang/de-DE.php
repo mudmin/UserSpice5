@@ -332,7 +332,7 @@ $lang = array_merge($lang,array(
 		"ERR_PW_SAME"			=> "Das neue Passwort muss anders als das alte Passwort sein.",
 		"ERR_PW_FAIL"			=> "Altes Passwort stimmt nicht. Aktualisierung fehlgeschlagen. Bitte erneut versuchen.",
 		"ERR_GOOG"				=> "<strong>Hinweis:</strong> Falls Sie sich mit Ihrem Google/Facebook Konto registriert haben, müssen sie den - Passwort vergessen - Link benutzen, um Ihr Passwort zu ändern, es sei denn, dass Sie richtig gut raten können",
-		"ERR_EM_VER"			=> "Email&uuml;berfr&uuml;fung ist nich aktiviert. Bitte Systemadministrator kontaktieren.",
+		"ERR_EM_VER"			=>  "Email&uuml;berpr&uuml;fung ist nicht aktiviert. Bitte Systemadministrator kontaktieren.",
 		"ERR_EMAIL_STR"		=> "Etwas stimmt nicht. Emailadresse bitte überprüfen. Entschuldigung sie die Unannehmlichkeit.",
 		));
 
