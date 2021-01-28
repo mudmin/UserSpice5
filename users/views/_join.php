@@ -73,7 +73,7 @@ Special thanks to John Bovey for the password strenth feature.
             $num_numbers_s = 's';
           }
 
-          $num_numbers_statement = '<span id="number" class="gray_out_text">'.lang("JOIN_HAVE") . $num_numbers . lang("GEN_NUMBER") .'</span>';
+          $num_numbers_statement = '<span id="number" class="gray_out_text">'.lang("JOIN_HAVE") . $num_numbers . " " . lang("GEN_NUMBER") .'</span>';
         }
         $password_match_statement = '<span id="password_match" class="gray_out_text">'.lang("JOIN_TWICE").'</span>';
 

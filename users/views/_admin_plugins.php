@@ -98,6 +98,8 @@ $token = Token::generate();
         </div>
       </div>
     </div>
+  </div>
+  <div class="row">
     <div class="col-md-12">
       <div class="card">
         <div class="card-body">
@@ -107,12 +109,12 @@ $token = Token::generate();
             </div>
           </div>
           <?php if ($pluginsC > 0) { ?>
-            <table class="table table-striped table-responsive">
+            <table class="table table-striped">
               <thead>
                 <tr>
                   <th scope="col" width="25%">Plugin</th>
                   <th scope="col" width="50%">Description</th>
-                  <th scope="col" width="15%" class="text-center">Status</th>
+                  <th scope="col" width="10%" class="text-center">Status</th>
                   <th scope="col" width="15%" class="text-center">Actions</th>
                 </tr>
               </thead>
@@ -155,23 +157,23 @@ $token = Token::generate();
                           <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
                           <input type="hidden" name="plugin" value="<?= $t ?>">
                           <?php if ($usplugins[$t] == 1) { ?>
-                            <button type="submit" name="disable" value="Disable" class="btn btn-outline-dark showTooltip" title="Disable">
+                            <button type="submit" name="disable" value="Disable" class="btn btn-outline-dark" title="Disable">
                               <i class="fa fa-ban" aria-hidden="true"></i>
                             </button>
-                            <a class="btn btn-outline-primary showTooltip" title="Configure" href="<?= $us_url_root . 'users/admin.php?view=plugins_config&plugin=' . $t ?>" role="button">
+                            <a class="btn btn-outline-primary" title="Configure" href="<?= $us_url_root . 'users/admin.php?view=plugins_config&plugin=' . $t ?>" role="button">
                               <i class="fa fa-cogs" aria-hidden="true"></i>
                             </a>
                           <?php } ?>
                           <?php if ($usplugins[$t] == 0) { ?>
-                            <button type="submit" name="activate" value="Activate" class="btn btn-outline-success showTooltip" title="Activate">
+                            <button type="submit" name="activate" value="Activate" class="btn btn-outline-success" title="Activate">
                               <i class="fa fa-toggle-on" aria-hidden="true"></i>
                             </button>
-                            <button type="submit" name="uninstall" value="Uninstall" class="btn btn-outline-danger showTooltip" title="Uninstall">
+                            <button type="submit" name="uninstall" value="Uninstall" class="btn btn-outline-danger" title="Uninstall">
                               <i class="fa fa-trash-o" aria-hidden="true"></i>
                             </button>
                           <?php } ?>
                           <?php if ($usplugins[$t] != 0 && $usplugins[$t] != 1) { ?>
-                            <button type="submit" name="install" value="Install" class="btn btn-outline-primary showTooltip" title="Install">
+                            <button type="submit" name="install" value="Install" class="btn btn-outline-primary" title="Install">
                               <i class="fa fa-download" aria-hidden="true"></i>
                             </button>
                             <!-- <input type="submit" name="uninstall" value="Uninstall" class="btn btn-default"> -->

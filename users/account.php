@@ -32,7 +32,7 @@ if (!empty($_POST['uncloak'])) {
         $to = $_SESSION['cloak_to'];
         $from = $_SESSION['cloak_from'];
         unset($_SESSION['cloak_to']);
-        $_SESSION['user'] = $_SESSION['cloak_from'];
+        $_SESSION[Config::get('session/session_name')] = $_SESSION['cloak_from'];
         unset($_SESSION['cloak_from']);
         logger($from, 'Cloaking', 'uncloaked from '.$to);
         Redirect::to($us_url_root.'users/admin.php?view=users&err=You+are+now+you!');
