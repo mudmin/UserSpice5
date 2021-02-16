@@ -47,10 +47,18 @@ tfoot input {
           <td><?=$l->logdate; ?></td>
           <td><?=$l->logtype; ?></td>
           <td>
+            <div class="input-group">
             <?php if ($l->metadata !== null) {?>
               <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?=$l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
-            <?php } ?>
-            <?=$l->lognote; ?>
+            <?php }
+            if(strlen($l->lognote) > 80){ ?>
+              <textarea rows="1" class="form-control" readonly><?=$l->lognote;?></textarea>
+            <?php
+            }else{
+              echo $l->lognote;
+            }
+            ?>
+            </div>
           </td>
         </tr>
       <?php } ?>

@@ -3,7 +3,7 @@ include "../init.php";
 $db = DB::getInstance();
 $settings = $db->query("SELECT * FROM settings")->first();
 
-if (!in_array($user->data()->id, $master_account)) {
+if (!isset($user) || (!in_array($user->data()->id, $master_account))) {
   die("Permission denied");
 }
 $type = Input::get('type');

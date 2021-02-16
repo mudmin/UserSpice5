@@ -294,9 +294,18 @@ if (Input::exists()) {
 <div class="container">
 <?php
 if ($settings->registration == 1) {
-    require $abs_us_root.$us_url_root.'users/views/_join.php';
+    if(file_exists($abs_us_root.$us_url_root.'usersc/views/_join.php')){
+      require($abs_us_root.$us_url_root.'usersc/views/_join.php');
+    }else{
+      require $abs_us_root.$us_url_root.'users/views/_join.php';
+    }
+
 } else {
+  if(file_exists($abs_us_root.$us_url_root.'usersc/views/_joinDisabled.php')){
+    require $abs_us_root.$us_url_root.'usersc/views/_joinDisabled.php';
+  }else{
     require $abs_us_root.$us_url_root.'users/views/_joinDisabled.php';
+  }
 }
 includeHook($hooks, 'bottom');
 ?>

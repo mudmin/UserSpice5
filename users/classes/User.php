@@ -218,7 +218,6 @@ class User
             if ($foundUS == 1) {
                 //Found an existing UserSpice user with the same email
                 // die("user already has userspice");
-                $this->_db->query('UPDATE users WHERE id = 3 SET lname = ?', [$email]) or die('Google oAuth Error');
             } else {
                 //If a user has neither UserSpice nor oAuth creds
                 //die("user has neither");

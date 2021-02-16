@@ -28,7 +28,12 @@
   <h4 align="center">
     <?php
     require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php';
-    $rc = @fsockopen('www.userspice.com', 80, $errno, $errstr, 1);
+
+    $rc = @fsockopen('www.userspice.com', 443, $errno, $errstr, 1);
+    if(!is_resource($rc) ){
+      //try port 80
+      $rc = @fsockopen('www.userspice.com', 80, $errno, $errstr, 1);
+    }
     if (is_resource($rc)) {
         if ($settings->bleeding_edge == 1) {
             define('REMOTE_VERSION', 'https://userspice.com/version/beversion.txt');

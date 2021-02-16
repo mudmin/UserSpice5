@@ -98,8 +98,7 @@ if ($view == '' || $view == 'dashboard') {
               }
           } else {
               //It failed to retrieve anything from us_management, so we log the error and send them away
-              logger($user->data()->id, 'checkAccess', 'Failed to check access for '.$file.', Error: '.$db->errorString());
-
+              logger($user->data()->id, 'checkAccess', 'Failed to check access for '.$value.', Error: '.$db->errorString());
               return false;
           }
       }
@@ -248,10 +247,6 @@ if ($view == '' || $view == 'dashboard') {
       }
     }
     ?>
-    <p align="center">
-      <font color='black'><br>&copy;<?=date('Y '); ?><?=$settings->copyright; ?></font>
-    </p>
-
 
   </div> <!-- .content -->
 </div><!-- /#right-panel -->

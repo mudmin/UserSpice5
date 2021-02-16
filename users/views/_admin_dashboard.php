@@ -27,7 +27,9 @@
   <?php
   $widgets = glob($abs_us_root.$us_url_root.'usersc/widgets/*' , GLOB_ONLYDIR);
   foreach($widgets as $w){
-    include($w.'/widget.php');
+    if(file_exists($w.'/widget.php')){
+      include($w.'/widget.php');
+    }
   }
   ?>
 <!-- </div> -->

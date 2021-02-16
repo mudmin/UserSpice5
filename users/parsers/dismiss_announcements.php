@@ -1,7 +1,7 @@
 <?php
   require_once '../init.php';
   $db = DB::getInstance();
-  if(!hasPerm([2],$user->data()->id)){
+  if (!isset($user) || (!hasPerm([2], $user->data()->id) ) ) {
   die("You do not have permission to be here.");
   }
 
