@@ -11,7 +11,7 @@ $url = Input::get('url');
 $hash = Input::get('hash');
 $diag = Input::get('diag');
 $reserved = Input::get('reserved');
-$api = "https://userspice.com/bugs/api.php";
+$api = "https://api.userspice.com/api/v2/";
 
 $zipFile = "temp.zip";
 if(file_exists($abs_us_root.$us_url_root."users/parsers/".$zipFile)){

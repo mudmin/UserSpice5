@@ -76,7 +76,9 @@ if (Input::get('forgotten_password')) {
                 $errors[] = lang("ERR_EMAIL");
             }
         }else{
-            $errors[] = lang("ERR_EM_DB");
+            sleep(2); //pretend to send
+            logger(1,"Password Reset","Attempted password reset on ".$email);
+            $email_sent = true;
         }
     }else{
         //display the errors

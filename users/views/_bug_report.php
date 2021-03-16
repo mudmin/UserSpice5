@@ -13,9 +13,12 @@
 </div>
 </div>
 </header>
-<?php $dataB = $db->query("select version()")->results(true);?>
+<?php $dataB = $db->query("select version()")->results(true);
 
-<?php
+$api = "https://api.userspice.com/api/v2/bugs/";
+
+
+
 if(!empty($_POST['submitKey'])){
   $spice_api = Input::get("spice_api");
   $db->update('settings',1,['spice_api'=>$spice_api]);
@@ -34,8 +37,7 @@ if(!empty($_POST) && $settings->spice_api != ''){
     'call'=>"bugreport"
   );
 
-  // $api = "http://127.0.0.1/bugs/api_bugs.php";
-  $api = "https://userspice.com/bugs/api_bugs.php";
+
   $payload = json_encode($data);
 
   $ch = curl_init($api);
@@ -61,10 +63,29 @@ if(!empty($_POST) && $settings->spice_api != ''){
     Redirect::to('?view=bugs&err='.$result->msg);
   }
 }
+if($settings->spice_api != ''){
+  $data = array(
+    'key' => $settings->spice_api,
+    'call'=>"fetch"
+  );
+  $payload = json_encode($data);
+  $ch = curl_init($api);
+  //attach encoded JSON string to the POST fields
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+  //set the content type to application/json
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+  //return response instead of outputting
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  //execute the POST request
+  $result = curl_exec($ch);
+  //close cURL resource
+  curl_close($ch);
+  $result = json_decode($result);
+}
 ?>
 <div class="content mt-3">
   <h2>Bug Report</h2>
-  <p>A System report will be submitted with the following information to help in the diagnosis of the problem.  If you don't want to submit this information, please submit a report directly at https://userspice.com/bugs. Please note that the API may collect other information about the API call itself in order to prevent spam.
+  <p>A System report will be submitted with the following information to help in the diagnosis of the problem.  If you don't want to submit this information, please submit a report directly at https://bugs.userspice.com. Please note that the API may collect other information about the API call itself in order to prevent spam.
   </p>
   <?php if($settings->spice_api == ''){ ?>
     <a href="https://userspice.com/developer-api-keys/"><font color='red'><strong>The Bug Report feature will not work with out a FREE API Key.</font></strong>
@@ -97,16 +118,36 @@ if(!empty($_POST) && $settings->spice_api != ''){
         <input type="submit" name="submit" value="Submit Bug Report" class="btn btn-danger">
       <?php } ?>
     </form>
+    <?php if(isset($result) && count($result->fetch) > 0){ ?>
     <div class="col-12"><br>
       <h3>Your Previous Reports</h3>
-      <?php $prev = $db->query("SELECT * FROM logs WHERE logtype = ? ORDER BY id DESC",["your_api_bugs"])->results();?>
-      <table class="table table-striped">
-        <?php foreach($prev as $p){ ?>
+      <table class="table table-striped paginate">
+        <thead>
           <tr>
-            <td><a href="https://userspice.com/bugs/usersc/issue_detail.php?id=<?=$p->lognote?>">Issue #<?=$p->lognote?></a></td>
-            <td><a href="https://userspice.com/bugs/usersc/issue_detail.php?id=<?=$p->lognote?>"><?=$p->logdate?></a></td>
+            <th>Issue ID</th>
+            <th>Issue Title</th>
+            <th>Resolution</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php foreach($result->fetch as $p){ ?>
+          <tr>
+            <td>Issue #<?=$p->kIssueID?></td>
+            <td><?=$p->Issue_Title?></td>
+            <td><?=$p->Issue_Resolution_Title?></td>
+            <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?=$p->kIssueID?>">View Ticket</a></td>
           </tr>
         <?php } ?>
+      </tbody>
       </table>
     </div>
   </div>
+  <script type="text/javascript" src="<?=$us_url_root?>users/js/pagination/datatables.min.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function () {
+     $('.paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
+    });
+
+  </script>
+<?php } ?>

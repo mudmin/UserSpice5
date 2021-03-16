@@ -331,8 +331,30 @@ includeHook($hooks, 'pre');
                 </div>
               </div>
 
+              <div class="card no-padding">
+                <div class="card-header"><h3>Update Track</h3>
+                  This gives you the opportunity to be part of our early release "Bleeding Edge" program.<br>
+                </div>
+                <div class="card-body">
+                  <!-- Bleeding Edge -->
+                  <div class="form-group">
+                    <label>Receive Bleeding Edge (Beta/Early Release) Updates <a role="button" tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="With this enabled, when you check updates, you will see them earlier than standard users. Not recommended for mission critical applications, but the beta testing is appreciated."><i class="fa fa-question-circle"></i></a></label>
+                    <span class="float-right">
+                      <label class="switch switch-text switch-success">
+                        <input id="bleeding_edge" type="checkbox" class="switch-input toggle" data-desc="Bleeding Edge" <?php if ($settings->bleeding_edge == 1) {
+                      echo 'checked="true"';
+                  } ?>>
+                        <span data-on="Yes" data-off="No" class="switch-label"></span>
+                        <span class="switch-handle"></span>
+                      </label>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
+
           <input type="hidden" name="csrf" value="<?=Token::generate(); ?>" />
         </form>
         <?php if (in_array($user->data()->id, $master_account)) {?>

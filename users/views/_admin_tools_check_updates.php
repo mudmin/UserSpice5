@@ -57,7 +57,7 @@
 <?php
 //New API Stuff
 $type = Input::get('type');
-$api = 'https://userspice.com/bugs/api.php';
+$api = "https://api.userspice.com/api/v2/";
 // $api = "http://localhost/bugs/api.php";
 if ($settings->spice_api != '') {
     $sysup = Input::get('sysup');

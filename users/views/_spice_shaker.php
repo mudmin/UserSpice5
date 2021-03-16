@@ -1,6 +1,8 @@
 <?php if(!in_array($user->data()->id,$master_account)){Redirect::to('admin.php');}
 $diag = Input::get('diag');
-
+if(empty($_POST)){
+  $_POST['type'] = "featured";
+}
 ?>
 <div class="col-sm-8">
   <div class="page-header float-right">
@@ -29,8 +31,9 @@ $diag = Input::get('diag');
   }
   $type = Input::get('type');
   if($diag && $type == '' && !isset($_POST['goSearch'])){$_POST['goSearch'] = 1 && $_POST['search'] = 'demo plugin';}
-  $api = "https://userspice.com/bugs/api.php";
-  // $api = "http://localhost/bugs/api.php";
+  $api = "https://api.userspice.com/api/v2/";
+  // $api = "http://localhost/bugs/api/v2/";
+
   if($settings->spice_api != ''){
     if($diag){ echo "<h6>API Key found.</h6><br>"; }
     if(!empty($_POST['type'])){
@@ -43,6 +46,7 @@ $diag = Input::get('diag');
         'call' => 'loadtype'
       );
       $payload = json_encode($data);
+
       if($diag){ echo "<h6>Attempting CURL Request. Will show results below if they exist.</h6><br>"; }
       //attach encoded JSON string to the POST fields
       curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -103,6 +107,7 @@ $diag = Input::get('diag');
   else{
     if($diag){ echo "<h6>No API Key found.</h6><br>"; }
   }
+
   ?>
 
   <h2>Spice Shaker Auto Installer
@@ -152,6 +157,7 @@ $diag = Input::get('diag');
               <div class="d-flex">
                 <select class="form-control" name="type">
                   <option value="" disabled <?php if($type ==''){?>selected="Selected"<?php } ?>>--Choose One--</option>
+                  <option value="featured" <?php if($type =='featured'){?>selected="Selected"<?php } ?>>Featured</option>
                   <option value="plugin" <?php if($type =='plugin'){?>selected="Selected"<?php } ?>>Plugins</option>
                   <option value="template" <?php if($type =='template'){?>selected="Selected"<?php } ?>>Templates</option>
                   <option value="widget" <?php if($type =='widget'){?>selected="Selected"<?php } ?>>Widgets</option>
@@ -183,14 +189,25 @@ $diag = Input::get('diag');
           $counter = 0;
           if(!is_null($dev)){
             foreach($dev as $d){
+              if($d->release_type == 1){
+                $class = "card-official";
+                $text = "Official ";
+                $img = $us_url_root."users/images/check.png";
+                $warning = "";
+              }else{
+                $class = "";
+                $text = "Community ";
+                $img = "";
+                $warning = "warnme";
+              }
               ?>
 
               <div class="col-md-6 col-lg-4 pb-3">
-                <div class="card card-custom bg-white border-white border-0" style="height: 450px">
+                <div class="card card-custom <?=$class?> bg-white border-white border-0" style="height: 450px">
                   <div class="card-custom-img" style="background-image: url(<?php if($d->img != ''){echo $d->img;}else{?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php }?>);"></div>
                     <div class="card-custom-avatar">
                       <?php if($d->icon == ''){
-                        $src = "http://userspice.com/bugs/usersc/logos/nologo.png";
+                        $src = "https://bugs.userspice.com/usersc/logos/nologo.png";
                       }else{
                         $src = $d->icon;
                       }
@@ -199,7 +216,9 @@ $diag = Input::get('diag');
                     </div>
                     <div class="card-body" style="overflow-y: auto">
                       <h6 class="card-title"><?=$d->project?> v<?=$d->version." (".$d->status.")";?></h6>
-                      <p><strong><?=ucfirst($d->category)?></strong></p>
+                      <p><strong><?=$text?><?=ucfirst($d->category)?></strong>
+                        <img src="<?=$img?>" alt="" height="15">
+                      </p>
                       <p class="card-text"><?=$d->descrip?></p>
                     </div>
                     <div class="card-footer" style="background: inherit; border-color: inherit;">
@@ -207,9 +226,9 @@ $diag = Input::get('diag');
                       <?php
                       if(shakerIsInstalled($d->category,$d->reserved)){
                         ?>
-                        <button type="button" name="button" class="btn btn-danger installme"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
+                        <button type="button" name="button" class="btn btn-danger installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
                       <?php }else{ ?>
-                        <button type="button" name="button" class="btn btn-primary installme"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Download</button>
+                        <button type="button" name="button" class="btn btn-primary installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Download</button>
                       <?php } ?>
                       <a href="https://github.com/<?=$d->repo?>/tree/master/src/<?=$d->reserved?>" class="btn btn-outline-primary" target="_blank">View Source</a>
                       <a href="#" class="btn btn-success visit" target="_blank" style="display:none" id="<?=$counter?>">Check it Out!</a>
@@ -228,9 +247,15 @@ $diag = Input::get('diag');
           }
 
           ?>
-      
+
         <script type="text/javascript">
         $( ".installme" ).click(function(event) {
+          if($(this).hasClass("warnme")){
+            if(!confirm("WARNING:  Please understand that this is a community provided addon and the UserSpice developers cannot take any responsibility for any harm it may cause.  Please make sure you understand the risks before using community provided addons")){
+              location.reload(forceGet)
+            }
+          }
+
           $(".installme").hide();
           $(".install").show();
           var counter = $(this).attr('data-counter');
@@ -273,6 +298,10 @@ $diag = Input::get('diag');
       overflow: hidden;
       min-height: 450px;
       box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
+    }
+
+    .card-official{
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
     }
 
     .card-custom-img {
