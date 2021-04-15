@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %m1% - Dymamic markers which are replaced at run time by the relevant index.
 */
 
+/* Translation assisted by Tekniskedirektorn */
+
 $lang = array();
 //important strings
 //You defiitely want to customize these for your language
@@ -56,7 +58,7 @@ $lang = array_merge($lang,array(
 
 // Signup
 $lang = array_merge($lang,array(
-	"SIGNUP_TEXT"					=> "Registera",
+	"SIGNUP_TEXT"					=> "Registrera",
 	"SIGNUP_BUTTONTEXT"		=> "Registera mig",
 	"SIGNUP_AUDITTEXT"		=> "Registerad",
 	));
