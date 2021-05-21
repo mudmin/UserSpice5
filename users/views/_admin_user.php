@@ -24,7 +24,7 @@ $email = $db->query('SELECT email_act FROM email')->first();
 $act = $email->email_act;
 $errors = [];
 $successes = [];
-$userId = Input::get('id');
+$userId = (int) Input::get('id');
 
 //Check if selected user exists
 if (!userIdExists($userId)) {
@@ -114,7 +114,7 @@ if (!empty($_POST)) {
                     $successes[] = 'First Name Updated';
                     logger($user->data()->id, 'User Manager', "Updated first name for $userdetails->fname from $userdetails->fname to $fname.");
                 } else {
-                    ?><?php if (!$validation->errors() == '') {?><div class="alert alert-danger"><?=display_errors($validation->errors()); ?></div><?php } ?>
+                    ?><?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
           <?php
                 }
             }
@@ -137,7 +137,7 @@ if (!empty($_POST)) {
                     logger($user->data()->id, 'User Manager', "Updated last name for $userdetails->fname from $userdetails->lname to $lname.");
                 } else {
                     ?>
-          <?php if (!$validation->errors() == '') {?><div class="alert alert-danger"><?=display_errors($validation->errors()); ?></div><?php } ?>
+          <?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
           <?php
                 }
             }
@@ -240,7 +240,7 @@ if (!empty($_POST)) {
                     logger($user->data()->id, 'User Manager', "Updated email for $userdetails->fname from $userdetails->email to $email.");
                 } else {
                     ?>
-          <?php if (!$validation->errors() == '') {?><div class="alert alert-danger"><?=display_errors($validation->errors()); ?></div><?php } ?>
+          <?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
           <?php
                 }
             }
@@ -374,7 +374,7 @@ if (!empty($_POST)) {
 
   <div class="content mt-3">
     <?=resultBlock($errors, $successes); ?>
-    <?php if (!$validation->errors() == '') {?><div class="alert alert-danger"><?=display_errors($validation->errors()); ?></div><?php } ?>
+    <?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
     <?php includeHook($hooks, 'body'); ?>
       <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId; ?>' method='post'>
         <div class="row">
@@ -403,22 +403,22 @@ if (!empty($_POST)) {
                     <div class="col-12 col-sm-6">
                       <div class="form-group" id="username-group">
                         <label>Username:</label>
-                        <input  class='form-control' type='text' name='unx' value='<?=$userdetails->username; ?>' autocomplete="off" />
+                        <input  class='form-control' type='search' name='unx' value='<?=$userdetails->username; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="email-group">
                         <label>Email:</label>
-                        <input class='form-control' type='text' name='emx' value='<?=$userdetails->email; ?>' autocomplete="off" />
+                        <input class='form-control' type='search' name='emx' value='<?=$userdetails->email; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="fname-group">
                         <label>First Name:</label>
-                        <input  class='form-control' type='text' name='fnx' value='<?=$userdetails->fname; ?>' autocomplete="off" />
+                        <input  class='form-control' type='search' name='fnx' value='<?=$userdetails->fname; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group" id="lname-group">
                         <label>Last Name:</label>
-                        <input  class='form-control' type='text' name='lnx' value='<?=$userdetails->lname; ?>' autocomplete="off" />
+                        <input  class='form-control' type='search' name='lnx' value='<?=$userdetails->lname; ?>' autocomplete="off" />
                       </div>
 
                       <div class="form-group">

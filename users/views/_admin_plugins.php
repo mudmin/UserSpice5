@@ -12,6 +12,9 @@
 </div>
 </header>
 <?php
+if(!in_array($user->data()->id,$master_account)){
+  Redirect::to('admin.php?err=Plugin administration is for master accounts only.');
+}
 //Errors Successes
 $errors = [];
 $successes = [];

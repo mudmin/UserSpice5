@@ -78,7 +78,7 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
 ?>
 
 <div class="content mt-3">
-  <h2>Edit Nav Item</h2>
+  <h2>Edit Nav Item: <?=$item->link?></h2>
   <form name='edit_menu_item' action='admin.php?view=nav_item&id=<?=$menuId?>&action=edit' method='post'>
 
     <div class="form-group">
@@ -104,18 +104,24 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
     </div>
 
     <div class="form-group">
-      <label>Authorized Groups:</label>
+      <label>Authorized Groups:</label><br />
+      <div class="row">
       <?php
       foreach ($allGroups as $group) { ?>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
         <label><input type="checkbox" name="authorized_groups[<?=$group->id?>]" value="<?=$group->id?>"
           <?php if (in_array($group->id, $authorizedGroups)) {
             echo "checked=\"checked\" ";
           }
-          echo "/> {$group->name}</label>";
+          echo "/> {$group->name}</label><br />";
+        ?>
+        </div>
+        <?php 
         }
         ?>
-      </select>
+
     </div>
+  </div>
 
     <div class="form-group">
       <label>User must be logged in</label>
@@ -154,4 +160,3 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
     </form>
 
   </div>
-

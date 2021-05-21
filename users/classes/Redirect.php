@@ -18,9 +18,31 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Redirect {
+
+//This method no longer checks to see if a link is valid before redirecting
+//to prevent conflicts with deep folder structures
   public static function to($location = null, $args=''){
     global $us_url_root;
-    #die("Redirecting to $location<br />\n");
+    if ($location) {
+
+      if ($args) $location .= $args; // allows 'login.php?err=Error+Message' or the like
+      if (!headers_sent()){
+        header('Location: '.$location);
+        exit();
+      } else {
+        echo '<script type="text/javascript">';
+        echo 'window.location.href="'.$location.'";';
+        echo '</script>';
+        echo '<noscript>';
+        echo '<meta http-equiv="refresh" content="0;url='.$location.'" />';
+        echo '</noscript>'; exit;
+      }
+    }
+  }
+
+//This is the old Redirect::to method that attempts to see if a link is valid before redirecting
+  public static function safe($location = null, $args=''){
+    global $us_url_root;
     if ($location) {
       if (!preg_match('/^https?:\/\//', $location) && !file_exists($location)) {
         foreach (array($us_url_root, '../', 'users/', substr($us_url_root, 1), '../../', '/', '/users/') as $prefix) {

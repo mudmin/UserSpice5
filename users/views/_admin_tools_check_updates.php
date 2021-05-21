@@ -184,7 +184,6 @@ if ($settings->spice_api != '') {
 <?php } elseif ($settings->spice_api == '') {
     echo "<h4 align='center'>You cannot download automatic updates because you have not entered your free API key in the dashboard</h4><br>";
 } ?>
-</div>
 
 <div class="row">
   <div class="col-12 text-center">
@@ -198,4 +197,5 @@ if ($settings->spice_api != '') {
         $db->update('us_plugins', $p->id, ['last_check' => date('Y-m-d H:i:s')]);
     } ?>
   </div>
+</div>
 </div>

@@ -311,14 +311,19 @@ if (!function_exists('securePage')) {
             return false;
         } else {
             //Retrieve list of permission levels with access to page
+            $pagePermissions = [];
+            $permissions = $db->query('SELECT permission_id FROM permission_page_matches WHERE page_id = ?', [$pageID])->results();
+            foreach($permissions as $p){
+              $pagePermissions[] = $p->permission_id;
+            }
 
-            $query = $db->query('SELECT permission_id FROM permission_page_matches WHERE page_id = ?', [$pageID]);
-
-            $permission = $query->results();
-            $pagePermissions[] = $permission;
+            if($pagePermissions == []){
+              //default to admin only
+              $pagePermissions = [2];
+            }
 
             //Check if user's permission levels allow access to page
-            if (checkPermission($pagePermissions)) {
+            if (hasPerm($pagePermissions)) {
                 return true;
             } elseif (in_array($user->data()->id, $master_account)) { //Grant access if master user
                 return true;
@@ -442,35 +447,6 @@ if (!function_exists('fetchAllPermissions')) {
     }
 }
 
-//Does user have permission
-//This is the old school UserSpice Permission System
-if (!function_exists('checkPermission')) {
-    function checkPermission($permission)
-    {
-        $db = DB::getInstance();
-        global $user;
-        //Grant access if master user
-        $access = 0;
-
-        foreach ($permission[0] as $perm) {
-            if ($access == 0) {
-                $query = $db->query('SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?', [$user->data()->id, $perm->permission_id]);
-                $results = $query->count();
-                if ($results > 0) {
-                    $access = 1;
-                }
-            }
-        }
-        if ($access == 1) {
-            return true;
-        }
-        if ($user->data()->id == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
 
 //Check if a permission level name exists in the DB
 if (!function_exists('permissionNameExists')) {

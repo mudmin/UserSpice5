@@ -203,30 +203,12 @@ if (!function_exists('sanitizedDest')) {
 }
 
 //Displays error and success messages
+//As of 5.3.0, this function automatically converts old resultBlock
+//error messages to the new Session based system
 if (!function_exists('resultBlock')) {
     function resultBlock($errors, $successes)
     {
-        //Error block
-        if (count($errors) > 0) {
-            echo "<div class='alert alert-danger alert-dismissible' role='alert'> <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-      <ul style='padding-left:1.25rem !important'>";
-            foreach ($errors as $error) {
-                echo '<li>'.$error.'</li>';
-            }
-            echo '</ul>';
-            echo '</div>';
-        }
-
-        //Success block
-        if (count($successes) > 0) {
-            echo "<div class='alert alert-success alert-dismissible' role='alert'> <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-      <ul style='padding-left:1.25rem !important'>";
-            foreach ($successes as $success) {
-                echo '<li>'.$success.'</li>';
-            }
-            echo '</ul>';
-            echo '</div>';
-        }
+      sessionValMessages($errors, $successes, NULL);
     }
 }
 
@@ -506,7 +488,9 @@ if (!function_exists('logger')) {
     function logger($user_id, $logtype, $lognote, $metadata = null)
     {
         $db = DB::getInstance();
-
+        if(is_array($lognote) || is_object($lognote)){
+          $lognote = json_encode($lognote);
+        }
         $fields = [
       'user_id' => $user_id,
       'logdate' => date('Y-m-d H:i:s'),
@@ -897,7 +881,9 @@ if (!function_exists('echodatetime')) {
           global $user;
           $db = DB::getInstance();
           if (is_null($uid)) {
+            if(isset($_SESSION['kUserSessionID'])){
               $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0 AND kUserSessionID <> ?', [$user->data()->id, $_SESSION['kUserSessionID']]);
+            }
           } else {
               $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0', [$uid]);
           }
@@ -1194,9 +1180,12 @@ if (!function_exists('echodatetime')) {
           $db = DB::getInstance();
           foreach ($hooks as $k => $v) {
               foreach ($v as $key => $value) {
-                  $check = $db->query('SELECT * FROM us_plugin_hooks WHERE page = ? AND folder = ? AND position = ? AND hook = ?', [$k, $plugin_name, $key, $value])->count();
+                  $checkQ = $db->query('SELECT * FROM us_plugin_hooks WHERE page = ? AND folder = ? AND position = ? AND hook = ?', [$k, $plugin_name, $key, $value]);
 
-                  if ($check > 0) {
+                  $checkC = $checkQ->count();
+                  if ($checkC > 0) {
+                      $check = $checkQ->first();
+                      $db->update("us_plugin_hooks",$check->id,['disabled'=>0]);
                       continue;
                   }
                   $fields = [
@@ -1215,7 +1204,7 @@ if (!function_exists('echodatetime')) {
       function deRegisterHooks($plugin_name)
       {
           $db = DB::getInstance();
-          $hooks = $db->query('DELETE FROM us_plugin_hooks WHERE folder = ?', [$plugin_name]);
+          $hooks = $db->query('UPDATE us_plugin_hooks SET disabled = 1 WHERE folder = ?', [$plugin_name]);
       }
   }
 
@@ -1341,3 +1330,56 @@ if (!function_exists('echodatetime')) {
           return json_last_error() == JSON_ERROR_NONE;
       }
   }
+
+//Added in 5.3.0
+//Grabs messages stored in the $_SESSION varaible and gets them ready for the error message system
+//These are errors and successes from the validation class and an extra place to store general messages.
+  if (!function_exists('parseSessionMessages')) {
+    function parseSessionMessages()
+    {
+      $sn = Config::get('session/session_name');
+      $messages = [];
+      $keys = ["genMsg","valSuc","valErr"];
+      foreach($keys as $key){
+        if(isset($_SESSION[$sn.$key])){
+
+          if(is_array($_SESSION[$sn.$key])){
+          $string = "";
+          foreach($_SESSION[$sn.$key] as $s){
+            //deal with compatibility of display_errors function
+            if(is_array($s)){
+              foreach($s as $str){
+                $string .= "<li>".$str."</li>";
+              }
+            }elseif(count($_SESSION[$sn.$key]) > 1){
+              $string .= "<li>".$s."</li>";
+            }else{
+              $string .= $s;
+            }
+          }
+          $messages[$key] = $string;
+        }else{
+          $messages[$key] = $_SESSION[$sn.$key];
+        }
+      }else{
+        $messages[$key] = "";
+      }
+      $_SESSION[$sn.$key] = "";
+    }
+    return $messages;
+  }
+}
+
+//Added in 5.3.0
+//This allows you to pass 3 parameters from standard php arrays
+//to the $_SESSION varables without having to deal with the crazy naming
+//Note that the session variables have these crazy names to prevent cross talk
+//on shared hosting environments
+function sessionValMessages($valErr = [],$valSuc = [], $genMsg = []){
+  $keys = ["valErr","valSuc","genMsg"];
+  foreach($keys as $key){
+      if($$key != [] && $$key != NULL){
+        $_SESSION[Config::get('session/session_name').$key] = $$key;
+      }
+  }
+}

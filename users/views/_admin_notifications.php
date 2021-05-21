@@ -93,7 +93,7 @@ $count = $adminNotificationsQ->count();
 <div class="content mt-3">
   <h2>Notifications  Manager</h2>
   <?=resultBlock($errors,$successes);?>
-  <?php if(!$validation->errors()=='') {?><div class="alert alert-danger"><?=display_errors($validation->errors());?></div><?php } ?>
+  <?php if(!$validation->errors()=='') { display_errors($validation->errors()); } ?>
   <?php if($count > 0) {?><label><input type="checkbox" class="checkAllMsg" />
     [ check/uncheck all ]</label><?php } ?>                         <div class="btn-group pull-right"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#composemass"><i class="fa fa-plus"></i> New Mass Notification</button></div>
     <br><br>

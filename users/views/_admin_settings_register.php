@@ -50,21 +50,8 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="auto_assign_un">Auto Assign Usernames <a href="#!" class="nounderline" title="Note" data-toggle="popover" data-content="Don't want users to choose their usernames? No worries! Enable this and a users default username will be their first initial and last name. This already exists? Okay! Lets do first name and last initial. Still not good? Email address it is since you won't be duplicating emails in your database! This will remove the username field from both the external and internal registration forms.Â Default: Disabled."><i class="fa fa-question-circle"></i></a></label>
-              <select id="auto_assign_un" class="form-control ajxnum" data-desc="Auto Assign Usernames" name="auto_assign_un">
-                <option value="1" <?php if($settings->auto_assign_un==1) echo 'selected="selected"'; ?> >Enabled</option>
-                <option value="0" <?php if($settings->auto_assign_un==0) echo 'selected="selected"'; ?> >Disabled</option>
-              </select>
-            </div>
-
-
-
-
           </div>
         </div>
-
-
       </div>
 
       <div class="col-md-6">

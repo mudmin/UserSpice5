@@ -5,6 +5,7 @@
         <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
         <li>Tools</li>
         <li class="active">System Logs</li>
+        <li></li>
       </ol>
     </div>
   </div>
@@ -37,6 +38,7 @@ tfoot input {
       <th>Date</th>
       <th>Type</th>
       <th>Note</th>
+      <th></th>
     </thead>
     <tbody>
       <?php foreach ($logs as $l) { ?>
@@ -48,17 +50,20 @@ tfoot input {
           <td><?=$l->logtype; ?></td>
           <td>
             <div class="input-group">
-            <?php if ($l->metadata !== null) {?>
-              <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?=$l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
-            <?php }
-            if(strlen($l->lognote) > 80){ ?>
-              <textarea rows="1" class="form-control" readonly><?=$l->lognote;?></textarea>
+              <?php
+              if(strlen($l->lognote) > 80){ ?>
+              <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?=$l->lognote;?></textarea>
             <?php
             }else{
               echo $l->lognote;
             }
             ?>
             </div>
+          </td>
+          <td>
+            <?php if ($l->metadata !== null) {?>
+              <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?=$l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
+            <?php } ?>
           </td>
         </tr>
       <?php } ?>

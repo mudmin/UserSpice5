@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
 <?php
+
 $page=currentFile();
 $titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));
 if ($titleQ->count() > 0) {
@@ -73,7 +74,65 @@ form label {font-weight:600}
 ?>
 
 <?php
+if(!function_exists('usView')){
+  function usView($file)
+{
+    global $abs_us_root;
+    global $us_url_root;
+    if (checkAccess('page', $file)) {
+        if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin/'.$file)) {
+            $path = $abs_us_root.$us_url_root.'usersc/includes/admin/'.$file;
+        } elseif (file_exists($abs_us_root.$us_url_root.'users/views/'.$file)) {
+            $path = $abs_us_root.$us_url_root.'users/views/'.$file;
+        } else {
+            $path = $abs_us_root.$us_url_root.'users/views/_admin_dashboard.php';
+        }
 
+        return $path;
+    } else {
+        $path = $abs_us_root.$us_url_root.'users/views/_admin_dashboard.php';
+
+        return $path;
+    }
+}
+}
+
+if(!function_exists('checkAccess')){
+function checkAccess($key, $value)
+{
+    global $db, $user, $master_account;
+    //Check if they belong to the master account array or have the Administrator (default 2) Perm
+    if (in_array($user->data()->id, $master_account) || hasPerm([2], $user->data()->id)) {
+        return true;
+    } else {
+        //They're not, now we're gonna check if the view exists in us_management and if they have perms
+        $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]);
+        if (!$db->error()) {
+            $checkC = $checkQ->count();
+            if ($checkC < 1) {
+                //The page isn't in the table, so we're gonna reject their ability to go
+                return false;
+            } else {
+                //The page is in there, so now we're gonna check if they have permission
+                $check = $checkQ->first();
+                if (hasPerm([$check->access], $user->data()->id)) {
+                    //They have permissions listed in us_management, let them through
+                    return true;
+                } else {
+                    //They don't have permissions, reject them
+                    return false;
+                }
+            }
+        } else {
+            //It failed to retrieve anything from us_management, so we log the error and send them away
+            logger($user->data()->id, 'checkAccess', 'Failed to check access for '.$value.', Error: '.$db->errorString());
+            return false;
+        }
+    }
+}
+}
+
+if(!function_exists('activeDropdown')){
 function activeDropdown($View, $dropId, $Area = false){
 	$sttngsDown = ['general','reg','social','email'];
 	$toolsDown = ['backup','updates','cron','forms','ip','messages','notifications','security_logs','sessions','logs','templates'];
@@ -102,6 +161,7 @@ function activeDropdown($View, $dropId, $Area = false){
     return ['','false'];;
 	}
 
+}
 }
 
 ?>
@@ -152,7 +212,7 @@ function activeDropdown($View, $dropId, $Area = false){
 
             </ul>
           </li>
-<?php //dump($plugins); ?>
+<?php if(in_array($user->data()->id,$master_account)){?>
 
           <li class="menu-item-has-children dropdown <?=activeDropdown($view, 'addons')[0];?>">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="<?=activeDropdown($view, 'addons')[1];?>"> <i class="menu-icon fa fa-plus"></i>Plugins</a>
@@ -177,7 +237,8 @@ function activeDropdown($View, $dropId, $Area = false){
 
             </ul>
           </li>
-          <?php if(file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_panels.php')){ ?>
+        <?php }
+           if(file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_panels.php')){ ?>
             <?php if(checkAccess('view','stats')){?> <li <?=($view == 'stats') ? 'class="active"' : '' ;?>>
                 <a href="admin.php?view=legacy"><i class="menu-icon fa fa-clock-o"></i>Legacy Buttons</a>
             </li>

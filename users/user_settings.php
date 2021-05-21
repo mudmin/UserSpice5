@@ -122,7 +122,7 @@ if (!empty($_POST)) {
       ]);
             if ($validation->passed()) {
                 $db->update('users', $userId, $fields);
-                $successes[] = lang('GEN_FNAME').' '.lang('GEN_UPDATED');
+                $successes[] = lang('GEN_LNAME').' '.lang('GEN_UPDATED');
                 logger($user->data()->id, 'User', "Changed lname from $userdetails->lname to $lname.");
             } else {
                 //validation did not pass
@@ -243,7 +243,9 @@ if (!empty($_POST)) {
             }
         }
     }
-    $userdetails = fetchUserDetails(null, null, $userdetails->id);
+
+    sessionValMessages($successes,$errors);
+    Redirect::to("user_settings.php");
 }
 ?>
 <div id="page-wrapper">
@@ -258,8 +260,8 @@ if (!empty($_POST)) {
           <?php if (!pluginActive('profile_pic', true)) {
     echo lang('SET_GRAVITAR');
 }?><br>
-          <?php if (!$errors == '') {?><div class="alert alert-danger"><?=display_errors($errors); ?></div><?php } ?>
-          <?php if (!$successes == '') {?><div class="alert alert-success"><?=display_successes($successes); ?></div><?php }
+          <?php if (!$errors == '') { display_errors($errors); } ?>
+          <?php if (!$successes == '') { display_successes($successes); }
           includeHook($hooks, 'body');
           ?>
 

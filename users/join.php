@@ -30,16 +30,11 @@ require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
     die();
 }
 $hooks = getMyHooks();
-if (ipCheckBan()) {
-    Redirect::to($us_url_root.'usersc/scripts/banned.php');
-    die();
-}
+
 if ($user->isLoggedIn()) {
     Redirect::to($us_url_root.'index.php');
 }
-if ($settings->recaptcha == 1 || $settings->recaptcha == 2) {
-    //require_once($abs_us_root.$us_url_root."users/includes/recaptcha.config.php");
-}
+
 includeHook($hooks, 'pre');
 //There is a lot of commented out code for a future release of sign ups with payments
 $form_method = 'POST';
@@ -53,17 +48,14 @@ $query = $db->query('SELECT * FROM email');
 $results = $query->first();
 $act = $results->email_act;
 
-//Opposite Day for Pre-Activation - Basically if you say in email
-//settings that you do NOT want email activation, this lists new
-//users as active in the database, otherwise they will become
+//If you say in email settings that you do NOT want email activation,
+//new users are active in the database, otherwise they will become
 //active after verifying their email.
 if ($act == 1) {
     $pre = 0;
 } else {
     $pre = 1;
 }
-
-$reCaptchaValid = false;
 
 if (Input::exists()) {
     $token = $_POST['csrf'];
@@ -74,26 +66,14 @@ if (Input::exists()) {
     $fname = Input::get('fname');
     $lname = Input::get('lname');
     $email = Input::get('email');
-    if ($settings->auto_assign_un == 1) {
-        $username = username_helper($fname, $lname, $email);
-        if (!$username) {
-            $username = null;
-        }
-    } else {
-        $username = Input::get('username');
-    }
+    $username = Input::get('username');
+
 
     $validation = new Validate();
-    if ($settings->auto_assign_un == 0) {
-        if (pluginActive('userInfo', true)) {
-            $is_not_email = false;
-        } else {
-            $is_not_email = true;
-        }
+
         $validation->check($_POST, [
           'username' => [
                 'display' => lang('GEN_UNAME'),
-                'is_not_email' => $is_not_email,
                 'required' => true,
                 'min' => $settings->min_un,
                 'max' => $settings->max_un,
@@ -103,19 +83,21 @@ if (Input::exists()) {
                 'display' => lang('GEN_FNAME'),
                 'required' => true,
                 'min' => 1,
-                'max' => 100,
+                'max' => 60,
           ],
           'lname' => [
                 'display' => lang('GEN_LNAME'),
                 'required' => true,
                 'min' => 1,
-                'max' => 100,
+                'max' => 60,
           ],
           'email' => [
                 'display' => lang('GEN_EMAIL'),
                 'required' => true,
                 'valid_email' => true,
                 'unique' => 'users',
+                'min' => 5,
+                'max' => 100,
           ],
 
           'password' => [
@@ -130,87 +112,10 @@ if (Input::exists()) {
                 'matches' => 'password',
           ],
         ]);
+    if ($eventhooks = getMyHooks(['page' => 'joinAttempt'])) {
+        includeHook($eventhooks, 'body');
     }
-    if ($settings->auto_assign_un == 1) {
-        $validation->check($_POST, [
-            'fname' => [
-                  'display' => lang('GEN_FNAME'),
-                  'required' => true,
-                  'min' => 1,
-                  'max' => 60,
-            ],
-            'lname' => [
-                  'display' => lang('GEN_LNAME'),
-                  'required' => true,
-                  'min' => 1,
-                  'max' => 60,
-            ],
-            'email' => [
-                  'display' => lang('GEN_EMAIL'),
-                  'required' => true,
-                  'valid_email' => true,
-                  'unique' => 'users',
-                  'min' => 5,
-                  'max' => 100,
-            ],
-
-            'password' => [
-                  'display' => lang('GEN_PASS'),
-                  'required' => true,
-                  'min' => $settings->min_pw,
-                  'max' => $settings->max_pw,
-            ],
-            'confirm' => [
-                  'display' => lang('PW_CONF'),
-                  'required' => true,
-                  'matches' => 'password',
-            ],
-          ]);
-    }
-
     if ($validation->passed()) {
-        //Logic if ReCAPTCHA is turned ON
-        if ($settings->recaptcha > 0) {
-            if (!function_exists('post_captcha')) {
-                function post_captcha($user_response)
-                {
-                    global $settings;
-                    $fields_string = '';
-                    $fields = [
-                  'secret' => $settings->recap_private,
-                  'response' => $user_response,
-              ];
-                    foreach ($fields as $key => $value) {
-                        $fields_string .= $key.'='.$value.'&';
-                    }
-                    $fields_string = rtrim($fields_string, '&');
-
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
-                    curl_setopt($ch, CURLOPT_POST, count($fields));
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-                    $result = curl_exec($ch);
-                    curl_close($ch);
-
-                    return json_decode($result, true);
-                }
-            }
-
-            // Call the function post_captcha
-            $res = post_captcha($_POST['g-recaptcha-response']);
-
-            if (!$res['success']) {
-                // What happens when the reCAPTCHA is not properly set up
-                echo 'reCAPTCHA error: Check to make sure your keys match the registered domain and are in the correct locations. You may also want to doublecheck your code for typos or syntax errors.';
-            } else {
-                $reCaptchaValid = true;
-                $form_valid = true;
-            }
-        } //else for recaptcha
-
-        if ($reCaptchaValid || $settings->recaptcha == 0) {
             $form_valid = true;
             //add user to the database
             $user = new User();
@@ -284,7 +189,7 @@ if (Input::exists()) {
                 }
                 die();
             }
-        }
+
     } //Validation
 } //Input exists
 
@@ -314,19 +219,8 @@ includeHook($hooks, 'bottom');
 </div>
 
 <!-- footers -->
-<?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; // the final html footer copyright row + the external js calls?>
+<?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; ?>
 
-<?php if ($settings->recaptcha > 0) { ?>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-    function submitForm() {
-        document.getElementById("payment-form").submit();
-    }
-</script>
-<?php } ?>
-<?php if ($settings->auto_assign_un == 0) { ?>
-
-<?php } ?>
 <script type="text/javascript">
     $(document).ready(function(){
         $('#password_view_control').hover(function () {
@@ -339,6 +233,4 @@ includeHook($hooks, 'bottom');
     });
 </script>
 
-
-
-<?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; // currently just the closing /body and /html?>
+<?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

@@ -254,39 +254,6 @@ includeHook($hooks, 'pre');
               </div>
 
               <div class="card no-padding">
-                <div class="card-header"><h3>Invisible Recaptcha v3</h3></div>
-                <div class="card-body">
-
-                  <!-- Recaptcha Option -->
-                  <div class="form-group">
-                    <label>Invisible Recaptcha (requires v3 Keys from <a class="text-primary" href="https://www.google.com/recaptcha" target="_blank">here.</a>) <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Use the Google Recaptcha to protect yourself from spam registrations and logins, and to verify the legitimacy of a users session. You can set this to Enabled for Registration and Logins, or just Registrations. Default: Disabled."><i class="fa fa-question-circle"></i></a></label>
-                    <select id="recaptcha" class="form-control ajxnum" data-desc="Invisible Recaptcha" name="recaptcha">
-                      <option value="1" <?php if ($settings->recaptcha == 1) {
-                  echo 'selected="selected"';
-              } ?> >Enabled</option>
-                      <option value="0" <?php if ($settings->recaptcha == 0) {
-                  echo 'selected="selected"';
-              } ?> >Disabled</option>
-                      <option value="2" <?php if ($settings->recaptcha == 2) {
-                  echo 'selected="selected"';
-              } ?> >For Join Only</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label>Invisible Recaptcha Public (Site) Key</label> <?php if (in_array($user->data()->id, $master_account)) {?><a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" id="recapatcha_public_show"><span class="fa fa-eye"></span></a><?php } ?>
-                    <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="Recaptcha Site Key" name="recap_public" id="recap_public" value="<?=$settings->recap_public; ?>">
-                  </div>
-
-                  <div class="form-group">
-                    <label>Invisible Recaptcha Private (Secret) Key</label> <?php if (in_array($user->data()->id, $master_account)) {?><a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" id="recapatcha_private_show"><span class="fa fa-eye"></span></a><?php } ?>
-                    <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="Recaptcha Private Key" name="recap_private" id="recap_private" value="<?=$settings->recap_private; ?>">
-                  </div>
-                </div>
-              </div>
-
-
-              <div class="card no-padding">
                 <div class="card-header"><h3>Language</h3>
                   There may be more languages available <a class="text-primary" href="https://userspice.com/translations" target="_blank">here</a>.<br>
                 </div>

@@ -22,8 +22,8 @@ require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 
 if (!securePage($_SERVER['PHP_SELF'])){die();}
-
-if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
+$hooks = getMyHooks();
+includeHook($hooks,'pre');
 if(isset($user) && $user->isLoggedIn()){
   Redirect::to($us_url_root."users/account.php");
 }
@@ -53,7 +53,10 @@ if (Input::get('forgotten_password')) {
     //validate the form
     $validate = new Validate();
     $msg1 = lang("GEN_EMAIL");
+
     $validation = $validate->check($_POST,array('email' => array('display' => $msg1,'valid_email' => true,'required' => true,),));
+    
+    includeHook($hooks,'post');
 
     if($validation->passed()){
         if($fuser->exists()){
@@ -100,12 +103,12 @@ if($email_sent){
     require $abs_us_root.$us_url_root.'users/views/_forgot_password.php';
 }
 
+includeHook($hooks,'bottom');
+
 ?>
 </div><!-- /.container-fluid -->
 </div><!-- /#page-wrapper -->
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<!-- footer -->
-<!-- footers -->
+
 <?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; // the final html footer copyright row + the external js calls ?>
 
 <!-- Place any per-page javascript here -->

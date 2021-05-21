@@ -97,7 +97,7 @@ if (!empty($_POST)) {
     <!-- Page Heading -->
     <div class="row">
       <?=resultBlock($errors,$successes);?>
-      <? if ($actual_link !='') { ?>
+      <?php if ($actual_link !='') { ?>
         <div class="col-xs-12 col-md-7">
           <h1>Please select a PIN code</h1>
           <p>PIN Codes are used for verification when accessing administrative pages. Your PIN should be 4-10 digits long.</p>
@@ -117,7 +117,7 @@ if (!empty($_POST)) {
               <input type="hidden" name="verify_uri" value="<?=$actual_link?>" />
               <input type="hidden" name="verify_page" value="<?=$page?>" />
               <input type="hidden" value="<?=Token::generate();?>" name="csrf">
-            <? } ?>
+            <?php } ?>
           </div>
         </div>
       </form><br />

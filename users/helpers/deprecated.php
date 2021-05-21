@@ -7,6 +7,36 @@ function output_message($message) {
 return $message;
 }
 
+//Does user have permission
+//This is the old school UserSpice Permission System
+if (!function_exists('checkPermission')) {
+    function checkPermission($permission)
+    {
+        $db = DB::getInstance();
+        global $user;
+        //Grant access if master user
+        $access = 0;
+
+        foreach ($permission[0] as $perm) {
+            if ($access == 0) {
+                $query = $db->query('SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?', [$user->data()->id, $perm->permission_id]);
+                $results = $query->count();
+                if ($results > 0) {
+                    $access = 1;
+                }
+            }
+        }
+        if ($access == 1) {
+            return true;
+        }
+        if ($user->data()->id == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 function inputBlock($type,$label,$id,$divAttr=array(),$inputAttr=array(),$helper=''){
 	$divAttrStr = '';
 	foreach($divAttr as $k => $v){

@@ -5,7 +5,7 @@
 
 //Check if a user ID exists in the DB
 if (!function_exists('userIdExists')) {
-    function userIdExists(int $id)
+    function userIdExists($id)
     {
         $db = DB::getInstance();
         $query = $db->query('SELECT * FROM users WHERE id = ?', [$id]);

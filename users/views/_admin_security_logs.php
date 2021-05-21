@@ -25,6 +25,7 @@ tfoot input {
 <link rel="stylesheet" href="<?=$us_url_root?>users/js/pagination/datatables.min.css">
 <div class="content mt-3">
   <h2 class="mb-3">Security Logs</h2>
+  <p>These logs are updated every time someone tries to access a page that they do not have permission to access.  Note that this could be because they are logged out, from a bad redirect, or many other causes other than someone attempting to hack your system.</p>
   <!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
   <?php resultBlock($errors, $successes);
   $logs = $db->query("SELECT * FROM audit ORDER BY id DESC LIMIT 5000")->results(); ?>
@@ -37,6 +38,7 @@ tfoot input {
             <th scope="col"class="text-left">Log ID</th>
             <th scope="col"class="text-left">User</th>
             <th scope="col"class="text-left">Page Attempted</th>
+            <th scope="col"class="text-left">IP</th>
             <th scope="col"class="text-left">Timestamp</th>
           </tr>
         </thead>
@@ -61,7 +63,7 @@ tfoot input {
               ?></td>
 
               <td><?php echopage($m->page);?></td>
-
+              <td><?=$m->ip?></td>
               <td><?=$m->timestamp?></td>
             </tr>
           <?php } ?>

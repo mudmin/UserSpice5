@@ -75,7 +75,7 @@ if (!empty($_POST)) {
 
     <div class="col-sm-12 col-md-6">
       <?=resultBlock($errors,$successes);?>
-      <? if ($actual_link !='') { ?>
+      <?php if ($actual_link !='') { ?>
 
         <h2>Restricted Access</h2><br>
         <p><font color='slate'>Please enter your <strong>password</strong> or <strong>PIN</strong> code below to continue</font></p>
@@ -88,7 +88,7 @@ if (!empty($_POST)) {
             <input type="hidden" name="verify_uri" value="<?=$actual_link?>" />
             <input type="hidden" name="verify_page" value="<?=$page?>" />
             <input type="hidden" value="<?=Token::generate();?>" name="csrf">
-          <? } ?>
+          <?php } ?>
         </form><br /><br /><br />
       </div>
     </div>

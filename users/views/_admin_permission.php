@@ -178,7 +178,7 @@ $token = Token::generate();
 </div>
 </header>
 <div class="content mt-3">
-  <?php if(!$validation->errors()=='') {?><div class="alert alert-danger"><?=display_errors($validation->errors());?></div><?php } ?>
+  <?php if(!$validation->errors()=='') { display_errors($validation->errors()); } ?>
   <?php echo resultBlock($errors,$successes); ?>
 
   <h2>Configure Details for Permission Level: <?=$permissionDetails['name']?></h2><br>
@@ -356,7 +356,7 @@ $token = Token::generate();
               </div>
               <div class="tab-pane fade" id="PublicPagesTab" role="tabpanel" aria-labelledby="PublicPages">
                 <h3>Public Pages</h3>
-                <strong>Manage Pablic Pages</strong>
+                <strong>Manage Public Pages</strong>
                 <?php
                 //List public pages
                 foreach ($pageData as $v1) {

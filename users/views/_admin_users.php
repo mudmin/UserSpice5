@@ -33,14 +33,7 @@ if (!empty($_POST)) {
         $fname = Input::get('fname');
         $lname = Input::get('lname');
         $email = Input::get('email');
-        if ($settings->auto_assign_un == 1) {
-            $username = username_helper($fname, $lname, $email);
-            if (!$username) {
-                $username = null;
-            }
-        } else {
-            $username = Input::get('username');
-        }
+        $username = Input::get('username');
         $token = $_POST['csrf'];
 
         if (!Token::check($token)) {
@@ -48,70 +41,35 @@ if (!empty($_POST)) {
         }
 
         $form_valid = false; // assume the worst
-        if ($settings->auto_assign_un == 0) {
-            $validation->check($_POST, [
-        'username' => [
-          'display' => 'Username',
-          'required' => true,
-          'min' => $settings->min_un,
-          'max' => $settings->max_un,
-          'unique' => 'users',
-        ],
-        'fname' => [
-          'display' => 'First Name',
-          'required' => true,
-          'min' => 1,
-          'max' => 100,
-        ],
-        'lname' => [
-          'display' => 'Last Name',
-          'required' => true,
-          'min' => 1,
-          'max' => 100,
-        ],
-        'email' => [
-          'display' => 'Email',
-          'required' => true,
-          'valid_email' => true,
-          'unique' => 'users',
-          'min' => 5,
-          'max' => 100,
-        ],
 
-        'password' => [
-          'display' => 'Password',
-          'required' => true,
-          'min' => $settings->min_pw,
-          'max' => $settings->max_pw,
-        ],
-        'confirm' => [
-          'display' => 'Confirm Password',
-          'required' => true,
-          'matches' => 'password',
-        ],
-      ]);
-        }
-        if ($settings->auto_assign_un == 1) {
-            $validation->check($_POST, [
+        $validation->check($_POST, [
+          'username' => [
+            'display' => 'Username',
+            'required' => true,
+            'min' => $settings->min_un,
+            'max' => $settings->max_un,
+            'unique' => 'users',
+          ],
           'fname' => [
             'display' => 'First Name',
             'required' => true,
             'min' => 1,
-            'max' => 60,
+            'max' => 100,
           ],
           'lname' => [
             'display' => 'Last Name',
             'required' => true,
             'min' => 1,
-            'max' => 60,
+            'max' => 100,
           ],
           'email' => [
             'display' => 'Email',
             'required' => true,
             'valid_email' => true,
             'unique' => 'users',
+            'min' => 5,
+            'max' => 100,
           ],
-
           'password' => [
             'display' => 'Password',
             'required' => true,
@@ -123,8 +81,8 @@ if (!empty($_POST)) {
             'required' => true,
             'matches' => 'password',
           ],
-        ]);
-        }
+      ]);
+
         if ($validation->passed()) {
             $form_valid = true;
             try {
@@ -258,29 +216,29 @@ if (!empty($_POST)) {
       </div>
       <form class="form-signup mb-0" action="admin.php?view=users" method="POST">
       <div class="modal-body">
-            <?php if ($settings->auto_assign_un == 0) {?>
+
               <div class="form-group" id="username-group">
               <label>Username (<?=$settings->min_un; ?>-<?=$settings->max_un; ?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
-              <input type="text" class="form-control" id="username" name="username" autocomplete="off" value="<?php if (!$form_valid && !empty($_POST)) {
+              <input type="search" class="form-control" id="username" name="username" autocomplete="off" value="<?php if (!$form_valid && !empty($_POST)) {
               echo $username;
           } ?>" required>
               </div>
-            <?php } ?>
+
               <div class="form-group" id="fname-group">
               <label>First Name</label>
-              <input type="text" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)) {
+              <input type="search" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)) {
               echo $fname;
           } ?>" required autocomplete="off">
               </div>
               <div class="form-group" id="lname-group">
               <label>Last Name</label>
-              <input type="text" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)) {
+              <input type="search" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)) {
               echo $lname;
           } ?>" required autocomplete="off">
               </div>
               <div class="form-group" id="email-group">
               <label>Email</label>
-              <input  class="form-control" type="email" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)) {
+              <input  class="form-control" type="search" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)) {
               echo $email;
           } ?>" required autocomplete="off">
               </div>
@@ -313,8 +271,11 @@ if (!empty($_POST)) {
               </div>
               </div>
 
-              <?php include $abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php'; ?>
-              <?php includeHook($hooks, 'form'); ?>
+              <?php
+              include $abs_us_root.$us_url_root.'usersc/scripts/additional_join_form_fields.php';
+              includeHook($hooks, 'form');
+
+              ?>
               <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
             </div>
             <div class="modal-footer">
@@ -357,7 +318,7 @@ if (!empty($_POST)) {
     });
     </script>
 
-    <?php if ($settings->auto_assign_un == 0) { ?>
+
       <script type="text/javascript">
       $(document).ready(function(){
         var x_timer;
@@ -386,4 +347,3 @@ if (!empty($_POST)) {
         }
       });
       </script>
-    <?php } ?>

@@ -22,12 +22,15 @@ ini_set('memory_limit', '1024M');
 ?>
 <?php
 require_once '../users/init.php';
+if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
 include $abs_us_root.$us_url_root.'users/includes/dashboard_language.php';
 $db = DB::getInstance();
 if (!securePage($_SERVER['PHP_SELF'])) {
     die();
 }
+
 $settings = $db->query('SELECT * FROM settings')->first();
+
 ?>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
 <?php $view = Input::get('view'); ?>
@@ -39,6 +42,7 @@ if ($view == '' || $view == 'dashboard') {
     }
 }
 ?>
+
 <div id="right-panel" class="right-panel">
 
   <div id="messages" class="sufee-alert alert with-close alert-primary alert-dismissible fade show d-none">
@@ -47,62 +51,9 @@ if ($view == '' || $view == 'dashboard') {
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-
   <?php require_once $abs_us_root.$us_url_root.'users/views/_admin_header.php'; ?>
+
   <?php
-  function usView($file)
-  {
-      global $abs_us_root;
-      global $us_url_root;
-      if (checkAccess('page', $file)) {
-          if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin/'.$file)) {
-              $path = $abs_us_root.$us_url_root.'usersc/includes/admin/'.$file;
-          } elseif (file_exists($abs_us_root.$us_url_root.'users/views/'.$file)) {
-              $path = $abs_us_root.$us_url_root.'users/views/'.$file;
-          } else {
-              $path = $abs_us_root.$us_url_root.'users/views/_admin_dashboard.php';
-          }
-
-          return $path;
-      } else {
-          $path = $abs_us_root.$us_url_root.'users/views/_admin_dashboard.php';
-
-          return $path;
-      }
-  }
-
-  function checkAccess($key, $value)
-  {
-      global $db, $user, $master_account;
-      //Check if they belong to the master account array or have the Administrator (default 2) Perm
-      if (in_array($user->data()->id, $master_account) || hasPerm([2], $user->data()->id)) {
-          return true;
-      } else {
-          //They're not, now we're gonna check if the view exists in us_management and if they have perms
-          $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]);
-          if (!$db->error()) {
-              $checkC = $checkQ->count();
-              if ($checkC < 1) {
-                  //The page isn't in the table, so we're gonna reject their ability to go
-                  return false;
-              } else {
-                  //The page is in there, so now we're gonna check if they have permission
-                  $check = $checkQ->first();
-                  if (hasPerm([$check->access], $user->data()->id)) {
-                      //They have permissions listed in us_management, let them through
-                      return true;
-                  } else {
-                      //They don't have permissions, reject them
-                      return false;
-                  }
-              }
-          } else {
-              //It failed to retrieve anything from us_management, so we log the error and send them away
-              logger($user->data()->id, 'checkAccess', 'Failed to check access for '.$value.', Error: '.$db->errorString());
-              return false;
-          }
-      }
-  }
 
   if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_override.php')) {
       include $abs_us_root.$us_url_root.'usersc/includes/admin_override.php';
@@ -246,17 +197,30 @@ if ($view == '' || $view == 'dashboard') {
           include $path;
       }
     }
-    ?>
 
+  if(file_exists( $abs_us_root . $us_url_root . 'usersc/includes/system_messages_header.php' ) ){
+    require_once $abs_us_root . $us_url_root . 'usersc/includes/system_messages_header.php';
+  }else{
+    require_once $abs_us_root . $us_url_root . 'users/includes/system_messages_header.php';
+  }
+?>
   </div> <!-- .content -->
 </div><!-- /#right-panel -->
 
 <!-- Right Panel -->
+<?php
+if(file_exists( $abs_us_root . $us_url_root . 'usersc/includes/system_messages_footer.php' ) ){
+  require_once $abs_us_root . $us_url_root . 'usersc/includes/system_messages_footer.php';
+}else{
+  require_once $abs_us_root . $us_url_root . 'users/includes/system_messages_footer.php';
+}
+?>
 <script type="text/javascript">
 $(document).ready(function() {
 $('[data-toggle="popover"]').popover();
 
   function messages(data) {
+    console.log(data.msg);
     console.log("messages found");
     $('#messages').removeClass();
     $('#message').text("");
@@ -266,7 +230,8 @@ $('[data-toggle="popover"]').popover();
     }else{
       $('#messages').addClass("sufee-alert alert with-close alert-success alert-dismissible fade show");
     }
-    $('#message').text(data.msg);
+
+    $('#message').html(data.msg);
     $('#messages').delay(3000).fadeOut('slow');
 
   }

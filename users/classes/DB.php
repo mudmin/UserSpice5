@@ -24,26 +24,27 @@ class DB {
 	private function __construct($config = []){
 
 		if (!$opts = Config::get('mysql/options'))
-			$opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
+		$opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
 		try{
+			$dbCharset = Config::get('mysql/charset')? Config::get('mysql/charset') : 'utf8';
 			if($config == []){
 				//grab the default db from the init.php file
 				$this->_pdo = new PDO('mysql:host=' .
-					Config::get('mysql/host') .';dbname='.
-					Config::get('mysql/db') . ';charset=utf8',
-					Config::get('mysql/username'),
-					Config::get('mysql/password'),
-					$opts);
+				Config::get('mysql/host') .';dbname='.
+				Config::get('mysql/db') . ';charset='.$dbCharset,
+				Config::get('mysql/username'),
+				Config::get('mysql/password'),
+				$opts);
 			}elseif(!is_array($config) || count($config) == 1){
 				//this allows you to pass DB::getDB('dbname') OR DB::getDB(['dbname']) to get
 				//a second db on the same server with the same username and password
-					if(is_array($config)){$config = $config[0];}
+				if(is_array($config)){$config = $config[0];}
 				$this->_pdo = new PDO('mysql:host=' .
-					Config::get('mysql/host') .';dbname='.
-					($config) . ';charset=utf8',
-					Config::get('mysql/username'),
-					Config::get('mysql/password'),
-					$opts);
+				Config::get('mysql/host') .';dbname='.
+				($config) . ';charset='.$dbCharset,
+				Config::get('mysql/username'),
+				Config::get('mysql/password'),
+				$opts);
 			}elseif(in_array('init',$config)){
 				//this allows you to get another db from your init file that is added to your init.php config
 				//array and call it like this DB::getDB(['mysql2','init']);
@@ -64,19 +65,19 @@ class DB {
 
 				$this->_pdo = new PDO('mysql:host=' .
 				Config::get($config[0].'/host') .';dbname='.
-				Config::get($config[0].'/db') . ';charset=utf8',
+				Config::get($config[0].'/db') . ';charset='.$dbCharset,
 				Config::get($config[0].'/username'),
 				Config::get($config[0].'/password'),
 				$opts);
 			}else{
-					$this->_pdo = new PDO('mysql:host=' .
-					$config[0].';dbname='.
-					$config[1]. ';charset=utf8',
-					$config[2],
-					$config[3],
-						$opts);
-				}
-			}catch(PDOException $e){
+				$this->_pdo = new PDO('mysql:host=' .
+				$config[0].';dbname='.
+				$config[1]. ';charset='.$dbCharset,
+				$config[2],
+				$config[3],
+				$opts);
+			}
+		}catch(PDOException $e){
 			die($e->getMessage());
 		}
 	}
@@ -89,7 +90,7 @@ class DB {
 	}
 
 	public static function getDB($config){
-			self::$_instance = new DB($config);
+		self::$_instance = new DB($config);
 		return self::$_instance;
 	}
 
@@ -108,24 +109,23 @@ class DB {
 			}
 
 			try {
-			    if ($this->_query->execute()) {
-			        if ($this->_query->columnCount() > 0) {
-			            $this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
-			            $this->_resultsArray = json_decode(json_encode($this->_results),true);
-			        }
-			        $this->_count = $this->_query->rowCount();
-			        $this->_lastId = $this->_pdo->lastInsertId();
-			    } else{
-			        $this->_error = true;
-			        $this->_results = [];
-			        $this->_errorInfo = $this->_query->errorInfo();
-			    }
-			} catch (PDOException $e) {
-			    $this->_error = true;
-			    $this->_results = [];
-			    $this->_errorInfo = $e->getMessage();
+				if($this->_query->execute()){
+					if ($this->_query->columnCount() > 0) {
+						$this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
+						$this->_resultsArray = json_decode(json_encode($this->_results),true);
+					}
+					$this->_count = $this->_query->rowCount();
+					$this->_lastId = $this->_pdo->lastInsertId();
+				}else{
+					throw new Exception("db error");
+				}
+			} catch (Exception $e){
+				$this->_error = true;
+				$this->_results = [];
+				$this->_errorInfo = $this->_query->errorInfo();
 			}
 		}
+
 		return $this;
 	}
 
@@ -143,11 +143,11 @@ class DB {
 		$is_ok  = true;
 
 		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
-			$sql .= " WHERE $where_text";
+		$sql .= " WHERE $where_text";
 
 		if ($is_ok)
-			if (!$this->query($sql, $values)->error())
-				return $this;
+		if (!$this->query($sql, $values)->error())
+		return $this;
 
 		return false;
 	}
@@ -155,7 +155,7 @@ class DB {
 	private function _calcWhere($w, &$vals, $comboparg='and', &$is_ok=NULL) {
 		#echo "DEBUG: Entering _calcwhere(w=".print_r($w,true).",...)<br />\n";
 		if (is_array($w)) {
-				#echo "DEBUG: is_array - check<br />\n";
+			#echo "DEBUG: is_array - check<br />\n";
 			$comb_ops   = ['and', 'or', 'and not', 'or not'];
 			$valid_ops  = ['=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'ALIKE', 'NOT ALIKE', 'REGEXP', 'NOT REGEXP'];
 			$two_args   = ['IS NULL', 'IS NOT NULL'];
@@ -167,16 +167,16 @@ class DB {
 			$wcount     = count($w);
 
 			if ($wcount == 0)
-				return "";
+			return "";
 
 			# believe it or not, this appears to be the fastest way to check
 			# sequential vs associative. Particularly with our expected short
 			# arrays it shouldn't impact memory usage
 			# https://gist.github.com/Thinkscape/1965669
 			if (array_values($w) === $w) { // sequential array
-						#echo "DEBUG: Sequential array - check!<br />\n";
+				#echo "DEBUG: Sequential array - check!<br />\n";
 				if (in_array(strtolower($w[0]), $comb_ops)) {
-							#echo "DEBUG: w=".print_r($w,true)."<br />\n";
+					#echo "DEBUG: w=".print_r($w,true)."<br />\n";
 					$sql = '';
 					$combop = '';
 					for ($i = 1; $i < $wcount; $i++) {
@@ -230,9 +230,9 @@ class DB {
 						#echo "B: k=$k, v=".print_r($v,true)."<br />\n";
 						$vals[] = $v;
 						if (in_array(substr($k,-1,1), array('=', '<', '>'))) // 'field !='=>'value'
-							$sql .= $combop . ' ' . $k . ' ? ';
+						$sql .= $combop . ' ' . $k . ' ? ';
 						else // 'field'=>'value'
-							$sql .= $combop . ' ' . $k . ' = ? ';
+						$sql .= $combop . ' ' . $k . ' = ? ';
 						$combop = $comboparg;
 					}
 				}
@@ -271,8 +271,8 @@ class DB {
 		}
 
 		for ($i=0; $i<$records; $i++)
-			foreach ($fields as $field)
-				$values[] = is_array($field) ? $field[$i] : $field;
+		foreach ($fields as $field)
+		$values[] = is_array($field) ? $field[$i] : $field;
 
 		$col = ",(" . substr( str_repeat(",?",count($fields)), 1) . ")";
 		$sql = "INSERT INTO {$table} (`". implode('`,`', $keys)."`) VALUES ". substr( str_repeat($col,$records), 1);
@@ -281,11 +281,11 @@ class DB {
 			$sql .= " ON DUPLICATE KEY UPDATE";
 
 			foreach ($keys as $key)
-				if ($key != "id")
-					$sql .= " `$key` = VALUES(`$key`),";
+			if ($key != "id")
+			$sql .= " `$key` = VALUES(`$key`),";
 
 			if (!empty($keys))
-				$sql = substr($sql, 0, -1);
+			$sql = substr($sql, 0, -1);
 		}
 
 		return !$this->query($sql, $values)->error();
@@ -300,15 +300,15 @@ class DB {
 			$fields[] = $id;
 		} else {
 			if (empty($id))
-				return false;
+			return false;
 
 			if ($where_text = $this->_calcWhere($id, $fields, "and", $is_ok))
-				$sql .= "WHERE $where_text";
+			$sql .= "WHERE $where_text";
 		}
 
 		if ($is_ok)
-			if (!$this->query($sql, $fields)->error())
-				return true;
+		if (!$this->query($sql, $fields)->error())
+		return true;
 
 		return false;
 	}
@@ -319,7 +319,7 @@ class DB {
 	}
 
 	public function first($assoc = false){
-				return ($this->count()>0)  ?  $this->results($assoc)[0]  :  [];
+		return ($this->count()>0)  ?  $this->results($assoc)[0]  :  [];
 	}
 
 	public function count(){
@@ -348,8 +348,8 @@ class DB {
 
 	private function get_subquery_sql($action, $table, $where, &$values, &$is_ok) {
 		if (is_array($where))
-			if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
-				$where_text = " WHERE $where_text";
+		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
+		$where_text = " WHERE $where_text";
 
 		return " (SELECT $action FROM $table$where_text)";
 	}
@@ -358,7 +358,7 @@ class DB {
 		$input = explode(".", $tablecolumn, 2);
 
 		if (count($input) != 2)
-			return null;
+		return null;
 
 		$result = $this->action("SELECT {$input[1]}", $input[0], (is_numeric($id) ? ["id","=",$id] : $id));
 

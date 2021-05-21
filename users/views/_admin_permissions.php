@@ -57,7 +57,7 @@ $count = 0;
 // echo $permissionData[0]->name;
 ?>
 <div class="content mt-3">
-  <?php if(!$validation->errors()=='') {?><div class="alert alert-danger"><?=display_errors($validation->errors());?></div><?php } ?>
+  <?php if(!$validation->errors()=='') { display_errors($validation->errors()); } ?>
   <?php echo resultBlock($errors,$successes); ?>
   <!-- Main Center Column -->
   <div class="class col-md-6 offset-md-3 col-sm-12">

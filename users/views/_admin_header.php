@@ -13,7 +13,11 @@
       $msg=Input::get('msg');
   		bold($msg);
   	}
-      ?>
+
+    if(!isset($us_loader_loaded)){
+    echo '<h4><b>IMPORTANT:</b> You must add the line</h4><h4><font color="blue">require_once $abs_us_root.$us_url_root."users/includes/loader.php";</font></h4><h4>to the bottom of your users/init.php file.</h4>';
+    }
+    ?>
 
   <div class="header-menu">
     <div class="col-sm-4">
@@ -23,7 +27,6 @@
           <h1>Dashboard</h1>
           <?php
             include($abs_us_root.$us_url_root.'users/includes/migrations.php');
-
             $updates = $db->query("SELECT * FROM updates");
             if(!$db->error()) {
               $updates=$db->results();

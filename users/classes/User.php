@@ -223,14 +223,8 @@ class User
                 //die("user has neither");
                 //$password = password_hash(Token::generate(),PASSWORD_BCRYPT,array('cost' => 12));
                 $settings = $this->_db->query('SELECT * FROM settings')->first();
-                if ($settings->auto_assign_un == 1) {
-                    $username = username_helper($fname, $lname, $email);
-                    if (!$username) {
-                        $username = null;
-                    }
-                } else {
-                    $username = $email;
-                }
+                $username = $email;
+
                 $insert = $this->_db->query("INSERT INTO $this->tableName SET `password` = NULL,username = '".$username."',active = '".$active."',oauth_provider = '".$oauth_provider."', oauth_uid = '".$oauth_uid."',permissions = '".$active."', email_verified = '".$active."', fname = '".$fname."', lname = '".$lname."', email = '".$email."', picture = '".$picture."', gpluslink = '".$link."', join_date = '".date('Y-m-d H:i:s')."',created = '".date('Y-m-d H:i:s')."', modified = '".date('Y-m-d H:i:s')."'") or die('Google oAuth Error');
                 $lastID = $insert->lastId();
 

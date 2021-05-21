@@ -138,39 +138,24 @@ if (!function_exists('money')) {
   }
 }
 
+//updated in 5.3.0 to now use the built in system messages feature
 if (!function_exists('display_errors')) {
   function display_errors($errors = [])
   {
-    $html = '<ul class="bg-danger dangerblock">';
-    foreach ($errors as $error) {
-      if (is_array($error)) {
-        //echo "<br>"; Patch from user SavaageStyle - leaving here in case of rollback
-        $html .= '<li>'.$error[0].'</li>';
-        $html .= '<script>jQuery("#'.$error[0].'").parent().closest("div").addClass("has-error");</script>';
-      } else {
-        $html .= '<li>'.$error.'</li>';
-      }
+    foreach($errors as $k=>$v){
+      unset($errors[$k][1]);
     }
-    $html .= '</ul>';
-
-    return $html;
+    sessionValMessages($errors);
   }
 }
 
 if (!function_exists('display_successes')) {
   function display_successes($successes = [])
   {
-    $html = '<ul>';
-    foreach ($successes as $success) {
-      if (is_array($success)) {
-        $html .= '<li>'.$success[0].'</li>';
-      } else {
-        $html .= '<li>'.$success.'</li>';
-      }
+    foreach($successes as $k=>$v){
+      unset($successes[$k][1]);
     }
-    $html .= '</ul>';
-
-    return $html;
+    sessionValMessages($successes);
   }
 }
 
@@ -298,9 +283,9 @@ if (!function_exists('bold')) {
 if (!function_exists('err')) {
   function err($text)
   {
-    echo "<text padding='1em' align='center'><font color='red'><h4><span class='errSpan'>";
-    echo $text;
-    echo '</span></h4></font></text>';
+    // echo "<text padding='1em' align='center'><font color='red'><h4><span class='errSpan'>";
+    // echo $text;
+    // echo '</span></h4></font></text>';
   }
 }
 
