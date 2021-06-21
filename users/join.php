@@ -70,10 +70,15 @@ if (Input::exists()) {
 
 
     $validation = new Validate();
-
+        if (pluginActive('userInfo', true)) {
+            $is_not_email = false;
+        } else {
+            $is_not_email = true;
+        }
         $validation->check($_POST, [
           'username' => [
                 'display' => lang('GEN_UNAME'),
+                'is_not_email' => $is_not_email,
                 'required' => true,
                 'min' => $settings->min_un,
                 'max' => $settings->max_un,
@@ -179,6 +184,7 @@ if (Input::exists()) {
                     $results = $query->first();
                     $act = $results->email_act;
                     require $abs_us_root.$us_url_root.'users/views/_joinThankYou_verify.php';
+
                 } else {
                     logger($theNewId, 'User', 'Registration completed.');
                     if (file_exists($abs_us_root.$us_url_root.'usersc/views/_joinThankYou.php')) {
@@ -186,7 +192,9 @@ if (Input::exists()) {
                     } else {
                         require $abs_us_root.$us_url_root.'users/views/_joinThankYou.php';
                     }
+
                 }
+                require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php';
                 die();
             }
 

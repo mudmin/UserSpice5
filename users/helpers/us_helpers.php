@@ -484,26 +484,30 @@ if (!function_exists('encodeURIComponent')) {
     }
 }
 
-if (!function_exists('logger')) {
-    function logger($user_id, $logtype, $lognote, $metadata = null)
-    {
-        $db = DB::getInstance();
-        if(is_array($lognote) || is_object($lognote)){
-          $lognote = json_encode($lognote);
-        }
-        $fields = [
-      'user_id' => $user_id,
-      'logdate' => date('Y-m-d H:i:s'),
-      'logtype' => $logtype,
-      'lognote' => $lognote,
-      'ip' => $_SERVER['REMOTE_ADDR'],
-      'metadata' => $metadata,
-    ];
-        $db->insert('logs', $fields);
-        $lastId = $db->lastId();
+function logger($user_id, $logtype, $lognote, $metadata = null)
+{
+    $db = DB::getInstance();
 
-        return $lastId;
+    if (is_array($lognote) || is_object($lognote)) {
+        $lognote = json_encode($lognote);
     }
+    if (is_array($metadata) || is_object($metadata)) {
+        $metadata = json_encode($metadata);
+    }
+
+    $fields = [
+      'user_id'   => $user_id,
+      'logdate'   => date('Y-m-d H:i:s'),
+      'logtype'   => $logtype,
+      'lognote'   => $lognote,
+      'ip'        => $_SERVER['REMOTE_ADDR'],
+      'metadata'  => $metadata,
+    ];
+
+    $db->insert('logs', $fields);
+    $lastId = $db->lastId();
+
+    return $lastId;
 }
 
 if (!function_exists('echodatetime')) {
@@ -1375,11 +1379,28 @@ if (!function_exists('echodatetime')) {
 //to the $_SESSION varables without having to deal with the crazy naming
 //Note that the session variables have these crazy names to prevent cross talk
 //on shared hosting environments
-function sessionValMessages($valErr = [],$valSuc = [], $genMsg = []){
-  $keys = ["valErr","valSuc","genMsg"];
-  foreach($keys as $key){
-      if($$key != [] && $$key != NULL){
-        $_SESSION[Config::get('session/session_name').$key] = $$key;
-      }
+if(!function_exists("sessionValMessages")){
+  function sessionValMessages($valErr = [],$valSuc = [], $genMsg = []){
+    $keys = ["valErr","valSuc","genMsg"];
+    foreach($keys as $key){
+        if( is_array($_SESSION[Config::get('session/session_name').$key])
+            && $$key != []
+            && $$key != NULL
+          ) {
+             $_SESSION[Config::get('session/session_name').$key][] = $$key;
+          }elseif(
+            isset($_SESSION[Config::get('session/session_name').$key])
+                  && $_SESSION[Config::get('session/session_name').$key] != ""
+                  && $$key != []
+                  && $$key != NULL
+            ){
+              $save = $_SESSION[Config::get('session/session_name').$key];
+              $_SESSION[Config::get('session/session_name').$key] = [];
+              $_SESSION[Config::get('session/session_name').$key][] = $save;
+              $_SESSION[Config::get('session/session_name').$key][] = $$key;
+            }elseif($$key != [] && $$key != NULL){
+          $_SESSION[Config::get('session/session_name').$key] = $$key;
+        }
+    }
   }
 }

@@ -20,7 +20,12 @@ if(file_exists($abs_us_root.$us_url_root."users/parsers/".$zipFile)){
 if ($type == 'plugin') {
   $extractPath = "../../usersc/plugins";
   $reserved = Input::get('reserved');
-  $return = $us_url_root . "users/admin.php?view=plugins";
+  if(pluginActive($reserved,true)){
+    $return = $us_url_root . "users/admin.php?view=plugins_config&plugin=".$reserved;
+  }else{
+    $return = $us_url_root . "users/admin.php?view=plugins";
+  }
+
 } elseif ($type == 'widget') {
   $extractPath = "../../usersc/widgets";
   $return = $us_url_root . "users/admin.php";

@@ -140,22 +140,24 @@ if (!function_exists('money')) {
 
 //updated in 5.3.0 to now use the built in system messages feature
 if (!function_exists('display_errors')) {
-  function display_errors($errors = [])
-  {
-    foreach($errors as $k=>$v){
-      unset($errors[$k][1]);
+    function display_errors($errors = []){
+      foreach($errors as $k=>$v){
+        if(array_key_exists($errors[$k][1],$errors)){
+          unset($errors[$k][1]);
+        }
+      } sessionValMessages($errors);
     }
-    sessionValMessages($errors);
-  }
 }
 
 if (!function_exists('display_successes')) {
   function display_successes($successes = [])
   {
     foreach($successes as $k=>$v){
-      unset($successes[$k][1]);
+      if(array_key_exists($successes[$k][1],$successes)){
+        unset($successes[$k][1]);
+      }
     }
-    sessionValMessages($successes);
+    sessionValMessages([],$successes);
   }
 }
 

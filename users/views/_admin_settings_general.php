@@ -31,9 +31,12 @@ includeHook($hooks, 'pre');
               <label >Free API Key (<a class="text-primary" href="https://userspice.com/developer-api-keys/" target="_blank">Get One Here</a>) <a tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle"></i></a></label>
               <input type="password" autocomplete="off" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api; ?>">
               <?php
-              if ($settings->spice_api != '' && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/", $settings->spice_api)) {
-                  echo "<font color='red'>The API Key does not appear to be valid.</font><br>";
-              } ?>
+              if (trim($settings->spice_api) != ''
+                  && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
+                  && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
+              {
+                echo "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
+              }?>
             </div>
             <!-- Site Name -->
             <div class="form-group">

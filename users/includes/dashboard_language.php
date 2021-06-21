@@ -134,4 +134,32 @@ $lang = array_merge($lang,array(
 	//Admin Page
 	$lang = array_merge($lang,array(
 		"PERMISSION_CHAR_LIMIT"			=> "Permission names must be between %m1% and %m2% characters in length",
-		));
+	));
+
+	// Admin Menu
+	$lang = array_merge($lang,array(
+
+		// Settings
+		"ACP_MENU_SETTINGS_NAVIGATION" => "Navigation",
+
+		// Tools
+		"ACP_MENU_TOOLS_SYSTEM_LOGS" => "System Logs",
+		"ACP_MENU_TOOLS_SECURITY_LOGS" => "Security Logs",
+		"ACP_MENU_TOOLS_TEMPLATES" => "Templates",
+		"ACP_MENU_TOOLS_BUG_REPORTER" => "Bug Reporter",
+		"ACP_MENU_HEADER_MENU_PLUGINS" => "Plugins",
+		"ACP_MENU_PLUGINS_PLUGIN_MANAGER" => "Plugin Manager",
+
+		// Manage
+		"ACP_MENU_HEADER_MANAGE" => "Manage",
+		"ACP_MENU_MANAGE_PAGES" => "Pages",
+		"ACP_MENU_MANAGE_PERMISSION_LEVELS" => "Permission Levels",
+		"ACP_MENU_MANAGE_SPICE_SHAKER" => "Spicer Shaker",
+		"ACP_MENU_MANAGE_USERS" => "Users",
+
+		// Misc
+		"ACP_MENU_HEADER_MISC" => "Misc",
+		"ACP_MENU_MISC_HOMEPAGE" => "Visit Homepage",
+		"ACP_MENU_MISC_ACCOUNT" => "Your Account",
+		"ACP_MENU_MISC_LOGOUT" => "Logout",
+	));

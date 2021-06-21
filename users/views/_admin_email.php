@@ -57,16 +57,16 @@ if (!empty($_POST)) {
         logger($user->data()->id, 'Email Settings', "Updated smtp_port from $results->smtp_port to $smtp_port.");
     } else {
     }
-    if ($results->email_login != $_POST['email_login']) {
-        $email_login = Input::get('email_login');
+    if ($results->email_login != $_POST['emx']) {
+        $email_login = Input::get('emx');
         $fields = ['email_login' => $email_login];
         $db->update('email', 1, $fields);
         $successes[] = 'Updated email_login';
         logger($user->data()->id, 'Email Settings', 'Updated email_login.');
     } else {
     }
-    if ($results->email_pass != $_POST['email_pass']) {
-        $email_pass = Input::get('email_pass');
+    if ($results->email_pass != $_POST['emp']) {
+        $email_pass = Input::get('emp');
         $fields = ['email_pass' => $email_pass];
         $db->update('email', 1, $fields);
         $successes[] = 'Updated email_pass';
@@ -81,8 +81,8 @@ if (!empty($_POST)) {
         logger($user->data()->id, 'Email Settings', "Updated from_name from $results->from_name to $from_name.");
     } else {
     }
-    if ($results->from_email != $_POST['from_email']) {
-        $from_email = Input::get('from_email');
+    if ($results->from_email != $_POST['frome']) {
+        $from_email = Input::get('frome');
         $fields = ['from_email' => $from_email];
         $db->update('email', 1, $fields);
         $successes[] = 'Updated from_email';
@@ -190,10 +190,10 @@ if (!empty($_POST)) {
   <input required size='50' class='form-control' type='text' autocomplete="off" name='smtp_port' value='<?=$results->smtp_port; ?>' />
   </div>
   <label>Email Login/Username:</label>
-  <input required size='50' class='form-control' type='password' autocomplete="off" name='email_login' value='<?=$results->email_login; ?>' />
+  <input required size='50' class='form-control' type='password' autocomplete="off" name='emx' value='<?=$results->email_login; ?>' />
   <div class="form-group">
   <label>Email Password:</label>
-  <input required size='50' class='form-control' type='password' autocomplete="off" name='email_pass' value='<?=$results->email_pass; ?>' />
+  <input required size='50' class='form-control' type='password' autocomplete="off" name='emp' value='<?=$results->email_pass; ?>' />
   </div>
   <div class="form-group">
   <label>From Name (For Sent Emails):</label>
@@ -201,7 +201,7 @@ if (!empty($_POST)) {
   </div>
   <div class="form-group">
   <label>From Email (For Sent Emails):</label>
-  <input required size='50' class='form-control' type='text' autocomplete="off" name='from_email' value='<?=$results->from_email; ?>' />
+  <input required size='50' class='form-control' type='text' autocomplete="off" name='frome' value='<?=$results->from_email; ?>' />
   </div>
 </div>
 </div>

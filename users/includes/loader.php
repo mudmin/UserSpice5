@@ -27,6 +27,16 @@ universally. Note that you can add your own loader content
 in usersc/includes/loader.php
 */
 $us_loader_loaded = true;
+
+//prevent script tags from being parsed in err and msg messages
+//required in 5.3.2 or later
+if(isset($_GET['err'])){
+	$_GET['err'] = str_ireplace("<script","",$_GET['err']);
+}
+if(isset($_GET['msg'])){
+	$_GET['msg'] = str_ireplace("<script","",$_GET['msg']);
+}
+
 $db = DB::getInstance();
 $settings = $db->query("SELECT * FROM settings")->first();
 require_once $abs_us_root.$us_url_root.'usersc/includes/security_headers.php';

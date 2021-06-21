@@ -63,7 +63,7 @@ if(Input::exists('post')){
             //send the email
             $options = array(
               'fname' => $fuser->data()->fname,
-              'email' => rawurlencode($email),
+              'email' => $email,
               'vericode' => $vericode,
               'join_vericode_expiry' => $settings->join_vericode_expiry
             );

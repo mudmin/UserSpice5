@@ -22,7 +22,10 @@ if(empty($_POST)){
 
 <div class="content mt-3">
   <?php
-  if ($settings->spice_api != '' && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",$settings->spice_api)) {
+  if (trim($settings->spice_api) != ''
+      && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
+      && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
+  {
     echo "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
   }
   if($diag){

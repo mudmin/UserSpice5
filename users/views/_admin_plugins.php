@@ -86,6 +86,12 @@ if (!empty($_POST)) {
 }
 $token = Token::generate();
 ?>
+<style media="screen">
+    .hov:hover{
+    opacity: 0.5;
+    transition: .4s ease;
+    }
+</style>
 <div class="content mt-3">
   <div class="row">
     <div class="col-12 mb-2">
@@ -115,7 +121,7 @@ $token = Token::generate();
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th scope="col" width="25%">Plugin</th>
+                  <th scope="col" width="25%">Plugin (Click to Configure)</th>
                   <th scope="col" width="50%">Description</th>
                   <th scope="col" width="10%" class="text-center">Status</th>
                   <th scope="col" width="15%" class="text-center">Actions</th>
@@ -135,9 +141,18 @@ $token = Token::generate();
                   <tr id="ctrl-<?= $xml->name ?>">
                     <td>
                       <div class="d-flex flex-row">
+
+
                         <div class="pr-3">
+                          <?php if(pluginActive($t,true)){ ?>
+                          <a href="<?= $us_url_root . 'users/admin.php?view=plugins_config&plugin=' . $t ?>">
+                            <img src="<?= $img_src ?>" class="hov" alt="thumbnail" width="100">
+                          </a>
+                        <?php }else{ ?>
                           <img src="<?= $img_src ?>" alt="thumbnail" width="100">
+                        <?php } ?>
                         </div>
+
                         <div class="d-flex flex-column">
                           <h4 class="mb-1"><?= $xml->name ?></h4>
                           <small class="ml-2"><strong>Author: </strong><a class="text-dark" href="<?= $xml->website ?>"><?= $xml->author ?></a></small>
