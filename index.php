@@ -10,8 +10,6 @@ require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if(isset($user) && $user->isLoggedIn()){
 }
 ?>
-<div id="page-wrapper">
-	<div class="container">
 		<div class="jumbotron">
 			<h1 align="center"><?=lang("JOIN_SUC");?> <?php echo $settings->site_name;?></h1>
 			<p align="center" class="text-muted"><?=lang("MAINT_OPEN")?></p>
@@ -28,11 +26,8 @@ if(isset($user) && $user->isLoggedIn()){
 			<p align="center"><?=lang("MAINT_PLEASE");?></p>
 			<h4 align="center"><a href="https://userspice.com/getting-started/">https://userspice.com/getting-started/</a></h4>
 		</div>
-<?php  languageSwitcher();?> 
-	</div>
-</div>
+<?php  languageSwitcher();?>
+
 
 <!-- Place any per-page javascript here -->
-
-
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
