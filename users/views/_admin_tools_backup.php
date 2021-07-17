@@ -391,7 +391,7 @@ $pagename = lang('AB_PAGENAME');
         <div class="card">
           <div class="card-header"><h4><?=lang('AB_CREATE_BACKUP')?></h4></div>
           <div class="card-body">
-      <form action="<?=$us_url_root?>users/admin.php?view=backup" name="backup" method="POST">
+      <form action="" name="backup" method="POST">
       <div class="row">
 
         <!-- backup_dest Option -->
@@ -469,7 +469,7 @@ $pagename = lang('AB_PAGENAME');
           </div>
           <div class="card-body">
 
-        <form name="delete" action="<?=$us_url_root?>users/admin.php?view=backup" method="post">
+        <form name="delete" action="" method="post">
 
           <table id="backups" class='table table-striped' cellspacing="0" width="100%" >
 

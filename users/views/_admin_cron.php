@@ -132,7 +132,7 @@ if (!empty($_POST)) {
                 Step 3: Then go into <a href="admin.php?view=general">the admin dashboard"</a> and set that IP address in the 'Only allow cron jobs from the following IP' box.<br>
                 Step 4: Go back into your server and set your cron job for a more reasonable amount of time. Most server admins don't want you running cron jobs every few minutes. Every hour or even every day is more reasonable.
               <?php } ?>
-  
+
             <div id="addcron" class="modal fade" role="dialog">
               <div class="modal-dialog">
 
@@ -142,7 +142,7 @@ if (!empty($_POST)) {
                     <h4 class="modal-title">Cron Addition</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                   </div>
-                  <form class="form-signup" action="admin.php?view=cron" method="POST">
+                  <form class="form-signup" action="" method="POST">
                   <div class="modal-body">
 
                         <label>Cron Name: </label><input type="text" class="form-control" id="name" name="name" placeholder="Cron Name" required>

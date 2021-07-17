@@ -155,7 +155,7 @@ if(empty($_POST)){
             </div>
           </div>
           <div class="col-4">
-            <form class="" action="admin.php?view=spice" method="post">
+            <form class="" action="" method="post">
               <label for="type">Browse</label>
               <div class="d-flex">
                 <select class="form-control" name="type">

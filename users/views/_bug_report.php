@@ -103,7 +103,7 @@ if($settings->spice_api != ''){
     <strong>Software Info:</strong> <?=$_SERVER['SERVER_SOFTWARE']?><br><br>
 
 
-    <form class="" action="admin.php?view=bugs" method="post">
+    <form class="" action="" method="post">
       <label for="">Please give a brief summary of the problem</label>
       <input class="form-control" type="text" name="brief" value="" required>
       <label for="">What type of bug report is this?</label>

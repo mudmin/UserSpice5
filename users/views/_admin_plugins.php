@@ -171,7 +171,7 @@ $token = Token::generate();
                     </td>
                     <td>
                       <div class="d-flex justify-content-center">
-                        <form class="" action="admin.php?view=plugins" method="post">
+                        <form class="" action="" method="post">
                           <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
                           <input type="hidden" name="plugin" value="<?= $t ?>">
                           <?php if ($usplugins[$t] == 1) { ?>

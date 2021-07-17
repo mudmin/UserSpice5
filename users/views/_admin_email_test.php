@@ -39,7 +39,7 @@
   }
   ?>
 
-  <form class="" name="test_email" action="admin.php?view=email_test" method="post">
+  <form class="" name="test_email" action="" method="post">
     <label>Send test to (Ideally different than your from address):
       <input required size='50' class='form-control' type='text' name='test_acct' value='' /></label>
 

@@ -12,7 +12,7 @@
 </div>
 </header>
 <div class="content mt-3">
-  <form class="" action="admin.php?tab=3" name="register" method="post">
+  <form class="" action="" name="register" method="post">
     <h2 class="mb-3">Registration Settings</h2>
     <div class="row">
       <div class="col-md-6">

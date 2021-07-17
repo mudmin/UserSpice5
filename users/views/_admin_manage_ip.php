@@ -61,7 +61,7 @@ if (!empty($_POST)) {
         </div>
         <div class="card-body">
           <p>Note: Whitelist overrides Blacklist</p>
-          <form action="<?= $us_url_root ?>users/admin.php?view=ip" method="post">
+          <form action="" method="post">
             <div class="form-row">
               <div class="input-group col-md-6 mb-3">
                 <div class="input-group-prepend">
@@ -101,7 +101,7 @@ if (!empty($_POST)) {
               <a class="nav-item nav-link" id="nav-blacklisted-tab" data-toggle="tab" href="#nav-blacklisted" role="tab" aria-controls="nav-blacklisted" aria-selected="false">Blacklist</a>
             </div>
           </nav>
-          <form class="" action="<?= $us_url_root ?>users/admin.php?view=ip" method="post">
+          <form class="" action="" method="post">
             <div class="tab-content" id="nav-tabContent">
               <div class="tab-pane fade show active" id="nav-whitelisted" role="tabpanel" aria-labelledby="nav-whitelisted-tab">
                 <div class="row">

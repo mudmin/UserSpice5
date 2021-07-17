@@ -81,7 +81,7 @@
                   <?php }else{ ?>
                   <p align="center"><a href="#" type="button" class="btn btn-default">No Preview Available</a></p>
               <?php } ?>
-              <form class="" id="temlate" action="<?=$us_url_root?>users/admin.php?view=templates" method="post">
+              <form class="" id="temlate" action="" method="post">
                 <input type="hidden" name="template" value="<?= $t ?>">
 
                 <?php if ($t != $settings->template) { ?>
@@ -149,7 +149,7 @@
                         ?>
 
                         <strong>Nav Style:</strong>
-                        <form class="form" id="navstyle"  action="<?=$us_url_root?>users/admin.php?view=templates" method="POST">
+                        <form class="form" id="navstyle"  action="" method="POST">
                           <div class="form-group">
                             <font color="blue">
                               <select class="form-control" id="navstyle" name="navstyle">

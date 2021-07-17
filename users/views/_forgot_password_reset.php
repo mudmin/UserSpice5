@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<div class="col-sm-12">
 		<h2 class="text-center"><?=$ruser->data()->fname;?>,</h2>
 		<p class="text-center"><?=lang("VER_PLEASE");?></p>
-		<form action="forgot_password_reset.php?reset=1" method="post">
-			<?php if(!$errors=='') {?><div class="alert alert-danger"><?=display_errors($errors);?></div><?php } ?>
+		<form action="" method="post">
+			<?php if(!$errors=='') { display_errors($errors); } ?>
 			<div class="form-group">
 				<label for="password"><?=lang("PW_NEW");?>:</label>
 				<input type="password" name="password" value="" id="password" class="form-control" autocomplete="new-password">

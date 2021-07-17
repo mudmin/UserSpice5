@@ -104,7 +104,7 @@ if (!empty($_POST['login_hook'])) {
         </div>
         <div class="row">
           <div class="col-sm-12">
-            <form name="login" id="login-form" class="form-signin" action="login.php" method="post">
+            <form name="login" id="login-form" class="form-signin" action="" method="post">
               <h2 class="form-signin-heading"></i> <?=lang("SIGNIN_TITLE","");?></h2>
               <input type="hidden" name="dest" value="<?= $dest ?>" />
 

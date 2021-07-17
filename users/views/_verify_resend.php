@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <li><?=lang("VER_AGAIN");?></li>
       <?=lang("VER_PAGE");?>
     </ol>
-    <form class="" action="verify_resend.php" method="post">
+    <form class="" action="" method="post">
       <?php if(!$errors=='') { display_errors($errors); } ?>
       <div class="form-group">
         <input class="form-control" type="text" id="email" name="email" placeholder="<?=lang("GEN_EMAIL");?>" autocomplete="email">

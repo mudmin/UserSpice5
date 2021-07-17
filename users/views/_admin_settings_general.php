@@ -18,7 +18,7 @@ includeHook($hooks, 'pre');
 <div class="content mt-3">
 
   <!-- Site Settings -->
-  <form class="" action="admin.php?view=<?=$view; ?>" name="settings" method="post">
+  <form class="" action="" name="settings" method="post">
     <h2 class="mb-3">Site Settings</h2>
     <div class="row">
       <div class="col-md-6">
@@ -194,6 +194,29 @@ includeHook($hooks, 'pre');
 
             <!-- right column -->
             <div class="col-md-6">
+              <div class="card no-padding">
+                <div class="card-header"><h3>Debug Mode</h3>
+                  Track down hard to find problems on your site. This causes MANY more things to be written to your logs and should only be used for short periods of time.<br>
+                </div>
+                <div class="card-body">
+                  <!-- Bleeding Edge -->
+                  <div class="form-group">
+                    <label>Enable Debug Mode <a role="button" tabindex="-1" title="Note" data-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" data-toggle="popover" data-content="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle"></i></a></label>
+                    <span class="float-right">
+                      <label class="switch switch-text switch-success"></label>
+                      <a style="color:blue;" href="admin.php?view=logs&mode=debug" class="">View Debug Logs</a>
+                    </span>
+                      <select id="debug" class="form-control ajxnum" data-desc="Debug Mode" name="debug">
+                        <option <?php if($settings->debug == 0){echo "selected='selected'";}?> value="0">Off (Mode 0)</option>
+
+                        <option <?php if($settings->debug == 1){echo "selected='selected'";}?> value="1">On for User ID 1 Only (Mode 1)</option>
+
+                        <option <?php if($settings->debug == 2){echo "selected='selected'";}?> value="2">On For Everyone (Mode 2)</option>
+                      </select>
+
+                  </div>
+                </div>
+              </div>
 
               <div class="card no-padding">
                 <div class="card-header"><h3>User Settings</h3></div>

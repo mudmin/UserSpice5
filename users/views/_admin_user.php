@@ -376,7 +376,7 @@ if (!empty($_POST)) {
     <?=resultBlock($errors, $successes); ?>
     <?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
     <?php includeHook($hooks, 'body'); ?>
-      <form class="form" id='adminUser' name='adminUser' action='admin.php?view=user&id=<?=$userId; ?>' method='post'>
+      <form class="form" id='adminUser' name='adminUser' action='' method='post'>
         <div class="row">
           <div class="col-8">
             <h3><span id="fname"><?=$userdetails->fname; ?> </span><span id="lname"><?=$userdetails->lname; ?> </span><span id="slash">- </span><span id="username"><?=$userdetails->username; ?></span></h3>

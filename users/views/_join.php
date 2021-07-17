@@ -40,7 +40,7 @@ Special thanks to John Bovey for the password strenth feature.
     includeHook($hooks,'body');
     ?>
 
-    <form class="form-signup" action="<?=$form_action;?>" method="<?=$form_method;?>" id="payment-form">
+    <form class="form-signup" action="" method="<?=$form_method;?>" id="payment-form">
 
       <h2 class="form-signin-heading"> <?=lang("SIGNUP_TEXT","");?></h2>
 

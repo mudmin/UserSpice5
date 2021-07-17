@@ -22,8 +22,23 @@ class Redirect {
 //This method no longer checks to see if a link is valid before redirecting
 //to prevent conflicts with deep folder structures
   public static function to($location = null, $args=''){
-    global $us_url_root;
+    global $us_url_root,$settings,$user;
     if ($location) {
+
+      if($settings != "" && $settings->debug > 0){
+        if($settings->debug == 2 || ($settings->debug == 1 && isset($user) && $user->isLoggedIn() && $user->data()->id == 1)){
+          $cp = currentPage();
+          $line = debug_backtrace();
+          $line = $line[0]["line"];
+          if(!isset($user) || !$user->isLoggedIn()){
+            $loggingUserId = 0;
+          }else{
+            $loggingUserId = $user->data()->id;
+          }
+          logger($loggingUserId,"Redirect Diag","From $cp on line $line to $location");
+        }
+        }
+
 
       if ($args) $location .= $args; // allows 'login.php?err=Error+Message' or the like
       if (!headers_sent()){
@@ -42,8 +57,25 @@ class Redirect {
 
 //This is the old Redirect::to method that attempts to see if a link is valid before redirecting
   public static function safe($location = null, $args=''){
-    global $us_url_root;
+    global $us_url_root,$settings,$user;
     if ($location) {
+
+
+      if($settings != "" && $settings->debug > 0){
+        if($settings->debug == 2 || ($settings->debug == 1 && isset($user) && $user->isLoggedIn() && $user->data()->id == 1)){
+          $cp = currentPage();
+          $line = debug_backtrace();
+          $line = $line[0]["line"];
+          if(!isset($user) || !$user->isLoggedIn()){
+            $loggingUserId = 0;
+          }else{
+            $loggingUserId = $user->data()->id;
+          }
+          logger($loggingUserId,"Redirect Diag","From $cp on line $line to $location");
+        }
+        }
+
+
       if (!preg_match('/^https?:\/\//', $location) && !file_exists($location)) {
         foreach (array($us_url_root, '../', 'users/', substr($us_url_root, 1), '../../', '/', '/users/') as $prefix) {
           if (file_exists($prefix.$location)) {

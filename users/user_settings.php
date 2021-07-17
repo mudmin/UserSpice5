@@ -265,7 +265,7 @@ if (!empty($_POST)) {
           includeHook($hooks, 'body');
           ?>
 
-          <form name='updateAccount' action='user_settings.php' method='post'>
+          <form name='updateAccount' action='' method='post'>
 
             <div class="form-group" id="username-group">
               <label id="username-label"><?=lang('GEN_UNAME'); ?></label>

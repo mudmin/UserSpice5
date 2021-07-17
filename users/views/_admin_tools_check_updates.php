@@ -175,7 +175,7 @@ if ($settings->spice_api != '') {
   <?php if ($remoteVersion != $user_spice_ver && $settings->spice_api != '') {?>
   <br>
   <div class="text-center">
-    <form class="" action="admin.php?view=updates" method="post">
+    <form class="" action="" method="post">
       <input type="submit" name="sysup" value="Download & Install Updates" class="btn btn-primary"><br>
       It's always a good idea to <strong><a href="<?=$us_url_root; ?>users/admin.php?view=backup">backup UserSpice</a></strong> before updating.
     </form>

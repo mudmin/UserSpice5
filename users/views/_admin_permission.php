@@ -189,7 +189,7 @@ $token = Token::generate();
     Although you can rename this permission level, please do not try to change its purpose.  #1 is the default "User" permission for all users and #2 is the "Admin"
     permission. Changing the purpose of these permissions <b>WILL</b> break things.<br><br>
   <?php } ?>
-  <form name='adminPermission' action='admin.php?view=permission&id=<?=$permissionId?>' method='post'>
+  <form name='adminPermission' action='' method='post'>
     <div class="row">
       <div class="col-sm-12">
         <h3>Permission ID - <?=$permissionDetails['id']?></h3>
@@ -242,7 +242,7 @@ $token = Token::generate();
         <div class="tab-content" id="v-pills-tabContent">
           <div class="tab-pane fade show active" id="ManageUsersTab" role="tabpanel" aria-labelledby="ManageUsers">
             <h3>Manage Users</h3>
-            <form class="" action="<?=$us_url_root?>users/admin.php" method="get">
+            <form class="" action="" method="get">
               <strong>Find user(s) to manage</strong>
               <div class="input-group">
                 <input type="hidden" name="view" value="permission">
@@ -279,7 +279,7 @@ $token = Token::generate();
                         <?php
                         if(!in_array($r->id,$master_account)){
                           ?>
-                          <form class="" action="admin.php?view=permission&id=<?=$permissionId?>&query=<?=$query?>" method="post">
+                          <form class="" action="" method="post">
                             <input type="hidden" name="user" value="<?=$r->id?>">
                             <input type="hidden" name="csrf" value="<?=$token?>" >
                             <?php

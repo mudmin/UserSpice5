@@ -41,6 +41,7 @@ if ($view == '' || $view == 'dashboard') {
         require_once $abs_us_root.$us_url_root.'users/views/_admin_announcements.php';
     }
 }
+
 ?>
 
 <div id="right-panel" class="right-panel">
@@ -51,14 +52,18 @@ if ($view == '' || $view == 'dashboard') {
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <?php require_once $abs_us_root.$us_url_root.'users/views/_admin_header.php'; ?>
-
-  <?php
+  <?php require_once $abs_us_root.$us_url_root.'users/views/_admin_header.php';
 
   if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_override.php')) {
       include $abs_us_root.$us_url_root.'usersc/includes/admin_override.php';
   }
 
+    if($settings->site_offline > 0){
+    echo "<h3 class='text-right'style='color:red; padding-right:1em;'>Maintenance Mode Active</h3>";
+    }
+    if($settings->debug > 0){
+    echo "<h3 class='text-right'style='color:red; padding-right:1em;'>Debug Mode Active</h3>";
+    }
   switch ($view) {
     case 'access':
     $path = usView('_dashboard_access.php');

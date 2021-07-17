@@ -214,7 +214,7 @@ if (!empty($_POST)) {
         <h4 class="modal-title">User Addition</h4>
         <button type="button" class="close float-right" data-dismiss="modal">&times;</button>
       </div>
-      <form class="form-signup mb-0" action="admin.php?view=users" method="POST">
+      <form class="form-signup mb-0" action="" method="POST">
       <div class="modal-body">
 
               <div class="form-group" id="username-group">

@@ -62,7 +62,7 @@ $count = 0;
   <!-- Main Center Column -->
   <div class="class col-md-6 offset-md-3 col-sm-12">
     <!-- Content Goes Here. Class width can be adjusted -->
-    <form name='adminPermissions' action='admin.php?view=permissions' method='post'>
+    <form name='adminPermissions' action='' method='post'>
       <h2>Create a new permission level</h2><br>
       <p>
         <label>Permission Name:</label>

@@ -143,7 +143,7 @@ if(Input::exists()){
   <div class="content mt-3">
     <h2>Page Permissions </h2>
     <?php resultBlock($errors,$successes); ?>
-    <form name='adminPage' action='<?=$us_url_root?>users/admin.php?view=page&id=<?=$pageId;?>' method='post'>
+    <form name='adminPage' action='' method='post'>
       <input type='hidden' name='process' value='1'>
 
       <div class="row">

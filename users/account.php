@@ -75,7 +75,7 @@ $userdetails = fetchUserDetails(null, null, $get_info_id); //Fetch user details
 			<img src="<?=$grav; ?>" class="img-thumbnail" alt="Generic placeholder thumbnail"></p>
 		<p><a href="../users/user_settings.php" class="btn btn-primary btn-block"><?=lang('ACCT_EDIT'); ?></a></p>
 	<?php if (isset($_SESSION['cloak_to'])) { ?>
-		<form class="" action="account.php" method="post">
+		<form class="" action="" method="post">
 			<input type="submit" name="uncloak" value="Uncloak!" class='btn btn-danger btn-block'>
 		</form><br>
 		<?php }

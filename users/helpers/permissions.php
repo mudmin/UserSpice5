@@ -122,7 +122,42 @@ if (!function_exists('deletePages')) {
         if (!$query = $db->query("DELETE FROM pages WHERE id IN ({$pages})")) {
             throw new Exception('There was a problem deleting pages.');
         } else {
+            cleanupPermissionPageMatches();
+
             return true;
+        }
+    }
+}
+
+// Cleanup orphraned permissions after removing pages
+if (!function_exists('cleanupPermissionPageMatches')) {
+    function cleanupPermissionPageMatches()
+    {
+        global $db, $user;
+        if (!isset($db)) {
+            $db = DB::getInstance();
+        }
+
+        if (!isset($user) || !$user->isLoggedIn()) {
+            $userId = 1;
+        }
+
+        $db->query('DELETE FROM permission_page_matches WHERE page_id NOT IN (SELECT id FROM pages)');
+        if (!$db->error()) {
+            $count = $db->count();
+            $plural = 'permission';
+            if ($count > 1) {
+                $plural .= 's';
+            }
+            if ($count > 0) {
+                logger($userId, 'cleanupPermissionPageMatches', "Removed {$count} orphaned {$plural}");
+            }
+
+            return true;
+        } else {
+            logger($userId, 'cleanupPermissionPageMatches', 'Error while cleaning up orphaned permissions', ['ERROR' => $db->errorString()]);
+
+            return false;
         }
     }
 }

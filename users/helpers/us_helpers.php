@@ -39,19 +39,20 @@ if (!function_exists('ipCheckBan')) {
         if ($ban > 0) {
             $unban = $db->query('SELECT id FROM us_ip_whitelist WHERE ip = ?', [$ip])->count();
             if ($unban == 0) {
-              //on blacklist and not on whitelist
+                //on blacklist and not on whitelist
                 logger(0, 'IP Logging', 'Blacklisted '.$ip.' attempted visit');
                 if ($eventhooks = getMyHooks(['page' => 'hitBanned'])) {
                     includeHook($eventhooks, 'body');
                 }
+
                 return true;
-            }else{
-              //blacklisted but also whitelisted and whitelist prevails
-              return false;
+            } else {
+                //blacklisted but also whitelisted and whitelist prevails
+                return false;
             }
         } else {
-          //not on blacklist
-          return false;
+            //not on blacklist
+            return false;
         }
     }
 }
@@ -208,7 +209,7 @@ if (!function_exists('sanitizedDest')) {
 if (!function_exists('resultBlock')) {
     function resultBlock($errors, $successes)
     {
-      sessionValMessages($errors, $successes, NULL);
+        sessionValMessages($errors, $successes, null);
     }
 }
 
@@ -496,12 +497,12 @@ function logger($user_id, $logtype, $lognote, $metadata = null)
     }
 
     $fields = [
-      'user_id'   => $user_id,
-      'logdate'   => date('Y-m-d H:i:s'),
-      'logtype'   => $logtype,
-      'lognote'   => $lognote,
-      'ip'        => $_SERVER['REMOTE_ADDR'],
-      'metadata'  => $metadata,
+      'user_id' => $user_id,
+      'logdate' => date('Y-m-d H:i:s'),
+      'logtype' => $logtype,
+      'lognote' => $lognote,
+      'ip' => ipCheck(),
+      'metadata' => $metadata,
     ];
 
     $db->insert('logs', $fields);
@@ -665,7 +666,7 @@ if (!function_exists('echodatetime')) {
             $responseAr['success'] = true;
             $responseAr['error'] = true;
             $responseAr['errorMsg'] = $errorMsg;
-            die(json_encode($responseAr));
+            exit(json_encode($responseAr));
         }
     }
 
@@ -765,7 +766,8 @@ if (!function_exists('echodatetime')) {
   if (!function_exists('isLocalhost')) {
       function isLocalhost()
       {
-          if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == 'localhost') {
+          $ip = ipCheck();
+          if ($ip == '127.0.0.1' || $ip == '::1' || $ip == 'localhost') {
               return true;
           } else {
               return false;
@@ -885,9 +887,9 @@ if (!function_exists('echodatetime')) {
           global $user;
           $db = DB::getInstance();
           if (is_null($uid)) {
-            if(isset($_SESSION['kUserSessionID'])){
-              $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0 AND kUserSessionID <> ?', [$user->data()->id, $_SESSION['kUserSessionID']]);
-            }
+              if (isset($_SESSION['kUserSessionID'])) {
+                  $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0 AND kUserSessionID <> ?', [$user->data()->id, $_SESSION['kUserSessionID']]);
+              }
           } else {
               $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0', [$uid]);
           }
@@ -1049,8 +1051,9 @@ if (!function_exists('echodatetime')) {
           }
           $check = $db->query('SELECT id FROM us_plugins WHERE plugin = ? and status = ?', [$plugin, 'active'])->count();
           if ($check != 1) {
-              logger($id, 'Errors', "Attempted to access disabled $plugin");
+
               if (!$checkOnly) {
+
                   Redirect::to($us_url_root.'users/admin.php?view=plugins&err=Plugin+is+disabled');
               }
 
@@ -1069,7 +1072,7 @@ if (!function_exists('echodatetime')) {
           if ($settings->allow_language != 1) {
               return false;
           }
-          $your_token = $_SERVER['REMOTE_ADDR'];
+          $your_token = ipCheck();
           if (!empty($_POST['language_selector'])) {
               $the_token = Input::get('your_token');
               if ($your_token != $the_token) {
@@ -1106,18 +1109,18 @@ if (!function_exists('echodatetime')) {
 
       <form class="" action="" method="post">
         <p align="center">
-          <input type="hidden" name="your_token" value="<?=$your_token; ?>">
+          <input type="hidden" name="your_token" value="<?php echo $your_token; ?>">
 
           <input type="hidden" name="language_selector" value="1">
           <?php
           foreach ($languages as $k => $v) {
               $languages[$k] = substr($v, 0, -4);
               if (file_exists($abs_us_root.$us_url_root.'users/lang/flags/'.$languages[$k].'.png')) {?>
-              <input type="image" title="<?=$languages[$k]; ?>" alt="<?=$languages[$k]; ?>" name="<?=$languages[$k]; ?>" src="<?=$us_url_root.'users/lang/flags/'.$languages[$k].'.png'; ?>" border="0" alt="Submit" style="width: 40px;" />
+              <input type="image" title="<?php echo $languages[$k]; ?>" alt="<?php echo $languages[$k]; ?>" name="<?php echo $languages[$k]; ?>" src="<?php echo $us_url_root.'users/lang/flags/'.$languages[$k].'.png'; ?>" border="0" alt="Submit" style="width: 40px;" />
             <?php }
           } ?>
         </p>
-        <input type="hidden" name="csrf" value="<?=$token; ?>">
+        <input type="hidden" name="csrf" value="<?php echo $token; ?>">
       </form>
       <?php
       }
@@ -1189,7 +1192,7 @@ if (!function_exists('echodatetime')) {
                   $checkC = $checkQ->count();
                   if ($checkC > 0) {
                       $check = $checkQ->first();
-                      $db->update("us_plugin_hooks",$check->id,['disabled'=>0]);
+                      $db->update('us_plugin_hooks', $check->id, ['disabled' => 0]);
                       continue;
                   }
                   $fields = [
@@ -1271,11 +1274,7 @@ if (!function_exists('echodatetime')) {
               $results = $query->first();
               $pageDetails = ['id' => $results->id, 'page' => $results->page, 're_auth' => $results->re_auth];
               $pageID = $results->id;
-              if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' || $_SERVER['REMOTE_ADDR'] == '::1' || $_SERVER['REMOTE_ADDR'] == 'localhost') {
-                  $local = true;
-              } else {
-                  $local = false;
-              }
+              $local = isLocalhost();
               if (empty($pageDetails)) {
                   return true;
               } elseif ($pageDetails['re_auth'] == 0) {//If page is public, allow access
@@ -1339,68 +1338,70 @@ if (!function_exists('echodatetime')) {
 //Grabs messages stored in the $_SESSION varaible and gets them ready for the error message system
 //These are errors and successes from the validation class and an extra place to store general messages.
   if (!function_exists('parseSessionMessages')) {
-    function parseSessionMessages()
-    {
-      $sn = Config::get('session/session_name');
-      $messages = [];
-      $keys = ["genMsg","valSuc","valErr"];
-      foreach($keys as $key){
-        if(isset($_SESSION[$sn.$key])){
-
-          if(is_array($_SESSION[$sn.$key])){
-          $string = "";
-          foreach($_SESSION[$sn.$key] as $s){
-            //deal with compatibility of display_errors function
-            if(is_array($s)){
-              foreach($s as $str){
-                $string .= "<li>".$str."</li>";
+      function parseSessionMessages()
+      {
+          $sn = Config::get('session/session_name');
+          $messages = [];
+          $keys = ['genMsg', 'valSuc', 'valErr'];
+          foreach ($keys as $key) {
+              if (isset($_SESSION[$sn.$key])) {
+                  if (is_array($_SESSION[$sn.$key])) {
+                      $string = '';
+                      foreach ($_SESSION[$sn.$key] as $s) {
+                          //deal with compatibility of display_errors function
+                          if (is_array($s)) {
+                              foreach ($s as $str) {
+                                  $string .= '<li>'.$str.'</li>';
+                              }
+                          } elseif (count($_SESSION[$sn.$key]) > 1) {
+                              $string .= '<li>'.$s.'</li>';
+                          } else {
+                              $string .= $s;
+                          }
+                      }
+                      $messages[$key] = $string;
+                  } else {
+                      $messages[$key] = $_SESSION[$sn.$key];
+                  }
+              } else {
+                  $messages[$key] = '';
               }
-            }elseif(count($_SESSION[$sn.$key]) > 1){
-              $string .= "<li>".$s."</li>";
-            }else{
-              $string .= $s;
-            }
+              $_SESSION[$sn.$key] = '';
           }
-          $messages[$key] = $string;
-        }else{
-          $messages[$key] = $_SESSION[$sn.$key];
-        }
-      }else{
-        $messages[$key] = "";
+
+          return $messages;
       }
-      $_SESSION[$sn.$key] = "";
-    }
-    return $messages;
   }
-}
 
 //Added in 5.3.0
 //This allows you to pass 3 parameters from standard php arrays
 //to the $_SESSION varables without having to deal with the crazy naming
 //Note that the session variables have these crazy names to prevent cross talk
 //on shared hosting environments
-if(!function_exists("sessionValMessages")){
-  function sessionValMessages($valErr = [],$valSuc = [], $genMsg = []){
-    $keys = ["valErr","valSuc","genMsg"];
-    foreach($keys as $key){
-        if( is_array($_SESSION[Config::get('session/session_name').$key])
+if (!function_exists('sessionValMessages')) {
+    function sessionValMessages($valErr = [], $valSuc = [], $genMsg = [])
+    {
+        $keys = ['valErr', 'valSuc', 'genMsg'];
+        foreach ($keys as $key) {
+            if(isset($_SESSION[Config::get('session/session_name').$key])
+            && is_array($_SESSION[Config::get('session/session_name').$key])        
             && $$key != []
-            && $$key != NULL
+            && $$key != null
           ) {
-             $_SESSION[Config::get('session/session_name').$key][] = $$key;
-          }elseif(
+                $_SESSION[Config::get('session/session_name').$key][] = $$key;
+            } elseif (
             isset($_SESSION[Config::get('session/session_name').$key])
-                  && $_SESSION[Config::get('session/session_name').$key] != ""
+                  && $_SESSION[Config::get('session/session_name').$key] != ''
                   && $$key != []
-                  && $$key != NULL
-            ){
-              $save = $_SESSION[Config::get('session/session_name').$key];
-              $_SESSION[Config::get('session/session_name').$key] = [];
-              $_SESSION[Config::get('session/session_name').$key][] = $save;
-              $_SESSION[Config::get('session/session_name').$key][] = $$key;
-            }elseif($$key != [] && $$key != NULL){
-          $_SESSION[Config::get('session/session_name').$key] = $$key;
+                  && $$key != null
+            ) {
+                $save = $_SESSION[Config::get('session/session_name').$key];
+                $_SESSION[Config::get('session/session_name').$key] = [];
+                $_SESSION[Config::get('session/session_name').$key][] = $save;
+                $_SESSION[Config::get('session/session_name').$key][] = $$key;
+            } elseif ($$key != [] && $$key != null) {
+                $_SESSION[Config::get('session/session_name').$key] = $$key;
+            }
         }
     }
-  }
 }

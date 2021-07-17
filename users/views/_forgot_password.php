@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<?=lang("VER_INS");?>
 		</ol>
 		<?php if(!$errors=='') { display_errors($errors); } ?>
-		<form action="forgot_password.php" method="post" class="form " id="pwReset">
+		<form action="" method="post" class="form " id="pwReset">
 
 			<div class="form-group">
 				<label for="email"><?=lang("GEN_EMAIL");?></label>

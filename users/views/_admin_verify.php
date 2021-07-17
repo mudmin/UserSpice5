@@ -79,7 +79,7 @@ if (!empty($_POST)) {
 
         <h2>Restricted Access</h2><br>
         <p><font color='slate'>Please enter your <strong>password</strong> or <strong>PIN</strong> code below to continue</font></p>
-        <form class="verify-admin" action="admin.php?view=verify" method="POST">
+        <form class="verify-admin" action="" method="POST">
 
           <div class="input-group"><input class="form-control" type="password" name="password" id="password" required autofocus>
             <span class="input-group-btn">

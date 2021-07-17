@@ -39,25 +39,52 @@ if(isset($_GET['msg'])){
 
 $db = DB::getInstance();
 $settings = $db->query("SELECT * FROM settings")->first();
+
 require_once $abs_us_root.$us_url_root.'usersc/includes/security_headers.php';
 
 //language
 if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
 if($settings->allow_language == 0 || !isset($user) || !$user->isLoggedIn()){
 	if(!isset($_SESSION['us_lang'])){
-	$_SESSION['us_lang'] = $settings->default_language;
-}
+		$_SESSION['us_lang'] = $settings->default_language;
+	}
 }else{
 	if(isset($user) && $user->isLoggedIn()){
-	$_SESSION['us_lang'] = $user->data()->language;
+		$_SESSION['us_lang'] = $user->data()->language;
 	}else{
-	$_SESSION['us_lang'] = $settings->default_language;
-}
+		$_SESSION['us_lang'] = $settings->default_language;
+	}
 }
 
 include $abs_us_root.$us_url_root.'users/lang/'.$_SESSION['us_lang'].".php";
 //check for a custom page
 $currentPage = currentPage();
+if($settings->debug > 0){
+	if($settings->debug == 2 || ($settings->debug == 1 && isset($user) && $user->isLoggedIn() && $user->data()->id == 1)){
+
+		$alldata = [];
+		foreach($_GET as $k=>$v){
+			$alldata['get'][$k] = Input::sanitize($v);
+		}
+
+		foreach($_POST as $k=>$v){
+			if($k != 'password' && $k != 'password_confirm' && $k != 'confirm'){
+				$alldata['post'][$k] = Input::sanitize($v);
+			}
+		}
+		$alldata = json_encode($alldata);
+		if(!isset($user) || !$user->isLoggedIn()){
+			$loggingUserId = 0;
+		}else{
+			$loggingUserId = $user->data()->id;
+		}
+
+		if($alldata != "[]"){
+			logger($loggingUserId,"Form Data",$currentPage." View Here--->",$alldata);
+		}
+
+	}
+}
 
 if(isset($_GET['err'])){
 	$err = Input::get('err');
@@ -99,17 +126,9 @@ if(!$user->isLoggedIn()){
 	}
 }
 
-//notifiy master_account that the site is offline
-if($user->isLoggedIn()){
-	if (($settings->site_offline==1) && (in_array($user->data()->id, $master_account)) && ($currentPage != 'login.php') && ($currentPage != 'maintenance.php')){
-		err("<br>Maintenance Mode Active");
-	}
-}
-
-
 if ($settings->force_ssl==1){
 	if(!isset($_SERVER['HTTP_HOST'])){
-	die("HTTP_HOST must be set due to force https rule");
+		die("HTTP_HOST must be set due to force https rule");
 	}
 	if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
 		// if request is not secure, redirect to secure url
@@ -127,11 +146,11 @@ if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $user->data()->
 $page=currentFile();
 $titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));
 if ($titleQ->count() > 0) {
-    $pageTitle = $titleQ->first()->title;
+	$pageTitle = $titleQ->first()->title;
 }
 else $pageTitle = '';
 
 
 if(file_exists($abs_us_root.$us_url_root."usersc/includes/loader.php")){
-  require_once $abs_us_root.$us_url_root."usersc/includes/loader.php";
+	require_once $abs_us_root.$us_url_root."usersc/includes/loader.php";
 }
