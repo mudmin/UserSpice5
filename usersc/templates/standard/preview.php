@@ -1,97 +1,12 @@
-standard<?php
+<?php
+$template_override = "standard";
 require_once '../../../users/init.php';
-// require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
-
-
-
-if (!securePage($_SERVER['PHP_SELF'])) {
-    die();
+require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
+if(!hasPerm([2],$user->data()->id)){
+  die("no permission to be here");
 }
-$db = DB::getInstance();
-$settings = $db->query("SELECT * FROM settings")->first();
 ?>
 
-<?php require_once($abs_us_root.$us_url_root.'users/includes/template/header1_must_include.php'); ?>
-
-
-<!-- Bootstrap Core CSS -->
-<link rel="stylesheet" href="<?=$us_url_root?>usersc/templates/standard/assets/css/bootstrap.min.css">
-
-<!-- Table Sorting and Such -->
-<link href="<?=$us_url_root?>users/css/datatables.css" rel="stylesheet">
-
-<!-- Custom Fonts/Animation/Styling-->
-<link rel="stylesheet" href="<?=$us_url_root?>users/fonts/css/font-awesome.min.css">
-
-<!-- jQuery Fallback -->
-<script type="text/javascript">
-if (typeof jQuery == 'undefined') {
-  document.write(unescape("%3Cscript src='<?=$us_url_root?>users/js/jquery.js' type='text/javascript'%3E%3C/script%3E"));
-}
-</script>
-
-<script src="<?=$us_url_root?>usersc/templates/standard/assets/js/bootstrap.min.js" type="text/javascript"></script>
-
-<?php
-//optional
-if(file_exists($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'.css')){?> <link href="<?=$us_url_root?>usersc/templates/<?=$settings->template?>.css" rel="stylesheet"> <?php } ?>
-
-</head>
-<?php require_once($abs_us_root.$us_url_root.'users/includes/template/header3_must_include.php'); ?>
-
-<!-- Grab the initial menu work that UserSpice does for you -->
-<?php require_once($abs_us_root.$us_url_root.'users/includes/template/database_navigation_prep.php');?>
-
-<!-- This file is a way of allowing the end user to customize stuff -->
-<!-- without getting in the middle of the whole template itself -->
-<?php require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/style.php');?>
-
-<!-- Set your logo and the "header" of the navigation here -->
-  <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-       <a href="<?=$us_url_root?>"><img src="<?=$us_url_root?>users/images/logo.png"></a>
-       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
-         <span class="navbar-toggler-icon"></span>
-       </button>
-
-       <div class="collapse navbar-collapse" id="navbarsExample03">
-         <ul class="navbar-nav ml-auto">
-
-<!-- Here's where it gets tricky.  We need to concatenate together the html to make the menu. -->
-<!-- Basically you will be editing each function into the "style" of your menu -->
-<?php if($settings->navigation_type==0) {
-    $query = $db->query("SELECT * FROM email");
-$results = $query->first();
-
-//Value of email_act used to determine whether to display the Resend Verification link
-$email_act=$results->email_act;
-
-// Set up notifications button/modal
-if ($user->isLoggedIn()) {
-    if ($dayLimitQ = $db->query('SELECT notif_daylimit FROM settings', array())) $dayLimit = $dayLimitQ->results()[0]->notif_daylimit;
-    else $dayLimit = 7;
-
-    // 2nd parameter- true/false for all notifications or only current
-	$notifications = new Notification($user->data()->id, false, $dayLimit);
-}
-require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/nav.php');
-}
-
-
- if($settings->navigation_type==1) {
- require_once($abs_us_root.$us_url_root.'usersc/templates/standard/assets/functions/dbnav.php');
-} ?>
-
-
-<!-- Close everything out and leave the hooks so error and bold messages work on your template -->
-</ul>
-</div>
-</div>
-</nav>
-<?php
-require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_open.php'; //custom template container
-?>
-
-<main class="container">
     <div class="text-center">
         <h2><a href="../../../users/admin.php?view=templates"><span class="fa fa-arrow-left"></span> Back to Themes</a></h2>
     </div>
@@ -294,7 +209,7 @@ require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_
             </div>
         </div>
     </section> <span id="jumbotron" class="anchor"></span>
-    <section class="d-flex align-items-center justify-content-center vh-100">
+    <section class="d-flex align-items-center justify-content-center">
         <div class="row w-100">
             <div class="col mb-4">
                 <div id="header" class="jumbotron mb-0 d-flex align-items-center flex-column justify-content-center p-5">
@@ -722,7 +637,7 @@ require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_
             </div>
         </div>
     </section> <span id="buttons" class="anchor"></span>
-    <section class="py-4 mt-2 vh-100">
+    <section class="py-4 mt-2">
         <div class="row h-100 align-items-center">
             <div class="col-12">
                 <h2>Buttons</h2>
@@ -914,8 +829,4 @@ require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_
     }, false);
 </script>
 
-<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/container_close.php'; //custom template container  ?>
-
-<?php require_once $abs_us_root . $us_url_root . 'users/includes/page_footer.php'; ?>
-
-<?php require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/footer.php'; //custom template footer ?>
+<?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

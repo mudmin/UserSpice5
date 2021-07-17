@@ -4,37 +4,26 @@
 //Note that there are a few "default" menu items that you are free to delete at your own risk
 //Generally you can look for the <li> tags and anything you change in there will be reflected in your template.
 function customItemString($menuItem,$user_id){
+	global $settings,$user;
+	$db = DB::getInstance();
 	$itemString='';
-
   //what do you want to happen if someone wants a "divider in their dropdown menu?"
-
-
 
   // typical bootstrap 4 styling...
   if($menuItem['label']=='{{hr}}') { $itemString = "<div class='dropdown-divider'></div>"; } //some bs4 css files will ignore this
 
-
 	elseif($menuItem['link']=='users/verify_resend.php' || $menuItem['link']=='usersc/verify_resend.php') {
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM email");
-		$results = $query->first();
-		$email_act=$results->email_act;
+		$query = $db->query("SELECT * FROM email")->first();
+		$email_act=$query->email_act;
 		if($email_act==1) {
 
 			$itemString.='<li class="nav-item"><a class="nav-link" href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
-	}
+	}	elseif($menuItem['link']=='users/join.php' || $menuItem['link']=='usersc/join.php') {
 
 
-	elseif($menuItem['link']=='users/join.php' || $menuItem['link']=='usersc/join.php') {
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM settings");
-		$results = $query->first();
-		$registration=$results->registration;
-		if($registration==1) {
+		if($settings->registration==1) {
 			$itemString.='<li class="nav-item"><a class="nav-link" href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
-	}
-	else {
-
+		}	else {
 
 // THIS is a typical menu link.  What do you want it to look like?
 // Note that this is in here twice to deal with if the link has http in it for a link to another website
@@ -51,40 +40,29 @@ function customItemString($menuItem,$user_id){
 
 }
 
-
 function DropdownString($menuItem,$user_id){
+	global $settings,$user;
+	$db = DB::getInstance();
 	$itemString='';
 
   //what do you want to happen if someone wants a "divider in their dropdown menu?"
-
-
-
   // typical bootstrap 4 styling...
   if($menuItem['label']=='{{hr}}') { $itemString = "<div class='dropdown-divider'></div>"; } //some bs4 css files will ignore this
 
 
 	elseif($menuItem['link']=='users/verify_resend.php' || $menuItem['link']=='usersc/verify_resend.php') {
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM email");
-		$results = $query->first();
-		$email_act=$results->email_act;
+		$query = $db->query("SELECT * FROM email")->first();
+
+		$email_act=$query->email_act;
 		if($email_act==1) {
 
 			$itemString.='<li class="nav-item"><a class="nav-link" href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
 	}
 
-
 	elseif($menuItem['link']=='users/join.php' || $menuItem['link']=='usersc/join.php') {
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM settings");
-		$results = $query->first();
-		$registration=$results->registration;
-		if($registration==1) {
+		if($settings->registration==1) {
 			$itemString.='<li class="nav-item"><a class="nav-link" href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
-	}
-	else {
-
-
+		} else {
 // THIS is a typical menu link.  What do you want it to look like?
 // Note that this is in here twice to deal with if the link has http in it for a link to another website
 		$fix = $menuItem['link'];
@@ -102,6 +80,8 @@ function DropdownString($menuItem,$user_id){
 
 // Let's deal with dropdown menus
 function customDropdownString($menuItem,$user_id){
+	global $settings,$user;
+	$db = DB::getInstance();
 	$itemString='';
   //bs4 usually uses divs, bs3 often uses li tags here
 	$itemString.='<li class="nav-item dropdown">';
@@ -127,14 +107,6 @@ function customDropdownString($menuItem,$user_id){
 	return $itemString;
 }
 
-// Set up notifications button/modal
-if ($user->isLoggedIn()) {
-    if ($dayLimitQ = $db->query('SELECT notif_daylimit FROM settings', array())) $dayLimit = $dayLimitQ->results()[0]->notif_daylimit;
-    else $dayLimit = 7;
-
-    // 2nd parameter- true/false for all notifications or only current
-  $notifications = new Notification($user->data()->id, false, $dayLimit);
-}
 /*
 Load main navigation menus
 */
@@ -156,31 +128,11 @@ foreach ($prep as $key => $value) {
   if (sizeof($value['children'])==0) {
     if ($user->isLoggedIn()) {
       if((hasPerm($authorizedGroups,$user->data()->id) || in_array(0,$authorizedGroups)) && $value['logged_in']==1) {
-      //if (checkMenu($value['id'],$user->data()->id) && $value['logged_in']==1) {
-        if($value['label']=='{{notifications}}') {
-            $itemString='';
-            if($settings->notifications==1) {
-                $itemString='<li class="nav-item"><a class="nav-link" href="#" onclick="displayNotifications(';
-                $itemString.="'new')";
-                $itemString.='"';
-                $itemString.='id="notificationsTrigger" data-toggle="modal" data-target="#notificationsModal"><span class="fa fa-fw fa-bell-o"></span><span id="notifCount" class="badge badge-pill badge-primary" style="margin-top: -5px;">';
-                 $itemString.=(int)$notifications->getUnreadCount();
-                $itemString.='</span></a></li>';
-            }
-         }
-        elseif($value['label']=='{{messages}}') {
-            $itemString='';
-            if($settings->messaging==1) {
-// glyphicons are deprecated out of bootstrap 4. Annoying.  Let's override with a font-awesome 4.7 icon.
-                $itemString='<li class="nav-item"><a class="nav-link" href="'.$us_url_root.'users/messages.php"><i data-count="'.$msgC.'" class="fa fa-fw fa-envelope-o icon-white badge"> ';
-                if($msgC > 0) $itemString.= '('.$msgC.')';//I'm being lazy and putting () around the msg count
-                $itemString.='</i></a></li>'; }
-         }
-        else {
+
         $itemString = customItemString($value,$user->data()->id);
 				include $abs_us_root.$us_url_root.'users/includes/template/database_navigation_hooks.php';
         include $abs_us_root.$us_url_root.'usersc/includes/database_navigation_hooks.php';
-       }
+
         echo $itemString;
       }
     } else {
