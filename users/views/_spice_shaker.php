@@ -23,8 +23,8 @@ if(empty($_POST)){
 <div class="content mt-3">
   <?php
   if (trim($settings->spice_api) != ''
-      && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
-      && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
+  && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
+  && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
   {
     echo "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
   }
@@ -130,230 +130,221 @@ if(empty($_POST)){
     echo "<font color='red'>We see that you do not have CURL installed on your server.  Please make sure it is enabled.</font><br>";
     $failed = 1;
   }
-  if(!is_writable($abs_us_root.$us_url_root.'users/parsers/checkWrite.php')){
+  if(!is_writable($abs_us_root.$us_url_root.'users/parsers/.htaccess')){
     echo "<font color='red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</font><br>";
     $failed = 1;
   }
 
   if($failed == 1){ ?>
     Please check out <a href="https://userspice.com/spice-shaker-problems/">https://userspice.com/spice-shaker-problems/</a> for some tips to fix Spice Shaker on your server.
-  <?php } ?>
+  <?php }
+  if(file_exists($abs_us_root.$us_url_root."users/parsers/temp.zip")){
+    if(!unlink($abs_us_root.$us_url_root."users/parsers/temp.zip")){
+      sessionValMessages("You have a temp.zip file in users/parsers that cannot be automatically deleted and may cause you problems.  If you experience problems, please delete it manually.");
+    }
+  }
+  ?>
   <div class="content mt-3">
-    <div class="row">
-      <div class="col-6">
-        <div class="form-group">
-
-          <label for="gid">UserSpice API Key (
-            <a href="https://userspice.com/developer-api-keys/">
-              <?php if($settings->spice_api == ''){
-                echo "<font color='red'><strong>Spice Shaker will not work with out a FREE API Key. Please refresh after pasting your key.</font></strong>";
-              }
-              ?>
-              Get One Here</a>
-              )</label>
-              <input type="password" autocomplete="new-password" class="form-control ajxtxt" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>">
+    <?php if($settings->spice_api != ''){?>
+      <div class="row">
+        <div class="col-12 col-sm-4">
+          <form class="" action="" method="post">
+            <div class="input-group">
+              <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
+              <input type="submit" name="goSearch" value="Search" required>
             </div>
-          </div>
-          <div class="col-4">
-            <form class="" action="" method="post">
-              <label for="type">Browse</label>
-              <div class="d-flex">
-                <select class="form-control" name="type">
-                  <option value="" disabled <?php if($type ==''){?>selected="Selected"<?php } ?>>--Choose One--</option>
-                  <option value="featured" <?php if($type =='featured'){?>selected="Selected"<?php } ?>>Featured</option>
-                  <option value="plugin" <?php if($type =='plugin'){?>selected="Selected"<?php } ?>>Plugins</option>
-                  <option value="template" <?php if($type =='template'){?>selected="Selected"<?php } ?>>Templates</option>
-                  <option value="widget" <?php if($type =='widget'){?>selected="Selected"<?php } ?>>Widgets</option>
-                  <option value="translation" <?php if($type =='translation'){?>selected="Selected"<?php } ?>>Languages</option>
-                </select>
-                <?php if($settings->spice_api != ''){?>
-                  <input type="submit" name="go" value="Go">
-                <?php } ?>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
+
+      </div>
+      <div class="col-12 col-sm-4">
         <form class="" action="" method="post">
-         <div class="row mb-5">
-           <div class="col-4 offset-2">
-               <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
-           </div>
-           <div class="col-3">
-               <?php if($settings->spice_api != ''){?>
-                 <input type="submit" name="goSearch" value="Search" required>
-               <?php } ?>
-           </div>
-
-         </div>
-         </form>
-
-        <?php if(isset($result)){
-          $dev = json_decode($result);
-          $counter = 0;
-          if(!is_null($dev)){
-            foreach($dev as $d){
-              if($d->release_type == 1){
-                $class = "card-official";
-                $text = "Official ";
-                $img = $us_url_root."users/images/check.png";
-                $warning = "";
-              }else{
-                $class = "";
-                $text = "Community ";
-                $img = "";
-                $warning = "warnme";
-              }
-              ?>
-
-              <div class="col-md-6 col-lg-4 pb-3">
-                <div class="card card-custom <?=$class?> bg-white border-white border-0" style="height: 450px">
-                  <div class="card-custom-img" style="background-image: url(<?php if($d->img != ''){echo $d->img;}else{?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php }?>);"></div>
-                    <div class="card-custom-avatar">
-                      <?php if($d->icon == ''){
-                        $src = "https://bugs.userspice.com/usersc/logos/nologo.png";
-                      }else{
-                        $src = $d->icon;
-                      }
-                      ?>
-                      <img class="img-fluid" src="<?=$src?>" alt="Avatar" />
-                    </div>
-                    <div class="card-body" style="overflow-y: auto">
-                      <h6 class="card-title"><?=$d->project?> v<?=$d->version." (".$d->status.")";?></h6>
-                      <p><strong><?=$text?><?=ucfirst($d->category)?></strong>
-                        <img src="<?=$img?>" alt="" height="15">
-                      </p>
-                      <p class="card-text"><?=$d->descrip?></p>
-                    </div>
-                    <div class="card-footer" style="background: inherit; border-color: inherit;">
-                      <a href="#" class="btn btn-default install" style="display:none;">Please Wait</a>
-                      <?php
-                      if(shakerIsInstalled($d->category,$d->reserved)){
-                        ?>
-                        <button type="button" name="button" class="btn btn-danger installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
-                      <?php }else{ ?>
-                        <button type="button" name="button" class="btn btn-primary installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Download</button>
-                      <?php } ?>
-                      <a href="https://github.com/<?=$d->repo?>/tree/master/src/<?=$d->reserved?>" class="btn btn-outline-primary" target="_blank">View Source</a>
-                      <a href="#" class="btn btn-success visit" target="_blank" style="display:none" id="<?=$counter?>">Check it Out!</a>
-                    </div>
-                  </div>
-
-                </div>
-                <?php
-                $counter++;
-              }
-            }else{
-              ?>
-              <p align="center"><font color="red"><strong>No results found</font></strong></p>
-              <?php
-            }
-          }
-
-          ?>
-
-        <script type="text/javascript">
-        $( ".installme" ).click(function(event) {
-          if($(this).hasClass("warnme")){
-            if(!confirm("WARNING:  Please understand that this is a community provided addon and the UserSpice developers cannot take any responsibility for any harm it may cause.  Please make sure you understand the risks before using community provided addons")){
-              location.reload(forceGet)
-            }
-          }
-
-          $(".installme").hide();
-          $(".install").show();
-          var counter = $(this).attr('data-counter');
-          var formData = {
-            'type' 			:  $(this).attr('data-type'),
-            'url' 			:  $(this).attr('data-url'),
-            'hash' 			:  $(this).attr('data-hash'),
-            'reserved'  :  $(this).attr('data-res'),
-            'diag'      :  "<?=$diag?>",
-          };
-
-          $.ajax({
-            type 		: 'POST',
-            url 		: 'parsers/downloader.php',
-            data 		: formData,
-            dataType 	: 'json',
-          })
-
-          .done(function(data) {
-            if(data.success == true){
-              $("#"+counter).css('display','inline');
-              $("a").closest(".visit").attr("href",data.url);
-              $(".installme").show();
-              $(".install").hide();
-            }else{
-              alert(data.error);
-              $(".installme").show();
-              $(".install").hide();
-            }
-
-          })
-        });
-      </script>
-
-
+          <label for="type">Browse</label>
+          <div class="d-flex">
+            <select class="form-control" name="type">
+              <option value="" disabled <?php if($type ==''){?>selected="Selected"<?php } ?>>--Choose One--</option>
+              <option value="featured" <?php if($type =='featured'){?>selected="Selected"<?php } ?>>Featured</option>
+              <option value="plugin" <?php if($type =='plugin'){?>selected="Selected"<?php } ?>>Plugins</option>
+              <option value="template" <?php if($type =='template'){?>selected="Selected"<?php } ?>>Templates</option>
+              <option value="widget" <?php if($type =='widget'){?>selected="Selected"<?php } ?>>Widgets</option>
+              <option value="translation" <?php if($type =='translation'){?>selected="Selected"<?php } ?>>Languages</option>
+            </select>
+            <input type="submit" name="go" value="Go">
+          </form>
+        </div>
+      </div>
     </div>
+  <?php }else{ ?>
+    <h2>You must enter your Free UserSpice API key <a href="admin.php?view=general">here</a> in order to use this feature.</h2>
+  <?php } ?>
 
-    <style media="screen">
-    .card-custom {
-      overflow: hidden;
-      min-height: 450px;
-      box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
+  <?php if(isset($result)){
+    $dev = json_decode($result);
+    $counter = 0;
+    if(!is_null($dev)){
+      foreach($dev as $d){
+        if($d->release_type == 1){
+          $class = "card-official";
+          $text = "Official ";
+          $img = $us_url_root."users/images/check.png";
+          $warning = "";
+        }else{
+          $class = "";
+          $text = "Community ";
+          $img = "";
+          $warning = "warnme";
+        }
+        ?>
+
+        <div class="col-md-6 col-lg-4 pb-3">
+          <div class="card card-custom <?=$class?> bg-white border-white border-0" style="height: 450px">
+            <div class="card-custom-img" style="background-image: url(<?php if($d->img != ''){echo $d->img;}else{?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php }?>);"></div>
+              <div class="card-custom-avatar">
+                <?php if($d->icon == ''){
+                  $src = "https://bugs.userspice.com/usersc/logos/nologo.png";
+                }else{
+                  $src = $d->icon;
+                }
+                ?>
+                <img class="img-fluid" src="<?=$src?>" alt="Avatar" />
+              </div>
+              <div class="card-body" style="overflow-y: auto">
+                <h6 class="card-title"><?=$d->project?> v<?=$d->version." (".$d->status.")";?></h6>
+                <p><strong><?=$text?><?=ucfirst($d->category)?></strong>
+                  <img src="<?=$img?>" alt="" height="15">
+                </p>
+                <p class="card-text"><?=$d->descrip?></p>
+              </div>
+              <div class="card-footer" style="background: inherit; border-color: inherit;">
+                <a href="#" class="btn btn-default install" style="display:none;">Please Wait</a>
+                <?php
+                if(shakerIsInstalled($d->category,$d->reserved)){
+                  ?>
+                  <button type="button" name="button" class="btn btn-danger installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
+                <?php }else{ ?>
+                  <button type="button" name="button" class="btn btn-primary installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Download</button>
+                <?php } ?>
+                <a href="https://github.com/<?=$d->repo?>/tree/master/src/<?=$d->reserved?>" class="btn btn-outline-primary" target="_blank">View Source</a>
+                <a href="#" class="btn btn-success visit" target="_blank" style="display:none" id="<?=$counter?>">Check it Out!</a>
+              </div>
+            </div>
+
+          </div>
+          <?php
+          $counter++;
+        }
+      }else{
+        ?>
+        <p align="center"><font color="red"><strong>No results found</font></strong></p>
+        <?php
+      }
     }
 
-    .card-official{
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-    }
+    ?>
 
-    .card-custom-img {
-      height: 200px;
-      min-height: 200px;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
-      border-color: inherit;
-    }
+    <script type="text/javascript">
+    $( ".installme" ).click(function(event) {
+      if($(this).hasClass("warnme")){
+        if(!confirm("WARNING:  Please understand that this is a community provided addon and the UserSpice developers cannot take any responsibility for any harm it may cause.  Please make sure you understand the risks before using community provided addons")){
+          location.reload(forceGet)
+        }
+      }
 
-    /* First border-left-width setting is a fallback */
-    .card-custom-img::after {
-      position: absolute;
-      content: '';
-      top: 161px;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-top-width: 40px;
-      border-right-width: 0;
-      border-bottom-width: 0;
-      border-left-width: 545px;
-      border-left-width: calc(575px - 5vw);
-      border-top-color: transparent;
-      border-right-color: transparent;
-      border-bottom-color: transparent;
-      border-left-color: inherit;
-    }
+      $(".installme").hide();
+      $(".install").show();
+      var counter = $(this).attr('data-counter');
+      var formData = {
+        'type' 			:  $(this).attr('data-type'),
+        'url' 			:  $(this).attr('data-url'),
+        'hash' 			:  $(this).attr('data-hash'),
+        'reserved'  :  $(this).attr('data-res'),
+        'diag'      :  "<?=$diag?>",
+      };
 
-    .card-custom-avatar img {
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
-      position: absolute;
-      top: 100px;
-      left: 1.25rem;
-      width: 100px;
-      height: 100px;
-    }
+      $.ajax({
+        type 		: 'POST',
+        url 		: 'parsers/downloader.php',
+        data 		: formData,
+        dataType 	: 'json',
+      })
 
-    html {
-      font-size: 14px;
-    }
+      .done(function(data) {
+        if(data.success == true){
+          $("#"+counter).css('display','inline');
+          $("a").closest(".visit").attr("href",data.url);
+          $(".installme").show();
+          $(".install").hide();
+        }else{
+          alert(data.error);
+          $(".installme").show();
+          $(".install").hide();
+        }
 
-    .container {
-      font-size: 14px;
-      color: #666666;
-      font-family: "Open Sans";
-    }
+      })
+    });
+  </script>
 
-  </style>
+
+</div>
+
+<style media="screen">
+.card-custom {
+  overflow: hidden;
+  min-height: 450px;
+  box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
+}
+
+.card-official{
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.card-custom-img {
+  height: 200px;
+  min-height: 200px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  border-color: inherit;
+}
+
+/* First border-left-width setting is a fallback */
+.card-custom-img::after {
+  position: absolute;
+  content: '';
+  top: 161px;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-top-width: 40px;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 545px;
+  border-left-width: calc(575px - 5vw);
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-left-color: inherit;
+}
+
+.card-custom-avatar img {
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
+  position: absolute;
+  top: 100px;
+  left: 1.25rem;
+  width: 100px;
+  height: 100px;
+}
+
+html {
+  font-size: 14px;
+}
+
+.container {
+  font-size: 14px;
+  color: #666666;
+  font-family: "Open Sans";
+}
+
+</style>

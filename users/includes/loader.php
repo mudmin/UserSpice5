@@ -42,25 +42,30 @@ $settings = $db->query("SELECT * FROM settings")->first();
 
 require_once $abs_us_root.$us_url_root.'usersc/includes/security_headers.php';
 
-//language
-if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
-if($settings->allow_language == 0 || !isset($user) || !$user->isLoggedIn()){
-	if(!isset($_SESSION['us_lang'])){
-		$_SESSION['us_lang'] = $settings->default_language;
-	}
-}else{
-	if(isset($user) && $user->isLoggedIn()){
-		$_SESSION['us_lang'] = $user->data()->language;
-	}else{
-		$_SESSION['us_lang'] = $settings->default_language;
-	}
+if (ipCheckBan()) {
+    Redirect::to($us_url_root.'usersc/scripts/banned.php');
+    exit();
+}
+
+// Language
+if ($settings->allow_language == 0 || !isUserLoggedIn()) {
+    if (!isset($_SESSION['us_lang'])) {
+        $_SESSION['us_lang'] = $settings->default_language;
+    }
+} else {
+    if (isUserLoggedIn()) {
+        $_SESSION['us_lang'] = $user->data()->language;
+    } else {
+        $_SESSION['us_lang'] = $settings->default_language;
+    }
 }
 
 include $abs_us_root.$us_url_root.'users/lang/'.$_SESSION['us_lang'].".php";
+
 //check for a custom page
 $currentPage = currentPage();
 if($settings->debug > 0){
-	if($settings->debug == 2 || ($settings->debug == 1 && isset($user) && $user->isLoggedIn() && $user->data()->id == 1)){
+	if($settings->debug == 2 || ($settings->debug == 1 && isUserLoggedIn() && $user->data()->id == 1)){
 
 		$alldata = [];
 		foreach($_GET as $k=>$v){
@@ -73,7 +78,7 @@ if($settings->debug > 0){
 			}
 		}
 		$alldata = json_encode($alldata);
-		if(!isset($user) || !$user->isLoggedIn()){
+		if(!isUserLoggedIn()){
 			$loggingUserId = 0;
 		}else{
 			$loggingUserId = $user->data()->id;

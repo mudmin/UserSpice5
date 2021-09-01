@@ -67,25 +67,7 @@ if(Input::exists()){
   }
 
 
-  //Toggle reauth setting
-  if($pageDetails->private==1 && $pageDetails->page != "users/admin_verify.php" && $pageDetails->page != "usersc/admin_verify.php" && $pageDetails->page != "users/admin_pin.php?view=pin" && $pageDetails->page != "usersc/admin_pin.php?view=pin") {
-    if (isset($re_auth) AND $re_auth == 'Yes'){
-      if ($pageDetails->re_auth == 0){
-        if (updateReAuth($pageId, 1)){
-          $successes[] = lang("PAGE_REAUTH_TOGGLED", array("requires"));
-          logger($user->data()->id,"Pages Manager","Changed re_auth from No to Yes for Page #$pageId.");
-        }else{
-          $errors[] = lang("SQL_ERROR");
-        }
-      }
-    }elseif ($pageDetails->re_auth == 1){
-      if (updateReAuth($pageId, 0)){
-        $successes[] = lang("PAGE_REAUTH_TOGGLED", array("does not require"));
-        logger($user->data()->id,"Pages Manager","Changed re_auth from Yes to No for Page #$pageId.");
-      }else{
-        $errors[] = lang("SQL_ERROR");
-      }
-    } }
+
 
     //Remove permission level(s) access to page
     if(!empty($_POST['removePermission'])){
@@ -173,12 +155,6 @@ if(Input::exists()){
                   $checked = ($pageDetails->private == 1)? ' checked' : ''; ?>
                   <input type='checkbox' name='private' id='private' value='Yes'<?=$checked;?>>
                 </label></div>
-                <?php if($pageDetails->private==1 && $pageDetails->page != "users/admin_verify.php" && $pageDetails->page != "usersc/admin_verify.php" && $pageDetails->page != "users/admin_pin.php?view=pin" && $pageDetails->page != "usersc/admin_pin.php?view=pin") {?>
-                  <label>Require ReAuth:
-                    <?php
-                    $checked1 = ($pageDetails->re_auth == 1)? ' checked' : ''; ?>
-                    <input type='checkbox' name='re_auth' id='re_auth' value='Yes'<?=$checked1;?>></label>
-                  <?php } ?>
                 </div>
               </div><!-- /panel -->
             </div><!-- /.col -->

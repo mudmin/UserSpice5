@@ -485,30 +485,32 @@ if (!function_exists('encodeURIComponent')) {
     }
 }
 
-function logger($user_id, $logtype, $lognote, $metadata = null)
-{
-    $db = DB::getInstance();
+if (!function_exists('logger')) {
+    function logger($user_id, $logtype, $lognote, $metadata = null)
+    {
+        $db = DB::getInstance();
 
-    if (is_array($lognote) || is_object($lognote)) {
-        $lognote = json_encode($lognote);
+        if (is_array($lognote) || is_object($lognote)) {
+            $lognote = json_encode($lognote);
+        }
+        if (is_array($metadata) || is_object($metadata)) {
+            $metadata = json_encode($metadata);
+        }
+
+        $fields = [
+          'user_id' => $user_id,
+          'logdate' => date('Y-m-d H:i:s'),
+          'logtype' => $logtype,
+          'lognote' => $lognote,
+          'ip' => ipCheck(),
+          'metadata' => $metadata,
+        ];
+
+        $db->insert('logs', $fields);
+        $lastId = $db->lastId();
+
+        return $lastId;
     }
-    if (is_array($metadata) || is_object($metadata)) {
-        $metadata = json_encode($metadata);
-    }
-
-    $fields = [
-      'user_id' => $user_id,
-      'logdate' => date('Y-m-d H:i:s'),
-      'logtype' => $logtype,
-      'lognote' => $lognote,
-      'ip' => ipCheck(),
-      'metadata' => $metadata,
-    ];
-
-    $db->insert('logs', $fields);
-    $lastId = $db->lastId();
-
-    return $lastId;
 }
 
 if (!function_exists('echodatetime')) {
@@ -1234,66 +1236,7 @@ if (!function_exists('echodatetime')) {
       }
   }
 
-  if (!function_exists('updateReAuth')) {
-      function updateReAuth($id, $re_auth)
-      {
-          $db = DB::getInstance();
-          $result = $db->query('UPDATE pages SET re_auth = ? WHERE id = ?', [$re_auth, $id]);
-
-          return $result;
-      }
-  }
-
-  if (!function_exists('reAuth')) {
-      function reAuth()
-      {
-          $abs_us_root = $_SERVER['DOCUMENT_ROOT'];
-          $self_path = explode('/', $_SERVER['PHP_SELF']);
-          $self_path_length = count($self_path);
-          $file_found = false;
-
-          for ($i = 1; $i < $self_path_length; ++$i) {
-              array_splice($self_path, $self_path_length - $i, $i);
-              $us_url_root = implode('/', $self_path).'/';
-
-              if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')) {
-                  $file_found = true;
-                  break;
-              } else {
-                  $file_found = false;
-              }
-          }
-
-          $urlRootLength = strlen($us_url_root);
-          $page = substr($_SERVER['PHP_SELF'], $urlRootLength, strlen($_SERVER['PHP_SELF']) - $urlRootLength);
-          $db = DB::getInstance();
-          $id = null;
-          $query = $db->query('SELECT id, page, re_auth FROM pages WHERE page = ?', [$page]);
-          $count = $query->count();
-          if ($count > 0) {
-              $results = $query->first();
-              $pageDetails = ['id' => $results->id, 'page' => $results->page, 're_auth' => $results->re_auth];
-              $pageID = $results->id;
-              $local = isLocalhost();
-              if (empty($pageDetails)) {
-                  return true;
-              } elseif ($pageDetails['re_auth'] == 0) {//If page is public, allow access
-                  return true;
-              } elseif ($page == 'users/admin_verify.php' || $page == 'usersc/admin_verify.php') {
-                  return true;
-              } elseif ($page == 'users/admin_pin.php' || $page == 'usersc/admin_pin.php') {
-                  return true;
-              } elseif ($local) {
-                  return true;
-              } else { //Authorization is required.  Insert your authorization code below.
-                  if (!isset($_SESSION['cloak_to'])) {
-                      verifyadmin($page);
-                  }
-              }
-          }
-      }
-  }
-
+  
   if (!function_exists('verifyadmin')) {
       function verifyadmin($page)
       {
@@ -1384,7 +1327,7 @@ if (!function_exists('sessionValMessages')) {
         $keys = ['valErr', 'valSuc', 'genMsg'];
         foreach ($keys as $key) {
             if(isset($_SESSION[Config::get('session/session_name').$key])
-            && is_array($_SESSION[Config::get('session/session_name').$key])        
+            && is_array($_SESSION[Config::get('session/session_name').$key])
             && $$key != []
             && $$key != null
           ) {
@@ -1405,3 +1348,40 @@ if (!function_exists('sessionValMessages')) {
         }
     }
 }
+
+if (!function_exists('isUserLoggedIn')) {
+    function isUserLoggedIn()
+    {
+        global $user;
+        if (isset($user) && $user->isLoggedIn()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+//slightly shortens repetitive code for checkbox, radio, and dropdown form elements
+	if(!function_exists('isSelected')){
+    function isSelected($one,$two,$output = "selected='selected'"){
+      if($one == $two){
+        echo $output." ";
+      }
+    }
+  }
+
+  if(!function_exists('checkAPIkey')){
+    function checkAPIkey($key){
+      $msg = "";
+      if($key == ""){
+        $msg = "<h4><font color='blue'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</font> </h4>";
+      }elseif(!preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($key))
+          && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($key)) )
+      {
+        $msg = "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
+      }else{
+        $msg =  "<h4><font color='green'><span>&#10003;</span> Your API Key appears to be valid.</font> </h4>";
+      }
+      return $msg;
+    }
+  }

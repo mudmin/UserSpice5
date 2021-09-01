@@ -1,13 +1,13 @@
 <?php
 
-// Adds settings.debug
-// Release Version 5.3.4
+// Deletes no longer needed checkWrite.php parser file.
+// Release Version 5.3.5
 
 $countE = 0;
 
-$db->query('ALTER TABLE settings ADD COLUMN debug tinyint(1) default 0');
-if (!$db->error()) {
-    logger(1, 'System Updates', 'Added settings.debug');
+$file = $abs_us_root.$us_url_root."users/parsers/checkWrite.php";
+if(file_exists($file)){
+  unlink($file);
 }
 
 if ($countE == 0) {

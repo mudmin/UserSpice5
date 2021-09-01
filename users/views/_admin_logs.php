@@ -36,7 +36,7 @@ tfoot input {
 <div class="content mt-3">
   <h2 class="mb-3">System Logs</h2>
   <?php if(in_array($user->data()->id, $master_account)) { ?>
-    <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
+    <form id="log_clearing_tools" class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
       <input type="hidden" name="csrf" value="<?=Token::generate();?>">
       <input type="hidden" name="delhook" value="true">
       <input type="submit" name="delAll" value="Clear All Logs" class="btn btn-danger">

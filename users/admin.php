@@ -329,6 +329,10 @@ $('[data-toggle="popover"]').popover();
     })
 
     .done(function(data) {
+      console.log(data);
+      if(data.api != ""){
+        $("#APIKeyMessage").html(data.api);
+      }
       messages(data);
     })
   });

@@ -19,7 +19,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 ini_set("allow_url_fopen", 1);
-if(isset($_SESSION)){session_destroy();}
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 $hooks =  getMyHooks();
@@ -32,7 +31,9 @@ if (Input::get('err') != '') {
     $errors[] = Input::get('err');
 }
 
-if($user->isLoggedIn()) Redirect::to($us_url_root.'index.php');
+if ($user->isLoggedIn()) {
+    Redirect::to($us_url_root.$settings->redirect_uri_after_login);
+}
 
 if (!empty($_POST['login_hook'])) {
   $token = Input::get('csrf');

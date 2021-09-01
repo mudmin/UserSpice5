@@ -8,6 +8,7 @@
   }
 
 $msg = [];
+$msg['api'] = "";
 
 $type = Input::get('type');
 $field = Input::get('field');
@@ -54,10 +55,17 @@ if($type == 'num'){
 }
 
 if($type == 'txt'){
+
     $db->update('settings',1,[$field=>$value]);
     $msg['success'] = "true";
-    $msg['msg'] = $desc." Updated!";
+    $msg['msg'] = $desc." Updated!!!";
   }
+
+
+if($field == "spice_api"){
+   $msg['api'] = checkAPIkey($value);
+}
+
 
 includeHook($hooks,'bottom');
 echo json_encode($msg);
