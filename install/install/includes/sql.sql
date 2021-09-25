@@ -808,16 +808,13 @@ CREATE TABLE `us_management` (
 
 INSERT INTO `us_management` (`id`, `page`, `view`, `feature`, `access`) VALUES
 (1, '_admin_manage_ip.php', 'ip', 'IP Whitelist/Blacklist', ''),
-(2, '_admin_messages.php', 'messages', 'Messages', ''),
-(3, '_admin_nav.php', 'nav', 'Navigation', ''),
-(4, '_admin_nav_item.php', 'nav_item', 'Navigation', ''),
-(5, '_admin_notifications.php', 'notifications', 'Notifications', ''),
-(6, '_admin_page.php', 'page', 'Page Management', ''),
-(7, '_admin_pages.php', 'pages', 'Page Management', ''),
-(10, '_admin_security_logs.php', 'security_logs', 'Security Logs', ''),
-(11, '_admin_sessions.php', 'sessions', 'Session Management', ''),
-(12, '_admin_templates.php', 'templates', 'Templates', ''),
-(13, '_admin_tools_check_updates.php', 'updates', 'Check Updates', '');
+(2, '_admin_nav.php', 'nav', 'Navigation [List/Add/Delete]', ''),
+(3, '_admin_nav_item.php', 'nav_item', 'Navigation [View/Edit]', ''),
+(4, '_admin_pages.php', 'pages', 'Page Management [List]', ''),
+(5, '_admin_page.php', 'page', 'Page Management [View/Edit]', ''),
+(6, '_admin_security_logs.php', 'security_logs', 'Security Logs', ''),
+(7, '_admin_templates.php', 'templates', 'Templates', ''),
+(8, '_admin_tools_check_updates.php', 'updates', 'Check Updates', '');
 
 -- --------------------------------------------------------
 
