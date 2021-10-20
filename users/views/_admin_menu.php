@@ -219,6 +219,10 @@ function activeDropdown($View, $dropId, $Area = false){
             <ul class="sub-menu children dropdown-menu <?=activeDropdown($view, 'addons')[0];?>">
               <?php if(checkAccess('view','plugins')){?>   <li <?=($view == 'plugins') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-plug"></i><a class="menu_item" id="plugin_manager" href="admin.php?view=plugins"><?=lang("ACP_MENU_PLUGINS_PLUGIN_MANAGER")?></a></li><?php } ?>
               <?php foreach($plugins as $t){
+                if(!file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml')) {
+                  continue;
+                }
+                
                 $xml=simplexml_load_file($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml');
                 if(file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/configure.php') && isset($usplugins[$t]) && ($usplugins[$t] == 1)){?>
                      <li><i class=" menu-icon fa fa-bolt"></i>

@@ -139,6 +139,7 @@ class Validate
 					$email_parts = explode('@', $value);
 					$str = lang("VAL_SERVER");
 					if ((!filter_var(gethostbyname($email_parts[1]), FILTER_VALIDATE_IP) && !filter_var(gethostbyname('www.' . $email_parts[1]), FILTER_VALIDATE_IP)) && !getmxrr($email_parts[1], $mxhosts)){
+
 						$this->addError(["{$display} $str",$item]);
 					}
 					break;
@@ -166,7 +167,7 @@ class Validate
 						}
 
 						if ($rule==">"  &&  $value<=$rule_value){
-							$str = lang("VAL_GREATER");
+							$str = lang("VAL_GREAT");
 							$this->addError(["{$display} $str {$rule_value_display}",$item]);
 						}
 
@@ -302,8 +303,14 @@ class Validate
 }
 
 	public function addError($error) {
-		if (array_search($error, $this->_errors) === FALSE)
-		$this->_errors[] = $error;
+		if (array_search($error, $this->_errors) === FALSE){
+			if(is_array($error) && count($error) > 1){
+				$this->_errors[] = $error[0];
+			}else{
+				$this->_errors[] = $error;
+			}
+
+		}
 	}
 
 	public function display_errors() {

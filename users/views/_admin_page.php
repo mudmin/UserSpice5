@@ -14,6 +14,7 @@
 </header>
 <?php
 //PHP Goes Here!
+$hooks = getMyHooks(['page' => 'adminPage']);
 $pageId = Input::get('id');
 $errors = [];
 $successes = [];
@@ -67,7 +68,25 @@ if(Input::exists()){
   }
 
 
-
+  //Toggle reauth setting
+  if($pageDetails->private==1 && $pageDetails->page != "users/admin_verify.php" && $pageDetails->page != "usersc/admin_verify.php" && $pageDetails->page != "users/admin_pin.php?view=pin" && $pageDetails->page != "usersc/admin_pin.php?view=pin") {
+    if (isset($re_auth) AND $re_auth == 'Yes'){
+      if ($pageDetails->re_auth == 0){
+        if (updateReAuth($pageId, 1)){
+          $successes[] = lang("PAGE_REAUTH_TOGGLED", array("requires"));
+          logger($user->data()->id,"Pages Manager","Changed re_auth from No to Yes for Page #$pageId.");
+        }else{
+          $errors[] = lang("SQL_ERROR");
+        }
+      }
+    }elseif ($pageDetails->re_auth == 1){
+      if (updateReAuth($pageId, 0)){
+        $successes[] = lang("PAGE_REAUTH_TOGGLED", array("does not require"));
+        logger($user->data()->id,"Pages Manager","Changed re_auth from Yes to No for Page #$pageId.");
+      }else{
+        $errors[] = lang("SQL_ERROR");
+      }
+    } }
 
     //Remove permission level(s) access to page
     if(!empty($_POST['removePermission'])){
@@ -105,6 +124,7 @@ if(Input::exists()){
         $errors[] = lang("SQL_ERROR");
       }
     }
+    includeHook($hooks, 'post');
     $pageDetails = fetchPageDetails($pageId);
     if(isset($_SESSION['redirect_after_save']) && $_SESSION['redirect_after_save']==true) {
       if(!empty($_SESSION['redirect_after_uri'])){
@@ -125,7 +145,7 @@ if(Input::exists()){
   <div class="content mt-3">
     <h2>Page Permissions </h2>
     <?php resultBlock($errors,$successes); ?>
-    <form name='adminPage' action='' method='post'>
+    <form name='adminPage' action='<?=$us_url_root?>users/admin.php?view=page&id=<?=$pageId;?>' method='post'>
       <input type='hidden' name='process' value='1'>
 
       <div class="row">
@@ -155,6 +175,12 @@ if(Input::exists()){
                   $checked = ($pageDetails->private == 1)? ' checked' : ''; ?>
                   <input type='checkbox' name='private' id='private' value='Yes'<?=$checked;?>>
                 </label></div>
+                <?php if($pageDetails->private==1 && $pageDetails->page != "users/admin_verify.php" && $pageDetails->page != "usersc/admin_verify.php" && $pageDetails->page != "users/admin_pin.php?view=pin" && $pageDetails->page != "usersc/admin_pin.php?view=pin") {?>
+                  <label>Require ReAuth:
+                    <?php
+                    $checked1 = ($pageDetails->re_auth == 1)? ' checked' : ''; ?>
+                    <input type='checkbox' name='re_auth' id='re_auth' value='Yes'<?=$checked1;?>></label>
+                  <?php } ?>
                 </div>
               </div><!-- /panel -->
             </div><!-- /.col -->
@@ -202,9 +228,13 @@ if(Input::exists()){
                   <div class="form-group">
                     <label for="title">Page Title:</label> <span class="small">(This is the text that's displayed on the browser's titlebar or tab)</span>
                       <input type="text" class="form-control" name="changeTitle" maxlength="50" value="<?= $pageDetails->title; ?>" />
-                    </div>
                   </div>
                 </div>
+              </div>
+              <?php
+                includeHook($hooks, 'form');
+              ?>
+
 
                 <input type="hidden" name="csrf" value="<?=Token::generate();?>" >
                 <a class='btn btn-warning' href="<?=$us_url_root?>users/admin.php?view=pages">Cancel</a>

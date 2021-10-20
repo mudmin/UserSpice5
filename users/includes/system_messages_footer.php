@@ -12,7 +12,7 @@ if(!isset($usSessionMessageClasses)){
   $usSessionMessageClasses = array(
     'err'=>"primary",       //err= in the url
     'msg'=>"info",          //msg= in the url
-    'genMsg'=>"dark",    //$_SESSION[Config::get('session/session_name')."genMsg"]
+    'genMsg'=>"dark",       //$_SESSION[Config::get('session/session_name')."genMsg"]
     'valSuc'=>"success",    //validation class success message
     'valErr'=>"danger",     //validation class error message
   );
@@ -23,34 +23,34 @@ if(!isset($usSessionMessageClasses)){
 $(document).ready(function() {
 <?php
   //look for the old school ?err=Whatever in the url
-  if(Input::get('err') != ""){ ?>
-    userSpiceMessages("<?=htmlspecialchars_decode(Input::get('err'))?>","errUserSpiceMessage","<?=$usSessionMessageClasses['err']?>");
+  if (Input::get('err') != '') { ?>
+    userSpiceMessages("<?php echo htmlspecialchars_decode(Input::get('err')); ?>","errUserSpiceMessage","<?php echo $usSessionMessageClasses['err']; ?>");
 <?php
   }
 
   //look for the old school ?msg=Whatever in the url
-  if(Input::get('msg') != ""){ ?>
-    userSpiceMessages("<?=htmlspecialchars_decode(Input::get('msg'))?>","msgUserSpiceMessage","<?=$usSessionMessageClasses['msg']?>");
+  if (Input::get('msg') != '') { ?>
+    userSpiceMessages("<?php echo htmlspecialchars_decode(Input::get('msg')); ?>","msgUserSpiceMessage","<?php echo $usSessionMessageClasses['msg']; ?>");
 
 <?php }
     //define the types of messages and what class they get
     $keys = [
-      "genMsg"=>$usSessionMessageClasses['genMsg'],
-      "valSuc"=>$usSessionMessageClasses['valSuc'],
-      "valErr"=>$usSessionMessageClasses['valSuc']
+      'genMsg' => $usSessionMessageClasses['genMsg'],
+      'valSuc' => $usSessionMessageClasses['valSuc'],
+      'valErr' => $usSessionMessageClasses['valErr'],
     ];
 
     //Display any messages that have been set in the $_SESSION variables
-    foreach($keys as $key=>$class){
-      if(isset($usSessionMessages[$key]) && $usSessionMessages[$key] != ""){ ?>
-        userSpiceMessages("<?=htmlspecialchars_decode($usSessionMessages[$key])?>","<?=$key?>UserSpiceMessage","<?=$class?>");
+    foreach ($keys as $key => $class) {
+        if (isset($usSessionMessages[$key]) && $usSessionMessages[$key] != '') { ?>
+        userSpiceMessages("<?php echo htmlspecialchars_decode($usSessionMessages[$key]); ?>","<?php echo $key; ?>UserSpiceMessage","<?php echo $class; ?>");
         <?php
       }
     }
-    if(isset($settings->err_time)){
-      $usMsgErrorTimeout = $settings->err_time * 1000;
-    }else{
-      $usMsgErrorTimeout = 10000;
+    if (isset($settings->err_time)) {
+        $usMsgErrorTimeout = $settings->err_time * 1000;
+    } else {
+        $usMsgErrorTimeout = 10000;
     }
     ?>
 
@@ -60,7 +60,7 @@ $(document).ready(function() {
       $('#'+div+'s').show();
       $('#'+div+'s').addClass("sufee-alert alert with-close alert-"+cls+" alert-dismissible fade show usmsg");
       $('#'+div).html(msg);
-      $('#'+div+'s').delay(<?=$usMsgErrorTimeout?>).fadeOut('slow');
+      $('#'+div+'s').delay(<?php echo $usMsgErrorTimeout; ?>).fadeOut('slow');
     }
   });
 </script>

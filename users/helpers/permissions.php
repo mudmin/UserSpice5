@@ -138,7 +138,9 @@ if (!function_exists('cleanupPermissionPageMatches')) {
             $db = DB::getInstance();
         }
 
-        if (!isset($user) || !$user->isLoggedIn()) {
+        if (isUserLoggedIn()) {
+            $userId = $user->data()->id;
+        } else {
             $userId = 1;
         }
 
@@ -552,6 +554,10 @@ if (!function_exists('hasPerm')) {
     {
         global $user, $master_account;
         $access = false;
+
+        if(!isset($user)) {
+          return $access;
+        }
 
         if (!is_array($permissions)) {
             $permissions = [$permissions];

@@ -15,6 +15,14 @@
 <?php
 $errors = [];
 $successes = [];
+$ignore = [];
+$w = Input::get("w");
+if($w != ""){
+  $ips = $db->query("SELECT * FROM us_ip_whitelist")->results();
+  foreach($ips as $i){
+    $ignore[] = $i->ip;
+  }
+}
 ?>
 <style>
 tfoot input {
@@ -24,7 +32,21 @@ tfoot input {
 </style>
 <link rel="stylesheet" href="<?=$us_url_root?>users/js/pagination/datatables.min.css">
 <div class="content mt-3">
-  <h2 class="mb-3">Security Logs</h2>
+  <div class="row">
+    <div class="col-12 col-sm-5">
+      <h2 class="mb-3">Security Logs</h2>
+    </div>
+    <div class="col-12 col-sm-7 text-right">
+      <?php if($w != ""){ ?>
+        <h4><font color="red">Currently Ignoring Whitelisted IPs</h4>
+        <a href="admin.php?view=security_logs" class="btn btn-primary">Show All</a>
+      <?php }else{ ?>
+        <a href="admin.php?view=security_logs&w=true" class="btn btn-primary">Hide Whitelisted IPs</a>
+      <?php } ?>
+    </div>
+  </div>
+
+
   <p>These logs are updated every time someone tries to access a page that they do not have permission to access.  Note that this could be because they are logged out, from a bad redirect, or many other causes other than someone attempting to hack your system.</p>
   <!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
   <?php resultBlock($errors, $successes);
@@ -43,7 +65,9 @@ tfoot input {
           </tr>
         </thead>
         <tbody>
-          <?php foreach($logs as $m){ ?>
+          <?php foreach($logs as $m){
+            if(in_array($m->ip,$ignore)){continue;}
+            ?>
             <tr>
               <td><?=$m->id?></td>
               <td><?php

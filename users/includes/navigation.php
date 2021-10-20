@@ -64,7 +64,7 @@ if ($user->isLoggedIn()) {
 <?php //require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_right_side.php'; ?>
 
 					 <!-- Hamburger menu link -->
-					<?php if (checkMenu(2,$user->data()->id)){  //Links for permission level 2 (default admin) ?>
+					<?php if (hasPerm(2)){  //Links for permission level 2 (default admin) ?>
 						<li class="hidden-sm hidden-md hidden-lg"><a href="<?=$us_url_root?>users/admin.php"><i class="fa fa-fw fa-cogs"></i> Admin Dashboard</a></li> <!-- Hamburger menu link -->
 						<li class="hidden-sm hidden-md hidden-lg"><a href="<?=$us_url_root?>users/admin.php?view=users"><i class="fa fa-user"></i> User Management</a></li> <!-- Hamburger menu link -->
 						<li class="hidden-sm hidden-md hidden-lg"><a href="<?=$us_url_root?>users/admin.php?view=permissions"><i class="fa fa-lock"></i> User Permissions</a></li> <!-- Hamburger menu link -->
@@ -80,7 +80,7 @@ if ($user->isLoggedIn()) {
 <?php //require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_dropdown.php'; ?>
 							<!-- regular user menu link -->
 
-							<?php if (checkMenu(2,$user->data()->id)){  //Links for permission level 2 (default admin) ?>
+							<?php if (hasPerm(2)){  //Links for permission level 2 (default admin) ?>
 								<li class="divider"></li>
 								<li><a href="<?=$us_url_root?>users/admin.php"><i class="fa fa-fw fa-cogs"></i> Admin Dashboard</a></li> <!-- regular Admin menu link -->
 								<li><a href="<?=$us_url_root?>users/admin.php?view=users"><i class="fa fa-user"></i> User Management</a></li>

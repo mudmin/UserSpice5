@@ -144,20 +144,20 @@ if (!empty($_POST)) {
 
             if (!empty($_POST['pwx'])) {
                 $validation->check($_POST, [
-          'pwx' => [
-            'display' => 'New Password',
-            'required' => true,
-            'min' => $settings->min_pw,
-            'max' => $settings->max_pw,
-          ],
-          'confirm' => [
-            'display' => 'Confirm New Password',
-            'required' => true,
-            'matches' => 'pwx',
-          ],
-        ]);
+                  'pwx' => [
+                    'display' => 'New Password',
+                    'required' => true,
+                    'min' => $settings->min_pw,
+                    'max' => $settings->max_pw,
+                  ],
+                  'confirm' => [
+                    'display' => 'Confirm New Password',
+                    'required' => true,
+                    'matches' => 'confirm',
+                  ],
+                ]);
 
-                if (empty($errors)) {
+                if (!$validation->errors()) {
                     //process
                     $new_password_hash = password_hash(Input::get('pwx', true), PASSWORD_BCRYPT, ['cost' => 12]);
                     $user->update(['password' => $new_password_hash], $userId);
@@ -180,7 +180,9 @@ if (!empty($_POST)) {
                             $errors[] = 'Failed to kill active sessions, Error: '.$passwordResetKillSessions;
                         }
                     }
-                }
+                  }else{
+                    Redirect::to("admin.php?view=user&id=".$userId."&err=Password validation failed");
+                  }
             }
             $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->reset_vericode_expiry minutes", strtotime(date('Y-m-d H:i:s'))));
             $vericode = randomstring(15);
@@ -497,12 +499,12 @@ if (!empty($_POST)) {
                           <option value="1" <?php if ($userdetails->permissions == 1) {
                                 echo "selected='selected'";
                             } else {
-                                if (!checkMenu(2, $user->data()->id)) {  ?>disabled<?php }
+                                if (!hasPerm(2)) {  ?>disabled<?php }
                             } ?>>No</option>
                           <option value="0" <?php if ($userdetails->permissions == 0) {
                                 echo "selected='selected'";
                             } else {
-                                if (!checkMenu(2, $user->data()->id)) {  ?>disabled<?php }
+                                if (!hasPerm(2)) {  ?>disabled<?php }
                             } ?>>Yes</option>
                         </select>
                       </div>
@@ -588,7 +590,7 @@ if (!empty($_POST)) {
                           <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><font color="blue">?</font></a></label>
                           <select name='delete[<?php echo "$userId"; ?>]' id='delete[<?php echo "$userId"; ?>]' class="form-control">
                             <option selected='selected' disabled>No</option>
-                            <option value="<?=$userId; ?>"  <?php if (!checkMenu(2, $user->data()->id) && !in_array($user->data()->id, $master_account)) {
+                            <option value="<?=$userId; ?>"  <?php if (!hasPerm(2) && !in_array($user->data()->id, $master_account)) {
                               echo 'disabled';
                           } ?>>Yes - Cannot be undone!</option>
                           </select>

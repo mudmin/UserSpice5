@@ -41,17 +41,24 @@ if (!empty($_POST['login_hook'])) {
     include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
   }
 
-    $validate = new Validate();
-    $validation = $validate->check($_POST, array(
-      'username' => array('display' => 'Username','required' => true),
-      'password' => array('display' => 'Password', 'required' => true)));
-      //plugin goes here with the ability to kill validation
+      $validate = new Validate();
+      $validation = $validate->check($_POST, array(
+        'username' => array('display' => 'Username','required' => true),
+        'password' => array('display' => 'Password', 'required' => true))
+      );
+
+
+      $validated = $validation->passed();
+      // Set $validated to False to kill validation, or run additional checks, in your post hook
+      $username = Input::get('username');
+      $password = trim(Input::get('password'));
+      $remember = false;
       includeHook($hooks,'post');
+
       if ($validation->passed()) {
         //Log user in
-        $remember = false;
         $user = new User();
-        $login = $user->loginEmail(Input::get('username'), trim(Input::get('password')), $remember);
+        $login = $user->loginEmail($username, $password, $remember);
         if ($login) {
           $hooks =  getMyHooks(['page'=>'loginSuccess']);
           includeHook($hooks,'body');

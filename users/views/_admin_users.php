@@ -2,7 +2,7 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
+        <li><a href="<?php echo $us_url_root; ?>users/admin.php">Dashboard</a></li>
         <li>Manage</li>
         <li class="active">Users</li>
       </ol>
@@ -83,6 +83,10 @@ if (!empty($_POST)) {
           ],
       ]);
 
+        if ($eventhooks = getMyHooks(['page' => 'adminUser'])) {
+            includeHook($eventhooks, 'createAttempt');
+        }
+
         if ($validation->passed()) {
             $form_valid = true;
             try {
@@ -134,7 +138,7 @@ if (!empty($_POST)) {
                 logger($user->data()->id, 'User Manager', "Added user $username.");
                 Redirect::to($us_url_root.'users/admin.php?view=user&id='.$theNewId);
             } catch (Exception $e) {
-                die($e->getMessage());
+                exit($e->getMessage());
             }
         }
     }
@@ -155,7 +159,7 @@ if (!empty($_POST)) {
   <div class="row">
     <div class="col-12 mb-2">
     <h2>Manage Users</h2>
-    <?=resultBlock($errors, $successes); ?>
+    <?php echo resultBlock($errors, $successes); ?>
     <?php includeHook($hooks, 'pre'); ?>
     <div class="w-100 text-right">
     <button class="btn btn-outline-dark" data-toggle="modal" data-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
@@ -178,11 +182,11 @@ if (!empty($_POST)) {
           foreach ($userData as $v1) {
               ?>
             <tr>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->id; ?></a></td>
-              <td><a class="nounderline text-danger" href='admin.php?view=user&id=<?=$v1->id; ?>'><?php if ($v1->force_pr == 1) {?><i class="fa fa-lock"></i><?php } ?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->username; ?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->fname; ?> <?=$v1->lname; ?></a></td>
-              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?=$v1->id; ?>'><?=$v1->email; ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?php echo $v1->id; ?>'><?php echo $v1->id; ?></a></td>
+              <td><a class="nounderline text-danger" href='admin.php?view=user&id=<?php echo $v1->id; ?>'><?php if ($v1->force_pr == 1) {?><i class="fa fa-lock"></i><?php } ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?php echo $v1->id; ?>'><?php echo $v1->username; ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?php echo $v1->id; ?>'><?php echo $v1->fname; ?> <?php echo $v1->lname; ?></a></td>
+              <td><a class="nounderline text-dark" href='admin.php?view=user&id=<?php echo $v1->id; ?>'><?php echo $v1->email; ?></a></td>
               <?php includeHook($hooks, 'bottom'); ?>
               <td><?php if ($v1->last_login != 0) {
                   echo $v1->last_login;
@@ -218,7 +222,7 @@ if (!empty($_POST)) {
       <div class="modal-body">
 
               <div class="form-group" id="username-group">
-              <label>Username (<?=$settings->min_un; ?>-<?=$settings->max_un; ?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
+              <label>Username (<?php echo $settings->min_un; ?>-<?php echo $settings->max_un; ?> chars)<span id="usernameCheck" class="small ml-2"></span></label>
               <input type="search" class="form-control" id="username" name="username" autocomplete="off" value="<?php if (!$form_valid && !empty($_POST)) {
               echo $username;
           } ?>" required>
@@ -243,12 +247,12 @@ if (!empty($_POST)) {
           } ?>" required autocomplete="off">
               </div>
               <div class="form-group">
-              <label>Password (<?=$settings->min_pw; ?>-<?=$settings->max_pw; ?> chars)</label>
+              <label>Password (<?php echo $settings->min_pw; ?>-<?php echo $settings->max_pw; ?> chars)</label>
               <div class="input-group" data-container="body">
               <div class="input-group-append">
                 <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
               </div>
-                <input  class="form-control" type="password" name="password" id="password" <?php if ($settings->force_pr == 1) { ?>value="<?=$random_password; ?>" readonly<?php } ?> placeholder="Password" required autocomplete="off" aria-describedby="passwordhelp">
+                <input  class="form-control" type="password" name="password" id="password" <?php if ($settings->force_pr == 1) { ?>value="<?php echo $random_password; ?>" readonly<?php } ?> placeholder="Password" required autocomplete="off" aria-describedby="passwordhelp">
                 <?php if ($settings->force_pr == 1) { ?>
                   <div class="input-group-append">
                   <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
@@ -262,7 +266,7 @@ if (!empty($_POST)) {
                 <div class="input-group-prepend">
                 <span class="input-group-text password_view_control" id="addon1"><span class="fa fa-eye"></span></span>
                 </div>
-                <input  type="password" id="confirm" name="confirm" <?php if ($settings->force_pr == 1) { ?>value="<?=$random_password; ?>" readonly<?php } ?> class="form-control" autocomplete="off" placeholder="Confirm Password" required >
+                <input  type="password" id="confirm" name="confirm" <?php if ($settings->force_pr == 1) { ?>value="<?php echo $random_password; ?>" readonly<?php } ?> class="form-control" autocomplete="off" placeholder="Confirm Password" required >
                 <?php if ($settings->force_pr == 1) { ?>
                   <div class="input-group-append">
                   <span class="input-group-text" id="addon2"><a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-content="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged)."><i class="fa fa-question"></i></a></span>
@@ -279,7 +283,7 @@ if (!empty($_POST)) {
               <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
             </div>
             <div class="modal-footer">
-                <input type="hidden" name="csrf" value="<?=Token::generate(); ?>" />
+                <input type="hidden" name="csrf" value="<?php echo Token::generate(); ?>" />
                 <input class='btn btn-primary submit' type='submit' id="addUser" name="addUser" value='Add User' />
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>

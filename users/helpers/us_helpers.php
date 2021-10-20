@@ -1044,13 +1044,8 @@ if (!function_exists('echodatetime')) {
   if (!function_exists('pluginActive')) {
       function pluginActive($plugin, $checkOnly = false)
       {
-          global $user,$us_url_root;
+          global $us_url_root;
           $db = DB::getInstance();
-          if (isset($user) && $user->isLoggedIn()) {
-              $id = $user->data()->id;
-          } else {
-              $id = 0;
-          }
           $check = $db->query('SELECT id FROM us_plugins WHERE plugin = ? and status = ?', [$plugin, 'active'])->count();
           if ($check != 1) {
 
@@ -1100,7 +1095,7 @@ if (!function_exists('echodatetime')) {
                       return false;
                   }
                   $_SESSION['us_lang'] = $set;
-                  if (isset($user) && $user->isLoggedIn()) {
+                  if (isUserLoggedIn()) {
                       $db->update('users', $user->data()->id, ['language' => $set]);
                   }
                   header('Refresh:0');
@@ -1236,7 +1231,7 @@ if (!function_exists('echodatetime')) {
       }
   }
 
-  
+
   if (!function_exists('verifyadmin')) {
       function verifyadmin($page)
       {
@@ -1383,5 +1378,57 @@ if (!function_exists('isUserLoggedIn')) {
         $msg =  "<h4><font color='green'><span>&#10003;</span> Your API Key appears to be valid.</font> </h4>";
       }
       return $msg;
+    }
+  }
+
+  if(!function_exists('UserSpice_getLogs')){
+    function UserSpice_getLogs($opts = [])
+    {
+        $db = DB::getInstance();
+        global $user;
+        if ($user->isLoggedIn()) {
+            $userId = $user->data()->id;
+        } else {
+            // Most of my functions would use 1, but I can't assume that for all US installations
+            $userId = 0;
+        }
+
+        // Current Accepted $opts:
+        // - preset | String: "diag"
+        // - limit | int (eg. 1000) | string (eg. "LIMIT 5000") | null
+        $preset = $opts['preset'] ?? null;
+
+        // We have to do this check in case limit is set to NULL, otherwise the concatenation I would want to do won't work (it'll set it anyways)
+        if (array_key_exists('limit', $opts)) {
+            $limit = $opts['limit'];
+            if (is_int($limit)) {
+                $limit = "LIMIT {$limit}";
+            }
+        } else {
+            $limit = 'LIMIT 5000';
+        }
+
+        $query_where = '';
+        // Later we will add the ability to register a hook that can add additional clauses to this function without overriding it
+        if ($preset == 'debug') {
+            if (strpos(strtolower($query_where), 'where ') == false) {
+                $query_where = 'WHERE ';
+            }
+            // Since we are not allowing user input into this, it is safe to pass without sanitizing it
+            $query_where .= "logtype = 'Redirect Diag' OR logtype = 'Form Data'";
+        }
+        if ($query_where != '') {
+        }
+        $query = trim(str_replace('  ', ' ', "SELECT * FROM logs {$query_where} ORDER BY id DESC {$limit}"));
+        $db->query($query);
+        if (!$db->error()) {
+            // Return the results
+            return $db->results();
+        } else {
+            // Pretty silly to log an error to a system we can't get the logs for..........but we'll do it anyways!
+            logger($userId, __FUNCTION__, 'Failed to retrieve logs', ['ERROR' => $db->errorString()]);
+            // Return an array since views/_admin_logs expects this
+            return [];
+        }
     }
   }

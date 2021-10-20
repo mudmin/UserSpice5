@@ -113,12 +113,14 @@ if(file_exists($abs_us_root.$us_url_root.'usersc/'.$currentPage)){
 }
 
 //dealing with logged in users
-if($user->isLoggedIn() && !checkMenu(2,$user->data()->id)){
+if($user->isLoggedIn() && !hasPerm(2)){
 	if (($settings->site_offline==1) && (!in_array($user->data()->id, $master_account)) && ($currentPage != 'login.php') && ($currentPage != 'maintenance.php')){
 		//:: force logout then redirect to maint.page
-		logger($user->data()->id,"Offline","Landed on Maintenance Page."); //Lggger
+		if(!isset($noMaintenanceRedirect) || $noMaintenanceRedirect != true){
+		logger($user->data()->id, "Offline", "Landed on Maintenance Page.");
 		$user->logout();
 		Redirect::to($us_url_root.'users/maintenance.php');
+		}
 	}
 }
 
@@ -126,8 +128,11 @@ if($user->isLoggedIn() && !checkMenu(2,$user->data()->id)){
 if(!$user->isLoggedIn()){
 	if (($settings->site_offline==1) && ($currentPage != 'login.php') && ($currentPage != 'maintenance.php')){
 		//:: redirect to maint.page
+
+		if(!isset($noMaintenanceRedirect) || $noMaintenanceRedirect != true){
 		logger(1,"Offline","Guest Landed on Maintenance Page."); //Logger
 		Redirect::to($us_url_root.'users/maintenance.php');
+		}
 	}
 }
 

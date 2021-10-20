@@ -212,8 +212,7 @@ if (!function_exists('fetchUserName')) {
 if (!function_exists('isAdmin')) {
     function isAdmin()
     {
-        global $user;
-        if (($user->isLoggedIn() && hasPerm([2], $user->data()->id)) || (isset($_SESSION['cloak_from']) && hasPerm([2], $_SESSION['cloak_from']))) {
+        if (hasPerm(2) || (isset($_SESSION['cloak_from']) && hasPerm(2, $_SESSION['cloak_from']))) {
             return true;
         } else {
             return false;

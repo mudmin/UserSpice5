@@ -154,7 +154,7 @@ $lang = array_merge($lang,array(
 		"ACP_MENU_HEADER_MANAGE" => "Manage",
 		"ACP_MENU_MANAGE_PAGES" => "Pages",
 		"ACP_MENU_MANAGE_PERMISSION_LEVELS" => "Permission Levels",
-		"ACP_MENU_MANAGE_SPICE_SHAKER" => "Spicer Shaker",
+		"ACP_MENU_MANAGE_SPICE_SHAKER" => "Spice Shaker",
 		"ACP_MENU_MANAGE_USERS" => "Users",
 
 		// Misc

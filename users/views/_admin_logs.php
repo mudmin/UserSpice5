@@ -53,12 +53,7 @@ tfoot input {
 
   <!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
   <?php resultBlock($errors, $successes);
-  if($mode == "diag"){
-      $logs = $db->query("SELECT * FROM logs WHERE logtype = ? OR logtype = ? ORDER BY id DESC LIMIT 5000",["Redirect Diag","Form Data"])->results();
-  }else{
-      $logs = $db->query('SELECT * FROM logs ORDER BY id DESC LIMIT 5000')->results();
-  }
-
+    $logs = UserSpice_getLogs(['preset' => $mode]);
   ?>
   <div class="card">
   <div class="card-body">

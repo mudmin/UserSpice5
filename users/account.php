@@ -42,7 +42,7 @@ if (!empty($_POST['uncloak'])) {
 }
 
 //dealing with if the user is logged in
-if ($user->isLoggedIn() || !$user->isLoggedIn() && !checkMenu(2, $user->data()->id)) {
+if ($user->isLoggedIn() || !$user->isLoggedIn() && !hasPerm(2)) {
     if (($settings->site_offline == 1) && (!in_array($user->data()->id, $master_account)) && ($currentPage != 'login.php') && ($currentPage != 'maintenance.php')) {
         $user->logout();
         logger($user->data()->id, 'Errors', 'Sending to Maint');

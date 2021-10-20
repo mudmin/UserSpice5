@@ -219,9 +219,14 @@ if(empty($_POST)){
                 <a href="#" class="btn btn-default install" style="display:none;">Please Wait</a>
                 <?php
                 if(shakerIsInstalled($d->category,$d->reserved)){
+                  if($d->category == "plugin" && file_exists($abs_us_root . $us_url_root . "usersc/plugins/" . $d->reserved."/.noupdate")){
+                    echo "This plugin is locked and cannot be updated";
+                  }else{
                   ?>
                   <button type="button" name="button" class="btn btn-danger installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Update</button>
-                <?php }else{ ?>
+                <?php
+                } //end noupdate
+                      }else{ ?>
                   <button type="button" name="button" class="btn btn-primary installme <?=$warning?>"  data-res="<?=$d->reserved?>" data-type="<?=$d->category?>" data-url="<?=$d->dd?>" data-hash="<?=$d->hash?>" data-counter="<?=$counter?>">Download</button>
                 <?php } ?>
                 <a href="https://github.com/<?=$d->repo?>/tree/master/src/<?=$d->reserved?>" class="btn btn-outline-primary" target="_blank">View Source</a>
