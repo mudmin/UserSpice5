@@ -269,7 +269,7 @@ function activeDropdown($View, $dropId, $Area = false){
     </nav>
     <footer>
         <p align="center" >
-          <font color='white'><br>&copy;<?=date('Y '); ?><?=$settings->copyright; ?></font>
+          <span style='color:white'><br>&copy;<?=date('Y '); ?><?=$settings->copyright; ?></span>
         </p>
     </footer>
   </aside><!-- /#left-panel -->

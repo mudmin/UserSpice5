@@ -26,11 +26,11 @@ if(empty($_POST)){
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
   {
-    echo "<h4><font color='red'>The API Key does not appear to be valid.</font> </h4>";
+    echo "<h4><span style='color:red'>The API Key does not appear to be valid.</span> </h4>";
   }
   if($diag){
     echo "<h6>Diagnostic Mode Activated</h6><br>";
-    echo "<h6><font color='red'>Please Note:</font> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
+    echo "<h6><span style='color:red'>Please Note:</span> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
   }
   $type = Input::get('type');
   if($diag && $type == '' && !isset($_POST['goSearch'])){$_POST['goSearch'] = 1 && $_POST['search'] = 'demo plugin';}
@@ -126,12 +126,17 @@ if(empty($_POST)){
   Spice Shaker allows you to download and automatically install Updates, Plugins, Templates, Widgets, and Languages for UserSpice.<br>Users with a (free) API key can make 2000 requests a day.<br>
   <?php
   $failed = 0;
-  if(!function_exists('curl_version')){
-    echo "<font color='red'>We see that you do not have CURL installed on your server.  Please make sure it is enabled.</font><br>";
+  if(!function_exists('curl_version')  || !extension_loaded('curl')){
+    echo "<span style='color:red'>We see that you do not have the PHP curl extension CURL enabled on your server.  Please make sure it is enabled.</span><br>";
+    $failed = 1;
+  }
+
+  if(!extension_loaded("zip")){
+    echo "<span style='color:red'>We see that you do not have the PHP zip extension installed on your server.  Please make sure it is enabled.</span><br>";
     $failed = 1;
   }
   if(!is_writable($abs_us_root.$us_url_root.'users/parsers/.htaccess')){
-    echo "<font color='red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</font><br>";
+    echo "<span style='color:red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</span><br>";
     $failed = 1;
   }
 
@@ -145,7 +150,16 @@ if(empty($_POST)){
   }
   ?>
   <div class="content mt-3">
-    <?php if($settings->spice_api != ''){?>
+    <?php
+    if(!extension_loaded("curl")){
+      usError("You must have the PHP CURL extension installed and loaded to use Spice Shaker");
+    }
+
+    if(!extension_loaded("zip")){
+      usError("You must have the PHP zip extension installed and loaded to use Spice Shaker");
+    }
+
+    if($settings->spice_api != ''){?>
       <div class="row">
         <div class="col-12 col-sm-4">
           <form class="" action="" method="post">
@@ -240,7 +254,7 @@ if(empty($_POST)){
         }
       }else{
         ?>
-        <p align="center"><font color="red"><strong>No results found</font></strong></p>
+        <p align="center"><span style="color:red"><strong>No results found</span></strong></p>
         <?php
       }
     }

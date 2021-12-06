@@ -53,7 +53,8 @@ if(!empty($_POST)){
         $successes[] = lang("PERMISSION_DELETIONS_SUCCESSFUL", array($deletion_count));
         $name = $permissionDetails['name'];
         logger($user->data()->id,"Permissions Manager","Deleted $name.");
-        Redirect::to($us_url_root.'users/admin.php?view=permissions&msg=Permission+deleted.');
+        usSuccess("Permission deleted");
+        Redirect::to($us_url_root.'users/admin.php?view=permissions');
       }
       else {
         $errors[] = lang("SQL_ERROR");
@@ -184,7 +185,7 @@ $token = Token::generate();
   <h2>Configure Details for Permission Level: <?=$permissionDetails['name']?></h2><br>
   <?php if($permissionId == 1 || $permissionId  == 2){ ?>
     <b>
-      <font color="red">WARNING:</font>
+      <span style="color:red">WARNING:</span>
     </b>
     Although you can rename this permission level, please do not try to change its purpose.  #1 is the default "User" permission for all users and #2 is the "Admin"
     permission. Changing the purpose of these permissions <b>WILL</b> break things.<br><br>

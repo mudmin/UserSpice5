@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ?>
 <div class="row">
 	<div class="col-sm-12">
-		<h1><?=lang("PW_RESET");?></h1>
+		<h2><?=lang("PW_RESET");?></h2>
 		<ol>
 			<?=lang("VER_INS");?>
 		</ol>

@@ -22,7 +22,8 @@ $api = "https://api.userspice.com/api/v2/bugs/";
 if(!empty($_POST['submitKey'])){
   $spice_api = Input::get("spice_api");
   $db->update('settings',1,['spice_api'=>$spice_api]);
-  Redirect::to('admin.php?view=bugs&err=Key Added');
+  usSuccess("Key added");
+  Redirect::to('admin.php?view=bugs');
 }
 if(!empty($_POST) && $settings->spice_api != ''){
   $data = array(
@@ -57,10 +58,12 @@ if(!empty($_POST) && $settings->spice_api != ''){
   // dnd($result);
   if($result->success == true){
     logger($user->data()->id,"your_api_bugs",$result->issue);
-    Redirect::to('?view=bugs&err='.$result->msg);
+    usSuccess($result->msg);
+    Redirect::to('?view=bugs');
     // err($result->msg); //maybe a different alert later
   }else{
-    Redirect::to('?view=bugs&err='.$result->msg);
+    usError($result->msg);
+    Redirect::to('?view=bugs');
   }
 }
 if($settings->spice_api != ''){
@@ -88,7 +91,7 @@ if($settings->spice_api != ''){
   <p>A System report will be submitted with the following information to help in the diagnosis of the problem.  If you don't want to submit this information, please submit a report directly at https://bugs.userspice.com. Please note that the API may collect other information about the API call itself in order to prevent spam.
   </p>
   <?php if($settings->spice_api == ''){ ?>
-    <a href="https://userspice.com/developer-api-keys/"><font color='red'><strong>The Bug Report feature will not work with out a FREE API Key.</font></strong>
+    <a href="https://userspice.com/developer-api-keys/"><span style='color:red'><strong>The Bug Report feature will not work with out a FREE API Key.</span></strong>
       Get One Here</a>
       <form class="" action="" method="post">
         <input type="password" autocomplete="new-password" class="form-control" data-desc="UserSpice API Key" name="spice_api" id="spice_api" value="<?=$settings->spice_api?>" placeholder="Paste your key here">

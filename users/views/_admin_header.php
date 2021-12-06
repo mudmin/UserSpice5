@@ -15,7 +15,7 @@
   	}
 
     if(!isset($us_loader_loaded)){
-    echo '<h4><b>IMPORTANT:</b> You must add the line</h4><h4><font color="blue">require_once $abs_us_root.$us_url_root."users/includes/loader.php";</font></h4><h4>to the bottom of your users/init.php file.</h4>';
+    echo '<h4><b>IMPORTANT:</b> You must add the line</h4><h4><span style="color:blue">require_once $abs_us_root.$us_url_root."users/includes/loader.php";</span></h4><h4>to the bottom of your users/init.php file.</h4>';
     }
     ?>
 
@@ -37,7 +37,7 @@
 
               $missing = array_diff($migrations,$existing_updates);
               if(count($missing)) { ?>
-              <font color="red">Your database is out of date. Please <a href='<?=$us_url_root?>users/updates/' class='nounderline'>click here</a> to run the updater.</font>
+              <span style="color:red">Your database is out of date. Please <a href='<?=$us_url_root?>users/updates/' class='nounderline'>click here</a> to run the updater.</span>
             <?php } } ?>
         </div>
       </div>

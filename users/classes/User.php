@@ -27,7 +27,7 @@ class User
     private $_isNewAccount;
     public $tableName = 'users';
 
-    public function __construct($user = null)
+    public function __construct($user = null, $loginHandler = null)
     {
         $this->_db = DB::getInstance();
         $this->_sessionName = Config::get('session/session_name');
@@ -37,14 +37,14 @@ class User
             if (Session::exists($this->_sessionName)) {
                 $user = Session::get($this->_sessionName);
 
-                if ($this->find($user)) {
+                if ($this->find($user,$loginHandler)) {
                     $this->_isLoggedIn = true;
                 } else {
                     //process Logout
                 }
             }
         } else {
-            $this->find($user);
+            $this->find($user,$loginHandler);
         }
     }
 
@@ -68,7 +68,10 @@ class User
 
         if ($user) {
             if ($loginHandler !== null) {
-                if (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
+                if($loginHandler == "forceEmail"){
+
+                   $field = 'email';
+                }  elseif (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
                     $field = 'email';
                 } else {
                     $field = 'username';

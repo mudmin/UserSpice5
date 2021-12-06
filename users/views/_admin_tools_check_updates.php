@@ -15,7 +15,13 @@
 <div class="content mt-3">
   <h2>Checking for updates...</h2>
   <?php
+      if(!extension_loaded("curl")){
+        usError("You must have the PHP CURL extension installed and loaded to use Spice Shaker");
+      }
 
+      if(!extension_loaded("zip")){
+        usError("You must have the PHP zip extension installed and loaded to use Spice Shaker");
+      }
       if ($settings->bleeding_edge == 1) {
           echo '<p>You are on the BLEEDING EDGE update cycle (Thank You!).  This means you will get updates a few days to a few weeks before everyone else.
         There may be bugs. Please backup and report bugs as you find them.</p>';
@@ -146,7 +152,7 @@ if ($settings->spice_api != '') {
                     echo '...extracting zip file';
                     logger(1, "$result->next_ver", 'Extracting zip file');
                     $zip->close();
-                    echo "<br><strong><font color='blue'>$result->message</font></strong>";
+                    echo "<br><strong><span style='color:blue'>$result->message</span></strong>";
                     if(file_exists($zipFile)){
                     unlink($zipFile);
                     }

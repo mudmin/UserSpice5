@@ -29,7 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <form class="" action="" method="post">
       <?php if(!$errors=='') { display_errors($errors); } ?>
       <div class="form-group">
-        <input class="form-control" type="text" id="email" name="email" placeholder="<?=lang("GEN_EMAIL");?>" autocomplete="email">
+        <label for=""><?=lang("GEN_EMAIL");?></label><br>
+        <input class="form-control" type="text" id="email" name="email" >
       </div>
       <input type="hidden" name="csrf" value="<?=Token::generate();?>">
       <input type="submit" value="<?=lang("VER_RESEND");?>" class="btn btn-primary">

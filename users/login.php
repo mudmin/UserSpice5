@@ -43,11 +43,9 @@ if (!empty($_POST['login_hook'])) {
 
       $validate = new Validate();
       $validation = $validate->check($_POST, array(
-        'username' => array('display' => 'Username','required' => true),
-        'password' => array('display' => 'Password', 'required' => true))
+        'username' => array('display' => lang('GEN_UNAME'),'required' => true),
+        'password' => array('display' => lang('GEN_PASS'), 'required' => true))
       );
-
-
       $validated = $validation->passed();
       // Set $validated to False to kill validation, or run additional checks, in your post hook
       $username = Input::get('username');

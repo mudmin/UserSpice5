@@ -49,7 +49,7 @@ if ($user->isLoggedIn() || !$user->isLoggedIn() && !hasPerm(2)) {
         Redirect::to($us_url_root.'users/maintenance.php');
     }
 }
-$grav = get_gravatar(strtolower(trim($user->data()->email)));
+$grav = fetchProfilePicture($user->data()->id);
 $get_info_id = $user->data()->id;
 // $groupname = ucfirst($loggedInUser->title);
 $raw = date_parse($user->data()->join_date);
@@ -65,13 +65,7 @@ $userdetails = fetchUserDetails(null, null, $get_info_id); //Fetch user details
 		<p>
 		</p>
 		<p>
-			<?php
-            if (isset($user->data()->steam_avatar) && $user->data()->steam_avatar != '') {
-                $grav = $user->data()->steam_avatar;
-            } elseif (isset($user->data()->picture) && $user->data()->picture != '') {
-                $grav = $user->data()->picture;
-            }
-            ?>
+
 			<img src="<?=$grav; ?>" class="img-thumbnail" alt="Generic placeholder thumbnail"></p>
 		<p><a href="../users/user_settings.php" class="btn btn-primary btn-block"><?=lang('ACCT_EDIT'); ?></a></p>
 	<?php if (isset($_SESSION['cloak_to'])) { ?>

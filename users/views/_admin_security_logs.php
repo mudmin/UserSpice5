@@ -38,7 +38,7 @@ tfoot input {
     </div>
     <div class="col-12 col-sm-7 text-right">
       <?php if($w != ""){ ?>
-        <h4><font color="red">Currently Ignoring Whitelisted IPs</h4>
+        <h4><span style="color:red">Currently Ignoring Whitelisted IPs</h4>
         <a href="admin.php?view=security_logs" class="btn btn-primary">Show All</a>
       <?php }else{ ?>
         <a href="admin.php?view=security_logs&w=true" class="btn btn-primary">Hide Whitelisted IPs</a>
@@ -81,7 +81,7 @@ tfoot input {
                   echo "IP last used by ";
                   echouser($f->user_id);
                 }else{
-                  echo "<font color='red'>Unknown IP</font>";
+                  echo "<span style='color:red'>Unknown IP</span>";
                 }
               }
               ?></td>

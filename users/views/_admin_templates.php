@@ -28,13 +28,16 @@
     if (in_array($choice, $templates)) {
       $db->update('settings', 1, ['template' => $choice]);
       if(!$db->error()) {
-        Redirect::to('admin.php?view=templates&msg=Template+assigned!');
+        usSuccess("Template assigned");
+        Redirect::to('admin.php?view=templates');
       } else {
         logger($user->data()->id,"Admin Templates","Failed to assign template, Error: ".$db->errorString());
-        Redirect::to('admin.php?view=templates&msg=Template+assigned!');
+        usSuccess("Template assigned");
+        Redirect::to('admin.php?view=templates');
       }
     }  else {
-      Redirect::to('admin.php?view=templates&err=Invalid+template');
+      usError("Invalid template");
+      Redirect::to('admin.php?view=templates');
     }
   }
   ?>
@@ -107,17 +110,20 @@
                 if ($navstyle == 'Default') {
                   $xml->navstyle = 'Default';
                   $xml->asXML($tpath);
-                  Redirect::to('admin.php?view=templates&msg=Default+Nav+Activated');
+                  usSuccess("Default nav activated");
+                  Redirect::to('admin.php?view=templates');
                 }
                 if ($navstyle == 'Left Side') {
                   $xml->navstyle = 'Left Side';
                   $xml->asXML($tpath);
-                  Redirect::to('admin.php?view=templates&msg=Left+Side+Nav+Activated');
+                  usSuccess("Left side nav activated");
+                  Redirect::to('admin.php?view=templates');
                 }
                 if ($navstyle == 'Right Side') {
                   $xml->navstyle = 'Right Side';
                   $xml->asXML($tpath);
-                  Redirect::to('admin.php?view=templates&msg=Right+Side+Nav+Activated');
+                  usSuccess("Right side nav activated");
+                  Redirect::to('admin.php?view=templates');
                 }
               }
             }
@@ -135,7 +141,7 @@
             <?php
             if (file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $t . '/info.xml')) {
               ?>
-              <strong>Library:</strong><font color="blue"><?= $xml->library ?></font><br>
+              <strong>Library:</strong><span style="color:blue"><?= $xml->library ?></span><br>
               <strong>DB Nav:</strong><?php bin($xml->dbnav); ?><br>
               <strong>Dropdown Nav:</strong><?php bin($xml->dropnav); ?><br>
               <strong>File Nav:</strong><?php bin($xml->filenav); ?><br>
@@ -151,13 +157,13 @@
                         <strong>Nav Style:</strong>
                         <form class="form" id="navstyle"  action="" method="POST">
                           <div class="form-group">
-                            <font color="blue">
+                            <span style="color:blue">
                               <select class="form-control" id="navstyle" name="navstyle">
                                 <?php
                                 foreach($opts as $o){?>
                                   <option <?php if($o == $xml->navstyle){echo "selected";}?> value="<?=$o?>"><?=$o?></option>
                                 <?php } ?>
-                              </select></font>
+                              </select></span>
                               <input hidden="true" name="tpath" value="<?php echo $path ?>">
                               <div class="text-center">
                                 <button class="btn btn-success" type="submit">Apply</button>

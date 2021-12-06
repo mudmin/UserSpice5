@@ -29,7 +29,8 @@ if (Input::exists('get')) {
 }
 
 if (!$item) {
-  Redirect::to($us_url_root.'users/admin.php?view=nav&err=This+menu+item+does+not+exist.');
+  usError("This menu item does not exist.");
+  Redirect::to($us_url_root.'users/admin.php?view=nav');
 }
 
 if (Input::exists('post')) {
@@ -49,10 +50,12 @@ if (Input::exists('post')) {
     //dump(Input::get('authorized_groups'));
     updateGroupsMenus((Input::get('authorized_groups')), $item->id);
     logger($user->data()->id,"Menu Manager","Updated $menuId");
-    Redirect::to($us_url_root.'users/admin.php?view=nav&msg=Menu+item+updated');
+    usSuccess("Menu item updated");
+    Redirect::to($us_url_root.'users/admin.php?view=nav');
   }
   else {
-    Redirect::to($us_url_root.'users/admin.php?view=nav&err=Unable+to+update+menu+item.');
+    usError("Unable to update menu item");
+    Redirect::to($us_url_root.'users/admin.php?view=nav');
   }
 }
 
@@ -148,7 +151,7 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
 
     <div class="form-group">
       <label>Icon Class (<a href="https://fontawesome.bootstrapcheatsheets.com/" target="_blank">options</a>)</label>
-      Be sure to add <font color="red">fa fa-fw </font> before the shortcode to display properly.
+      Be sure to add <span style="color:red">fa fa-fw </span> before the shortcode to display properly.
       <input  class='form-control' type='text' name='icon_class' value='<?=$item->icon_class?>' />
     </div>
 

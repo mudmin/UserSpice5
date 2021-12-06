@@ -151,7 +151,12 @@ if ($settings->force_ssl==1){
 // Get html lang attribute, default 'en'
 if(isset($_SESSION['us_lang'])){ $html_lang = substr($_SESSION['us_lang'],0,2);}else{$html_lang = 'en';}
 
-if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $user->data()->force_pr == 1) Redirect::to($us_url_root.'users/user_settings.php?err=You+must+change+your+password!');
+
+if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $user->data()->force_pr == 1){
+	$resetMsg = lang("VER_PLEASE");
+	usError($resetMsg);
+	Redirect::to($us_url_root.'users/user_settings.php');
+}
 
 $page=currentFile();
 $titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));

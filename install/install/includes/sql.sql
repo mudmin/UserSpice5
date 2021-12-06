@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 06, 2020 at 06:17 PM
+-- Generation Time: Dec 06, 2021 at 11:35 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `sql`
+-- Database: `sqlupd`
 --
 
 -- --------------------------------------------------------
@@ -579,16 +579,16 @@ CREATE TABLE `users` (
   `force_pr` tinyint(1) NOT NULL DEFAULT 0,
   `logins` int(11) UNSIGNED NOT NULL DEFAULT 0,
   `last_login` datetime DEFAULT NULL,
-  `join_date` datetime,
-  `modified` datetime
+  `join_date` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`) VALUES
-(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', NULL, '', '', '', 0, 0, 0, '', '', 1, 1, 0, 1, 0, NULL, 0, 0, 0, '2016-01-01 00:00:00', '2016-01-01 00:00:00', '2016-01-01 00:00:00');
+INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gender`, `locale`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `created`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`) VALUES
+(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 0, 0, 0, '', '', '0000-00-00 00:00:00', 1, 1, 0, 1, 1, NULL, 0, 0, 0, '2016-01-01 00:00:00', '2016-01-01 00:00:00', '2016-01-01 00:00:00');
 
 -- --------------------------------------------------------
 
