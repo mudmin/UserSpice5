@@ -69,7 +69,7 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 		));
 		if($validation->passed()){
 			if($ruser->data()->vericode != $vericode || (strtotime($ruser->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) <= 0)){
-				$msg = str_replace("+"," ",lang("REDIR_SOM_TING_WONG"));
+				$msg = lang("REDIR_SOM_TING_WONG");
 				usError($msg);
 				Redirect::to($us_url_root.'users/forgot_password_reset.php');
 			}

@@ -29,15 +29,12 @@ class Validate
 		$this->_db = DB::getInstance();
 	}
 
-	public function check($source, $items=[], $sanitize=false) {
+	public function check($source, $items=[], $sanitize=true) {
 
 		$this->_errors = [];
 
 		foreach ($items as $item => $rules) {
-			if($sanitize){
-				$item = sanitize($item);
-			}
-
+			$item    = sanitize($item);
 			$display = $rules['display'];
 			if(!isset($source[$item])){
 				$source[$item] = "";
@@ -50,7 +47,7 @@ class Validate
 					$value = sanitize(trim($value));
 				}
 
-				$length = is_array($value) ? count($value) : mb_strlen($value);
+				$length = is_array($value) ? count($value) : strlen($value);
 				$verb   = is_array($value) ? "are"         : "is";
 
 				if ($rule==='required'  &&  $length==0) {
@@ -93,7 +90,7 @@ class Validate
 						$str = lang("GEN_AND");
 						$str1 = lang("VAL_SAME");
 						foreach ($array as $rule_value)
-						if ($value != trim($source[$rule_value])){
+						if ($value != sanitize(trim($source[$rule_value]))){
 							$this->addError(["{$items[$rule_value]['display']} $str {$display} $str1",$item]);
 							$this->ruleBroken([$item,"matches",$source]);
 						}

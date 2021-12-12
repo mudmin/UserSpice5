@@ -103,10 +103,6 @@ if (!function_exists('echouser')) {
     function echouser($id, $echoType = null)
     {
         $db = DB::getInstance();
-        if($id == "" || $id == 0){
-          echo "Guest";
-          return true;
-        }
 
         $id = (int) $id;
 

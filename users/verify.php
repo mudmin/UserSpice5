@@ -46,11 +46,11 @@ if(Input::exists('get')){
 		));
 	}
 
-	//if email is valid, do this
-	if($validation->passed()){
+
+	if($validation->passed()){ //if email is valid, do this
 		//get the user info based on the email
-		if(isset($hookData['overrideEmailVerification'])){
-			//for GDPR email hashing
+		if(!isset($hookData['overrideEmailVerification'])){
+
 		}else{
 			$eventhooks =  getMyHooks(['page'=>'verifyEmailAttemptPassed']);
 			includeHook($eventhooks,'body');
@@ -59,8 +59,8 @@ if(Input::exists('get')){
 			}else{
 				$verify = new User($email);
 			}
-		}
 
+		}
 		if($verify->data()->email_verified == 1 && $verify->data()->vericode == $vericode && $verify->data()->email_new == ""){
 			//email is already verified - Basically if the system already shows the email as verified and they click the link again, we're going to pass it regardless of the expiry because
 			//the hassle of telling people verification failed (after previously successful is worse than what could go wrong)
@@ -86,7 +86,7 @@ if(Input::exists('get')){
 			else $verify->update(array('email_verified' => 1,'vericode' => randomstring(15),'vericode_expiry' => date("Y-m-d H:i:s")),$verify->data()->id);
 			$verify_success=TRUE;
 			logger($verify->data()->id,"User","Verification completed via vericode.");
-			$msg = str_replace("+"," ",lang("REDIR_EM_SUCC"));
+			$msg = lang("REDIR_EM_SUCC");
 			$eventhooks =  getMyHooks(['page'=>'verifySuccess']);
 			includeHook($eventhooks,'body');
 			usSuccess($msg);
