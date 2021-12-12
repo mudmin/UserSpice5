@@ -2,11 +2,11 @@
 require_once '../init.php';
 $db = DB::getInstance();
 $ip = ipCheck();
-logger(1,"CronRequest","Cron request from $ip.");
+logger("","CronRequest","Cron request from $ip.");
 $settings = $db->query("SELECT * FROM settings")->first();
 if($settings->cron_ip != ''){
 if($ip != $settings->cron_ip && $ip != '127.0.0.1'){
-	logger(1,"CronRequest","Cron request DENIED from $ip.");
+	logger("","CronRequest","Cron request DENIED from $ip.");
 	die;
 	}
 }

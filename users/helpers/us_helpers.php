@@ -486,7 +486,7 @@ if (!function_exists('encodeURIComponent')) {
 }
 
 if (!function_exists('logger')) {
-  function logger($user_id = "", $logtype, $lognote, $metadata = null)
+  function logger($user_id = "", $logtype = "", $lognote = "", $metadata = null)
   {
     $db = DB::getInstance();
     global $user;

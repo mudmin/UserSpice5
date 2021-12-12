@@ -130,7 +130,7 @@ if(!$user->isLoggedIn()){
 		//:: redirect to maint.page
 
 		if(!isset($noMaintenanceRedirect) || $noMaintenanceRedirect != true){
-		logger(1,"Offline","Guest Landed on Maintenance Page."); //Logger
+		logger("","Offline","Guest Landed on Maintenance Page."); //Logger
 		Redirect::to($us_url_root.'users/maintenance.php');
 		}
 	}

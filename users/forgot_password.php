@@ -24,6 +24,7 @@ require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 $hooks = getMyHooks();
 includeHook($hooks,'pre');
+$email = Input::get('email');
 if(isset($user) && $user->isLoggedIn()){
   Redirect::to($us_url_root."users/account.php");
 }
@@ -44,19 +45,26 @@ if(Input::exists()){
         include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
     }
 }
-if($eventhooks =  getMyHooks(['page'=>'forgotPassword'])){
-  includeHook($eventhooks,'body');
-}
+$eventhooks =  getMyHooks(['page'=>'forgotPassword']);
+includeHook($eventhooks,'body');
+
+
 if (Input::get('forgotten_password')) {
-    $email = Input::get('email');
+
     $fuser = new User($email);
     //validate the form
     $validate = new Validate();
     $msg1 = lang("GEN_EMAIL");
 
     $validation = $validate->check($_POST,array('email' => array('display' => $msg1,'valid_email' => true,'required' => true,),));
-    
+
     includeHook($hooks,'post');
+    if(isset($hookData['validation'])){
+      $validation = $hookData['validation'];
+    }
+    if(isset($hookData['fuser'])){
+      $fuser = $hookData['fuser'];
+    }
 
     if($validation->passed()){
         if($fuser->exists()){
@@ -80,7 +88,7 @@ if (Input::get('forgotten_password')) {
             }
         }else{
             sleep(2); //pretend to send
-            logger(1,"Password Reset","Attempted password reset on ".$email);
+            logger("","Password Reset","Attempted password reset on ".$email);
             $email_sent = true;
         }
     }else{

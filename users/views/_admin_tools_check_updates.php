@@ -106,7 +106,7 @@ if ($settings->spice_api != '') {
                 }
                 $zipFile = $abs_us_root.$us_url_root.'usupdate.zip';
                 echo 'Creating zip file...';
-                logger(1, "$result->next_ver", 'Creating zip file');
+                logger($user->data()->id, "$result->next_ver", 'Creating zip file');
                 $extractPath = $abs_us_root.$us_url_root;
                 $zip_resource = fopen($zipFile, 'w');
                 $url = 'https://github.com/mudmin/releases/raw/master/updates/'.$result->next_file;
@@ -114,7 +114,7 @@ if ($settings->spice_api != '') {
 
                 $ch_start = curl_init();
                 echo 'attempting download...';
-                logger(1, "$result->next_ver", 'Attempting download');
+                logger($user->data()->id, "$result->next_ver", 'Attempting download');
                 curl_setopt($ch_start, CURLOPT_URL, $url);
                 curl_setopt($ch_start, CURLOPT_FAILONERROR, true);
                 curl_setopt($ch_start, CURLOPT_HEADER, 0);
@@ -128,7 +128,7 @@ if ($settings->spice_api != '') {
                 $page = curl_exec($ch_start);
                 if (!$page) {
                     echo 'Error :- '.curl_error($ch_start);
-                    logger(1, "$result->next_ver", 'Curl error'.curl_error($ch_start));
+                    logger($user->data()->id, "$result->next_ver", 'Curl error'.curl_error($ch_start));
                     //unlink($zipFile);
                 }
                 curl_close($ch_start);
@@ -140,35 +140,35 @@ if ($settings->spice_api != '') {
                     unlink($zipFile);
                     }
                     echo 'Error :- Unable to open the Zip File';
-                    logger(1, "$result->next_ver", 'Unable to open the Zip File');
+                    logger($user->data()->id, "$result->next_ver", 'Unable to open the Zip File');
                 }
                 echo '<br>Opening zip file and checking hash.';
-                logger(1, "$result->next_ver", 'Opening zip file and checking hash');
+                logger($user->data()->id, "$result->next_ver", 'Opening zip file and checking hash');
                 $newCrc = base64_encode(hash_file('sha256', $zip->filename));
                 if ($newCrc == $hash) {
                     echo '<br>Hash matches';
-                    logger(1, "$result->next_ver", 'Hash Matches');
+                    logger($user->data()->id, "$result->next_ver", 'Hash Matches');
                     $zip->extractTo($extractPath);
                     echo '...extracting zip file';
-                    logger(1, "$result->next_ver", 'Extracting zip file');
+                    logger($user->data()->id, "$result->next_ver", 'Extracting zip file');
                     $zip->close();
                     echo "<br><strong><span style='color:blue'>$result->message</span></strong>";
                     if(file_exists($zipFile)){
                     unlink($zipFile);
                     }
-                    logger(1, "$result->next_ver", $result->message);
-                    logger(1, "$result->next_ver", 'Running migration script(s)');
+                    logger($user->data()->id, "$result->next_ver", $result->message);
+                    logger($user->data()->id, "$result->next_ver", 'Running migration script(s)');
                     Redirect::to($us_url_root.'users/updates/index.php?auto=1');
                 } else {
                     if(file_exists($zipFile)){
                     unlink($zipFile);
                     }
-                    logger(1, "$result->next_ver", 'Hash match failed');
+                    logger($user->data()->id, "$result->next_ver", 'Hash match failed');
                     echo "<br>The hash does not match.  This means one of 2 things. Either the file on the server has been tampered with or (more likely) the file was
             updated and we forgot to update the hash.  Please fill out a bug report. You can still download this plugin at $url if you wish.";
                 }
                 echo '<br>Deleting zip file';
-                logger(1, "$result->next_ver", 'Deleting zip file');
+                logger($user->data()->id, "$result->next_ver", 'Deleting zip file');
                 if(file_exists($zipFile)){
                 unlink($zipFile);
                 }
