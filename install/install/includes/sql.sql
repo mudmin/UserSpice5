@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.2
+-- version 5.1.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 06, 2020 at 06:17 PM
--- Server version: 10.4.14-MariaDB
--- PHP Version: 7.4.10
+-- Generation Time: Dec 02, 2021 at 01:28 PM
+-- Server version: 10.4.18-MariaDB
+-- PHP Version: 8.0.3
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `sql`
+-- Database: `524`
 --
 
 -- --------------------------------------------------------
@@ -177,12 +177,44 @@ CREATE TABLE `keys` (
 
 CREATE TABLE `logs` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `user_id` int(11) NOT NULL DEFAULT 0,
   `logdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `logtype` varchar(25) NOT NULL,
   `lognote` mediumtext NOT NULL,
-  `ip` varchar(75) DEFAULT NULL
+  `ip` varchar(75) DEFAULT NULL,
+  `metadata` blob DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `logs`
+--
+
+INSERT INTO `logs` (`id`, `user_id`, `logdate`, `logtype`, `lognote`, `ip`, `metadata`) VALUES
+(1, 1, '2021-12-02 07:28:02', 'System Updates', 'Added metadata column to logs table', '::1', NULL),
+(2, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-10-06a successfully deployed.', '::1', NULL),
+(3, 1, '2021-12-02 07:28:02', 'System Updates', 'Added container_open_class column to settings table', '::1', NULL),
+(4, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-11-03a successfully deployed.', '::1', NULL),
+(5, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-11-08a successfully deployed.', '::1', NULL),
+(6, 1, '2021-12-02 07:28:02', 'System Updates', 'Set a default for account owner', '::1', NULL),
+(7, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-11-10a successfully deployed.', '::1', NULL),
+(8, 1, '2021-12-02 07:28:02', 'System Updates', 'Added active to users table', '::1', NULL),
+(9, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-11-10b successfully deployed.', '::1', NULL),
+(10, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-12-17a successfully deployed.', '::1', NULL),
+(11, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2020-12-28a successfully deployed.', '::1', NULL),
+(12, 1, '2021-12-02 07:28:02', 'System Updates', 'Update 2021-01-20a successfully deployed.', '::1', NULL),
+(13, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-02-16a successfully deployed.', '::1', NULL),
+(14, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-04-14a successfully deployed.', '::1', NULL),
+(15, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-04-15a successfully deployed.', '::1', NULL),
+(16, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-05-20a successfully deployed.', '::1', NULL),
+(17, 1, '2021-12-02 07:28:03', 'System Updates', 'Added settings.debug', '::1', NULL),
+(18, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-07-11a successfully deployed.', '::1', NULL),
+(19, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-08-22a successfully deployed.', '::1', NULL),
+(20, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-08-24a successfully deployed.', '::1', NULL),
+(21, 1, '2021-12-02 07:28:03', 'System Updates', '2021-09-25a: Dashbooard Access Feature Renamed: _admin_nav', '::1', NULL),
+(22, 1, '2021-12-02 07:28:03', 'System Updates', '2021-09-25a: Dashbooard Access Feature Renamed: _admin_nav_item', '::1', NULL),
+(23, 1, '2021-12-02 07:28:03', 'System Updates', '2021-09-25a: Dashbooard Access Feature Renamed: _admin_page', '::1', NULL),
+(24, 1, '2021-12-02 07:28:03', 'System Updates', '2021-09-25a: Dashbooard Access Feature Renamed: _admin_pages', '::1', NULL),
+(25, 1, '2021-12-02 07:28:03', 'System Updates', 'Update 2021-09-25a successfully deployed.', '::1', NULL);
 
 -- --------------------------------------------------------
 
@@ -289,8 +321,8 @@ CREATE TABLE `notifications` (
 
 CREATE TABLE `pages` (
   `id` int(11) NOT NULL,
-  `page` varchar(100) NOT NULL,
-  `title` varchar(50) NOT NULL,
+  `page` varchar(255) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
   `private` int(11) NOT NULL DEFAULT 0,
   `re_auth` int(1) NOT NULL DEFAULT 0,
   `core` int(1) DEFAULT 0
@@ -393,12 +425,8 @@ CREATE TABLE `settings` (
   `recaptcha` int(1) NOT NULL DEFAULT 0,
   `force_ssl` int(1) NOT NULL,
   `css_sample` int(1) NOT NULL,
-  `us_css1` varchar(255) NOT NULL,
-  `us_css2` varchar(255) NOT NULL,
-  `us_css3` varchar(255) NOT NULL,
   `site_name` varchar(100) NOT NULL,
   `language` varchar(255) NOT NULL,
-  `track_guest` int(1) NOT NULL,
   `site_offline` int(1) NOT NULL,
   `force_pr` int(1) NOT NULL,
   `glogin` int(1) NOT NULL DEFAULT 0,
@@ -459,15 +487,17 @@ CREATE TABLE `settings` (
   `spice_api` varchar(75) DEFAULT NULL,
   `announce` datetime DEFAULT NULL,
   `bleeding_edge` tinyint(1) DEFAULT 0,
-  `err_time` int(11) DEFAULT 15
+  `err_time` int(11) DEFAULT 15,
+  `container_open_class` varchar(255) DEFAULT 'container-fluid',
+  `debug` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `settings`
 --
 
-INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `us_css1`, `us_css2`, `us_css3`, `site_name`, `language`, `track_guest`, `site_offline`, `force_pr`, `glogin`, `fblogin`, `gid`, `gsecret`, `gredirect`, `ghome`, `fbid`, `fbsecret`, `fbcallback`, `graph_ver`, `finalredir`, `req_cap`, `req_num`, `min_pw`, `max_pw`, `min_un`, `max_un`, `messaging`, `snooping`, `echouser`, `wys`, `change_un`, `backup_dest`, `backup_source`, `backup_table`, `msg_notification`, `permission_restriction`, `auto_assign_un`, `page_permission_restriction`, `msg_blocked_users`, `msg_default_to`, `notifications`, `notif_daylimit`, `recap_public`, `recap_private`, `page_default_private`, `navigation_type`, `copyright`, `custom_settings`, `system_announcement`, `twofa`, `force_notif`, `cron_ip`, `registration`, `join_vericode_expiry`, `reset_vericode_expiry`, `admin_verify`, `admin_verify_timeout`, `session_manager`, `template`, `saas`, `redirect_uri_after_login`, `show_tos`, `default_language`, `allow_language`, `spice_api`, `announce`, `bleeding_edge`, `err_time`) VALUES
-(1, 0, 0, 0, '../users/css/color_schemes/bootstrap.min.css', '../users/css/sb-admin.css', '../users/css/custom.css', 'UserSpice', 'en', 1, 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 30, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'standard', NULL, NULL, 1, 'en-US', 0, NULL, '2020-10-07 21:26:18', 0, 15);
+INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `site_name`, `language`, `site_offline`, `force_pr`, `glogin`, `fblogin`, `gid`, `gsecret`, `gredirect`, `ghome`, `fbid`, `fbsecret`, `fbcallback`, `graph_ver`, `finalredir`, `req_cap`, `req_num`, `min_pw`, `max_pw`, `min_un`, `max_un`, `messaging`, `snooping`, `echouser`, `wys`, `change_un`, `backup_dest`, `backup_source`, `backup_table`, `msg_notification`, `permission_restriction`, `auto_assign_un`, `page_permission_restriction`, `msg_blocked_users`, `msg_default_to`, `notifications`, `notif_daylimit`, `recap_public`, `recap_private`, `page_default_private`, `navigation_type`, `copyright`, `custom_settings`, `system_announcement`, `twofa`, `force_notif`, `cron_ip`, `registration`, `join_vericode_expiry`, `reset_vericode_expiry`, `admin_verify`, `admin_verify_timeout`, `session_manager`, `template`, `saas`, `redirect_uri_after_login`, `show_tos`, `default_language`, `allow_language`, `spice_api`, `announce`, `bleeding_edge`, `err_time`, `container_open_class`, `debug`) VALUES
+(1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'standard', NULL, NULL, 1, 'en-US', 0, NULL, '2021-12-02 07:28:05', 0, 15, 'container-fluid', 0);
 
 -- --------------------------------------------------------
 
@@ -536,7 +566,23 @@ INSERT INTO `updates` (`id`, `migration`, `applied_on`, `update_skipped`) VALUES
 (61, '2020-06-30a', '2020-07-16 11:27:54', NULL),
 (62, '2020-07-01a', '2020-07-16 11:27:54', NULL),
 (63, '2020-07-16a', '2020-10-08 01:26:22', NULL),
-(64, '2020-07-30a', '2020-10-08 01:26:22', NULL);
+(64, '2020-07-30a', '2020-10-08 01:26:22', NULL),
+(65, '2020-10-06a', '2021-12-02 12:28:02', NULL),
+(66, '2020-11-03a', '2021-12-02 12:28:02', NULL),
+(67, '2020-11-08a', '2021-12-02 12:28:02', NULL),
+(68, '2020-11-10a', '2021-12-02 12:28:02', NULL),
+(69, '2020-11-10b', '2021-12-02 12:28:02', NULL),
+(70, '2020-12-17a', '2021-12-02 12:28:02', NULL),
+(71, '2020-12-28a', '2021-12-02 12:28:02', NULL),
+(72, '2021-01-20a', '2021-12-02 12:28:02', NULL),
+(73, '2021-02-16a', '2021-12-02 12:28:03', NULL),
+(74, '2021-04-14a', '2021-12-02 12:28:03', NULL),
+(75, '2021-04-15a', '2021-12-02 12:28:03', NULL),
+(76, '2021-05-20a', '2021-12-02 12:28:03', NULL),
+(77, '2021-07-11a', '2021-12-02 12:28:03', NULL),
+(78, '2021-08-22a', '2021-12-02 12:28:03', NULL),
+(79, '2021-08-24a', '2021-12-02 12:28:03', NULL),
+(80, '2021-09-25a', '2021-12-02 12:28:03', NULL);
 
 -- --------------------------------------------------------
 
@@ -563,7 +609,7 @@ CREATE TABLE `users` (
   `gender` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `locale` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `gpluslink` varchar(255) DEFAULT NULL,
-  `account_owner` tinyint(4) NOT NULL DEFAULT 0,
+  `account_owner` tinyint(4) NOT NULL DEFAULT 1,
   `account_id` int(11) NOT NULL DEFAULT 0,
   `account_mgr` int(11) NOT NULL DEFAULT 0,
   `fb_uid` varchar(255) DEFAULT NULL,
@@ -579,16 +625,17 @@ CREATE TABLE `users` (
   `force_pr` tinyint(1) NOT NULL DEFAULT 0,
   `logins` int(11) UNSIGNED NOT NULL DEFAULT 0,
   `last_login` datetime DEFAULT NULL,
-  `join_date` datetime,
-  `modified` datetime
+  `join_date` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  `active` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`) VALUES
-(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', NULL, '', '', '', 0, 0, 0, '', '', 1, 1, 0, 1, 0, NULL, 0, 0, 0, '2016-01-01 00:00:00', '2016-01-01 00:00:00', '2016-01-01 00:00:00');
+INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gender`, `locale`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `created`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`, `active`) VALUES
+(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', 1, 1, 0, 1, 1, NULL, 0, 0, 0, '2016-01-01 00:00:00', '2016-01-01 00:00:00', '2016-01-01 00:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -1159,7 +1206,7 @@ ALTER TABLE `keys`
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `menus`
@@ -1219,7 +1266,7 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `updates`
 --
 ALTER TABLE `updates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
 -- AUTO_INCREMENT for table `users`

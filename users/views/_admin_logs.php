@@ -2,7 +2,7 @@
   <div class="page-header float-right">
     <div class="page-title">
       <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
+        <li><a href="<?php echo $us_url_root; ?>users/admin.php">Dashboard</a></li>
         <li>Tools</li>
         <li class="active">System Logs</li>
         <li></li>
@@ -14,44 +14,75 @@
 </header>
 <?php
 $mode = Input::get('mode');
+$action = Input::get('action');
+$filters = [
+  'debug' => 'View Only Debugging Logs',
+];
 $errors = [];
 $successes = [];
-if(in_array($user->data()->id, $master_account)) {
-if(!empty($_POST['delhook'])){
-  if(Input::get("delAll") != ""){
-    $db->query("TRUNCATE table logs");
+if (in_array($user->data()->id, $master_account) && $action != '') {
+    $query = '';
+    switch ($action) {
+    case 'delete_logs':
+      $query = 'DELETE FROM logs';
+      break;
+    case 'truncate_logs':
+      $query = 'TRUNCATE table logs';
+      break;
+    case 'delete_debugging_logs':
+      $query = "DELETE FROM logs WHERE logtype = 'Redirect Diag' OR logtype = 'Form Data'";
+      break;
   }
-  if(Input::get("delDebug") != ""){
-    $db->query("DELETE FROM logs WHERE logtype = ? OR logtype = ?",["Redirect Diag","Form Data"]);
-  }
-}
+
+    if ($query != '') {
+        $db->query($query);
+        if (!$db->error()) {
+            logger($user->data()->id, 'Logs', 'An action was performed against the logs', ['ACTION' => $action, 'QUERY' => $query]);
+        } else {
+            logger($user->data()->id, 'Logs', 'An action performed against the logs has failed', ['ACTION' => $action, 'QUERY' => $query, 'ERROR' => $db->errorString()]);
+        }
+    }
+
+    Redirect::to('?view=logs');
 }
 ?>
-<style>
-tfoot input {
-  width: 100%;
-  box-sizing: border-box;
-}
-</style>
-<div class="content mt-3">
-  <h2 class="mb-3">System Logs</h2>
-  <?php if(in_array($user->data()->id, $master_account)) { ?>
-    <form id="log_clearing_tools" class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
-      <input type="hidden" name="csrf" value="<?=Token::generate();?>">
-      <input type="hidden" name="delhook" value="true">
-      <input type="submit" name="delAll" value="Clear All Logs" class="btn btn-danger">
-      <input type="submit" name="delDebug" value="Clear Debugging Logs" class="btn btn-warning">
-      <?php if($mode == "debug"){ ?>
-        <a href="admin.php?view=logs" class="btn btn-primary">View All Logs</a>
-      <?php }else{ ?>
-        <a href="admin.php?view=logs&mode=debug" class="btn btn-primary">View Only Debugging Logs</a>
-      <?php } ?>
-    </form>
-  <?php
+  <style>
+  tfoot input {
+    width: 100%;
+    box-sizing: border-box;
   }
-  ?>
+  </style>
+  <div class="content mt-3">
+    <h2 class="mb-3">System Logs</h2>
+    <?php if (in_array($user->data()->id, $master_account)) { ?>
+      <div style="padding-left: 0" class="col-xs-12 col-lg-3">
+        <select class="form-control" name="logs_actions" id="logs_actions">
+            <option disabled selected value>Select an action...</option>
+            <option value="delete_logs">Clear All Logs (Keep IDs)</option>
+            <option value="truncate_logs">Clear All Logs (Reset IDs)</option>
+            <option value="delete_debugging_logs">Clear Debugging Logs</option>
+        </select>
+      </div>
+      <div class="col-xs-12 col-lg-3">
+        <select class="form-control" name="logs_filters" id="logs_filters">
+            <option disabled selected value>Select a filter...</option>
+            <?php if ($mode != '') { ?>
+              <option value="">View All Logs</option>
+            <?php } ?>
+            <?php
+            foreach ($filters as $key => $value) {
+                if ($key == $mode) {
+                    continue;
+                } ?>
+              <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+            <?php
+            } ?>
+        </select>
+      </div>
+      <br><br>
+    <?php } ?>
+  </div>
 
-  <!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
   <?php resultBlock($errors, $successes);
     $logs = UserSpice_getLogs(['preset' => $mode]);
   ?>
@@ -70,26 +101,26 @@ tfoot input {
     <tbody>
       <?php foreach ($logs as $l) { ?>
         <tr>
-          <td><?=$l->id; ?></td>
-          <td><?=$l->ip; ?></td>
-          <td><?php echouser($l->user_id); ?> (<?=$l->user_id; ?>)</td>
-          <td><?=$l->logdate; ?></td>
-          <td><?=$l->logtype; ?></td>
+          <td><?php echo $l->id; ?></td>
+          <td><?php echo $l->ip; ?></td>
+          <td><?php echouser($l->user_id); ?> (<?php echo $l->user_id; ?>)</td>
+          <td><?php echo $l->logdate; ?></td>
+          <td><?php echo $l->logtype; ?></td>
           <td>
             <div class="input-group">
               <?php
-              if(strlen($l->lognote) > 80){ ?>
-              <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?=$l->lognote;?></textarea>
+              if (strlen($l->lognote) > 80) { ?>
+              <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?php echo $l->lognote; ?></textarea>
             <?php
-            }else{
-              echo $l->lognote;
+            } else {
+                echo $l->lognote;
             }
             ?>
             </div>
           </td>
           <td>
             <?php if ($l->metadata !== null) {?>
-              <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?=$l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
+              <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?php echo $l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
             <?php } ?>
           </td>
         </tr>
@@ -125,8 +156,49 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
+$("select#logs_actions").change(function() {
+  var val = $(this).val()
+  var msg
+  switch (val) {
+    case 'delete_logs':
+      msg = "Are you sure you want to Delete All Logs (this may take awhile)?"
+    case 'truncate_logs':
+      msg = "Are you sure you want to Truncate All Logs (this will reset all IDs)?"
+    case 'delete_debugging_logs':
+      msg = "Are you sure you want to clear Debugging Logs?"
+  }
+  if(confirm(msg)) {
+    var url = window.location.href
+    url = `${url}&action=${val}`
+    window.location.href = url
+  } else {
+    $("select#logs_actions")[0].selectedIndex = 0;
+  }
+})
+
+$("select#logs_filters").change(function() {
+  var val = $(this).val()
+  var url = updateQueryStringParameter(window.location.href, 'mode', val)
+  window.location.href = url
+})
+
+function updateQueryStringParameter(uri, key, value) {
+  var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+  var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+  if (uri.match(re)) {
+    if(value == '') {
+      return uri.replace(re, '');
+    } else {
+      return uri.replace(re, '$1' + key + "=" + value + '$2');
+    }
+  }
+  else {
+    return uri + separator + key + "=" + value;
+  }
+}
+
 function generateMetadataModal(logId) {
-  $.get("<?=$us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId, function(data, status) {
+  $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId, function(data, status) {
     $("#logMetadataBody").html(data)
     $("#logMetadataID").html(logId)
     $("#logMetadata").modal();

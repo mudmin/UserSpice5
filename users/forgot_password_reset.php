@@ -44,6 +44,12 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 	$email = Input::get('email');
 	$vericode = Input::get('vericode');
 	$ruser = new User($email);
+	$eventhooks =  getMyHooks(['page'=>'forgotPasswordResponse']);
+	includeHook($eventhooks,'body');
+	if(isset($hookData['ruser'])){
+		$ruser = $hookData['ruser'];
+	}
+
 	if (Input::get('resetPassword')) {
 		$newPw = lang("PW_NEW");
 		$confPw = lang("PW_CONF");
@@ -52,7 +58,8 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 		'password' => array(
 		  'display' => $newPw,
 		  'required' => true,
-		  'min' => 6,
+		  'min' => $settings->min_pw,
+			'max' => $settings->max_pw,
 		),
 		'confirm' => array(
 		  'display' => $confPw,
@@ -62,8 +69,9 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 		));
 		if($validation->passed()){
 			if($ruser->data()->vericode != $vericode || (strtotime($ruser->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) <= 0)){
-				$msg = lang("REDIR_SOM_TING_WONG");
-				Redirect::to($us_url_root.'users/forgot_password_reset.php?err='.$msg);
+				$msg = str_replace("+"," ",lang("REDIR_SOM_TING_WONG"));
+				usError($msg);
+				Redirect::to($us_url_root.'users/forgot_password_reset.php');
 			}
 			//update password
 			$ruser->update(array(

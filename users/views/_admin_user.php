@@ -28,7 +28,8 @@ $userId = (int) Input::get('id');
 
 //Check if selected user exists
 if (!userIdExists($userId)) {
-    Redirect::to($us_url_root.'users/admin.php?view=users&err=That user does not exist.');
+    usError("That user does not exist");
+    Redirect::to($us_url_root.'users/admin.php?view=users');
     die();
 }
 
@@ -45,7 +46,9 @@ if (!empty($_POST)) {
             $deletions = $_POST['delete'];
             if ($deletion_count = deleteUsers($deletions)) {
                 logger($user->data()->id, 'User Manager', "Deleted user named $userdetails->fname.");
-                Redirect::to($us_url_root.'users/admin.php?view=users&msg='.lang('ACCOUNT_DELETIONS_SUCCESSFUL', [$deletion_count]));
+                $msg = lang('ACCOUNT_DELETIONS_SUCCESSFUL', [$deletion_count]);
+                usSuccess($msg);
+                Redirect::to($us_url_root.'users/admin.php?view=users');
             } else {
                 $errors[] = lang('SQL_ERROR');
             }
@@ -53,24 +56,29 @@ if (!empty($_POST)) {
             if (!empty($_POST['cloak'])) {
                 if ($user->data()->cloak_allowed != 1 && !in_array($user->data()->id, $master_account) && !isset($_SESSION['cloak_to'])) {
                     logger($user->data()->id, 'Cloaking', 'User attempted to cloak User ID #'.$userId);
-                    Redirect::to($us_url_root.'users/admin.php?view=users&err=You do not have permission to cloak.');
+                    usError("You do not have permission to cloak");
+                    Redirect::to($us_url_root.'users/admin.php?view=users');
                 } else {
                     if (in_array($userId, $master_account) && !in_array($user->data()->id, $master_account)) {
                         logger($user->data()->id, 'Cloaking', "User attempted to cloak User ID #$userId who belongs to the Master Account Array.");
-                        Redirect::to($us_url_root.'users/admin.php?view=users&err=You cannot cloak into a master account.');
+                        usError("You cannot cloak into a master account");
+                        Redirect::to($us_url_root.'users/admin.php?view=users');
                     } elseif ($userId == $user->data()->id) {
                         logger($user->data()->id, 'Cloaking', 'User attempted to cloak themself.');
-                        Redirect::to($us_url_root.'users/admin.php?view=users&err=Cloaking+into+yourself+would+open+up+a+black+hole!');
+                        usError("Cloaking into yourself would open up a black hole");
+                        Redirect::to($us_url_root.'users/admin.php?view=users');
                     } else {
                         $check = $db->query('SELECT id FROM users WHERE id = ?', [$userId]);
                         $count = $check->count();
                         if ($count < 1) {
-                            Redirect::to($us_url_root.'users/admin.php?view=users&err=You+broke+it!+User+not+found.');
+                            usError("You broke it! User not found");
+                            Redirect::to($us_url_root.'users/admin.php?view=users');
                         } else {
                             $_SESSION['cloak_from'] = $user->data()->id;
                             $_SESSION['cloak_to'] = $userId;
                             logger($user->data()->id, 'Cloaking', 'Cloaked into '.$userId);
-                            Redirect::to('account.php?err=You+are+now+cloaked!');
+                            usSuccess("You are now cloaked!");
+                            Redirect::to('account.php');
                         }
                     }
                 }
@@ -181,7 +189,8 @@ if (!empty($_POST)) {
                         }
                     }
                   }else{
-                    Redirect::to("admin.php?view=user&id=".$userId."&err=Password validation failed");
+                    usError("Password validation failed");
+                    Redirect::to("admin.php?view=user&id=".$userId);
                   }
             }
             $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->reset_vericode_expiry minutes", strtotime(date('Y-m-d H:i:s'))));
@@ -355,9 +364,11 @@ if (!empty($_POST)) {
     }
 
     if ($errors == [] && Input::get('return') != '') {
-        Redirect::to('admin.php?view=users&err=Saved');
+        usSuccess("Saved");
+        Redirect::to('admin.php?view=users');
     } elseif ($errors == []) {
-        Redirect::to('admin.php?view=user&err=Saved&id='.$userId);
+        usSuccess("Saved");
+        Redirect::to('admin.php?view=user&id='.$userId);
     }
 }
 
@@ -365,7 +376,7 @@ if (!empty($_POST)) {
   // $currentuserPermission = fetchUserPermissions($user->data()->id);
   $permissionData = fetchAllPermissions();
 
-  $grav = get_gravatar(strtolower(trim($userdetails->email)));
+  $grav = fetchProfilePicture($userId);
   $useravatar = '<img src="'.$grav.'" class="img-responsive img-thumbnail" alt="">';
   if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {
       $protectedprof = 1;
@@ -478,7 +489,7 @@ if (!empty($_POST)) {
                     </div>
                     <div class="col-12 col-sm-6">
                       <div class="form-group">
-                        <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><font color="blue">?</font></a></label>
+                        <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><span style="color:blue">?</span></a></label>
                         <select name="cloak_allowed" class="form-control">
                           <option value="1" <?php if ($userdetails->cloak_allowed == 1) {
                                 echo "selected='selected'";
@@ -494,7 +505,7 @@ if (!empty($_POST)) {
                       </div>
 
                       <div class="form-group">
-                        <label> Block<a class="nounderline" data-toggle="tooltip" title="Drop the banhammer on a troublemaker!"><font color="blue">?</font></a></label>
+                        <label> Block<a class="nounderline" data-toggle="tooltip" title="Drop the banhammer on a troublemaker!"><span style="color:blue">?</span></a></label>
                         <select name="active" class="form-control">
                           <option value="1" <?php if ($userdetails->permissions == 1) {
                                 echo "selected='selected'";
@@ -510,7 +521,7 @@ if (!empty($_POST)) {
                       </div>
 
                       <div class="form-group">
-                        <label> Force Password Reset<a class="nounderline" data-toggle="tooltip" title="The user will be required to create a new password on next login"><font color="blue">?</font></a></label>
+                        <label> Force Password Reset<a class="nounderline" data-toggle="tooltip" title="The user will be required to create a new password on next login"><span style="color:blue">?</span></a></label>
                         <select name="force_pr" class="form-control">
                           <option <?php if ($userdetails->force_pr == 0) {
                                 echo "selected='selected'";
@@ -528,7 +539,7 @@ if (!empty($_POST)) {
                       </div>
 
                         <div class="form-group">
-                          <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><font color="blue">?</font></a></label>
+                          <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><span style="color:blue">?</span></a></label>
                           <select name="dev_user" class="form-control">
                             <option <?php if ($userdetails->dev_user == 0) {
                                 echo "selected='selected'";
@@ -560,7 +571,7 @@ if (!empty($_POST)) {
                           }
                           ?>
 
-                          <label>Cloak into this user<a class="nounderline" data-toggle="tooltip" title="Automatically logs you in as this user"><font color="blue">?</font></a>
+                          <label>Cloak into this user<a class="nounderline" data-toggle="tooltip" title="Automatically logs you in as this user"><span style="color:blue">?</span></a>
                           </label>
                           <select name="cloak" class="form-control">
                             <option selected='selected' disabled>--Select--</option>
@@ -569,7 +580,7 @@ if (!empty($_POST)) {
                           }?>>Yes</option>
                           </select>
                           <?php if ($rsn != '') {
-                              echo "<font color='blue'>Cloaking disabled because ".$rsn.'</font>';
+                              echo "<span style='color:blue'>Cloaking disabled because ".$rsn.'</span>';
                           }?>
                         </div>
                         <div class="form-group">
@@ -587,7 +598,7 @@ if (!empty($_POST)) {
                           <?php } ?>
                         </div>
                         <div class="form-group">
-                          <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><font color="blue">?</font></a></label>
+                          <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><span style="color:blue">?</span></a></label>
                           <select name='delete[<?php echo "$userId"; ?>]' id='delete[<?php echo "$userId"; ?>]' class="form-control">
                             <option selected='selected' disabled>No</option>
                             <option value="<?=$userId; ?>"  <?php if (!hasPerm(2) && !in_array($user->data()->id, $master_account)) {

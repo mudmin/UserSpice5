@@ -34,7 +34,7 @@ $emailR = $emailQ->first();
 $errors = [];
 $successes = [];
 $userId = $user->data()->id;
-$grav = get_gravatar(strtolower(trim($user->data()->email)));
+$grav = fetchProfilePicture($userId);
 $validation = new Validate();
 $userdetails = $user->data();
 //Temporary Success Message
@@ -65,8 +65,9 @@ if (!empty($_POST)) {
       ]);
             if ($validation->passed()) {
                 if (($settings->change_un == 2) && ($user->data()->un_changed == 1)) {
-                    $msg = lang('REDIR_UN_ONCE');
-                    Redirect::to($us_url_root.'users/user_settings.php?err='.$msg);
+                    $msg = str_replace("+"," ",lang("REDIR_UN_ONCE"));
+                    usError($msg);
+                    Redirect::to($us_url_root.'users/user_settings.php');
                 }
                 $db->update('users', $userId, $fields);
                 $successes[] = lang('GEN_UNAME').' '.lang('GEN_UPDATED');
@@ -186,7 +187,7 @@ if (!empty($_POST)) {
                 if (!empty($_POST['password'])) {
                     $validation->check($_POST, [
             'password' => [
-              'display' => lang('NEW_PW'),
+              'display' => lang('PW_NEW'),
               'required' => true,
               'min' => $settings->min_pw,
               'max' => $settings->max_pw,

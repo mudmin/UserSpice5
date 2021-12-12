@@ -83,10 +83,10 @@ if (!empty($_POST)) {
           ],
       ]);
 
-        if ($eventhooks = getMyHooks(['page' => 'adminUser'])) {
-            includeHook($eventhooks, 'createAttempt');
+        if ($eventhooks = getMyHooks(['page' => 'createAttempt'])) {
+            includeHook($eventhooks, 'body');
         }
-
+        
         if ($validation->passed()) {
             $form_valid = true;
             try {

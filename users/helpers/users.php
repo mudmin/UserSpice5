@@ -41,30 +41,42 @@ if (!function_exists('fetchAllUsers')) {
     }
 }
 
-//Retrieve complete user information by username, token or ID
-if (!function_exists('fetchUserDetails')) {
-    function fetchUserDetails($username = null, $token = null, $id = null)
-    {
-        $db = DB::getInstance();
-        $column = $data = $results = null;
-
-        if ($username != null) {
-            $column = 'username';
-            $data = $username;
-        } elseif ($id != null) {
-            $column = 'id';
-            $data = $id;
-        }
-
-        if (!is_null($column) && !is_null($data)) {
-            $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$data]);
-            if ($query->count() == 1) {
-                $results = $query->first();
-            }
-        }
-
-        return $results;
+//Retrieve complete user info by id ID
+if (!function_exists('fetchUser')) {
+  function fetchUser($id)
+  {
+    $db = DB::getInstance();
+    $query = $db->query("SELECT * FROM users WHERE id = ?", [$id]);
+    if ($query->count() > 0) {
+      return $query->first();
+    }else{
+      return false;
     }
+  }
+}
+
+//Retrieve complete user information by username, token or ID
+//This function is primarily for legacy purposes
+if (!function_exists('fetchUserDetails')) {
+  function fetchUserDetails($column = null, $term = null, $id = null)
+  {
+    $db = DB::getInstance();
+    if($column == null || $column == ""){
+      $column = "id";
+    }
+
+    if($term == null || $term == ""){
+      $term = $id;
+    }
+
+    $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$term]);
+    if ($query->count() == 1) {
+      return $query->first();
+    }else{
+      return false;
+    }
+
+  }
 }
 
 //Delete a defined array of users
@@ -91,6 +103,10 @@ if (!function_exists('echouser')) {
     function echouser($id, $echoType = null)
     {
         $db = DB::getInstance();
+        if($id == "" || $id == 0){
+          echo "Guest";
+          return true;
+        }
 
         $id = (int) $id;
 

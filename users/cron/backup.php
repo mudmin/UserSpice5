@@ -1,15 +1,12 @@
 <?php
-ini_set('max_execution_time', 1356);
-ini_set('memory_limit','1024M');
 require_once '../init.php';
 $db = DB::getInstance();
 $ip = ipCheck();
-logger(1,"CronRequest","Cron request from $ip.");
-$settingsQ = $db->query("Select * FROM settings");
-$settings = $settingsQ->first();
+logger("","CronRequest","Cron request from $ip.");
+$settings = $db->query("Select * FROM settings")->first();
 if($settings->cron_ip != ''){
 if($ip != $settings->cron_ip && $ip != '127.0.0.1'){
-	logger(1,"CronRequest","Cron request DENIED from $ip.");
+	logger("","CronRequest","Cron request DENIED from $ip.");
 	die;
 	}
 }
@@ -184,8 +181,9 @@ if($checkQuery->count()==1) {
 			'user_id' => $user_id);
 			$db->insert('crons_logs',$cronfields);
 			Redirect::to('../../'. $from);
-		} }
-		else {
-			Redirect::to('../../'. $from .'?err=Cron is disabled, cannot be ran.');
+		}
+	}	else {
+			usError("Cron is disabled, cannot be ran.");
+			Redirect::to('../../'. $from );
 		}
 		?>

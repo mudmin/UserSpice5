@@ -120,7 +120,8 @@ if (!empty($_POST)) {
   }
   if (!empty($_POST['removeFolder'])) {
     if (!in_array($user->data()->id, $master_account)) {
-      Redirect::to('admin.php?view=pages&err=Permission+denied');
+      usError("Permission denied");
+      Redirect::to('admin.php?view=pages');
     }
     $folder = Input::get('folder');
     if (in_array($folder, $paths) && $folder != '' && $folder != 'users/' && $folder != 'usersc/') {
@@ -146,15 +147,18 @@ if (!empty($_POST)) {
       $h = fopen($file, 'w');
       fwrite($h, $new_content);
       fclose($h);
-      Redirect::to('admin.php?view=pages&msg=Deleted Folder');
+      usSuccess("Deleted folder");
+      Redirect::to('admin.php?view=pages');
     } else {
-      Redirect::to('admin.php?view=pages&err=Error Deleting Folder');
+      usError("Error deleting folder");
+      Redirect::to('admin.php?view=pages');
     }
   }//end of delete folder to monitor.
 
   if (!empty($_POST['addFolder'])) {
     if (!in_array($user->data()->id, $master_account)) {
-      Redirect::to('admin.php?view=pages&err=Permission+denied');
+      usError("Permission denied");
+      Redirect::to('admin.php?view=pages');
     }
     $folder = Input::get('newFolder');
     $check = file_exists($abs_us_root.$us_url_root.$folder);
@@ -177,9 +181,11 @@ if (!empty($_POST)) {
       $h = fopen($file, 'w');
       fwrite($h, $new_content);
       fclose($h);
-      Redirect::to('admin.php?view=pages&msg=Added Folder');
+      usSuccess("Added folder");
+      Redirect::to('admin.php?view=pages');
     } else {
-      Redirect::to('admin.php?view=pages&err=Error Adding Folder');
+      usError("Error adding folder");
+      Redirect::to('admin.php?view=pages');
     }
   }//end of add folder to monitor
 }//end of post
@@ -219,7 +225,7 @@ $csrf = Token::generate();
     <table id="paginate" class='table table-hover table-list-search'>
       <thead>
         <tr>
-          <th>Id</th><th>Page</th><th>Page Name</th><th>ReAuth</th><th>Access</th>
+          <th>Id</th><th>Page</th><th>Page Name</th><th>Access</th>
         </tr>
       </thead>
       <tbody>
@@ -234,18 +240,13 @@ $csrf = Token::generate();
             <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id; ?>'><?=$dbpages[$count]->page; ?></a></td>
             <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id; ?>'><?=$dbpages[$count]->title; ?></a></td>
             <td>
-              <?php if ($dbpages[$count]->re_auth == 1) {
-                echo "<i class='fa fa-check'></i>";
-              } ?>
-            </td>
-            <td>
               <a class="nounderline" href ='admin.php?view=page&id=<?=$dbpages[$count]->id; ?>'>
                 <?php
                 //Show public/private setting of page
                 if ($dbpages[$count]->private == 0) {
-                  echo "<font color='green'>Public</font>";
+                  echo "<span style='color:green'>Public</span>";
                 } else {
-                  echo "<font color='red'>Private</font>";
+                  echo "<span style='color:red'>Private</span>";
                 } ?>
               </a>
             </td></tr>

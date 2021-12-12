@@ -285,9 +285,9 @@ if (!function_exists('bold')) {
 if (!function_exists('err')) {
   function err($text)
   {
-    // echo "<text padding='1em' align='center'><font color='red'><h4><span class='errSpan'>";
+    // echo "<text padding='1em' align='center'><span style='color:red'><h4><span class='errSpan'>";
     // echo $text;
-    // echo '</span></h4></font></text>';
+    // echo '</span></h4></span></text>';
   }
 }
 
