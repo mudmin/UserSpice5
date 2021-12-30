@@ -24,13 +24,13 @@ $(document).ready(function() {
 <?php
   //look for the old school ?err=Whatever in the url
   if (Input::get('err') != '') { ?>
-    userSpiceMessages("<?php echo htmlspecialchars_decode(Input::get('err')); ?>","errUserSpiceMessage","<?php echo $usSessionMessageClasses['err']; ?>");
+    userSpiceMessages("<?php echo htmlspecialchars_decode(htmlspecialchars(Input::get('err'))); ?>","errUserSpiceMessage","<?php echo $usSessionMessageClasses['err']; ?>");
 <?php
   }
 
   //look for the old school ?msg=Whatever in the url
   if (Input::get('msg') != '') { ?>
-    userSpiceMessages("<?php echo htmlspecialchars_decode(Input::get('msg')); ?>","msgUserSpiceMessage","<?php echo $usSessionMessageClasses['msg']; ?>");
+    userSpiceMessages("<?php echo htmlspecialchars_decode(htmlspecialchars(Input::get('msg'))); ?>","msgUserSpiceMessage","<?php echo $usSessionMessageClasses['msg']; ?>");
 
 <?php }
     //define the types of messages and what class they get
@@ -43,7 +43,7 @@ $(document).ready(function() {
     //Display any messages that have been set in the $_SESSION variables
     foreach ($keys as $key => $class) {
         if (isset($usSessionMessages[$key]) && $usSessionMessages[$key] != '') { ?>
-        userSpiceMessages("<?php echo htmlspecialchars_decode($usSessionMessages[$key]); ?>","<?php echo $key; ?>UserSpiceMessage","<?php echo $class; ?>");
+        userSpiceMessages("<?php echo htmlspecialchars_decode(htmlspecialchars($usSessionMessages[$key])); ?>","<?php echo $key; ?>UserSpiceMessage","<?php echo $class; ?>");
         <?php
       }
     }

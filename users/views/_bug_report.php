@@ -124,7 +124,7 @@ if($settings->spice_api != ''){
     <?php if(isset($result) && count($result->fetch) > 0){ ?>
     <div class="col-12"><br>
       <h3>Your Previous Reports</h3>
-      <table class="table table-striped paginate">
+      <table id="bugstable" class="table table-striped paginate">
         <thead>
           <tr>
             <th>Issue ID</th>

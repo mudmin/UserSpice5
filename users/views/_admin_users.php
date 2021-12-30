@@ -86,7 +86,7 @@ if (!empty($_POST)) {
         if ($eventhooks = getMyHooks(['page' => 'createAttempt'])) {
             includeHook($eventhooks, 'body');
         }
-        
+
         if ($validation->passed()) {
             $form_valid = true;
             try {
@@ -151,7 +151,7 @@ if (!empty($_POST)) {
   $random_password = random_password();
 
   foreach ($validation->errors() as $error) {
-      $errors[] = $error[0];
+      $errors[] = $error;
   }
   ?>
 
@@ -169,10 +169,10 @@ if (!empty($_POST)) {
     <div class="card">
       <div class="card-body">
       <div class="allutable">
-      <table id="paginate" class='table table-hover table-list-search'>
+      <table id="userstable" class='table table-hover table-list-search'>
         <thead>
           <tr>
-            <th></th><th></th><th>Username</th><th>Name</th><th>Email</th><?php includeHook($hooks, 'body'); ?>
+            <th>ID</th><th></th><th>Username</th><th>Name</th><th>Email</th><?php includeHook($hooks, 'body'); ?>
             <th>Last Sign In</th><?php if ($act == 1) {?><th>Verified</th><?php } ?><th>Status</th>
           </tr>
         </thead>
@@ -280,7 +280,7 @@ if (!empty($_POST)) {
               includeHook($hooks, 'form');
 
               ?>
-              <label><input type="checkbox" name="sendEmail" id="sendEmail" checked /> Send Email?</label>
+              <label><input type="checkbox" name="sendEmail" id="sendEmail"/> Send Email?</label>
             </div>
             <div class="modal-footer">
                 <input type="hidden" name="csrf" value="<?php echo Token::generate(); ?>" />
@@ -301,7 +301,7 @@ if (!empty($_POST)) {
       jwerty.key('esc', function(){
         $('.modal').modal('hide');
       });
-      $('#paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]], "aaSorting": []});
+      $('#userstable').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]], "aaSorting": []});
 
       $('.password_view_control').hover(function () {
         $('#password').attr('type', 'text');

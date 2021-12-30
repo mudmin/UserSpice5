@@ -1,4 +1,3 @@
-<link href="<?=$us_url_root?>users/css/datatables.css" rel="stylesheet">
 <div class="col-sm-8">
   <div class="page-header float-right">
     <div class="page-title">
@@ -54,7 +53,7 @@ tfoot input {
   <div class="card">
 
     <div class="card-body table-sm table-responsive">
-      <table id="paginate" class='table table-hover table-striped table-list-search display'>
+      <table id="seclogstable" class='table table-hover table-striped table-list-search display'>
         <thead>
           <tr>
             <th scope="col"class="text-left">Log ID</th>
@@ -103,7 +102,7 @@ tfoot input {
 <script>
 
 $(document).ready(function () {
-   $('#paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
+   $('#seclogstable').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
   });
 
 </script>

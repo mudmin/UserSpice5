@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="<?=$us_url_root?>users/js/pagination/datatables.min.css">
 <div class="col-sm-8">
   <div class="page-header float-right">
     <div class="page-title">
@@ -88,7 +89,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   ?>
   <div class="card">
   <div class="card-body">
-  <table id="paginate" class='table table-hover table-striped table-list-search display'>
+  <table id="logstable" class='table table-hover table-striped table-list-search display'>
     <thead>
       <th>ID</th>
       <th>IP</th>
@@ -206,7 +207,7 @@ function generateMetadataModal(logId) {
 }
 
 $(document).ready(function () {
-   $('#paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
+   $('#logstable').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
   });
 
 </script>

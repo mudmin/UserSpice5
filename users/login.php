@@ -53,7 +53,7 @@ if (!empty($_POST['login_hook'])) {
       $remember = false;
       includeHook($hooks,'post');
 
-      if ($validation->passed()) {
+      if ($validated) {
         //Log user in
         $user = new User();
         $login = $user->loginEmail($username, $password, $remember);
@@ -111,7 +111,7 @@ if (!empty($_POST['login_hook'])) {
         <div class="row">
           <div class="col-sm-12">
             <form name="login" id="login-form" class="form-signin" action="" method="post">
-              <h2 class="form-signin-heading"></i> <?=lang("SIGNIN_TITLE","");?></h2>
+              <h2 class="form-signin-heading"><?=lang("SIGNIN_TITLE","");?></h2>
               <input type="hidden" name="dest" value="<?= $dest ?>" />
 
               <div class="form-group">

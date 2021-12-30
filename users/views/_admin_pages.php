@@ -222,7 +222,7 @@ $csrf = Token::generate();
 </p>
 <div class="card">
   <div class="card-body">
-    <table id="paginate" class='table table-hover table-list-search'>
+    <table id="pagestable" class='table table-hover table-list-search'>
       <thead>
         <tr>
           <th>Id</th><th>Page</th><th>Page Name</th><th>Access</th>
@@ -272,7 +272,7 @@ $csrf = Token::generate();
 <script type="text/javascript" src="js/pagination/datatables.min.js"></script>
 <script>
 $(document).ready(function() {
-  $('#paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]], "aaSorting": []});
+  $('#pagestable').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]], "aaSorting": []});
 } );
 </script>
 <?php

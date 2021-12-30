@@ -19,6 +19,7 @@
     }
     ?>
 
+<link rel="stylesheet" href="<?=$us_url_root?>users/js/pagination/datatables.min.css">
   <div class="header-menu">
     <div class="col-sm-4">
       <a id="menuToggle" class="menutoggle pull-left"><i class="fa fa fa-hand-o-left"></i></a>
