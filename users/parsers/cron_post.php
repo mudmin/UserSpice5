@@ -23,7 +23,7 @@ if(isset($user) && $user->isLoggedIn()) {
     }
 
     if($field == 'sort'){
-    if(!is_int($value) || $value < 0 || $value > 999){
+    if(!is_numeric($value) || $value < 0 || $value > 999){
       $msg['success'] = "false";
       $msg['msg'] = "Sort must be an integer between 0 and 999";
     }else{

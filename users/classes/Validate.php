@@ -68,7 +68,7 @@ class Validate
 						$rule_value = max($rule_value);
 						$str = lang("GEN_MIN");
 						$str1 = lang("GEN_CHAR");
-						$str2 = lang("GEN_REQ");
+						$str2 = lang("VAL_ALLOWED") ?? lang("GEN_REQ");
 						if ($length < $rule_value){
 							$this->addError(["{$display} $str {$rule_value} $str1 $str2",$item]);
 							$this->ruleBroken([$item,"min",$rule_value]);
@@ -80,7 +80,7 @@ class Validate
 						$rule_value = min($rule_value);
 						$str = lang("GEN_MAX");
 						$str1 = lang("GEN_CHAR");
-						$str2 = lang("GEN_REQ");
+						$str2 = lang("VAL_ALLOWED") ?? lang("GEN_REQ");
 						if ($length > $rule_value){
 							$this->addError(["{$display} $str {$rule_value} $str1 $str2",$item]);
 							$this->ruleBroken([$item,"max",$rule_value]);

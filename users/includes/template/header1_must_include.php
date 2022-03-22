@@ -30,4 +30,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	}
 
 	?>
+	<script src="<?=$us_url_root?>users/js/messages.js"></script>
 	<title><?= (($pageTitle != '') ? $pageTitle : ''); ?> <?=$settings->site_name?></title>

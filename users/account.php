@@ -35,9 +35,13 @@ if (!empty($_POST['uncloak'])) {
         $_SESSION[Config::get('session/session_name')] = $_SESSION['cloak_from'];
         unset($_SESSION['cloak_from']);
         logger($from, 'Cloaking', 'uncloaked from '.$to);
-        Redirect::to($us_url_root.'users/admin.php?view=users&err=You+are+now+you!');
+        $cloakHook =  getMyHooks(['page'=>'cloakEnd']);
+        includeHook($cloakHook,'body');
+        usSuccess("You are now you");
+        Redirect::to($us_url_root.'users/admin.php?view=users');
     } else {
-        Redirect::to($us_url_root.'users/logout.php?err=Something+went+wrong.+Please+login+again');
+        usError("Something went wrong. Please login again");
+        Redirect::to($us_url_root.'users/logout.php');
     }
 }
 

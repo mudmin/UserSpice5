@@ -24,6 +24,23 @@ else $pageTitle = '';
   <script src="js/bootstrap.min.js"></script>
 
 <style>
+body, p {
+  color:black;
+}
+
+a{
+  color:#0d0d0d;
+  font-weight: 500;
+}
+
+a:hover{
+  color: #292828;
+  font-weight: 700;
+}
+
+.text-dark{
+  color: black;
+}
 .btn-circle.btn-lg {
   width: 40px;
   height: 40px;
@@ -45,6 +62,9 @@ form label {font-weight:600}
 .feedback.right .dropdown-menu{ right: 0px}
 .feedback .hideme{ display: none}
 </style>
+<?php if(file_exists($abs_us_root.$us_url_root."usersc/includes/dashboard.css")){ ?>
+  <link rel="stylesheet" href="<?=$us_url_root?>usersc/includes/dashboard.css">
+<?php } ?>
 </head>
 <body>
 <?php
@@ -167,18 +187,40 @@ function activeDropdown($View, $dropId, $Area = false){
 ?>
 
   <!-- Left Panel -->
+  <style>
+    .navbar-header{
+      position: absolute;
+      top:-3rem;
+    }
+    .navbar{
+      margin-top:3rem;
+      padding:0!important;
+    }
+    .nav-small{
+      position: absolute!important;
+      left:0;
+      top:1.5rem
+    }
+    .nav-small img{
+      max-height: 32px!important;
+    }
+
+    .nav-footer{
+      position: absolute;
+      bottom:1rem;
+    }
+
+  </style>
 
   <aside id="left-panel" class="left-panel">
     <nav class="navbar navbar-expand-sm navbar-default">
-
       <div class="navbar-header">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-menu" aria-controls="main-menu" aria-expanded="false" aria-label="Toggle navigation">
           <i class="fa fa-bars"></i>
         </button>
-        <a class="navbar-brand" href="<?=$us_url_root?>index.php"><img src="images/logo.png" alt="Logo"></a>
-        <a class="navbar-brand hidden" href="./"><img src="images/logo2.png" alt="Logo"></a>
+        <a class="nav-brand" href="<?=$us_url_root?>index.php"><img src="images/logo.png" alt="Logo"></a>
+        <a class="nav-brand nav-small d-none" href="./"><img src="images/logo2.png" alt="Logo"></a>
       </div>
-
       <div id="main-menu" class="main-menu collapse navbar-collapse">
         <ul class="nav navbar-nav">
          <li <?=($view) ? '' : 'class="active"' ;?>>
@@ -222,7 +264,7 @@ function activeDropdown($View, $dropId, $Area = false){
                 if(!file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml')) {
                   continue;
                 }
-                
+
                 $xml=simplexml_load_file($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/info.xml');
                 if(file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$t.'/configure.php') && isset($usplugins[$t]) && ($usplugins[$t] == 1)){?>
                      <li><i class=" menu-icon fa fa-bolt"></i>
@@ -267,11 +309,11 @@ function activeDropdown($View, $dropId, $Area = false){
         </ul>
       </div><!-- /.navbar-collapse -->
     </nav>
-    <footer>
+    <div class="nav-footer">
         <p align="center" >
           <span style='color:white'><br>&copy;<?=date('Y '); ?><?=$settings->copyright; ?></span>
         </p>
-    </footer>
+    </div>
   </aside><!-- /#left-panel -->
 
   <!-- Left Panel -->
@@ -288,7 +330,22 @@ function activeDropdown($View, $dropId, $Area = false){
 }( jQuery ));
 
 $(document).ready(function () {
-	// $('.feedback').feedback();
+  $("#menuToggle").click(function(){
+      if($(".nav-footer").css("display")!= "none"){
+        $(".nav-footer").css("display", "none");
+      }else{
+        $(".nav-footer").css("display", "block");
+      }
+        $(".nav-brand").each(function(){
+      if($(this).hasClass("d-none")){
+        $(this).css("display", "flex!important");
+        $(this).removeClass("d-none");
+      }else{
+        $(this).addClass("d-none");
+      }
+    });
+  });
 });
+
 </script>
   <!-- Right Panel -->

@@ -77,6 +77,8 @@ if (!empty($_POST)) {
                             $_SESSION['cloak_from'] = $user->data()->id;
                             $_SESSION['cloak_to'] = $userId;
                             logger($user->data()->id, 'Cloaking', 'Cloaked into '.$userId);
+                            $cloakHook =  getMyHooks(['page'=>'cloakBegin']);
+                            includeHook($cloakHook,'body');
                             usSuccess("You are now cloaked!");
                             Redirect::to('account.php');
                         }

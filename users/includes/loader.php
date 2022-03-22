@@ -42,7 +42,7 @@ $settings = $db->query("SELECT * FROM settings")->first();
 
 require_once $abs_us_root.$us_url_root.'usersc/includes/security_headers.php';
 
-if (ipCheckBan()) {
+if (ipCheckBan() && currentPage() != "banned.php") {
     Redirect::to($us_url_root.'usersc/scripts/banned.php');
     exit();
 }

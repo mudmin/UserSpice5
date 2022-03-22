@@ -79,11 +79,11 @@ if (!function_exists('size')) {
   }
 }
 
-//escapes strings and sets character set
+//Pass through to static method in input class
 if (!function_exists('sanitize')) {
   function sanitize($string)
   {
-    return htmlentities($string, ENT_QUOTES, 'UTF-8');
+    return Input::sanitize($string);
   }
 }
 
