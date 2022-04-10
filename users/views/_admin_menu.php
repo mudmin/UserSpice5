@@ -309,11 +309,6 @@ function activeDropdown($View, $dropId, $Area = false){
         </ul>
       </div><!-- /.navbar-collapse -->
     </nav>
-    <div class="nav-footer">
-        <p align="center" >
-          <span style='color:white'><br>&copy;<?=date('Y '); ?><?=$settings->copyright; ?></span>
-        </p>
-    </div>
   </aside><!-- /#left-panel -->
 
   <!-- Left Panel -->
