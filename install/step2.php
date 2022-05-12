@@ -89,7 +89,7 @@
                               </div>
                           </div>
                           <div class="form-group row">
-                              <label for="dbh" class="col-sm-4 control-label">Database Host (required)</label>
+                              <label for="dbh" class="col-sm-4 control-label">Database Host (required) To use a nonstandard port enter it after the host as in 127.0.0.1; port=3309</label>
                               <div class="col-sm-8">
                                 <input required class="form-control" type="text" name="dbh" value="<?php if (!empty($_POST['dbh'])){ print $_POST['dbh']; } ?>" required>
                               </div>
