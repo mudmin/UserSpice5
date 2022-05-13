@@ -34,7 +34,12 @@ $settings = $db->query('SELECT * FROM settings')->first();
 ?>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
 <?php $view = Input::get('view'); ?>
-<?php require_once $abs_us_root.$us_url_root.'users/views/_admin_menu.php';
+<?php
+if (file_exists($abs_us_root.$us_url_root.'usersc/views/_admin_menu.php')) {
+require_once $abs_us_root.$us_url_root.'usersc/views/_admin_menu.php';
+}else{
+require_once $abs_us_root.$us_url_root.'users/views/_admin_menu.php';
+}
 if ($view == '' || $view == 'dashboard') {
     if ((time() - strtotime($settings->announce)) > 10800) {
         $db->update('settings', 1, ['announce' => date('Y-m-d H:i:s')]);

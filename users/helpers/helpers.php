@@ -164,6 +164,7 @@ if (!function_exists('display_successes')) {
 if (!function_exists('email')) {
   function email($to, $subject, $body, $opts = [], $attachment = null)
   {
+   global $abs_us_root,$us_url_root;
     /*you can now pass in
     $opts = array(
     'email' => 'from_email@aol.com',
@@ -215,6 +216,9 @@ if (!function_exists('email')) {
   	$mail->Subject = $subject;
   	$mail->Body    = $body;
     if (!empty($attachment)) $mail->addAttachment($attachment);
+    if(file_exists($abs_us_root.$us_url_root."usersc/scripts/email_function_override.php")){
+      include $abs_us_root.$us_url_root."usersc/scripts/email_function_override.php";
+    }
   	$result = $mail->send();
 
   	return $result;

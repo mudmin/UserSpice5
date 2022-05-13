@@ -1,9 +1,6 @@
 <div class="row">
 
 <!-- Important Info -->
-<?php
-$top = $db->query("SELECT id, logins FROM users ORDER BY logins DESC LIMIT 5")->results();
-?>
 <div class="col-lg-4 col-md-6">
   <aside class="profile-nav alt">
     <section class="card">

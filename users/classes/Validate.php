@@ -50,7 +50,7 @@ class Validate
 					$value = sanitize(trim($value));
 				}
 
-				$length = is_array($value) ? count($value) : mb_strlen($value);
+				$length = is_array($value) ? count($value) : strlen($value);
 				$verb   = is_array($value) ? "are"         : "is";
 
 				if ($rule==='required'  &&  $length==0) {

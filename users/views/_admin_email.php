@@ -89,6 +89,14 @@ if (!empty($_POST)) {
     logger($user->data()->id, 'Email Settings', "Updated from_email from $results->from_email to $from_email.");
   } else {
   }
+  if ($results->authtype != $_POST['authtype']) {
+    $authtype = Input::get('authtype');
+    $fields = ['authtype' => $authtype];
+    $db->update('email', 1, $fields);
+    $successes[] = 'Updated authtype';
+    logger($user->data()->id, 'Email Settings', "Updated authtype from $results->authtype to $authtype.");
+  } else {
+  }
   if ($results->transport != $_POST['transport']) {
     $transport = Input::get('transport');
     $fields = ['transport' => $transport];
@@ -202,6 +210,10 @@ if (!empty($_POST)) {
             <div class="form-group">
               <label>From Email (For Sent Emails):</label>
               <input size='50' class='form-control' type='text' autocomplete="off" name='frome' value='<?=$results->from_email; ?>' />
+            </div>
+            <div class="form-group">
+              <label>PHPMailer Authtype: (Typically CRAM-MD5, LOGIN, PLAIN, or XOAUTH2)</label>
+              <input size='50' class='form-control' type='text' autocomplete="off" name='frome' value='<?=$results->authtype; ?>' />
             </div>
           </div>
         </div>

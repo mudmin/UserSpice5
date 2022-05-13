@@ -102,19 +102,19 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     <tbody>
       <?php foreach ($logs as $l) { ?>
         <tr>
-          <td><?php echo $l->id; ?></td>
-          <td><?php echo $l->ip; ?></td>
-          <td><?php echouser($l->user_id); ?> (<?php echo $l->user_id; ?>)</td>
-          <td><?php echo $l->logdate; ?></td>
-          <td><?php echo $l->logtype; ?></td>
+          <td><?php echo Input::sanitize($l->id); ?></td>
+          <td><?php echo Input::sanitize($l->ip); ?></td>
+          <td><?php echouser(Input::sanitize($l->user_id)); ?> (<?php echo Input::sanitize($l->user_id); ?>)</td>
+          <td><?php echo Input::sanitize($l->logdate); ?></td>
+          <td><?php echo Input::sanitize($l->logtype); ?></td>
           <td>
             <div class="input-group">
               <?php
               if (strlen($l->lognote) > 80) { ?>
-              <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?php echo $l->lognote; ?></textarea>
+              <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?php echo Input::sanitize($l->lognote); ?></textarea>
             <?php
             } else {
-                echo $l->lognote;
+                echo Input::sanitize($l->lognote);
             }
             ?>
             </div>

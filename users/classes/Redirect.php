@@ -35,7 +35,8 @@ class Redirect {
           }else{
             $loggingUserId = $user->data()->id;
           }
-          logger($loggingUserId,"Redirect Diag","From $cp on line $line to $location");
+          $loc = Input::sanitize($location);
+          logger($loggingUserId,"Redirect Diag","From $cp on line $line to $loc");
         }
         }
 
