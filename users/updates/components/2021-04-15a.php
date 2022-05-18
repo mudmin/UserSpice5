@@ -7,10 +7,10 @@
 
 $countE=0;
 
-$fp = fopen($abs_us_root.$us_url_root.'users/init.php', 'a');//opens file in append mode
-fwrite($fp,"\n");
-fwrite($fp, 'require_once $abs_us_root.$us_url_root."users/includes/loader.php";');
-fclose($fp);
+// $fp = fopen($abs_us_root.$us_url_root.'users/init.php', 'a');//opens file in append mode
+// fwrite($fp,"\n");
+// fwrite($fp, 'require_once $abs_us_root.$us_url_root."users/includes/loader.php";');
+// fclose($fp);
 
 if($countE==0) {
   $db->insert('updates',['migration'=>$update]);

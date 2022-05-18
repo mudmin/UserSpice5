@@ -39,3 +39,5 @@ if($user->isLoggedIn()){
 		Redirect::to($us_url_root.'users/verify.php');
 	}
 }
+
+require_once $abs_us_root.$us_url_root."users/includes/loader.php";
