@@ -213,7 +213,7 @@ if (!empty($_POST)) {
             </div>
             <div class="form-group">
               <label>PHPMailer Authtype: (Typically CRAM-MD5, LOGIN, PLAIN, or XOAUTH2)</label>
-              <input size='50' class='form-control' type='text' autocomplete="off" name='frome' value='<?=$results->authtype; ?>' />
+              <input size='50' class='form-control' type='text' autocomplete="off" name='authtype' value='<?=$results->authtype; ?>' />
             </div>
           </div>
         </div>

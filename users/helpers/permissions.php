@@ -366,7 +366,7 @@ if (!function_exists('securePage')) {
                 return true;
             } else {
                 if (!$homepage = Config::get('homepage')) {
-                    $homepage = 'index.php';
+                    $homepage = $us_url_root;
                 }
                 $fields = [
                     'user' => $user->data()->id,
