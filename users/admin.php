@@ -66,9 +66,11 @@ if ($view == '' || $view == 'dashboard') {
     if($settings->site_offline > 0){
     echo "<h3 class='text-right'style='color:red; padding-right:1em;'>Maintenance Mode Active</h3>";
     }
-    if($settings->debug > 0){
-    echo "<h3 class='text-right'style='color:red; padding-right:1em;'>Debug Mode Active</h3>";
-    }
+    if($settings->debug > 0){ ?>
+    <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=debug">
+      <h4 class='text-right'style='color:blue; padding-right:1em;'>Debug Mode Active</h4>
+    </a>
+    <?php }
   switch ($view) {
     case 'access':
     $path = usView('_dashboard_access.php');

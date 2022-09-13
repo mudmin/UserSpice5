@@ -76,4 +76,16 @@ function prepareItemString($menuItem,$user_id){
 	return $itemString;
 
 }
+
+if(!function_exists("parse_menu_hook")){
+	function parse_menu_hook($find,$replace,$string){
+		if(is_null($replace)){
+			$replace = "";
+		}
+		if(is_null($string)){
+			$string = "";
+		}
+	return str_replace($find,$replace,$string);
+	}
+}
 ?>

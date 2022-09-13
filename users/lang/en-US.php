@@ -1,5 +1,6 @@
 <?php
 /*
+Do not put any content above the opening PHP tag
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
 We are going to keep these files in the iso xx-xx format because that will also
 allow us to autoformat numbers on the sites.
@@ -141,8 +142,8 @@ $lang = array_merge($lang,array(
 		"VAL_DB"					=> "Database Error",
 		"VAL_NUM"					=> "must be a number",
 		"VAL_INT"					=> "must be a whole number",
-		"VAL_EMAIL"				=> "must be a valid email address",
-		"VAL_NO_EMAIL"		=> "cannot be an email address",
+		"VAL_EMAIL"				=> "must be a valid email addresss",
+		"VAL_NO_EMAIL"		=> "cannot be an email addresss",
 		"VAL_SERVER"			=> "must belong to a valid server",
 		"VAL_LESS"				=> "must be less than",
 		"VAL_GREAT"				=> "must be greater than",
@@ -409,4 +410,4 @@ $lang = array_merge($lang,array(
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }
-?>
+//do not put a closing php tag here

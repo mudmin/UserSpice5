@@ -14,11 +14,6 @@
 <?php
 
 $menu_title="main";
-/*
-*
-* DANGER - the menu_title is passed in and can be corrupted - great source for injection!!!
-*
-*/
 
 if (!empty($_GET['action'])) {
   $action=Input::get('action');
@@ -133,11 +128,23 @@ Get groups and names
                   <td><p class="oce text-dark" data-id="<?=$item->id?>" data-field="dropdown" data-input="select"><?=($item->dropdown) ? 'Yes' : 'No';?></p></td>
                   <td>
                     <?php
-                    $sep = '';
+                    $_auth_group = "";
                     foreach (fetchGroupsByMenu($item->id) as $g) {
-                      #var_dump($g);
-                      echo $g->group_id.",";
+                      switch ($g->group_id) {
+                      case '0':
+                      	$_auth_group = "Everyone";
+                      break;
+                      default:
+                      $_auth_group .= $db->findById($g->group_id,'permissions')->first()->name;
+                      $_auth_group .= ",";
+                      }
 
+
+                    }
+                    if($_auth_group == "Everyone"){
+                      echo $_auth_group;
+                    }else{
+                      echo substr($_auth_group,0,-1);
                     }
                     ?>
                   </td>

@@ -89,6 +89,12 @@ if (!empty($_POST)) {
 
         if ($validation->passed()) {
             $form_valid = true;
+            if (isset($_SESSION['us_lang'])){
+               $newLang = $_SESSION['us_lang'];
+             } else {
+              $newLang = $settings->default_language;
+             }
+             
             try {
                 // echo "Trying to create user";
                 $fields = [
@@ -104,6 +110,7 @@ if (!empty($_POST)) {
             'force_pr' => $settings->force_pr,
             'vericode_expiry' => $vericode_expiry,
             'oauth_tos_accepted' => true,
+            'language' => $newLang,
           ];
 
                 $activeCheck = $db->query('SELECT active FROM users');
@@ -151,7 +158,7 @@ if (!empty($_POST)) {
   $random_password = random_password();
 
   foreach ($validation->errors() as $error) {
-      $errors[] = $error;
+      $errors[] = $error[0];
   }
   ?>
 
@@ -280,7 +287,7 @@ if (!empty($_POST)) {
               includeHook($hooks, 'form');
 
               ?>
-              <label><input type="checkbox" name="sendEmail" id="sendEmail"/> Send Email?</label>
+              <label><input type="checkbox" name="sendEmail" id="sendEmail" /> Send Email?</label>
             </div>
             <div class="modal-footer">
                 <input type="hidden" name="csrf" value="<?php echo Token::generate(); ?>" />

@@ -243,8 +243,13 @@ function activeDropdown($View, $dropId, $Area = false){
           <li class="menu-item-has-children dropdown <?=activeDropdown($view, 'tools')[0];?>">
             <a class="menu_item" id="tools" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="<?=activeDropdown($view, 'tools')[1];?>"> <i class="menu-icon fa fa-wrench"></i><?=lang("BE_TOOLS")?></a>
             <ul class="sub-menu children dropdown-menu <?=activeDropdown($view, 'tools')[0];?>">
-              <?php if(checkAccess('view','backup')){?> <li <?=($view == 'backup') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-floppy-o"></i><a class="menu_item" id="tools_backups" href="admin.php?view=backup"><?=lang("BE_BACKUP")?></a></li><?php } ?>
-              <?php if(in_array($user->data()->id,$master_account)){?> <li <?=($view == 'bugs') ? 'class="active"' : '' ;?>><i class=" menu-icon fa fa-bug"></i><a class="menu_item" id="tools_bug_reporter" href="admin.php?view=bugs"><?=lang("ACP_MENU_TOOLS_BUG_REPORTER")?></a></li><?php } ?>
+              <?php
+              if(file_exists($abs_us_root.$us_url_root."users/views/_admin_tools_backup.php")
+              && checkAccess('view','backup')){ ?> <li <?=($view == 'backup') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-floppy-o"></i><a class="menu_item" id="tools_backups" href="admin.php?view=backup"><?=lang("BE_BACKUP")?></a></li>
+              <?php }
+              ?>
+              <?php if(in_array($user->data()->id,$master_account)){?> <li <?=($view == 'bugs') ? 'class="active"' : '' ;?>><i class=" menu-icon fa fa-bug"></i><a class="menu_item" id="tools_bug_reporter" href="admin.php?view=bugs"><?=lang("ACP_MENU_TOOLS_BUG_REPORTER")?></a></li>
+              <?php } ?>
               <?php if(checkAccess('view','cron')){?> <li <?=($view == 'cron') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-terminal"></i><a class="cron_manager" id="tools_cron" href="admin.php?view=cron"><?=lang("BE_CRON")?></a></li><?php } ?>
               <?php if(checkAccess('view','ip')){?> <li <?=($view == 'ip') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-warning"></i><a class="menu_item" id="tools_ip_manager" href="admin.php?view=ip"><?=lang("BE_IP")?></a></li><?php } ?>
               <?php if(checkAccess('view','logs')){?> <li <?=($view == 'logs') ? 'class="active"' : '' ;?>><i class="menu-icon fa fa-list-ol"></i><a class="menu_item" id="tools_system_logs" href="admin.php?view=logs"><?=lang("ACP_MENU_TOOLS_SYSTEM_LOGS")?></a></li><?php } ?>

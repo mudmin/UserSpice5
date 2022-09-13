@@ -67,10 +67,6 @@ class Input {
 		}else{
 			if(is_bool($item)){
 				return $item;
-			}elseif(is_numeric($item)){
-				$item = trim(htmlentities($item, ENT_QUOTES, 'UTF-8'));
-				$item = $item + 0;
-				return $item;
 			}else{
 			return trim(htmlentities($item, ENT_QUOTES, 'UTF-8'));
 		}

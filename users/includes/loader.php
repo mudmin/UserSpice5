@@ -137,15 +137,27 @@ if(!$user->isLoggedIn()){
 }
 
 if ($settings->force_ssl==1){
-	if(!isset($_SERVER['HTTP_HOST'])){
-		die("HTTP_HOST must be set due to force https rule");
+	$isSecure = false;
+
+	if(
+		isset($_SERVER['HTTPS'])
+		&& $_SERVER['HTTPS'] == 'on')
+		{
+		$isSecure = true;
+	}elseif (
+		!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])
+		&& $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'
+		|| !empty($_SERVER['HTTP_X_FORWARDED_SSL'])
+		&& $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+		$isSecure = true;
 	}
-	if (!isset($_SERVER['HTTPS']) || !$_SERVER['HTTPS']) {
+		if ($isSecure != true) {
 		// if request is not secure, redirect to secure url
 		$url = 'https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 		Redirect::to($url);
 		exit;
 	}
+
 }
 
 // Get html lang attribute, default 'en'
