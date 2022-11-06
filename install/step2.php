@@ -131,6 +131,7 @@ $go = 0;
 			<?php
 			//PHP Logic Goes Here
 			if (!empty($_POST)){
+
 				$fh=fopen($config_file , "a+");
 
 				fwrite($fh ,"");
@@ -156,6 +157,7 @@ $go = 0;
 				$dbFail = 0;
 				//If Submitted
 				if (!empty($_POST['submit'])) {
+
 					$timezone_syn='$timezone_string = \'';
 					$tz=$_POST['timezone'];
 					fwrite($fh ,
@@ -176,26 +178,23 @@ $go = 0;
 				redirect("step3.php");
 			}
 
-			if(!empty($_POST['tryToCreate'])){
-				try {
-					$dsn = "mysql:host=$dbh;charset=utf8";
-					$opt = array(
-						PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-						PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-					);
-					$pdo = new PDO($dsn, $dbu, $dbp, $opt) or die('could not connect');
-					$pdo->exec("CREATE DATABASE `$dbn`;
-						CREATE USER '$dbu'@'$dbh' IDENTIFIED BY '$dbp';
-						GRANT ALL ON `$dbn`.* TO '$dbu'@'$dbh';
-						FLUSH PRIVILEGES;")
-						or die(print_r($pdo->errorInfo(), true));
-
-					} catch (PDOException $e) {
-						//I'm commenting this out because the script tries create a user and will fail if the user exists, but that is fine. We'll  stick with the if don't see a bunch of errors
-					}
-				}
-				//If Testing
 				if (!empty($_POST['test'])) {
+					try {
+						$dsn = "mysql:host=$dbh;charset=utf8";
+						$opt = array(
+							PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+							PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+						);
+						$pdo = new PDO($dsn, $dbu, $dbp, $opt) or die('could not connect');
+						$pdo->exec("CREATE DATABASE `$dbn`;
+							CREATE USER '$dbu'@'$dbh' IDENTIFIED BY '$dbp';
+							GRANT ALL ON `$dbn`.* TO '$dbu'@'$dbh';
+							FLUSH PRIVILEGES;")
+							or die(print_r($pdo->errorInfo(), true));
+
+						} catch (PDOException $e) {
+							//I'm commenting this out because the script tries create a user and will fail if the user exists, but that is fine. We'll  stick with the if don't see a bunch of errors
+						}
 					$success = true;
 					try {
 						$dsn = "mysql:host=$dbh;charset=utf8";
