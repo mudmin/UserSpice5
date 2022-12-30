@@ -1,5 +1,6 @@
 <?php
 /*
+Do not put any content above the opening PHP tag
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
 We are going to keep these files in the iso xx-xx format because that will also
 allow us to autoformat numbers on the sites.
@@ -302,7 +303,7 @@ $lang = array_merge($lang,array(
 		"EML_EML"				=> "Z Vašeho uživatelského účtu jsme zaregistrovali požadavek na změnu Vašeho emailu.",
 		"EML_VER_EML"		=> "Díky za registraci. Až si ověříte emailovou adresu, budete se moci přihlásit! Pro ověření Vaší emailové adresy klikněte na odkaz níže.",
         "EML_INTRO"         => "těší nás, že chcete využívat mapu inspirativních škol a případně se i podílet na jejím rozvoji. Budeme rádi za sdílení jakýchkoliv podnětů či zaslání zpětné vazby na email ",
-		"EML_SUBJ_WELCOME" => "Vítejte na webu ", 
+		"EML_SUBJ_WELCOME" => "Vítejte na webu ",
 		"EML_SIGNATURE"		=> "Tým mapy škol",
     ));
 
@@ -415,4 +416,4 @@ $lang = array_merge($lang,array(
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }
-?>
+ //do not put a closing php tag here

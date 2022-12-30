@@ -50,7 +50,7 @@ if(count(get_included_files()) ==1) die(); //Direct Access Not Permitted
 if(isset($message) && $message != ''){  ?>
 <div class="sufee-alert alert with-close alert-<?=$class?> alert-dismissible fade show">
   <span class="badge badge-pill badge-<?=$class?>"><?php echo htmlspecialchars($title);?></span> <a href="<?php echo htmlspecialchars($link);?>"><?php echo htmlspecialchars($message);?></a>
-  <button type="button" class="close dismiss-announcement" data-dismiss="alert"
+  <button type="button" class="close dismiss-announcement" data-dismiss="alert" data-bs-dismiss="alert"
   data-dis="<?=$dis?>"
   data-ignore="<?=$ignore?>"
   data-title="<?=$title?>"
@@ -72,11 +72,12 @@ $(document).ready(function() {
 
     var formData = {
       'dismissed' 					: $(this).attr("data-dis"),
-      'link' 					: $(this).attr("data-link"),
-      'title' 					: $(this).attr("data-title"),
-      'class' 					: $(this).attr("data-class"),
-      'message' 					: $(this).attr("data-message"),
-      'ignore' 					: $(this).attr("data-ignore")
+      'link' 					      : $(this).attr("data-link"),
+      'title' 					    : $(this).attr("data-title"),
+      'class' 					    : $(this).attr("data-class"),
+      'message' 				  	: $(this).attr("data-message"),
+      'ignore' 					    : $(this).attr("data-ignore"),
+      'token'               : "<?=Token::generate()?>",
     };
     //
     $.ajax({

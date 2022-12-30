@@ -1,4 +1,30 @@
 <?php
+function parseMenuLabel($string){
+	global $lang,$user,$settings;
+
+	if(substr($string, 0, 2) != "{{"){
+		$newString =  $string;
+	}elseif($string == "{{LOGGED_IN_USERNAME}}"){
+			if(isset($user) && $user->isLoggedIn()){
+
+			$newString = echouser($user->data()->id,$settings->echouser,true);
+
+		}else{
+			$newString = "";
+		}
+		return $newString;
+	}else{
+		$newString = str_replace(['{', '}'], '', $string);
+		if(array_key_exists($newString,$lang)){
+			return $lang[$newString];
+		}else{
+			return $newString;
+		}
+
+	}
+	return $newString;
+}
+
 function _assert( $expr, $msg){ if( !$expr ) print "<br/><b>ASSERTION FAIL: </b>{$msg}<br>";  }
 
 function prepareMenuTree($menuResults){
@@ -88,4 +114,111 @@ if(!function_exists("parse_menu_hook")){
 	return str_replace($find,$replace,$string);
 	}
 }
+
+if(!function_exists("migrateUSMainMenu")){
+	function migrateUSMainMenu($truncate = false){
+  global $db;
+
+  if($truncate){
+    $db->query("TRUNCATE TABLE us_menu_items");
+  }else{
+		$db->query("DELETE FROM us_menu_items WHERE menu = 1");
+	}
+		$db->query("DELETE FROM us_menu_perms WHERE menu = 1");
+
+  $old = $db->query("SELECT * FROM menus ORDER BY parent")->results();
+  $oldIds = [];
+  $newIds = [];
+  $counter = 0;
+  $labels = [
+    "{{home}}"=>"{{MENU_HOME}}",
+    "{{username}}" =>"{{LOGGED_IN_USERNAME}}",
+    "{{help}}" =>"{{MENU_HELP}}",
+    "{{register}}" =>"{{SIGNUP_TEXT}}",
+    "{{login}}" =>"{{SIGNIN_BUTTONTEXT}}",
+    "{{account}}" =>"{{MENU_ACCOUNT}}",
+    "{{dashboard}}" =>"{{MENU_DASH}}",
+    "{{users}}" =>"{{MENU_USER_MGR}}",
+    "{{perms}}" =>"{{MENU_PERM_MGR}}",
+    "{{pages}}" =>"{{MENU_PAGE_MGR}}",
+    "{{logs}}" =>"{{MENU_LOGS_MGR}}",
+    "{{logout}}" =>"{{MENU_LOGOUT}}",
+    "{{forgot}}" =>"{{SIGNIN_FORGOTPASS}}",
+    "{{resend}}" =>"{{VER_RESEND}}",
+  ];
+
+  foreach($old as $o){
+
+    $fields = [
+      "menu"=>1,
+      "label"=>$o->label,
+      "link"=>$o->link,
+      "icon_class"=>str_replace("fa-fw ","",$o->icon_class),
+      "link_target"=>"_self",
+      "display_order"=>$o->display_order,
+      "parent"=>$o->parent,
+    ];
+
+    if($o->dropdown == 0){
+      $fields['type'] = "link";
+    }else{
+      $fields['type'] = "dropdown";
+    }
+
+    if($o->label == "{{hr}}"){
+      $fields['type'] = "separator";
+      $fields['label'] = "";
+    }
+
+    //switch to standard userspice multilanguage
+    if(array_key_exists($fields['label'],$labels)){
+      $fields['label'] = $labels[$fields['label']];
+    }
+
+    $db->insert("us_menu_items",$fields);
+    // dump("Item insert " . $db->errorString());
+    $id = $db->lastId();
+    $oldIds[$counter] = $o->id;
+    $newIds[$counter] = $id;
+    $counter++;
+
+    $perms = $db->query("SELECT DISTINCT group_id FROM groups_menus WHERE menu_id = ?",[$o->id])->results();
+    $newPerms = "[";
+    foreach($perms as $p){
+      $newPerms .= $p->group_id .",";
+    }
+    $newPerms = rtrim($newPerms, ',');
+    $newPerms .= "]";
+    if($o->logged_in == 0 && ($newPerms == "[]" || $newPerms == "[0]")){
+      $newPerms = "[0]";
+    }
+    if($o->logged_in == 1 && $newPerms == "[0]"){
+      $newPerms = "[1]";
+    }
+    $db->update("us_menu_items",$id,["permissions"=>$newPerms]);
+    // dump("Perm Update " . $db->errorString());
+  }
+
+
+  $new = $db->query("SELECT * FROM us_menu_items WHERE menu = 1")->results();
+  foreach($new as $n){
+    $newParent = 0;
+
+    if(!$n->parent == "-1"){
+      $newParent = 0;
+    }else{
+      foreach($oldIds as $k=>$v){
+        if($n->parent == $v){
+          $newParent = $newIds[$k];
+          break;
+        }
+      }
+    }
+
+    $db->update("us_menu_items",$n->id,['parent'=>$newParent]);
+  }
+
+}
+}
+
 ?>

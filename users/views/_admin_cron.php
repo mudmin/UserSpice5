@@ -1,16 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-        <li>Tools</li>
-        <li>Cron Jobs</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
 $errors = $successes = [];
 $form_valid=TRUE;
@@ -75,7 +62,7 @@ if (!empty($_POST)) {
     <div class="card">
       <div class="card-body">
     <div class="float-right mb-2">
-      <div class="btn-group"><button class="btn btn-info" data-toggle="modal" data-target="#addcron"><i class="fa fa-plus"></i> add</button></div>
+      <div class="btn-group"><button class="btn btn-primary" data-toggle="modal" data-bs-toggle="modal" data-target="#addcron" data-bs-target="#addcron"><i class="fa fa-plus"></i> add</button></div>
     </div>
         <table class="table table-bordered">
             <tr>
@@ -139,8 +126,8 @@ if (!empty($_POST)) {
                 <!-- Modal content-->
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h4 class="modal-title">Cron Addition</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">New Cron</h4>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">&times;</button>
                   </div>
                   <form class="form-signup" action="" method="POST">
                   <div class="modal-body">
@@ -153,11 +140,11 @@ if (!empty($_POST)) {
                         <br />
                       </div>
                       <div class="modal-footer">
-                        <div class="btn-group">
+
                           <input type="hidden" name="csrf" value="<?=Token::generate();?>" />
-                          <input class='btn btn-info mr-2' type='submit' name="addCron" value='Add Cron' class='submit' />
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
+                          <input class='btn btn-primary mr-2' type='submit' name="addCron" value='Add Cron' />
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+
                         </div>
                         </form>
                       </div>
@@ -188,22 +175,24 @@ if (!empty($_POST)) {
               }
 
               $(document).ready(function() {
-                var options = {url:'parsers/cron_post.php'};
+                var options = {url:'parsers/cron_post.php', token: '<?=Token::generate()?>'};
               $('.txt').oneClickEdit(options,success);
 
 
               var active = {
                   url:'parsers/cron_post.php',
-                  selectOptions : {0:'Inactive', 1:'Active'}
+                  selectOptions : {0:'Inactive', 1:'Active'},
+                  token: '<?=Token::generate()?>'
+
                 }
                 $('.cronactive').oneClickEdit(active,success);
 
-
-                $( "#deleteCron" ).click(function() { //use event delegation
+                $( document ).on("click","#deleteCron", function() {
                   var deleteMe = $(this).attr("data-value");;
                   var formData = {
                     'value' 				: deleteMe,
-                    'field'         : 'deleteMe'
+                    'field'         : 'deleteMe',
+                    'token'         : '<?=Token::generate()?>',
                   };
 
                   $.ajax({

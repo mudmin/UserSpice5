@@ -21,11 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 
+//this is an event hook (v5.3.8+) to allow hashing of emails in the db
+
+
 $query = $db->query("SELECT * FROM email");
 $results = $query->first();
 $act = $results->email_act;
 $msg = lang("ERR_EM_VER");
-if($act!=1) Redirect::to($us_url_root.'index.php?err='.$msg);
+
+if($act!=1){
+  usError($msg);
+  Redirect::to($us_url_root.'index.php');
+}
+
 if($user->isLoggedIn()) $user->logout();
 
 $token = Input::get('csrf');
@@ -39,23 +47,39 @@ $email_sent=FALSE;
 
 $errors = array();
 if(Input::exists('post')){
-    $email = Input::get('email');
-    $fuser = new User($email);
-    $check = $db->query("SELECT id FROM users WHERE email = ? AND email_verified = 1",[$email])->count();
-    $validate = new Validate();
-    $validation = $validate->check($_POST,array(
-    'email' => array(
-      'display' => lang("GEN_EMAIL"),
-      'valid_email' => true,
-      'required' => true,
-    ),
-    ));
+
+    $hooks = getMyHooks(['page'=>'verifyResendSubmit']);
+    includeHook($hooks,'body');
+
+    if(!isset($hookData['overrideEmailVerification'])){
+      $email = Input::get('email');
+      $fuser = new User($email);
+      $check = $db->query("SELECT id FROM users WHERE email = ? AND email_verified = 1",[$email])->count();
+      $validate = new Validate();
+      $validation = $validate->check($_POST,array(
+      'email' => array(
+        'display' => lang("GEN_EMAIL"),
+        'valid_email' => true,
+        'required' => true,
+      ),
+      ));
+    }else{
+      $fields = ["validation","fuser","check","email"];
+      foreach($fields as $f){
+        if(isset($hookData[$f])){
+          $$f = $hookData[$f];
+        }
+      }
+
+    }
+
     if($validation->passed()){ //if email is valid, do this
 
         if($fuser->exists()){
           if($check > 0){
             $string = lang("VER_SUC");
-            Redirect::to($us_url_root."users/login.php?err=".$string);
+            usSuccess($string);
+            Redirect::to($us_url_root."users/login.php");
           }
           $vericode=randomstring(15);
           $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->join_vericode_expiry hours",strtotime(date("Y-m-d H:i:s"))));
@@ -83,25 +107,10 @@ if(Input::exists('post')){
     }
 }
 
-?>
-
-<div id="page-wrapper">
-<div class="container">
-
-<?php
-
 if ($email_sent){
     require $abs_us_root.$us_url_root.'users/views/_verify_resend_success.php';
 }else{
     require $abs_us_root.$us_url_root.'users/views/_verify_resend.php';
 }
 
-?>
-</div>
-</div>
-
-<?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; // the final html footer copyright row + the external js calls ?>
-
-  <!-- Place any per-page javascript here -->
-
-<?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; // currently just the closing /body and /html ?>
+require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

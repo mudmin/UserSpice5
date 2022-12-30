@@ -27,7 +27,7 @@ universally. Note that you can add your own loader content
 in usersc/includes/loader.php
 */
 $us_loader_loaded = true;
-
+define("INSTANCE",Config::get('session/session_name'));
 //prevent script tags from being parsed in err and msg messages
 //required in 5.3.2 or later
 if(isset($_GET['err'])){

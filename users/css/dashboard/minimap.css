@@ -1,0 +1,23 @@
+.minimap {
+  font-size: 13px;
+}
+.minimap ul {
+  list-style-type: none;
+}
+.minimap ul {
+  padding-left: 18px;
+  border-left: 1px solid #ddd;
+}
+.minimap ul:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.minimap ul li a {
+  text-decoration: none;
+}
+
+.minimap ul li a.active {
+  text-decoration: underline;
+  font-weight: bold;
+}

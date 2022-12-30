@@ -1,19 +1,4 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-        <li>Manage</li>
-        <li><a href="<?=$us_url_root?>users/admin.php?view=nav">Navigation</a></li>
-        <li class="active">Nav Item</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
-
 $errors = [];
 $successes = [];
 
@@ -34,6 +19,10 @@ if (!$item) {
 }
 
 if (Input::exists('post')) {
+  $token = $_POST['csrf'];
+  if(!Token::check($token)){
+    include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
+  }
   # Update the db with the new values
   $fields=array(
     'menu_title'=>$item->menu_title,
@@ -52,8 +41,7 @@ if (Input::exists('post')) {
     logger($user->data()->id,"Menu Manager","Updated $menuId");
     usSuccess("Menu item updated");
     Redirect::to($us_url_root.'users/admin.php?view=nav');
-  }
-  else {
+  }  else {
     usError("Unable to update menu item");
     Redirect::to($us_url_root.'users/admin.php?view=nav');
   }
@@ -83,7 +71,7 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
 <div class="content mt-3">
   <h2>Edit Nav Item: <?=$item->link?></h2>
   <form name='edit_menu_item' action='' method='post'>
-
+<?=tokenHere();?>
     <div class="form-group">
       <label>Parent</label>
       <select class="form-control" name="parent">

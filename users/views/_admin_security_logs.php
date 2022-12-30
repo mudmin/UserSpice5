@@ -1,16 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-        <li>Tools</li>
-        <li class="active">Security Logs</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
 $errors = [];
 $successes = [];
@@ -35,7 +22,7 @@ tfoot input {
     <div class="col-12 col-sm-5">
       <h2 class="mb-3">Security Logs</h2>
     </div>
-    <div class="col-12 col-sm-7 text-right">
+    <div class="col-12 col-sm-7 text-end">
       <?php if($w != ""){ ?>
         <h4><span style="color:red">Currently Ignoring Whitelisted IPs</h4>
         <a href="admin.php?view=security_logs" class="btn btn-primary">Show All</a>
@@ -56,11 +43,11 @@ tfoot input {
       <table id="seclogstable" class='table table-hover table-striped table-list-search display'>
         <thead>
           <tr>
-            <th scope="col"class="text-left">Log ID</th>
-            <th scope="col"class="text-left">User</th>
-            <th scope="col"class="text-left">Page Attempted</th>
-            <th scope="col"class="text-left">IP</th>
-            <th scope="col"class="text-left">Timestamp</th>
+            <th scope="col"class="text-start">Log ID</th>
+            <th scope="col"class="text-start">User</th>
+            <th scope="col"class="text-start">Page Attempted</th>
+            <th scope="col"class="text-start">IP</th>
+            <th scope="col"class="text-start">Timestamp</th>
           </tr>
         </thead>
         <tbody>

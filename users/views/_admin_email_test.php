@@ -1,18 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-        <li>Settings</li>
-        <li><a href="<?=$us_url_root?>users/admin.php?view=email">Email</a></li>
-        <li class="active">Email Test</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
-
 <div class="content mt-3">
   <h2>Email Test</h2>
   It's a good idea to test to make sure you can actually receive system emails before forcing your users to verify theirs. <br><br>
@@ -26,6 +11,10 @@
   <br>
   <?php
   if (!empty($_POST)){
+    $token = $_POST['csrf'];
+    if(!Token::check($token)){
+      include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
+    }
     $to = $_POST['test_acct'];
     $subject = 'Testing Your Email Settings!';
     $body = 'This is the body of your test email';
@@ -40,6 +29,7 @@
   ?>
 
   <form class="" name="test_email" action="" method="post">
+    <?=tokenHere();?>
     <label>Send test to (Ideally different than your from address):
       <input required size='50' class='form-control' type='text' name='test_acct' value='' /></label>
 

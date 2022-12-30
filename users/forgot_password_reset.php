@@ -85,6 +85,8 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 			),$ruser->data()->id);
 			$reset_password_success=TRUE;
 			logger($ruser->data()->id,"User","Reset password.");
+      $eventhooks =  getMyHooks(['page'=>'passwordResetSuccess']);
+      includeHook($eventhooks,'body');
 			if($settings->session_manager==1) {
 				$passwordResetKillSessions=passwordResetKillSessions();
 				if(is_numeric($passwordResetKillSessions)) {
@@ -101,6 +103,8 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 		}else{
 			$reset_password_success=FALSE;
 			$errors = $validation->errors();
+      $eventhooks =  getMyHooks(['page'=>'passwordResetFail']);
+      includeHook($eventhooks,'body');
 		}
 	}
 	if ($ruser->exists() && $ruser->data()->vericode == $vericode) {
@@ -109,12 +113,6 @@ if(Input::get('reset') == 1){ //$_GET['reset'] is set when clicking the link in 
 	}
 }
 
-?>
-
-<div id="page-wrapper">
-<div class="container">
-
-<?php
 if ((Input::get('reset') == 1)){
 	if($reset_password_success){
 		require $abs_us_root.$us_url_root.'users/views/_forgot_password_reset_success.php';
@@ -126,13 +124,5 @@ if ((Input::get('reset') == 1)){
 }else{
 	require $abs_us_root.$us_url_root.'users/views/_forgot_password_reset_error.php';
 }
-?>
 
-</div><!-- /.container-fluid -->
-</div><!-- /#page-wrapper -->
-
-<?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; // the final html footer copyright row + the external js calls ?>
-
-<!-- Place any per-page javascript here -->
-
-<?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; // currently just the closing /body and /html ?>
+require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

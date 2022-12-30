@@ -22,16 +22,19 @@ ini_set('memory_limit', '1024M');
 ?>
 <?php
 require_once '../users/init.php';
+require_once $abs_us_root . $us_url_root . 'usersc/includes/dashboard_overrides.php';
+require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if(ipCheckBan()){Redirect::to($us_url_root.'usersc/scripts/banned.php');die();}
 include $abs_us_root.$us_url_root.'users/includes/dashboard_language.php';
-$db = DB::getInstance();
+
 if (!securePage($_SERVER['PHP_SELF'])) {
     die();
 }
 
 $settings = $db->query('SELECT * FROM settings')->first();
-
+$chartsLoaded = "true"; //widget signal not to reload js
 ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php'; ?>
 <?php $view = Input::get('view'); ?>
 <?php
@@ -48,14 +51,78 @@ if ($view == '' || $view == 'dashboard') {
 }
 
 ?>
+<style media="screen">
+.grippy{
+  cursor:grab;
+}
 
-<div id="right-panel" class="right-panel">
+.dashboard-icon-label{
+  margin-top: .3rem;
+  font-size: .75rem;
+  line-height: .75rem;
+}
+
+.font-info{
+  color: var(--bs-link-color);
+  padding-left:.25rem;
+}
+.dash-icon{
+  height:2.8rem;
+  max-width:3.2rem;
+}
+
+.dashboard-icon-label{
+  line-height:1rem;
+}
+
+.collapseCard{
+  cursor:pointer;
+  padding-left:.5rem;
+  padding-right:.5rem;
+}
+
+.card-title-text{
+  font-weight:650;
+}
+
+.dash-card {
+   width: 48%;
+   margin: 1%;
+   padding-left: 0px;
+   padding-right: 0px;
+}
+@media only screen and (max-width: 960px) {
+   .dash-card {
+      width: 100%;
+      margin: 0%;
+   }
+}
+
+form label, th {
+  font-weight:600;
+}
+
+p { margin: 0em; }
+.form-group{
+  margin-bottom:1rem;
+}
+
+.hideMe{
+  display:none;
+}
+
+.offset-switch{
+  margin-top:.5rem;
+}
+.offset-circle{
+  margin-bottom:.5rem;
+}
+</style>
+
 
   <div id="messages" class="sufee-alert alert with-close alert-primary alert-dismissible fade show d-none">
     <span id="message"></span>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
+    <button type="button" class="close btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
   <?php require_once $abs_us_root.$us_url_root.'users/views/_admin_header.php';
 
@@ -67,9 +134,9 @@ if ($view == '' || $view == 'dashboard') {
     echo "<h3 class='text-right'style='color:red; padding-right:1em;'>Maintenance Mode Active</h3>";
     }
     if($settings->debug > 0){ ?>
-    <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=debug">
-      <h4 class='text-right'style='color:blue; padding-right:1em;'>Debug Mode Active</h4>
-    </a>
+      <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=debug">
+        <h4 class='text-right'style='color:blue; padding-right:1em;'>Debug Mode Active</h4>
+      </a>
     <?php }
   switch ($view) {
     case 'access':
@@ -112,7 +179,8 @@ if ($view == '' || $view == 'dashboard') {
     if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_panels.php')) {
         include $abs_us_root.$us_url_root.'usersc/includes/admin_panels.php';
     } else {
-        Redirect::to('admin.php?view=stats&err=Legacy+files+not+found');
+        usError("Legacy files not found");
+        Redirect::to('admin.php?view=stats');
     }
     break;
     case 'logs':
@@ -123,6 +191,26 @@ if ($view == '' || $view == 'dashboard') {
     $path = usView('_admin_nav.php');
     include $path;
     break;
+    case 'menus':
+      $path = usView('_admin_menus.php');
+      include $path;
+      break;
+    case 'menu_form':
+      $path = usView('_admin_menu_form.php');
+      include $path;
+      break;
+    case 'edit_menu':
+      $path = usView('_admin_menu_edit.php');
+      include $path;
+      break;
+    case 'delete_menu':
+      $path = usView('_admin_menu_delete.php');
+      include $path;
+      break;
+    case 'delete_menu_item':
+      $path = usView('_admin_menu_delete_item.php');
+      include $path;
+      break;
     case 'nav_item':
     $path = usView('_admin_nav_item.php');
     include $path;
@@ -136,7 +224,7 @@ if ($view == '' || $view == 'dashboard') {
     include $path;
     break;
     case 'permission':
-    $path = usView('_admin_permission.php');
+    $path = usView('_admin_permissions.php'); //compatibility
     include $path;
     break;
     case 'permissions':
@@ -231,6 +319,12 @@ if(file_exists( $abs_us_root . $us_url_root . 'usersc/includes/system_messages_f
 $(document).ready(function() {
 $('[data-toggle="popover"]').popover();
 
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+
   function messages(data) {
     console.log(data.msg);
     console.log("messages found");
@@ -248,7 +342,7 @@ $('[data-toggle="popover"]').popover();
 
   }
 
-  $( ".toggle" ).change(function() { //use event delegation
+  $( ".toggle" ).change(function() {
     var value = $(this).prop("checked");
     $(this).prop("checked",value);
 
@@ -259,6 +353,7 @@ $('[data-toggle="popover"]').popover();
       'field'					: field,
       'desc'					: desc,
       'type'          : 'toggle',
+      'token'         : "<?=Token::generate()?>",
     };
 
     $.ajax({
@@ -276,7 +371,8 @@ $('[data-toggle="popover"]').popover();
   $("#force_user_pr").click(function(data) {
     console.log("clicked");
     var formData = {
-      'type'								: 'resetPW'
+      'type'								: 'resetPW',
+      'token'         : "<?=Token::generate()?>",
     };
     $.ajax({
       type 		: 'POST',
@@ -290,7 +386,7 @@ $('[data-toggle="popover"]').popover();
     })
   });
 
-  $( ".ajxnum" ).change(function() { //use event delegation
+  $( ".ajxnum" ).change(function() {
     var value = $(this).val();
     // console.log(value);
 
@@ -301,6 +397,7 @@ $('[data-toggle="popover"]').popover();
       'field'					: field,
       'desc'					: desc,
       'type'          : 'num',
+      'token'         : "<?=Token::generate()?>",
     };
 
     $.ajax({
@@ -315,7 +412,7 @@ $('[data-toggle="popover"]').popover();
     })
   });
 
-  $( ".ajxtxt" ).change(function() { //use event delegation
+  $( ".ajxtxt" ).change(function() {
     var value = $(this).val();
     console.log(value);
 
@@ -326,6 +423,7 @@ $('[data-toggle="popover"]').popover();
       'field'					: field,
       'desc'					: desc,
       'type'          : 'txt',
+      'token'         : "<?=Token::generate()?>",
     };
 
     $.ajax({
@@ -344,6 +442,20 @@ $('[data-toggle="popover"]').popover();
     })
   });
 
+
+  // hide cards
+  $('.collapseCard').on('click', function() {
+    let card = $(this).attr('data-card');
+    $('#'+card+'-card-body').toggle();
+    if($('#'+card+'-card-body').is(':visible')){
+      $('#'+card+'-caret').html(`<i class="fa fa-caret-down"></i>`);
+      localStorage.setItem("<?=INSTANCE?>"+card, "true");
+    }else{
+      $('#'+card+'-caret').html(`<i class="fa fa-caret-right"></i>`);
+      localStorage.setItem("<?=INSTANCE?>"+card, "false");
+    }
+
+  });
   // Toggle menu
   $('#menuToggle').on('click', function() {
     $('body').toggleClass('open');
@@ -360,13 +472,20 @@ $('[data-toggle="popover"]').popover();
   });
 });
 </script>
+
+<script type="text/javascript" src="<?=$us_url_root?>users/js/pagination/datatables.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+  $('.paginate').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, 250, 500]], "aaSorting": []});
+});
+
+</script>
 <?php foreach ($usplugins as $k => $v) {
         if ($v == 1) {
             if (file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/footer.php')) {
                 include $abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/footer.php';
             }
         }
-    }?>
+    }
 
-</body>
-</html>
+require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

@@ -160,6 +160,9 @@ $go = 0;
 
 					$timezone_syn='$timezone_string = \'';
 					$tz=$_POST['timezone'];
+					if($tz == ""){
+						$tz = 'America/New_York';
+					}
 					fwrite($fh ,
 					$dbh_syn . $dbh . "; port=" . $port . $end . PHP_EOL .
 					$dbu_syn . $dbu . $end . PHP_EOL .

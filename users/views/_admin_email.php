@@ -1,16 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
-        <li>Settings</li>
-        <li class="active">Email</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
 $query = $db->query('SELECT * FROM email');
 $results = $query->first();
@@ -234,8 +221,8 @@ if (!empty($_POST)) {
               </select>
             </div>
             <div class="form-group">
-              <label>Email Debugging Level <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="0=Off, 1=Client Messages, 2=Normal Debug, 3=More Verbose, 4=Extremely Verbose.
-                Debugging should be off in production projects for security reasons"><i class="fa fa-question-circle"></i></a></label>
+              <label>Email Debugging Level <a href="#!" tabindex="-1"  data-trigger="focus" data-bs-trigger="focus" class="nounderline"  title="0=Off, 1=Client Messages, 2=Normal Debug, 3=More Verbose, 4=Extremely Verbose.
+                Debugging should be off in production projects for security reasons"><i class="fa fa-question-circle offset-circle"></i></a></label>
                 <select class="form-control" width="100%" name="debug_level">
                   <option value="<?=$results->debug_level; ?>"><?=$results->debug_level; ?></option>
                   <option value="0">0</option>
@@ -246,7 +233,7 @@ if (!empty($_POST)) {
                 </select>
               </div>
               <div class="form-group">
-                <label>Use isSMTP Feature <a href="#!" tabindex="-1" title="Note" data-trigger="focus" class="nounderline" data-toggle="popover" data-content="Use this if your email keeps failing and you know your credentials are correct."><i class="fa fa-question-circle"></i></a></label>
+                <label>Use isSMTP Feature <a href="#!" tabindex="-1"  data-trigger="focus" data-bs-trigger="focus" class="nounderline"  title="Use this if your email keeps failing and you know your credentials are correct."><i class="fa fa-question-circle offset-circle"></i></a></label>
                 <select class="form-control" width="100%" name="isSMTP">
                   <?php if ($results->isSMTP == 0) {
                     echo "<option value='0'>No</option>";
@@ -282,7 +269,7 @@ if (!empty($_POST)) {
                 </select>
               </div>
               <div class="form-group">
-                <label>Root URL of your UserSpice install <a href="#!" tabindex="-1" title="Note" data-trigger="click" class="nounderline" data-toggle="popover" data-content="Including http or https protocol (VERY Important). Default location would be: <?=$urlProtocol.$_SERVER['HTTP_HOST'].$us_url_root; ?>"><i class="fa fa-question-circle"></i></a></label>
+                <label>Root URL of your UserSpice install <a href="#!" tabindex="-1"  data-trigger="click" data-bs-trigger="click" class="nounderline"  title="Including http or https protocol (VERY Important). Default location would be: <?=$urlProtocol.$_SERVER['HTTP_HOST'].$us_url_root; ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
                 <small class="form-text text-muted">
                   Put http://yourdomain.com/ with the final / below
                 </small>

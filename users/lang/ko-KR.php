@@ -1,5 +1,6 @@
 <?php
 /*
+Do not put any content above the opening PHP tag
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
 We are going to keep these files in the iso xx-xx format because that will also
 allow us to autoformat numbers on the sites.
@@ -73,7 +74,7 @@ $lang = array_merge($lang,array(
 	"SIGNOUT_TEXT"		=> "로그아웃",
 	"SIGNIN_BUTTONTEXT"	=> "로그인",
 		/* doesn't translate directly. does the Remember Me feature remember username, password, or both? */
-	"SIGNIN_REMEMBER"	=> "사용자 이름 저장", 
+	"SIGNIN_REMEMBER"	=> "사용자 이름 저장",
 	"SIGNIN_AUDITTEXT"	=> "로그인됨",
 	"SIGNIN_FORGOTPASS"	=> "암호 찾기",
 	"SIGNOUT_AUDITTEXT"	=> "로그아웃됨",
@@ -142,7 +143,7 @@ $lang = array_merge($lang,array(
 	"VAL_EXISTS"		=> "이미 있습니다. 다른 값 주소를 선택하세요", //this doesn't translate well. verb-surbject-object order requires a generic object be used.
 	"VAL_DB"			=> "데이터베이스 오류",
 	"VAL_NUM"			=> "숫자여야 합니다",
-	"VAL_INT"			=> "모두 숫자여야 합니다", //context? "은(는) 정수여야 합니다" might be more appropriate whether the value is printed back with it 
+	"VAL_INT"			=> "모두 숫자여야 합니다", //context? "은(는) 정수여야 합니다" might be more appropriate whether the value is printed back with it
 	"VAL_EMAIL"			=> "유효한 전자 메일 주소여야 합니다",
 	"VAL_NO_EMAIL"		=> "이메일 주소일 수 없습니다", //Papago
 	"VAL_SERVER"		=> "must belong to a valid server", //context?
@@ -409,4 +410,4 @@ $lang = array_merge($lang,array(
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }
-?>
+ //do not put a closing php tag here

@@ -1,20 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
-        <li>Manage</li>
-        <li><a href="<?=$us_url_root; ?>users/admin.php?view=users">Users</a></li>
-        <li class="active">User</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
-<style media="screen">
-  form label {font-weight:600}
-</style>
 <?php
 $hooks = getMyHooks(['page' => 'admin.php?view=user']);
 includeHook($hooks, 'pre');
@@ -37,54 +20,85 @@ $userdetails = fetchUserDetails(null, null, $userId); //Fetch user details
 
 //Forms posted
 if (!empty($_POST)) {
+
     $token = $_POST['csrf'];
     if (!Token::check($token)) {
         include $abs_us_root.$us_url_root.'usersc/scripts/token_error.php';
     } else {
         includeHook($hooks, 'post');
+
+
         if (!empty($_POST['delete'])) {
-            $deletions = $_POST['delete'];
-            if ($deletion_count = deleteUsers($deletions)) {
+          if($userdetails->id == $user->data()->id || in_array($userdetails->id,$master_account)){
+            usError("You cannot delete this user");
+            Redirect::to("admin.php?view=user&id=".$userdetails->id);
+          }
+            if ($deletion_count = deleteUsers($userdetails->id)) {
                 logger($user->data()->id, 'User Manager', "Deleted user named $userdetails->fname.");
                 $msg = lang('ACCOUNT_DELETIONS_SUCCESSFUL', [$deletion_count]);
                 usSuccess($msg);
                 Redirect::to($us_url_root.'users/admin.php?view=users');
             } else {
-                $errors[] = lang('SQL_ERROR');
+                usError(lang('SQL_ERROR'));
+                Redirect::to("admin.php?view=user&id=".$userdetails->id);
             }
-        } else {
-            if (!empty($_POST['cloak'])) {
-                if ($user->data()->cloak_allowed != 1 && !in_array($user->data()->id, $master_account) && !isset($_SESSION['cloak_to'])) {
-                    logger($user->data()->id, 'Cloaking', 'User attempted to cloak User ID #'.$userId);
-                    usError("You do not have permission to cloak");
-                    Redirect::to($us_url_root.'users/admin.php?view=users');
-                } else {
-                    if (in_array($userId, $master_account) && !in_array($user->data()->id, $master_account)) {
-                        logger($user->data()->id, 'Cloaking', "User attempted to cloak User ID #$userId who belongs to the Master Account Array.");
-                        usError("You cannot cloak into a master account");
-                        Redirect::to($us_url_root.'users/admin.php?view=users');
-                    } elseif ($userId == $user->data()->id) {
-                        logger($user->data()->id, 'Cloaking', 'User attempted to cloak themself.');
-                        usError("Cloaking into yourself would open up a black hole");
-                        Redirect::to($us_url_root.'users/admin.php?view=users');
-                    } else {
-                        $check = $db->query('SELECT id FROM users WHERE id = ?', [$userId]);
-                        $count = $check->count();
-                        if ($count < 1) {
-                            usError("You broke it! User not found");
-                            Redirect::to($us_url_root.'users/admin.php?view=users');
-                        } else {
-                            $_SESSION['cloak_from'] = $user->data()->id;
-                            $_SESSION['cloak_to'] = $userId;
-                            logger($user->data()->id, 'Cloaking', 'Cloaked into '.$userId);
-                            $cloakHook =  getMyHooks(['page'=>'cloakBegin']);
-                            includeHook($cloakHook,'body');
-                            usSuccess("You are now cloaked!");
-                            Redirect::to('account.php');
-                        }
-                    }
-                }
-            }
+        }
+
+        if (!empty($_POST['blocking'])) {
+          if($userdetails->id == $user->data()->id || in_array($userdetails->id,$master_account)){
+            usError("You cannot adjust the active state of this user");
+            Redirect::to("admin.php?view=user&id=".$userdetails->id);
+          }
+          $active = Input::get('active');
+          if($active == 1 || $active == 0){
+            $db->update("users",$userdetails->id,['active'=>$active,'permissions'=>$active]);
+            usSuccess("Active status changed");
+          }
+          Redirect::to("admin.php?view=user&id=".$userdetails->id);
+        }
+
+        //Force PW User
+        $force_pr = Input::get('force_pr');
+        if ($force_pr == 1) {
+            $fields = ['force_pr' => $force_pr];
+            $db->update('users', $userId, $fields);
+            $successes[] = "Forcing password reset on next login.";
+            logger($user->data()->id, 'User Manager', "Updated force_pr for $userdetails->fname from $userdetails->force_pr to $force_pr.");
+            Redirect::to("admin.php?view=user&id=".$userdetails->id);
+        }
+
+          if (!empty($_POST['cloak'])) {
+                  if ($user->data()->cloak_allowed != 1 && !in_array($user->data()->id, $master_account) && !isset($_SESSION['cloak_to'])) {
+                  logger($user->data()->id, 'Cloaking', 'User attempted to cloak User ID #'.$userId);
+                  usError("You do not have permission to cloak");
+                  Redirect::to($us_url_root.'users/admin.php?view=users');
+              } else {
+                  if (in_array($userId, $master_account) && !in_array($user->data()->id, $master_account)) {
+                      logger($user->data()->id, 'Cloaking', "User attempted to cloak User ID #$userId who belongs to the Master Account Array.");
+                      usError("You cannot cloak into a master account");
+                      Redirect::to($us_url_root.'users/admin.php?view=users');
+                  } elseif ($userId == $user->data()->id) {
+                      logger($user->data()->id, 'Cloaking', 'User attempted to cloak themself.');
+                      usError("Cloaking into yourself would open up a black hole");
+                      Redirect::to($us_url_root.'users/admin.php?view=users');
+                  } else {
+                      $check = $db->query('SELECT id FROM users WHERE id = ?', [$userId]);
+                      $count = $check->count();
+                      if ($count < 1) {
+                          usError("You broke it! User not found");
+                          Redirect::to($us_url_root.'users/admin.php?view=users');
+                      } else {
+                          $_SESSION['cloak_from'] = $user->data()->id;
+                          $_SESSION['cloak_to'] = $userId;
+                          logger($user->data()->id, 'Cloaking', 'Cloaked into '.$userId);
+                          $cloakHook =  getMyHooks(['page'=>'cloakBegin']);
+                          includeHook($cloakHook,'body');
+                          usSuccess("You are now cloaked!");
+                          Redirect::to('account.php');
+                      }
+                  }
+              }
+          }
 
             //Update display name
             $displayname = Input::get('unx');
@@ -215,23 +229,8 @@ if (!empty($_POST)) {
                 logger($user->data()->id, 'User Manager', "Sent password reset email to $userdetails->fname, Vericode expires at $vericode_expiry.");
             }
 
-            //Block User
-            $active = Input::get('active');
-            if ($userdetails->permissions != $active) {
-                $fields = ['permissions' => $active];
-                $db->update('users', $userId, $fields);
-                $successes[] = "Set user access to $active.";
-                logger($user->data()->id, 'User Manager', "Updated active for $userdetails->fname from $userdetails->permissions to $active.");
-            }
 
-            //Force PW User
-            $force_pr = Input::get('force_pr');
-            if ($userdetails->force_pr != $force_pr) {
-                $fields = ['force_pr' => $force_pr];
-                $db->update('users', $userId, $fields);
-                $successes[] = "Set force_pr to $force_pr.";
-                logger($user->data()->id, 'User Manager', "Updated force_pr for $userdetails->fname from $userdetails->force_pr to $force_pr.");
-            }
+
 
             //Update email
             $email = Input::get('emx');
@@ -259,26 +258,26 @@ if (!empty($_POST)) {
             }
 
             //Update validation
-            if ($act == 1) {
-                $email_verified = Input::get('email_verified');
-                if (isset($email_verified) and $email_verified == '1') {
-                    if ($userdetails->email_verified == 0) {
-                        if (updateUser('email_verified', $userId, 1)) {
-                            $successes[] = 'Verification Updated';
-                            logger($user->data()->id, 'User Manager', "Updated email_verified for $userdetails->fname to $email_verified..");
-                        } else {
-                            $errors[] = lang('SQL_ERROR');
-                        }
-                    }
-                } elseif ($userdetails->email_verified == 1) {
-                    if (updateUser('email_verified', $userId, 0)) {
-                        $successes[] = 'Verification Updated';
-                        logger($user->data()->id, 'User Manager', "Updated email_verified for $userdetails->fname to $email_verified..");
-                    } else {
-                        $errors[] = lang('SQL_ERROR');
-                    }
-                }
-            }
+            // if ($act == 1) {
+            //     $email_verified = Input::get('email_verified');
+            //     if (isset($email_verified) and $email_verified == '1') {
+            //         if ($userdetails->email_verified == 0) {
+            //             if (updateUser('email_verified', $userId, 1)) {
+            //                 $successes[] = 'Verification Updated';
+            //                 logger($user->data()->id, 'User Manager', "Updated email_verified for $userdetails->fname to $email_verified..");
+            //             } else {
+            //                 $errors[] = lang('SQL_ERROR');
+            //             }
+            //         }
+            //     } elseif ($userdetails->email_verified == 1) {
+            //         if (updateUser('email_verified', $userId, 0)) {
+            //             $successes[] = 'Verification Updated';
+            //             logger($user->data()->id, 'User Manager', "Updated email_verified for $userdetails->fname to $email_verified..");
+            //         } else {
+            //             $errors[] = lang('SQL_ERROR');
+            //         }
+            //     }
+            // }
 
             //Toggle protected setting
             if (in_array($user->data()->id, $master_account)) {
@@ -361,7 +360,7 @@ if (!empty($_POST)) {
             if (file_exists($abs_us_root.$us_url_root.'usersc/includes/admin_user_system_settings_post.php')) {
                 require_once $abs_us_root.$us_url_root.'usersc/includes/admin_user_system_settings_post.php';
             }
-        }
+
         $userdetails = fetchUserDetails(null, null, $userId);
     }
 
@@ -385,35 +384,130 @@ if (!empty($_POST)) {
   } else {
       $protectedprof = 0;
   }
-  ?>
+
+    $rsn = '';
+    if (isset($_SESSION['cloak_to'])) {
+        $rsn = 'You are already cloaked';
+    }
+    if (in_array($userId, $master_account)) {
+        $rsn = 'Cloaking into this user is disabled because they are a master account.';
+    }
+    if ($userId == $user->data()->id) {
+        $rsn = 'Cloaking into yourself will break the space-time continuum.';
+    }
+    if (in_array($user->data()->id, $master_account) && !in_array($userId, $master_account)) {
+        $rsn = '';
+    }
+    if ($user->data()->cloak_allowed != 1) {
+        $cloakId = $user->data()->id;
+        $rsn = "Your account has cloaking disabled. Enable it <a href='?admin.php&view=user&id=$cloakId'>here</a>";
+    }
+    ?>
 
   <div class="content mt-3">
     <?=resultBlock($errors, $successes); ?>
     <?php if (!$validation->errors() == '') { display_errors($validation->errors()); } ?>
     <?php includeHook($hooks, 'body'); ?>
-      <form class="form" id='adminUser' name='adminUser' action='' method='post'>
+
         <div class="row">
-          <div class="col-8">
-            <h3><span id="fname"><?=$userdetails->fname; ?> </span><span id="lname"><?=$userdetails->lname; ?> </span><span id="slash">- </span><span id="username"><?=$userdetails->username; ?></span></h3>
-            <label>User ID: </label> <?=$userdetails->id; ?><?php if ($act == 1) {?> <br>
-              <?php if ($userdetails->email_verified == 1) {?> Email Verified <input type="hidden" name="email_verified" value="1" />
-            <?php } elseif ($userdetails->email_verified == 0) {?> Email Unverified -
-              <label class="normal"><br><input type="checkbox" name="email_verified" value="1" />
-                Verify</label><?php } else {?>Error: No Validation<?php } } ?>
+          <div class="col-2 col-sm-1">
+            <?php echo $useravatar; ?>
+          </div>
+          <div class="col-4 col-sm-5">
 
-                  <br><label>Joined: </label> <?=$userdetails->join_date; ?>
+            <h3>
+              <span id="fname"><?=$userdetails->fname; ?></span>
+              <span id="lname"><?=$userdetails->lname; ?></span>
+              <span id="slash"> - </span>
+              <span id="username"><?=$userdetails->username; ?></span>
+            </h3>
 
-                  <br><label>Last Login: </label> <?php if ($userdetails->last_login != 0) {
-      echo $userdetails->last_login;
-  } else {?> <i>Never</i> <?php }?><br/>
+            <p><label>User ID:  <?=$userdetails->id; ?>
+            <?php if ($act == 1) {?>
+              <?php if ($userdetails->email_verified == 1) {?>
+                 (Email Verified)</label> <input type="hidden" name="email_verified" value="1" />
+
+              <?php } elseif ($userdetails->email_verified == 0) {?>
+                (Email Unverified)</label>
+
+                <!-- - <label class="normal"><br><input type="checkbox" name="email_verified" value="1" />
+                Verify</label> -->
+
+              <?php }
+                }
+              ?>
+            </p>
+                  <p><label>Joined: </label> <?=$userdetails->join_date; ?></p>
+
+                  <p><label>Last Login: </label>
+                  <?php if ($userdetails->last_login != 0) {
+                    echo $userdetails->last_login;
+                  } else {
+                    echo "<i>Never</i>";
+                   }
+                   ?>
                 </div>
-                <div class="col-4">
+                <div class="col-6">
+                  <div class="row">
+                    <div class="col-12 col-sm-6 col-md-3 mt-2">
+                      <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
+                        <?=tokenHere();?>
+                      <input type="submit" name="delete" id="delete" class="btn btn-danger col-12" value="Delete User">
+                      </form>
+                    </div>
 
-                  <?php echo $useravatar; ?>
+                    <div class="col-12 col-sm-6 col-md-3 mt-2">
+                      <?php if($userdetails->permissions == 1){ ?>
+                      <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? The user will immediately be blocked from the site.');">
+                        <?=tokenHere();?>
+                      <input type="hidden" name="active" value="0">
+                      <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12" value="Block User">
+                      </form>
+                    <?php }else{ ?>
+                      <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? The user will immediately have their access to the site restored.');">
+                        <?=tokenHere();?>
+                      <input type="hidden" name="active" value="1">
+                      <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12" value="Unblock User">
+                      </form>
+                    <?php } ?>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-3 mt-2">
+                      <?php
+                      if($rsn != ""){
+                        $cloakClass = "btn-outline-secondary";
+                        $disabled = "disabled";
+                      }else{
+                        $cloakClass = "btn-primary";
+                        $disabled = "";
+                      }
+                      ?>
+                      <form class="" action="" method="post" onsubmit="return confirm('You are about to cloak into another user.  To return to your own account, visit the Account page and hit the uncloak button.');">
+                        <?=tokenHere();?>
+
+                      <input type="submit" name="cloak" id="cloak" class="btn <?=$cloakClass?> col-12" value="Cloak Into User"
+                      <?=$disabled?>
+                      >
+                      </form>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-3 mt-2">
+                      <form class="" action="" method="post" onsubmit="return confirm('If you continue, the user will be forced to change their password on the next login.');">
+                        <?=tokenHere();?>
+                      <input type="hidden" name="force_pr" value="1">
+                      <input type="submit" name="force_the_pr" id="force_the_pr" class="btn btn-secondary col-12" value="Force PW Reset"
+                      >
+                      </form>
+                    </div>
+                    <div class="col-12">
+                      <?php if($rsn != ""){ echo "<p class='text-center mt-2'><em>" . $rsn . "</em></p>"; } ?>
+                    </div>
+
+                  </div>
                 </div>
               </div>
 
-
+      <form class="form" id='adminUser' name='adminUser' action='' method='post'>
                   <div class="row">
                     <div class="col-12 col-sm-6">
                       <div class="form-group" id="username-group">
@@ -437,19 +531,9 @@ if (!empty($_POST)) {
                       </div>
 
                       <div class="form-group">
-                        <label>New Password (<?=$settings->min_pw; ?> char min, <?=$settings->max_pw; ?> max.)</label>
-                        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
-                      </div>
-
-                      <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
-                      </div>
-
-
-                      <div class="form-group">
                         <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email? Will expire in <?=$settings->reset_vericode_expiry; ?> minutes.</label><br>
                       </div>
+
                       <?php includeHook($hooks, 'form'); ?>
                       <div class="row">
                         <div class="col-12 col-sm-6">
@@ -491,7 +575,17 @@ if (!empty($_POST)) {
                     </div>
                     <div class="col-12 col-sm-6">
                       <div class="form-group">
-                        <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><span style="color:blue">?</span></a></label>
+                        <label>New Password (<?=$settings->min_pw; ?> char min, <?=$settings->max_pw; ?> max.)</label>
+                        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                      </div>
+
+                      <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {?>disabled<?php } ?>/>
+                      </div>
+
+                      <div class="form-group">
+                        <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
                         <select name="cloak_allowed" class="form-control">
                           <option value="1" <?php if ($userdetails->cloak_allowed == 1) {
                                 echo "selected='selected'";
@@ -507,41 +601,13 @@ if (!empty($_POST)) {
                       </div>
 
                       <div class="form-group">
-                        <label> Block<a class="nounderline" data-toggle="tooltip" title="Drop the banhammer on a troublemaker!"><span style="color:blue">?</span></a></label>
-                        <select name="active" class="form-control">
-                          <option value="1" <?php if ($userdetails->permissions == 1) {
-                                echo "selected='selected'";
-                            } else {
-                                if (!hasPerm(2)) {  ?>disabled<?php }
-                            } ?>>No</option>
-                          <option value="0" <?php if ($userdetails->permissions == 0) {
-                                echo "selected='selected'";
-                            } else {
-                                if (!hasPerm(2)) {  ?>disabled<?php }
-                            } ?>>Yes</option>
-                        </select>
-                      </div>
-
-                      <div class="form-group">
-                        <label> Force Password Reset<a class="nounderline" data-toggle="tooltip" title="The user will be required to create a new password on next login"><span style="color:blue">?</span></a></label>
-                        <select name="force_pr" class="form-control">
-                          <option <?php if ($userdetails->force_pr == 0) {
-                                echo "selected='selected'";
-                            } ?> value="0">No</option>
-                          <option <?php if ($userdetails->force_pr == 1) {
-                                echo "selected='selected'";
-                            } ?>value="1">Yes</option>
-                        </select>
-                      </div>
-
-                      <div class="form-group">
                         <?php if (!is_null($userdetails->pin)) {?>
                           <label><input  type="checkbox" id="resetPin" name="resetPin" value="1" /> Reset PIN</label>
                         <?php } ?>
                       </div>
 
                         <div class="form-group">
-                          <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><span style="color:blue">?</span></a></label>
+                          <label>Dev User<a class="nounderline" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessable from $user->data()->dev_user"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
                           <select name="dev_user" class="form-control">
                             <option <?php if ($userdetails->dev_user == 0) {
                                 echo "selected='selected'";
@@ -552,39 +618,7 @@ if (!empty($_POST)) {
                           </select>
                         </div>
 
-                        <div class="form-group">
 
-                          <?php
-                          $rsn = '';
-                          if (isset($_SESSION['cloak_to'])) {
-                              $rsn = 'you are already cloaked';
-                          }
-                          if (in_array($userId, $master_account)) {
-                              $rsn = 'cloaking into this user is disabled because they are a master account.';
-                          }
-                          if ($userId == $user->data()->id) {
-                              $rsn = 'cloaking into yourself will break the space-time continuum.';
-                          }
-                          if (in_array($user->data()->id, $master_account) && !in_array($userId, $master_account)) {
-                              $rsn = '';
-                          }
-                          if ($user->data()->cloak_allowed != 1) {
-                              $rsn = 'your account has cloaking disabled. Enable it in User->Misc Settings->Is Allowed To Cloak.';
-                          }
-                          ?>
-
-                          <label>Cloak into this user<a class="nounderline" data-toggle="tooltip" title="Automatically logs you in as this user"><span style="color:blue">?</span></a>
-                          </label>
-                          <select name="cloak" class="form-control">
-                            <option selected='selected' disabled>--Select--</option>
-                            <option value="1" <?php if ($rsn != '') {
-                              echo 'disabled';
-                          }?>>Yes</option>
-                          </select>
-                          <?php if ($rsn != '') {
-                              echo "<span style='color:blue'>Cloaking disabled because ".$rsn.'</span>';
-                          }?>
-                        </div>
                         <div class="form-group">
                           <?php if ($protectedprof == 1) {?><br>PROTECTED PROFILE - EDIT DISABLED<?php } ?>
                           <?php if (in_array($user->data()->id, $master_account)) {?>
@@ -599,20 +633,12 @@ if (!empty($_POST)) {
                             </select>
                           <?php } ?>
                         </div>
-                        <div class="form-group">
-                          <label>Delete this User<a class="nounderline" data-toggle="tooltip" title="Completely delete a user. This cannot be undone."><span style="color:blue">?</span></a></label>
-                          <select name='delete[<?php echo "$userId"; ?>]' id='delete[<?php echo "$userId"; ?>]' class="form-control">
-                            <option selected='selected' disabled>No</option>
-                            <option value="<?=$userId; ?>"  <?php if (!hasPerm(2) && !in_array($user->data()->id, $master_account)) {
-                              echo 'disabled';
-                          } ?>>Yes - Cannot be undone!</option>
-                          </select>
-                        </div>
+
                         <input type="hidden" name="csrf" value="<?=Token::generate(); ?>" />
-                        <div class="pull-right">
-                          <a class='btn btn-warning' href="<?=$us_url_root; ?>users/admin.php?view=users">Cancel</a>
-                          <input class='btn btn-secondary' name = "return" type='submit' value='Update & Close' class='submit' />
-                          <input class='btn btn-primary' type='submit' value='Update' class='submit' />
+                        <div class="pull-right mt-3">
+                          <a class='btn btn-outline-danger' href="<?=$us_url_root; ?>users/admin.php?view=users">Cancel</a>
+                          <input class='btn btn-outline-secondary' name = "return" type='submit' value='Update & Close' class='submit' />
+                          <input class='btn btn-outline-primary' type='submit' value='Update' class='submit' />
                         </div>
                       </div>
                     </div>

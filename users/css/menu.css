@@ -1,0 +1,245 @@
+ul.us_menu {
+  display: block;
+  /*float: left;*/
+  list-style: none;
+  padding-left: 0;
+  width: 280px;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
+}
+
+ul.us_menu::after {
+  clear: both;
+}
+
+ul.us_menu .us_brand {
+  padding-top: 0.3125rem;
+  padding-bottom: 0.3125rem;
+  margin-right: 1rem;
+  font-size: 1.25rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+ul.us_menu li.dropdown .caret::after {
+  /* content: "\f0d7";
+  font-family: FontAwesome; */
+  font-size: inherit;
+  color: inherit;
+  display: inline-block;
+  margin-left: 4px;
+}
+
+ul.us_menu li {
+  display: block;
+  white-space: nowrap;
+}
+
+ul.us_menu .dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(0,0,0,.15);
+  background-color: transparent;
+}
+
+ul.us_menu li > a{
+  padding: 5px 18px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  color: #333;
+}
+
+ul.us_menu li a i{
+  display: inline-block;
+  margin-right: 4px;
+}
+
+ul.us_menu li:hover {
+  transition: 1s all;
+  background-color: #ddd;
+}
+
+ul.us_sub-menu {
+  padding: 0;
+  background-color: #f2f2f2;
+  position: absolute;
+  display: none;
+  float: right;
+  top: 0;
+  left: 100%;
+  z-index: auto;
+  border: 1px solid #ddd;
+}
+
+.us_menu_backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.us_menu_mobile_wrapper {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 18px;
+}
+
+.us_brand.full_screen {
+  padding: 5px 18px;
+}
+
+.us_menu_mobile_control i{
+  font-size: 1.5rem;
+}
+/* //////////////////// Horizontal ////////////////////*/
+
+ul.us_menu.horizontal {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  padding: 5px 18px;
+}
+
+ul.us_menu.horizontal .us_sub-menu {
+  left: 0;
+  top: 100%;
+}
+
+ul.us_menu.horizontal .us_sub-menu.us_deep-sub-menu {
+  left: 100%;
+  top: 0;
+}
+
+ul.us_menu.horizontal .us_menu_mobile_wrapper {
+  padding: 0px;
+  flex-wrap: wrap;
+}
+
+/*/////////////// Accordion /////////////*/
+ul.us_menu.accordion .us_sub-menu{
+  position: relative;
+  top: unset;
+  left: unset;
+  display: none;
+  float: unset;
+  padding-left: 8px;
+}
+
+ul.us_sub-menu.show, ul.us_menu.accordion .us_sub-menu.show {
+  display: block;
+}
+
+/*/////////////// Theme  ////////////////*/
+ul.us_menu.dark, ul.us_menu.dark .us_sub-menu li, ul.us_menu.dark li:hover,
+ul.us_menu.dark ul.us_sub-menu
+{
+  background-color: #212529;
+}
+
+ul.us_menu.dark a, ul.us_menu.dark .us_menu_mobile_control {
+  color: rgba(255, 255, 255, .55);
+}
+
+ul.us_menu.dark li:hover > a {
+  color: rgba(255, 255, 255, .75);
+}
+
+ul.us_menu.dark  .us_sub-menu,
+ul.us_menu.accordion .us_sub-menu {
+  border-color: transparent;
+}
+ul.us_menu.dark .dropdown-divider{
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+
+@media screen and (max-width: 992px) {
+  .us_menu_mobile_wrapper {
+    display: flex;
+  }
+  ul.us_menu.horizontal {
+    display: block;
+  }
+  ul.us_menu.horizontal > li {
+    display: none;
+  }
+
+  ul.us_menu .us_brand.full_screen {
+    display: none;
+  }
+
+  ul.us_menu.horizontal.expanded > li {
+    display: block;
+  }
+
+  ul.us_menu.horizontal .us_sub-menu,
+  ul.us_menu.horizontal .us_sub-menu.us_deep-sub-menu{
+    width: 100%;
+    left: 0;
+    top: 100%;
+    border: none;
+  }
+
+  ul.us_menu:not(.horizontal) {
+    transition: all 750ms ease-in-out;
+    width: 15vw;
+    overflow: hidden;
+  }
+
+  /* .us_menu:not(.horizontal):not(.expanded) .us_menu_mobile_wrapper {
+
+  } */
+
+  ul.us_menu:not(.horizontal):not(.expanded) .us_menu_mobile_wrapper {
+    padding-left: 5px;
+  }
+
+  ul.us_menu:not(.horizontal):not(.expanded) .us_brand{
+    display: none;
+  }
+
+  ul.us_menu:not(.horizontal):not(.expanded) .labelText{
+    display: none;
+  }
+
+  ul.us_menu:not(.horizontal):not(.expanded) i{
+    font-size: 1.25rem;
+    padding-left:2px;
+  }
+
+  ul.us_menu:not(.horizontal) .us_sub-menu,
+  ul.us_menu:not(.horizontal) .us_deep-sub-menu
+  {
+    position: relative;
+    border: none;
+    left: unset;
+    top: unset;
+    float: unset;
+  }
+
+  ul.us_menu:not(.horizontal) > li a {
+    transition: all 750ms ease-in-out;
+  }
+
+
+  ul.us_menu:not(.horizontal):not(.expanded) > li a{
+    padding-left: 5px;
+    font-size: 28px;
+  }
+
+  ul.us_menu.expanded:not(.horizontal) {
+    width: 280px;
+  }
+
+}
+
+.caret{
+  margin-left:.25rem;
+}

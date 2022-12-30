@@ -315,10 +315,12 @@ if (!function_exists('securePage')) {
                                 logger($user->data()->id, 'securePage', 'Failed ot add Permission ID#'.$permission->permission_id." to $page, Error: ".$db->errorString());
                             }
                         }
-                        Redirect::to($us_url_root.$page.'?msg=Page inserted and auto-mapped.');
+                        usSuccess("Page inserted and auto-mapped.");
+                        Redirect::to($us_url_root.$page);
                     }
                 }
-                Redirect::to($us_url_root.'users/admin.php?view=page&err=Please+confirm+permission+settings.&new=yes&id='.$last.'&dest='.$dest);
+                usError("Please confirm permission settings");
+                Redirect::to($us_url_root.'users/admin.php?view=page&new=yes&id='.$last.'&dest='.$dest);
             } else {
                 bold('<br><br>You must go into the Admin Panel and click the Manage Pages button to add this page to the database. Doing so will make this error go away.');
                 die();
@@ -632,4 +634,41 @@ if (!function_exists('isStandardUser')) {
             }
         }
     }
+}
+
+
+//this is a dashboard-specific access control function
+if(!function_exists('checkAccess')){
+function checkAccess($key, $value)
+{
+    global $db, $user, $master_account;
+    //Check if they belong to the master account array or have the Administrator (default 2) Perm
+    if (in_array($user->data()->id, $master_account) || hasPerm([2], $user->data()->id)) {
+        return true;
+    } else {
+        //They're not, now we're gonna check if the view exists in us_management and if they have perms
+        $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]);
+        if (!$db->error()) {
+            $checkC = $checkQ->count();
+            if ($checkC < 1) {
+                //The page isn't in the table, so we're gonna reject their ability to go
+                return false;
+            } else {
+                //The page is in there, so now we're gonna check if they have permission
+                $check = $checkQ->first();
+                if (hasPerm(explode(',', $check->access), $user->data()->id)) {
+                    //They have permissions listed in us_management, let them through
+                    return true;
+                } else {
+                    //They don't have permissions, reject them
+                    return false;
+                }
+            }
+        } else {
+            //It failed to retrieve anything from us_management, so we log the error and send them away
+            logger($user->data()->id, 'checkAccess', 'Failed to check access for '.$value.', Error: '.$db->errorString());
+            return false;
+        }
+    }
+}
 }

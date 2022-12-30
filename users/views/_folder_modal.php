@@ -6,7 +6,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">Choose Folders to Monitor</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
         <p class="text-dark"><strong>Remove a folder from monitoring:</strong></p>
@@ -48,7 +48,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-dark" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
 

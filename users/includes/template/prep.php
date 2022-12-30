@@ -14,10 +14,10 @@ require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->tem
 }else{
   //assume template has been deleted
   if(!$ignoreTemplateFix){
-  if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/standard/header.php')){
-    $db->update('settings',1,['template'=>'standard']);
-    $settings->template = "standard";
-    require_once $abs_us_root . $us_url_root . 'usersc/templates/standard/header.php';
+  if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/bs5/header.php')){
+    $db->update('settings',1,['template'=>'bs5']);
+    $settings->template = "bsf";
+    require_once $abs_us_root . $us_url_root . 'usersc/templates/bs5/header.php';
     err("Template missing. Falling back to Standard Template");
   }else{
     // die("Looking for alt");

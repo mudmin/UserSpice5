@@ -61,7 +61,8 @@ if(!$db->error()) {
             Finished applying <?=$count?> updates (<?=$eCount?> errors).<br>
           <?php }
           if($auto == 1){
-            Redirect::to($us_url_root."users/admin.php?view=updates&sysup=1&err=Update+applied");
+            usSuccess("Update applied");
+            Redirect::to($us_url_root."users/admin.php?view=updates&sysup=1");
           }
           if(isset($user) && $user->isLoggedIn()){ ?>
             <a href="<?=$us_url_root?>users/admin.php">Return to the Admin Dashboard</a>

@@ -4,25 +4,9 @@ if(empty($_POST)){
   $_POST['type'] = "featured";
 }
 ?>
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <ol class="breadcrumb text-right">
-          <li><a href="<?=$us_url_root?>users/admin.php">Dashboard</a></li>
-          <li>Spice Shaker</li>
-          <!-- <li class="active">Users</li> -->
-        </ol>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
-
 <div class="content mt-3">
   <?php
-  if (trim($settings->spice_api) != ''
+  if (trim($settings->spice_api ?? '') != ''
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($settings->spice_api))
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($settings->spice_api)) )
   {
@@ -33,7 +17,10 @@ if(empty($_POST)){
     echo "<h6><span style='color:red'>Please Note:</span> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
   }
   $type = Input::get('type');
-  if($diag && $type == '' && !isset($_POST['goSearch'])){$_POST['goSearch'] = 1 && $_POST['search'] = 'demo plugin';}
+  if($diag && $type == '' && !isset($_POST['goSearch'])){
+    $_POST['goSearch'] = 1;
+    $_POST['search'] = 'demo plugin';
+  }
   $api = "https://api.userspice.com/api/v2/";
   // $api = "http://localhost/bugs/api/v2/";
 
@@ -46,7 +33,8 @@ if(empty($_POST)){
       $data = array(
         'key' => $settings->spice_api,
         'type' => $type,
-        'call' => 'loadtype'
+        'call' => 'loadtype',
+        'generation'=>2
       );
       $payload = json_encode($data);
 
@@ -81,7 +69,8 @@ if(empty($_POST)){
       $data = array(
         'key' => $settings->spice_api,
         'search' => $search,
-        'call' => 'search'
+        'call' => 'search',
+        'generation'=>2
       );
       $payload = json_encode($data);
       if($diag){ echo "<h6>Attempting CURL Request. Will show results below if they exist.</h6><br>"; }
@@ -165,25 +154,21 @@ if(empty($_POST)){
           <form class="" action="" method="post">
             <div class="input-group">
               <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
-              <input type="submit" name="goSearch" value="Search" required>
+              <input type="submit" name="goSearch" value="Search" required class="btn btn-primary">
             </div>
           </form>
         </div>
-
-      </div>
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-sm-4 mb-4">
         <form class="" action="" method="post">
-          <label for="type">Browse</label>
           <div class="d-flex">
             <select class="form-control" name="type">
-              <option value="" disabled <?php if($type ==''){?>selected="Selected"<?php } ?>>--Choose One--</option>
-              <option value="featured" <?php if($type =='featured'){?>selected="Selected"<?php } ?>>Featured</option>
-              <option value="plugin" <?php if($type =='plugin'){?>selected="Selected"<?php } ?>>Plugins</option>
-              <option value="template" <?php if($type =='template'){?>selected="Selected"<?php } ?>>Templates</option>
-              <option value="widget" <?php if($type =='widget'){?>selected="Selected"<?php } ?>>Widgets</option>
-              <option value="translation" <?php if($type =='translation'){?>selected="Selected"<?php } ?>>Languages</option>
+              <option value="featured" <?php if($type =='featured'){?>selected="Selected"<?php } ?>>Browse Featured</option>
+              <option value="plugin" <?php if($type =='plugin'){?>selected="Selected"<?php } ?>>Browse Plugins</option>
+              <option value="template" <?php if($type =='template'){?>selected="Selected"<?php } ?>>Browse Templates</option>
+              <option value="widget" <?php if($type =='widget'){?>selected="Selected"<?php } ?>>Browse Widgets</option>
+              <option value="translation" <?php if($type =='translation'){?>selected="Selected"<?php } ?>>Browse Languages</option>
             </select>
-            <input type="submit" name="go" value="Go">
+            <input type="submit" name="go" value="Go" class="btn btn-primary">
           </form>
         </div>
       </div>
@@ -191,6 +176,7 @@ if(empty($_POST)){
   <?php }else{ ?>
     <h2>You must enter your Free UserSpice API key <a href="admin.php?view=general">here</a> in order to use this feature.</h2>
   <?php } ?>
+  <div class="row">
 
   <?php if(isset($result)){
     $dev = json_decode($result);
@@ -210,7 +196,7 @@ if(empty($_POST)){
         }
         ?>
 
-        <div class="col-md-6 col-lg-4 pb-3">
+        <div class="col-12 col-sm-6 col-md-4 pb-3">
           <div class="card card-custom <?=$class?> bg-white border-white border-0" style="height: 450px">
             <div class="card-custom-img" style="background-image: url(<?php if($d->img != ''){echo $d->img;}else{?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php }?>);"></div>
               <div class="card-custom-avatar">
@@ -261,6 +247,7 @@ if(empty($_POST)){
 
     ?>
 
+  </div>
     <script type="text/javascript">
     $( ".installme" ).click(function(event) {
       if($(this).hasClass("warnme")){
@@ -278,6 +265,7 @@ if(empty($_POST)){
         'hash' 			:  $(this).attr('data-hash'),
         'reserved'  :  $(this).attr('data-res'),
         'diag'      :  "<?=$diag?>",
+        'token'     : "<?=Token::generate()?>",
       };
 
       $.ajax({

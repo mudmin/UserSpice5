@@ -1,37 +1,25 @@
 <link rel="stylesheet" href="<?=$us_url_root?>users/js/pagination/datatables.min.css">
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?php echo $us_url_root; ?>users/admin.php">Dashboard</a></li>
-        <li>Tools</li>
-        <li class="active">System Logs</li>
-        <li></li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
 $mode = Input::get('mode');
 $action = Input::get('action');
 $filters = [
   'debug' => 'View Only Debugging Logs',
 ];
-$errors = [];
-$successes = [];
+
 if (in_array($user->data()->id, $master_account) && $action != '') {
     $query = '';
     switch ($action) {
     case 'delete_logs':
       $query = 'DELETE FROM logs';
+      $msg = "All logs deleted";
       break;
     case 'truncate_logs':
       $query = 'TRUNCATE table logs';
+      $msg = "The logs table has been truncated";
       break;
     case 'delete_debugging_logs':
       $query = "DELETE FROM logs WHERE logtype = 'Redirect Diag' OR logtype = 'Form Data'";
+      $msg = "The debugging logs have been deleted";
       break;
   }
 
@@ -43,7 +31,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
             logger($user->data()->id, 'Logs', 'An action performed against the logs has failed', ['ACTION' => $action, 'QUERY' => $query, 'ERROR' => $db->errorString()]);
         }
     }
-
+    usSuccess($msg);
     Redirect::to('?view=logs');
 }
 ?>
@@ -54,17 +42,20 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   }
   </style>
   <div class="content mt-3">
-    <h2 class="mb-3">System Logs</h2>
-    <?php if (in_array($user->data()->id, $master_account)) { ?>
-      <div style="padding-left: 0" class="col-xs-12 col-lg-3">
-        <select class="form-control" name="logs_actions" id="logs_actions">
-            <option disabled selected value>Select an action...</option>
-            <option value="delete_logs">Clear All Logs (Keep IDs)</option>
-            <option value="truncate_logs">Clear All Logs (Reset IDs)</option>
-            <option value="delete_debugging_logs">Clear Debugging Logs</option>
-        </select>
+    <div class="row">
+      <div class="col-12 col-sm-6">
+        <h2 class="mb-3">System Logs</h2>
       </div>
-      <div class="col-xs-12 col-lg-3">
+      <?php if (in_array($user->data()->id, $master_account)) { ?>
+      <div class="col-12 col-sm-3">
+          <select class="form-control" name="logs_actions" id="logs_actions">
+              <option disabled selected value>Select an action...</option>
+              <option value="delete_logs">Clear All Logs (Keep IDs)</option>
+              <option value="truncate_logs">Clear All Logs (Reset IDs)</option>
+              <option value="delete_debugging_logs">Clear Debugging Logs</option>
+          </select>
+    </div>
+      <div class="col-12 col-sm-3">
         <select class="form-control" name="logs_filters" id="logs_filters">
             <option disabled selected value>Select a filter...</option>
             <?php if ($mode != '') { ?>
@@ -79,12 +70,14 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
             <?php
             } ?>
         </select>
-      </div>
-      <br><br>
-    <?php } ?>
-  </div>
 
-  <?php resultBlock($errors, $successes);
+      </div>
+    <?php } ?>
+    </div>
+</div>
+
+
+  <?php
     $logs = UserSpice_getLogs(['preset' => $mode]);
   ?>
   <div class="card">
@@ -102,7 +95,9 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     <tbody>
       <?php foreach ($logs as $l) { ?>
         <tr>
-          <td><?php echo Input::sanitize($l->id); ?></td>
+          <td>
+            <span class="hideMe"><?=sprintf('%11d',Input::sanitize($l->id))?></span>
+            <?php echo Input::sanitize($l->id); ?></td>
           <td><?php echo Input::sanitize($l->ip); ?></td>
           <td><?php echouser(Input::sanitize($l->user_id)); ?> (<?php echo Input::sanitize($l->user_id); ?>)</td>
           <td><?php echo Input::sanitize($l->logdate); ?></td>
@@ -137,7 +132,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Log ID #<span id="logMetadataID"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -145,7 +140,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -159,15 +154,8 @@ $(function () {
 
 $("select#logs_actions").change(function() {
   var val = $(this).val()
-  var msg
-  switch (val) {
-    case 'delete_logs':
-      msg = "Are you sure you want to Delete All Logs (this may take awhile)?"
-    case 'truncate_logs':
-      msg = "Are you sure you want to Truncate All Logs (this will reset all IDs)?"
-    case 'delete_debugging_logs':
-      msg = "Are you sure you want to clear Debugging Logs?"
-  }
+
+  msg = "Are you sure you want to clear these logs? This cannot be undone";
   if(confirm(msg)) {
     var url = window.location.href
     url = `${url}&action=${val}`
@@ -199,7 +187,7 @@ function updateQueryStringParameter(uri, key, value) {
 }
 
 function generateMetadataModal(logId) {
-  $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId, function(data, status) {
+  $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId + "&token=<?=Token::generate()?>", function(data, status) {
     $("#logMetadataBody").html(data)
     $("#logMetadataID").html(logId)
     $("#logMetadata").modal();

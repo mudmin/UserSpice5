@@ -1,5 +1,6 @@
 <?php
 /*
+Do not put any content above the opening PHP tag
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
 We are going to keep these files in the iso xx-xx format because that will also
 allow us to autoformat numbers on the sites.
@@ -379,24 +380,9 @@ $lang = array_merge($lang,array(
 		"DAT_ASC"           => "Aktivieren Sie diese Option, um die Spalte aufsteigend zu sortieren.",
 		"DAT_DESC"          => "Aktivieren Sie diese Option, um die Spalte absteigend zu sortieren.",
 		));
-		///////////////////////////////////////////////////////////////
 
-		//Backend Translations for UserSpice
-		$lang = array_merge($lang,array(
-		"BE_DASH"    			=> "Dashboard",
-		"BE_SETTINGS"     => "Einstellungen",
-		"BE_GEN"					=> "Allgemein",
-		"BE_REG"					=> "Registrierung",
-		"BE_CUS"					=> "Benutzerdefiniert",
-		"BE_DASH_ACC"			=> "Dashboard Zugriff",
-		"BE_TOOLS"				=> "Werkzeuge",
-		"BE_BACKUP"				=> "Backup",
-		"BE_UPDATE"				=> "Updates",
-		"BE_CRON"				  => "Cron Jobs",
-		"BE_IP"				  	=> "IP Manager",
-		));
 		//LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
 		if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 			include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 		}
-?>
+ //do not put a closing php tag here

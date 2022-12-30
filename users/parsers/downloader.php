@@ -17,6 +17,15 @@ $zipFile = "temp.zip";
 if(file_exists($abs_us_root.$us_url_root."users/parsers/".$zipFile)){
   unlink($abs_us_root.$us_url_root."users/parsers/".$zipFile);
 }
+
+if(!Token::check(Input::get('token'))){
+  $msg = [];
+  $msg['success'] = false;
+  $msg['error'] = "Invalid token";
+  echo json_encode($msg);
+  die;
+}
+
 if ($type == 'plugin') {
   $extractPath = "../../usersc/plugins";
   $reserved = Input::get('reserved');
@@ -34,7 +43,8 @@ if ($type == 'plugin') {
   $return = $us_url_root . "users/admin.php?view=templates";
 } elseif ($type == 'translation') {
   $extractPath = $abs_us_root . $us_url_root . "users";
-  $return = $us_url_root . "users/admin.php?err=Language(s)+Installed.";
+  usSuccess("Language(s) installed");
+  $return = $us_url_root . "users/admin.php";
 } else {
   $data['error'] = "Something is wrong";
   if($diag){logger($user->data()->id, "DIAG", "Invalid request type");}

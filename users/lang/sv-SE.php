@@ -1,5 +1,6 @@
 <?php
 /*
+Do not put any content above the opening PHP tag
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
 We are going to keep these files in the iso xx-xx format because that will also
 allow us to autoformat numbers on the sites.
@@ -411,4 +412,4 @@ $lang = array_merge($lang,array(
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }
-?>
+ //do not put a closing php tag here

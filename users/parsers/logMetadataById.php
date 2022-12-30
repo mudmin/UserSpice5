@@ -6,6 +6,14 @@ if (!isset($user) || (!hasPerm([2], $user->data()->id) ) ) {
     die('You do not have permission to be here.');
 }
 
+if(!Token::check(Input::get('token'))){
+  $msg = [];
+  $msg['success'] = "false";
+  $msg['msg'] = "Invalid token";
+  echo json_encode($msg);
+  die;
+}
+
 $return = [
   'isJson' => false,
   'Data' => null,

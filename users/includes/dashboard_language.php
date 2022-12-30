@@ -141,6 +141,7 @@ $lang = array_merge($lang,array(
 
 		// Settings
 		"ACP_MENU_SETTINGS_NAVIGATION" => "Navigation",
+		"ACP_MENU_SETTINGS_MENUS" => "Menus",
 
 		// Tools
 		"ACP_MENU_TOOLS_SYSTEM_LOGS" => "System Logs",

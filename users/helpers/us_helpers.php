@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // UserSpice Specific Functions
 
 $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MISSING';
-
 if (!function_exists('ipCheck')) {
   function ipCheck()
   {
@@ -1278,7 +1277,7 @@ if (!function_exists('verifyadmin')) {
 if (!function_exists('validateJson')) {
   function validateJson($string)
   {
-    json_decode($string);
+    json_decode($string ?? '');
 
     return json_last_error() == JSON_ERROR_NONE;
   }
@@ -1403,7 +1402,7 @@ if(!function_exists('checkAPIkey')){
   function checkAPIkey($key){
     $msg = "";
     if($key == ""){
-      $msg = "<h4><span style='color:blue'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</span> </h4>";
+      $msg = "<h6><span style='color:blue'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</span> </h6>";
     }elseif(!preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($key))
     && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($key)) )
     {
@@ -1496,4 +1495,66 @@ if(!function_exists("fetchProfilePicture")){
     }
     return $grav;
   }
+}
+
+if(!function_exists("fetchFolderFiles")){
+  function fetchFolderFiles($folder,$extension = "php"){
+    global $abs_us_root,$us_url_root;
+    if(!is_array($extension)){
+      $extension = (array)$extension;
+    }
+
+    $files = [];
+    $links = [];
+    $direct = [];
+    if(substr($folder,-1) != "/"){
+      $folder = $folder . "/";
+    }
+    $linkpath = $us_url_root .  $folder;
+    $basepath = $abs_us_root . $linkpath;
+
+    if(is_dir($basepath)) {
+    $scan_arr = scandir($basepath);
+    $files_arr = array_diff($scan_arr, array('.','..') );
+
+    foreach ($files_arr as $file) {
+      $file_path = $basepath.$file;
+      $file_ext = pathinfo($file_path, PATHINFO_EXTENSION);
+      if (in_array($file_ext,$extension)) {
+        $files[] = $file;
+        $links[] = $linkpath  . $file;
+        $direct[] = $basepath . $file;
+      }
+    }
+    }
+    $response = ["files"=>$files,"direct"=>$direct,"links"=>$links];
+    return $response;
+  }
+}
+
+
+//examples
+//30 days from today
+//echo dateOffset(30);
+
+//7 days ago
+//echo dateOffset(-7);
+
+//can be hours, months, days, years, etc
+// Or what the day will be in 17 hours with
+// echo dateOffset(17,"","hours");
+// Or you can do it from another date so 20 days from Jan 1, 2023
+// echo dateOffset(20,"2023-01-01");
+
+function offsetDate($number, $datestring = "", $unit = "days"){
+     if($datestring == ""){
+       $datestring = date("Y-m-d");
+     }
+     $first = substr($number, 0, 1);
+     if($first != "+" && $first != "-"){
+       $symbol = "+ ";
+     }else{
+       $symbol = "";
+     }
+     return date("Y-m-d",strtotime($symbol . $number . $unit,strtotime($datestring)));
 }

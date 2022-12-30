@@ -1,17 +1,3 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?=$us_url_root; ?>users/admin.php">Dashboard</a></li>
-        <li>Manage</li>
-        <li class="active">Pages</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
-
 <?php
 $hide = Input::get('hide');
 if ($hide == 'core') {
@@ -217,15 +203,15 @@ $csrf = Token::generate();
     ?>
   </strong>
   <?php if (in_array($user->data()->id, $master_account)) {?>
-    <a href="#folder_modal" data-toggle="modal" class="btn btn-outline-dark">Change</a>
+    <a href="#folder_modal" data-toggle="modal" data-bs-toggle="modal" class="btn btn-outline-primary btn-sm mb-2">Change</a>
   <?php } ?>
 </p>
 <div class="card">
   <div class="card-body">
-    <table id="pagestable" class='table table-hover table-list-search'>
+    <table id="pagestable" class='table table-hover paginate'>
       <thead>
         <tr>
-          <th>Id</th><th>Page</th><th>Page Name</th><th>Access</th>
+          <th>ID</th><th>Page</th><th>Page Name</th><th>Access</th>
         </tr>
       </thead>
       <tbody>
@@ -236,7 +222,9 @@ $csrf = Token::generate();
           if ($c && $page->core == 1) {
             continue;
           } ?>
-          <tr><td><?=$dbpages[$count]->id; ?></td>
+          <tr>
+            <td><span class="hideMe"><?=sprintf('%08d',$dbpages[$count]->id)?></span>
+              <?=$dbpages[$count]->id; ?></td>
             <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id; ?>'><?=$dbpages[$count]->page; ?></a></td>
             <td><a class="nounderline text-dark" href ='admin.php?view=page&id=<?=$dbpages[$count]->id; ?>'><?=$dbpages[$count]->title; ?></a></td>
             <td>
@@ -257,7 +245,8 @@ $csrf = Token::generate();
       </table>
     </div>
   </div>
-
+</div>
+</div>
   <?php
   if ($delMsgs != '') {
     ?>
@@ -266,15 +255,6 @@ $csrf = Token::generate();
   </script>
 
   <?php
-} ?>
-
-
-<script type="text/javascript" src="js/pagination/datatables.min.js"></script>
-<script>
-$(document).ready(function() {
-  $('#pagestable').DataTable({"pageLength": 25,"stateSave": true,"aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]], "aaSorting": []});
-} );
-</script>
-<?php
+}
 include $abs_us_root.$us_url_root.'users/views/_folder_modal.php';
 ?>

@@ -100,12 +100,17 @@ if (!function_exists('deleteUsers')) {
 }
 
 if (!function_exists('echouser')) {
-    function echouser($id, $echoType = null)
+    function echouser($id, $echoType = null, $return = false)
     {
+
         $db = DB::getInstance();
         if($id == "" || $id == 0){
-          echo "Guest";
-          return true;
+          $string = "Guest";
+          if($return){
+            return $string;
+          }else{
+            echo $string;
+          }
         }
 
         $id = (int) $id;
@@ -117,62 +122,55 @@ if (!function_exists('echouser')) {
             $settings = $settingsQ->first();
             $echoType = $settings->echouser;
         }
-
+        $string = "Unknown";
         if ($echoType == 0) {
             $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
+
             $count = $query->count();
             if ($count > 0) {
                 $results = $query->first();
-                echo $results->fname.' '.$results->lname;
-            } else {
-                echo 'Unknown';
-            }
-        }
+                $string = $results->fname.' '.$results->lname;
 
-        if ($echoType == 1) {
+            }
+        }elseif ($echoType == 1) {
             $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
             $count = $query->count();
             if ($count > 0) {
                 $results = $query->first();
-                echo ucfirst($results->username);
-            } else {
-                echo '-';
+                $string = ucfirst($results->username);
             }
-        }
-
-        if ($echoType == 2) {
+        }elseif ($echoType == 2) {
             $query = $db->query('SELECT username,fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
             $count = $query->count();
             if ($count > 0) {
                 $results = $query->first();
-                echo ucfirst($results->username).' ('.$results->fname.' '.$results->lname.')';
-            } else {
-                echo 'Unknown';
+                $string = ucfirst($results->username).' ('.$results->fname.' '.$results->lname.')';
             }
-        }
-
-        if ($echoType == 3) {
+        }elseif ($echoType == 3) {
             $query = $db->query('SELECT username,fname FROM users WHERE id = ? LIMIT 1', [$id]);
             $count = $query->count();
             if ($count > 0) {
                 $results = $query->first();
-                echo ucfirst($results->username).' ('.$results->fname.')';
-            } else {
-                echo 'Unknown';
+                $string =  ucfirst($results->username).' ('.$results->fname.')';
             }
-        }
-        if ($echoType == 4) {
+        }elseif ($echoType == 4) {
             $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
             $count = $query->count();
             if ($count > 0) {
                 $results = $query->first();
-                echo ucfirst($results->fname).' '.substr(ucfirst($results->lname), 0, 1);
-            } else {
-                echo 'Unknown';
+                $string = ucfirst($results->fname).' '.substr(ucfirst($results->lname), 0, 1);
             }
+
+          }
+
+        if($return == true){
+          return $string;
+        }else{
+          echo $string;
         }
     }
 }
+
 
 if (!function_exists('echousername')) {
     function echousername($id)

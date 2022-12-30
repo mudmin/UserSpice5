@@ -1,6 +1,8 @@
 <?php
+/*
+Do not put any content above the opening PHP tag
 /**
-      Afrikaans Translation by John Dovey <boondock@criptext.com> 
+      Afrikaans Translation by John Dovey <boondock@criptext.com>
       v 1.0: 8 January 2021
       Any suggestions for improvements greately appreciated
 **/
@@ -263,7 +265,7 @@ $lang = array_merge($lang,array(
 	"2FA_FATAL"	=> "<strong> fatale fout </strong> Kontak asseblief die stelselbeheerder.",
 		));
 
-	//Redirect Messages - These get a plus between each word 
+	//Redirect Messages - These get a plus between each word
   // It seems pointless to me to translate these. Feel free to contribute, Voel Vry!
 	$lang = array_merge($lang,array(
 	"REDIR_2FA"		=> "Sorry.Two+factor+is+not+enabled+at+this+time",
@@ -310,11 +312,11 @@ $lang = array_merge($lang,array(
 	"VER_RES_SUC" 		=> "<p> U verifikasieskakel is na u e-posadres gestuur. </p> <p> Klik op die skakel in die e-posadres om die verifikasie te voltooi. Kontroleer u strooiposmap as die e-pos nie in u posbus. </p> <p> Verifikasie skakels is slegs geldig vir ",
 	"VER_OOPS"		=> "Oeps ... iets het verkeerd gegaan, miskien 'n ou reset-skakel waarop u geklik het. Klik hieronder om weer te probeer",
 	"VER_RESET"		=> "U wagwoord is herstel!",
-	"VER_INS"		=> "<li> Voer u e-posadres in en klik op Herstel </li> 
+	"VER_INS"		=> "<li> Voer u e-posadres in en klik op Herstel </li>
 					<li> Kontroleer u e-posadres en klik op die skakel wat aan u gestuur word. </li>
 					<li> Volg die instruksies op die skerm </li> ",
 	"VER_SENT"		=> "<p> U skakel vir die herstel van wagwoord is na u e-posadres gestuur. </p>
-					<p> Klik op die skakel in die e-pos om u wagwoord terug te stel. Maak seker dat u u strooipos van die strooipos nagaan as die e-pos nie in u posbus is nie. </p> 
+					<p> Klik op die skakel in die e-pos om u wagwoord terug te stel. Maak seker dat u u strooipos van die strooipos nagaan as die e-pos nie in u posbus is nie. </p>
 					<p> Terugstelskakels is slegs geldig vir ",
 	"VER_PLEASE"		=> "Stel u wagwoord asseblief terug",
 			));
@@ -405,4 +407,4 @@ $lang = array_merge($lang,array(
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }
-?>
+ //do not put a closing php tag here

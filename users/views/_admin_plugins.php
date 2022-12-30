@@ -1,19 +1,7 @@
-<div class="col-sm-8">
-  <div class="page-header float-right">
-    <div class="page-title">
-      <ol class="breadcrumb text-right">
-        <li><a href="<?= $us_url_root ?>users/admin.php">Dashboard</a></li>
-        <li>Manage</li>
-        <li class="active">Plugins</li>
-      </ol>
-    </div>
-  </div>
-</div>
-</div>
-</header>
 <?php
 if(!in_array($user->data()->id,$master_account)){
-  Redirect::to('admin.php?err=Plugin administration is for master accounts only.');
+  usError('Plugin administration is for master accounts only.');
+  Redirect::to('admin.php');
 }
 //Errors Successes
 $errors = [];
@@ -21,7 +9,7 @@ $successes = [];
 $dirs = glob($abs_us_root . $us_url_root . 'usersc/plugins/*', GLOB_ONLYDIR);
 $plugins = [];
 if (!is_writeable($abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php')) {
-  err("Warning. Your plugins.ini.php file is not writeable. This will cause problems installing plugins.");
+  usError("Warning. Your plugins.ini.php file is not writeable. This will cause problems installing plugins.");
 }
 foreach ($dirs as $d) {
   $plugins[] = str_replace($abs_us_root . $us_url_root . 'usersc/plugins/', "", $d);
@@ -48,14 +36,16 @@ if (!empty($_POST)) {
     $file = $abs_us_root.$us_url_root."usersc/plugins/".$plugin."/.noupdate";
     if($action == "unlockme"){
       unlink($file);
-      Redirect::to('admin.php?view=plugins&err=' . $plugin . ' unlocked');
+      usSuccess("$plugin unlocked");
+      Redirect::to('admin.php?view=plugins');
     }
 
     if($action == "lockme"){
       $write = fopen($file,"w");
       fwrite($write,"");
       fclose($write);
-      Redirect::to('admin.php?view=plugins&err=' . $plugin . ' has been locked');
+      usSuccess("$plugin has been locked");
+      Redirect::to('admin.php?view=plugins');
     }
   }
   $activate = Input::get('activate');
@@ -89,22 +79,28 @@ if (!empty($_POST)) {
 
       rmdir($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin);
     }
-
-    Redirect::to('admin.php?view=plugins&err=' . $plugin . ' deleted');
+    usSuccess("$plugin has been deleted");
+    Redirect::to('admin.php?view=plugins');
   }
 
   if ($deactivate != '') {
+
     $usplugins[$plugin] = 2;
     $db->update('us_plugins', ['plugin', '=', $plugin], ['status' => 'uninstalled']);
     write_php_ini($usplugins, $abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php');
     if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/uninstall.php')) {
+
       include $abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/uninstall.php';
+
     }
-    Redirect::to('admin.php?view=plugins&err=' . $plugin . ' deactivated. You may click the trash can icon to delete the plugin' . $jump);
+    usSuccess("$plugin deactivated. You may click the trash can icon to delete the plugin");
+    dump("About to redirect");
+    Redirect::to('admin.php?view=plugins&activation_code='.uniqid() . $jump);
   }
 
 
   if ($activate != '') {
+
     $usplugins[$plugin] = 1;
     $db->update('us_plugins', ['plugin', '=', $plugin], ['status' => 'active']);
     write_php_ini($usplugins, $abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php');
@@ -120,9 +116,8 @@ if (!empty($_POST)) {
     }
     $pluginId = $db->query("SELECT id FROM us_plugins WHERE plugin = ?",[$plugin])->first();
     $db->update('us_plugins',$pluginId->id,['last_check'=>date("Y-m-d H:i:s")]);
-
-
-    Redirect::to('admin.php?view=plugins&err=' . $plugin . ' Activated.' . $jump);
+    usSuccess("$plugin has been activated");
+    Redirect::to('admin.php?view=plugins&activation_code='.uniqid() . $jump);
   }
 }
 $token = Token::generate();

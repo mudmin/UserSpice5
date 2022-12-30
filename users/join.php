@@ -21,14 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // error_reporting(E_ALL);
 // ini_set('display_errors', 1);
 ini_set('allow_url_fopen', 1);
+header('X-Frame-Options: DENY');
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 
-?>
-
-<?php if (!securePage($_SERVER['PHP_SELF'])) {
-    die();
-}
 $hooks = getMyHooks();
 
 if ($user->isLoggedIn()) {
@@ -36,17 +32,16 @@ if ($user->isLoggedIn()) {
 }
 
 includeHook($hooks, 'pre');
-//There is a lot of commented out code for a future release of sign ups with payments
+
 $form_method = 'POST';
 $form_action = 'join.php';
 $vericode = randomstring(15);
 
-$form_valid = false;
-
 //Decide whether or not to use email activation
-$query = $db->query('SELECT * FROM email');
-$results = $query->first();
-$act = $results->email_act;
+$act = $db->query('SELECT * FROM email')->first()->email_act;
+
+
+$form_valid = false;
 
 //If you say in email settings that you do NOT want email activation,
 //new users are active in the database, otherwise they will become
@@ -75,6 +70,7 @@ if (Input::exists()) {
         } else {
             $is_not_email = true;
         }
+
         $validation->check($_POST, [
           'username' => [
                 'display' => lang('GEN_UNAME'),
@@ -117,22 +113,25 @@ if (Input::exists()) {
                 'matches' => 'password',
           ],
         ]);
+
     if ($eventhooks = getMyHooks(['page' => 'joinAttempt'])) {
         includeHook($eventhooks, 'body');
     }
+
     if ($validation->passed()) {
             $form_valid = true;
             //add user to the database
             $user = new User();
             $join_date = date('Y-m-d H:i:s');
             $params = [
-                                'fname' => Input::get('fname'),
-                                'email' => $email,
-                                'username' => $username,
-                                'vericode' => $vericode,
-                                'join_vericode_expiry' => $settings->join_vericode_expiry,
+                      'fname' => Input::get('fname'),
+                      'email' => $email,
+                      'username' => $username,
+                      'vericode' => $vericode,
+                      'join_vericode_expiry' => $settings->join_vericode_expiry,
                         ];
             $vericode_expiry = date('Y-m-d H:i:s');
+
             if ($act == 1) {
                 //Verify email address settings
                 $to = rawurlencode($email);
@@ -142,25 +141,24 @@ if (Input::exists()) {
                 $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
             }
             try {
-                // echo "Trying to create user";
                 if(isset($_SESSION['us_lang'])){
                   $newLang = $_SESSION['us_lang'];
                 }else{
                   $newLang = $settings->default_language;
                 }
                 $fields = [
-                                        'username' => $username,
-                                        'fname' => ucfirst(Input::get('fname')),
-                                        'lname' => ucfirst(Input::get('lname')),
-                                        'email' => Input::get('email'),
-                                        'password' => password_hash(Input::get('password', true), PASSWORD_BCRYPT, ['cost' => 12]),
-                                        'permissions' => 1,
-                                        'join_date' => $join_date,
-                                        'email_verified' => $pre,
-                                        'vericode' => $vericode,
-                                        'vericode_expiry' => $vericode_expiry,
-                                        'oauth_tos_accepted' => true,
-                                        'language'=>$newLang,
+                    'username' => $username,
+                    'fname' => ucfirst(Input::get('fname')),
+                    'lname' => ucfirst(Input::get('lname')),
+                    'email' => Input::get('email'),
+                    'password' => password_hash(Input::get('password', true), PASSWORD_BCRYPT, ['cost' => 12]),
+                    'permissions' => 1,
+                    'join_date' => $join_date,
+                    'email_verified' => $pre,
+                    'vericode' => $vericode,
+                    'vericode_expiry' => $vericode_expiry,
+                    'oauth_tos_accepted' => true,
+                    'language'=>$newLang,
                                 ];
                 $activeCheck = $db->query('SELECT active FROM users');
                 if (!$activeCheck->error()) {
@@ -175,37 +173,34 @@ if (Input::exists()) {
                 }
                 die($e->getMessage());
             }
-            if ($form_valid == true) { //this allows the plugin hook to kill the post but it must delete the created user
+            if ($form_valid == true) {
+              //this allows the plugin hook to kill the post but it must delete the created user
                 include $abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php';
 
                 if ($act == 1) {
                     logger($theNewId, 'User', 'Registration completed and verification email sent.');
-                    $query = $db->query('SELECT * FROM email');
-                    $results = $query->first();
-                    $act = $results->email_act;
-                    require $abs_us_root.$us_url_root.'users/views/_joinThankYou_verify.php';
+
+                    Redirect::to($us_url_root . "users/complete.php?action=thank_you_verify");
+
 
                 } else {
                     logger($theNewId, 'User', 'Registration completed.');
                     if (file_exists($abs_us_root.$us_url_root.'usersc/views/_joinThankYou.php')) {
-                        require_once $abs_us_root.$us_url_root.'usersc/views/_joinThankYou.php';
+
+                        Redirect::to($us_url_root . "users/complete.php?action=thank_you_join");
+
                     } else {
-                        require $abs_us_root.$us_url_root.'users/views/_joinThankYou.php';
+                        Redirect::to($us_url_root . "users/complete.php?action=thank_you");
                     }
 
                 }
-                require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php';
-                die();
             }
 
     } //Validation
 } //Input exists
 
-?>
-<?php header('X-Frame-Options: DENY'); ?>
-<div id="page-wrapper">
-<div class="container">
-<?php
+
+
 if ($settings->registration == 1) {
     if(file_exists($abs_us_root.$us_url_root.'usersc/views/_join.php')){
       require($abs_us_root.$us_url_root.'usersc/views/_join.php');
@@ -222,12 +217,6 @@ if ($settings->registration == 1) {
 }
 includeHook($hooks, 'bottom');
 ?>
-
-</div>
-</div>
-
-<!-- footers -->
-<?php require_once $abs_us_root.$us_url_root.'users/includes/page_footer.php'; ?>
 
 <script type="text/javascript">
     $(document).ready(function(){
