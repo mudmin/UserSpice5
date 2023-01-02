@@ -17,8 +17,10 @@ require_once($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'
 require_once $abs_us_root . $us_url_root . "users/js/jquery.php";
 ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
-
 <?php
+if(file_exists($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'/assets/css/style.css')){?>
+  <link href="<?=$us_url_root?>usersc/templates/<?=$settings->template?>/assets/css/style.css" rel="stylesheet">
+<?php }
 if(file_exists($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'.css')){?>
   <link href="<?=$us_url_root?>usersc/templates/<?=$settings->template?>.css" rel="stylesheet">
 <?php } ?>

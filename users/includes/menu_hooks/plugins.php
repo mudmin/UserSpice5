@@ -15,7 +15,7 @@ foreach($dirs as $d){
   }
   ?>
   <li class=''>
-    <a class='' href='<?=$us_url_root?>users/admin.php?view=plugins&plugin=<?=$string?>' ><i class='<?=$icon?>'></i>
+    <a class='' href='<?=$us_url_root?>users/admin.php?view=plugins_config&plugin=<?=$string?>' ><i class='<?=$icon?>'></i>
       <span class='labelText'><?=$buttonTitle?></span>
     </a>
   </li>

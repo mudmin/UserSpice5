@@ -202,7 +202,7 @@ if($_POST) {
                   <?php foreach($snippets as $s){
                       $s = str_replace($us_url_root,"",$s);
                     ?>
-                    <option value="<?=$s?>"><?=$s?></option>
+                    <option <?php if($item->link == $s){echo "selected='selected'";} ?> value="<?=$s?>"><?=$s?></option>
                   <?php } ?>
                 </select>
                 <small class="form-text text-muted">Snippets can be located in usersc/hooks/menus or in a  plug-in's menu_hooks folder.</small>
