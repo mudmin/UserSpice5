@@ -205,3 +205,24 @@ if(!function_exists('echoId')) {
 		}
 	}
 }
+
+if (!function_exists('format_date')) {
+  function format_date($date, $tz)
+  {
+    //return date("m/d/Y ~ h:iA", strtotime($date));
+    $format = 'Y-m-d H:i:s';
+    $dt = DateTime::createFromFormat($format, $date);
+    // $dt->setTimezone(new DateTimeZone($tz));
+    return $dt->format('m/d/y ~ h:iA');
+  }
+}
+
+if (!function_exists('abbrev_date')) {
+  function abrev_date($date, $tz)
+  {
+    $format = 'Y-m-d H:i:s';
+    $dt = DateTime::createFromFormat($format, $date);
+    // $dt->setTimezone(new DateTimeZone($tz));
+    return $dt->format('M d,Y');
+  }
+}

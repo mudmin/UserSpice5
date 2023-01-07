@@ -1,22 +1,29 @@
 <?php
 class Menu {
-  public $id, $menu_name, $menu, $disabled = 0;
   protected $db;
+  public $id, $menu_name, $menu, $view;
   public $items = [];
   public $tree = [];
   public $userPerms = [0];
+  public $show_branding = true;
+  public $disabled = 0;
 
 
   public function __construct($id) {
+    $menu = false;
     $this->db = DB::getInstance();
     $q = $this->db->query("SELECT * FROM us_menus WHERE id = ?",[$id]);
     $c = $q->count();
     if($c < 1){
-      die("Your menu is missing. If you have just upgraded UserSpice,
-      please navigate to users/updates in your browser to create your menus.
-      Otherwise, please go into your database and restore a backup or select a different menu.
-      If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to
-      attempt to create a new Main Menu");
+      $view = Input::get('view');
+      if($view != "edit_menu"){
+        die("Your menu is missing. If you have just upgraded UserSpice,
+        please navigate to users/updates in your browser to create your menus.
+        Otherwise, please go into your database and restore a backup or select a different menu.
+        If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to
+        attempt to create a new Main Menu");
+      }
+
     }else{
       $menu = $q->first();
     }
@@ -155,7 +162,7 @@ class Menu {
         include $abs_us_root . $us_url_root . $item->link;
         $data = ob_get_clean();
         $html .=  $data;
-        ob_end_flush();
+        @ob_end_flush();
         $html .= "</li>";
       }else{
         $html .= "<li class='{$liClass}' data-menu='{$item->menu}'>";
@@ -206,6 +213,15 @@ class Menu {
     }
     foreach($items as $item) {
       $parsedLabel = parseMenuLabel($item->label);
+
+      if ($parsedLabel == "" || $parsedLabel == null) {
+        if($item->type == "separator"){
+          $parsedLabel = "(separator)";
+        }else{
+          $parsedLabel = "(no label)";
+        }
+
+      }
       $active = $item->id == $itemId? 'active' : '';
       $html .= "<li>";
       $html .= "<a ";

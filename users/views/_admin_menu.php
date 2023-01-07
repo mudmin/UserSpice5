@@ -65,7 +65,4 @@ if(!function_exists('usView')){
 }
 
 
-  if(file_exists($abs_us_root . $us_url_root . "usersc/includes/admin_sidebar.php")){
-    require_once $abs_us_root . $us_url_root . "usersc/includes/admin_sidebar.php";
-  }
   ?>

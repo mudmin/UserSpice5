@@ -105,6 +105,8 @@ if (empty($dest = sanitizedDest('dest'))) {
       <div class="modal-content">
         <div class="modal-header">
           <b><?=lang("SIGNIN_TITLE","");?></b>
+          <a href="<?=$us_url_root?>" aria-label="Close" class="close btn btn-outline-secondary btn-sm">X</a>
+
         </div>
         <div class="modal-body p-4 py-5 p-md-5">
           <?php includeHook($hooks,'body'); ?>
@@ -156,7 +158,7 @@ $(document).ready(function(){
   $("#loginModal").modal('show');
   setTimeout(function (){
     $('#username').focus();
-}, 1000);
+}, 500);
 });
 
 </script>

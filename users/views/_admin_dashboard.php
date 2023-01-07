@@ -1,4 +1,3 @@
-<div class="content mt-3">
 <!-- Begin Widgets -->
 <!-- <div class="col-sm-12 mb-6"> -->
 <div class="row" id="widgetList">

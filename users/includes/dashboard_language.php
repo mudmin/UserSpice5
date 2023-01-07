@@ -1,6 +1,4 @@
 <?php
-$db = DB::getInstance();
-$settings = $db->query("SELECT * FROM settings")->first();
 if(file_exists($abs_us_root.$us_url_root."users/lang/".$settings->default_language.".php")){
 require_once $abs_us_root.$us_url_root."users/lang/".$settings->default_language.".php";
 }elseif(file_exists($abs_us_root.$us_url_root."users/lang/en-US.php")){

@@ -1,4 +1,3 @@
-<div class="content mt-3">
   <form class="" action="" name="register" method="post">
     <h2 class="mb-3">Registration Settings</h2>
     <div class="row">

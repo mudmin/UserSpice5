@@ -155,7 +155,6 @@ if (!empty($_POST)) {
 }
 
 ?>
-<div class="content mt-3">
   <form name='update' action='' method='post'>
     <h2 class="mb-3">Email Server Settings</h2>
     <p class="text-dark">

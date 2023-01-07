@@ -43,9 +43,9 @@
         $remoteVersion = trim(file_get_contents(REMOTE_VERSION));
         $remoteVersion = preg_replace('/[^\\d.]+/', '', $remoteVersion);
         if (version_compare($remoteVersion, $user_spice_ver) == 1) {
-          $class = "text-bg-success";
+          $class = "text-bg-danger";
         }else{
-          $class = "text-bg-warning";
+          $class = "text-bg-success";
         }
         ?>
         <div class="card text-bg-secondary mb-3 me-3 col">

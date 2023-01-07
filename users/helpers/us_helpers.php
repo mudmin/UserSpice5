@@ -678,21 +678,6 @@ if (!function_exists('returnError')) {
   }
 }
 
-if (!function_exists('userHasPermission')) {
-  function userHasPermission($userID, $permissionID)
-  {
-    $permissionsAr = fetchUserPermissions($userID);
-    //if($permissions[0])
-    foreach ($permissionsAr as $perm) {
-      if ($perm->permission_id == $permissionID) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-}
-
 if (!function_exists('requestCheck')) {
   function requestCheck($expectedAr)
   {

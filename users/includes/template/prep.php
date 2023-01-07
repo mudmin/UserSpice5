@@ -1,6 +1,4 @@
 <?php
-$db = DB::getInstance();
-$settings = $db->query("SELECT * FROM settings")->first();
 if($settings->template == "wp"){$ignoreTemplateFix = true;}else{$ignoreTemplateFix = false;}
 if(isset($template_override)){
   $settings->template = $template_override;
@@ -42,7 +40,10 @@ require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->tem
   }
 }//end $ignoreTemplateFix for wordpress compatibility
 }
-require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/navigation.php'; //custom template nav
+if(!isset($hide_top_navigation) || $hide_top_navigation != true){
+  require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/navigation.php'; //custom template nav
+}
+
 require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/container_open.php'; //custom template container
 
 if(file_exists( $abs_us_root . $us_url_root . 'usersc/includes/system_messages_header.php' ) ){

@@ -12,13 +12,13 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 function closeSiblings(dropdown) {
-  const parent = dropdown.parentNode;
+  const parent = dropdown.parentNode; // menu UL
   if(!parent) return;
-  let sibling = parent.firstChild;
-  while(sibling) {
-    if(sibling != dropdown) {
+  let sibling = parent.firstChild; // children are DIV, LI, or TEXT
+  while (sibling) {
+    if (sibling != dropdown) {
       const dd = sibling.querySelector('.us_sub-menu.show');
-      if(dd){
+      if (dd) {
         dd.classList.remove('show');
       }
     }
@@ -38,13 +38,18 @@ function expandMenuIfMobile(menuId) {
 
 function openDropdown(e) {
   e.preventDefault();
-  const parent = e.currentTarget.parentNode;
-  const sub = e.currentTarget.nextElementSibling;
+  const parent = e.currentTarget.parentNode; // parent LI
+  const sub = e.currentTarget.nextElementSibling; // submenu UL
   if(sub.classList.contains('show')) {
     sub.classList.remove('show');
-  } else {
+    if (parent.classList.contains('open')) {
+      parent.classList.remove('open');
+    }
+  }
+  else {
     sub.classList.add('show');
-    closeSiblings(parent);
+    parent.classList.add('open');
+    closeSiblings(parent); // this line fails on non-dashboard menu
     expandMenuIfMobile(parent.dataset.menu);
     const zIndex = parseInt(sub.style.zIndex, 10);
     let rect = sub.getBoundingClientRect();
@@ -52,15 +57,15 @@ function openDropdown(e) {
     // check to see if it goes off screen
     if((rect.x + rect.width) > windowWidth) {
       sub.style.left = 'unset';
-      sub.style.right = '100%';
+      sub.style.right = '0';
     }
-    rect = sub.getBoundingClientRect();
+    //rect = sub.getBoundingClientRect();
     if(rect.x < 0) {
       sub.style.left = '0';
       sub.style.right = '0';
       sub.style.top = '100%';
     }
-    // add backdrop if not exists
+    // add backdrop if not exists (only works in admin dashboard)
     let bd = document.getElementById('us-menu-backdrop');
     if(!bd) {
       bd = document.createElement('div');
@@ -77,6 +82,9 @@ function backdropClick(evt) {
   const opens = document.querySelectorAll('.us_menu .us_sub-menu.show');
   for(let i = 0; i < opens.length; i++) {
     opens[i].classList.remove('show');
+    // remove open
+    var parent = opens[i].parentNode;
+    parent.classList.remove('open');
   }
   evt.currentTarget.remove();
 }

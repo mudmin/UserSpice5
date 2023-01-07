@@ -3,7 +3,7 @@ ul.us_menu {
   /*float: left;*/
   list-style: none;
   padding-left: 0;
-  width: 280px;
+  /*width: 280px; */ /* no explicit widths or zoom will break layout */
   background-color: #f2f2f2;
   margin: 0;
   padding: 0;
@@ -52,9 +52,11 @@ ul.us_menu li > a{
   color: #333;
 }
 
-ul.us_menu li a i{
+ul.us_menu li a i,
+ul.us_menu li a span:first-child /* hopeful that span can be used for icons going forward */
+{
   display: inline-block;
-  margin-right: 4px;
+  margin-right: 10px;
 }
 
 ul.us_menu li:hover {
@@ -129,7 +131,7 @@ ul.us_menu.accordion .us_sub-menu{
   left: unset;
   display: none;
   float: unset;
-  padding-left: 8px;
+  padding-left: 16px;
 }
 
 ul.us_sub-menu.show, ul.us_menu.accordion .us_sub-menu.show {
@@ -189,7 +191,7 @@ ul.us_menu.dark .dropdown-divider{
 
   ul.us_menu:not(.horizontal) {
     transition: all 750ms ease-in-out;
-    width: 15vw;
+    /*width: 15vw;*/ /* no explicit widths in case of zoom */
     overflow: hidden;
   }
 
