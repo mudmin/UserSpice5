@@ -23,8 +23,6 @@ require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 $hooks =  getMyHooks();
 includeHook($hooks,'pre');
-?>
-<?php
 
 $errors = $successes = [];
 if (Input::get('err') != '') {
@@ -98,6 +96,11 @@ if (empty($dest = sanitizedDest('dest'))) {
   $dest = '';
 }
 ?>
+<style media="screen">
+  .img-responsive{
+    width:100% !important;
+  }
+</style>
 <div class="container p-2 h-100">
 
   <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" aria-hidden="true" data-keyboard="false" data-backdrop="static">
@@ -145,13 +148,6 @@ if (empty($dest = sanitizedDest('dest'))) {
     </div>
   </div>
 
-  <!-- <button type="button" class="btn btn-primary py-3 px-4"
-  data-toggle="modal"
-  data-bs-toggle="modal"
-  data-target="#loginModal"
-  data-bs-target="#loginModal">
-  Launch Modal 05
-</button> -->
 <script>
 $(document).ready(function(){
   $("#loginModal").modal({backdrop: 'static', keyboard: false})
