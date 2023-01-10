@@ -1,4 +1,5 @@
   <?php
+  $settings = $db->query("SELECT * FROM settings")->first();
   $dirs = glob($abs_us_root . $us_url_root . 'usersc/templates/*', GLOB_ONLYDIR);
   $templates = [];
   foreach ($dirs as $d) {

@@ -22,7 +22,8 @@ ini_set('memory_limit', '1024M');
 ?>
 <?php
 require_once '../users/init.php';
-
+// change container_open_class so pages will be full-height.
+$settings->container_open_class = "container-fluid d-flex flex-column flex-grow-1";
 $settings->navigation_type = 1;
 require_once $abs_us_root . $us_url_root . 'usersc/includes/dashboard_overrides.php';
 if (isset($template_override)) {
@@ -135,7 +136,7 @@ if ($view == '' || $view == 'dashboard') {
   }
 </style>
 
-<div class="row">
+<div class="row flex-grow-1" id="page-wrap">
   <?php
   if ($dashboard_sidebar_menu == true) {
     if (file_exists($abs_us_root . $us_url_root . "usersc/views/_admin_sidebar.php")) {
@@ -355,7 +356,7 @@ if ($view == '' || $view == 'dashboard') {
     }
     ?>
   </div> <!-- .content -->
-</div><!-- /#right-panel -->
+</div><!-- .row -->
 
 <?php
 if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/system_messages_footer.php')) {
@@ -537,6 +538,7 @@ if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/system_messages_f
     });
   });
 </script>
+</div> <!-- close the container class that's set in the preferences -->
 <?php foreach ($usplugins as $k => $v) {
   if ($v == 1) {
     if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $k . '/footer.php')) {
@@ -544,7 +546,6 @@ if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/system_messages_f
     }
   }
 }
-
 
 if (isset($use_template_footer) && $use_template_footer == true) {
   require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php';

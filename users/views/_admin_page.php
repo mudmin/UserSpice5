@@ -2,6 +2,8 @@
 // PHP Goes Here!
 $hooks = getMyHooks(['page' => 'adminPage']);
 $pageId = Input::get('id');
+$errors = [];
+$successes = [];
 
 // Check if selected pages exist
 if (!pageIdExists($pageId)) {

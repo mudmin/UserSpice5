@@ -1,4 +1,6 @@
-<?php $hooks = getMyHooks(['page' => 'admin.php?view=general']);
+<?php
+$settings = $db->query("SELECT * FROM settings")->first();
+$hooks = getMyHooks(['page' => 'admin.php?view=general']);
 includeHook($hooks, 'pre');
 ?>
 

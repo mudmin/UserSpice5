@@ -105,7 +105,7 @@ if (empty($dest = sanitizedDest('dest'))) {
       <div class="modal-content">
         <div class="modal-header">
           <b><?=lang("SIGNIN_TITLE","");?></b>
-          <a href="<?=$us_url_root?>" aria-label="Close" class="close btn btn-outline-secondary btn-sm">X</a>
+          <a href="<?=$us_url_root?>" aria-label="Close" class="close btn-close" style="top: 1rem!important;"></a>
 
         </div>
         <div class="modal-body p-4 py-5 p-md-5">

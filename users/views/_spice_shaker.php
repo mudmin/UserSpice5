@@ -177,10 +177,11 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
               <option value="translation" <?php if ($type == 'translation') { ?>selected="Selected" <?php } ?>>Browse Languages</option>
             </select>
             <input type="submit" name="go" value="Go" class="btn btn-primary">
+          </div>
         </form>
       </div>
     </div>
-</div>
+
 <?php } else { ?>
   <h2>You must <a href="admin.php?view=general">enter your Free UserSpice API key here</a> in order to use this feature.</h2>
 <?php } ?>
@@ -206,9 +207,18 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
 
       <div class="col-12 col-sm-6 col-md-4 pb-3">
         <div class="card card-custom <?= $class ?> bg-white border-white border-0" style="height: 450px">
-          <div class="card-custom-img" style="background-image: url(<?php if ($d->img != '') {
+          <?php if($d->category == "template"){
+            $imgClass = "card-template-img";
+            $showLogo = false;
+          }else{
+            $imgClass = "card-custom-img";
+            $showLogo = true;
+          }
+          ?>
+          <div class="<?=$imgClass?>" style="background-image: url(<?php if ($d->img != '') {
                                                                       echo $d->img;
                                                                     } else { ?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php } ?>);"></div>
+          <?php if($showLogo){ ?>
           <div class="card-custom-avatar">
             <?php if ($d->icon == '') {
               $src = "https://bugs.userspice.com/usersc/logos/nologo.png";
@@ -218,6 +228,8 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
             ?>
             <img class="img-fluid" src="<?= $src ?>" alt="Avatar" />
           </div>
+          <?php } //end show logo ?>
+
           <div class="card-body" style="overflow-y: auto">
             <h6 class="card-title"><?= $d->project ?> v<?= $d->version . " (" . $d->status . ")"; ?></h6>
             <p><strong><?= $text ?><?= ucfirst($d->category) ?></strong>
@@ -256,7 +268,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
   echo "</div>";
 }
 ?>
-
+</div> <!-- end .mt-3 -->
 <script type="text/javascript">
   $(".installme").click(function(event) {
     if ($(this).hasClass("warnme")) {
@@ -319,6 +331,17 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
     background-position: center;
     border-color: inherit;
   }
+
+  .card-template-img {
+    height: 200px;
+    min-height: 200px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    border-color: inherit;
+  }
+
+
 
   /* First border-left-width setting is a fallback */
   .card-custom-img::after {

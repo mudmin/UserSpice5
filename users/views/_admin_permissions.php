@@ -11,7 +11,7 @@ if (!empty($_POST)) {
   }
 
   //Create new permission level
-  if (!empty($_POST['name'])) {
+  if (!empty($_POST['create'])) {
     $permission = Input::get('name');
     if ($permission != "") {
       $fields = array('name' => $permission);
@@ -37,7 +37,7 @@ if (!empty($_POST)) {
     Redirect::to("admin.php?view=permissions&manage=$manage");
   }
 
-  if (!empty($_POST['delete'])) {
+  if (!empty($_POST['deleteButton'])) {
     $delete = Input::get('delete');
     if ($delete < 3) {
       usError("This Permission cannot be deleted");
@@ -80,20 +80,33 @@ $userCount = $db->query("SELECT id FROM users")->count();
 ?>
 
 <div class="row">
-  <div class="col-12">
+  <div class="col-12 col-sm-6">
     <h3>Permission Levels</h3>
+  </div>
+  <div class="col-12 col-sm-6">
+    <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
+      <?= tokenHere(); ?>
+      <p class=" text-xs-center text-sm-end">
+        <input type="hidden" name="delete" value="<?=$manage?>">
+        <?php if ($manage == 1 || $manage == 2) { ?>
+          <button type="button" name="button" class="btn btn-secondary">Cannot be Deleted</button>
+        <?php } else { ?>
+          <input type="submit" name="deleteButton" value="Delete Permission Level" class="btn btn-danger">
+        <?php } ?>
+      </p>
+    </form>
   </div>
 </div>
 
 <div class="row">
-  <div class="col-12 col-md-4">
+  <div class="col-12 col-md-6">
     <h5>Create Permission Level</h5>
     <form name='adminPermissions' action='' method='post'>
       <?= tokenHere(); ?>
 
       <div class="input-group">
         <input type='text' name='name' class="form-control" placeholder="Permission Name" />
-        <input class='btn btn-primary' type='submit' name='Submit' value='Create' />
+        <input class='btn btn-primary' type='submit' name='create' value='Create' />
       </div>
     </form>
     <h5 style="margin-top:2rem;">Existing Permissions
@@ -126,7 +139,8 @@ $userCount = $db->query("SELECT id FROM users")->count();
     </table>
   </div>
 
-  <div class="col-12 col-md-8">
+  <div class="col-12 col-md-6">
+    <h5>Manage the Permission Level</h5>
     <?php
     $q = $db->query("SELECT * FROM permissions WHERE id = ?", [$manage]);
     $c = $q->count();
@@ -144,11 +158,11 @@ $userCount = $db->query("SELECT id FROM users")->count();
         $users = $usersQ->results();
       }
     ?>
-      <h5>Manage the <span class="text-primary"><?= ucfirst($perm->name) ?></span> Permission Level</h5>
+
       <div class="row">
         <div class="col-12">
           <div class="row">
-            <div class="col-12 col-lg-6">
+            <div class="col-12">
               <form class="" action="" method="post">
                 <?= tokenHere(); ?>
                 <div class="input-group">
@@ -157,18 +171,7 @@ $userCount = $db->query("SELECT id FROM users")->count();
                 </div>
               </form>
             </div>
-            <div class="col-12 col-md-6">
-              <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
-                <?= tokenHere(); ?>
-                <p class="text-end">
-                  <?php if ($manage == 1 || $manage == 2) { ?>
-                    <button type="button" name="button" class="btn btn-secondary">Cannot be Deleted</button>
-                  <?php } else { ?>
-                    <input type="submit" name="delete" value="Delete Permission Level" class="btn btn-danger">
-                  <?php } ?>
-                </p>
-              </form>
-            </div>
+
           </div>
           <?php if ($manage == 1 || $manage == 2) { ?>
             <small class="mb-3">Although you can rename the Admin and User permissions, please do not attempt to change their purpose. Permission 1 is the permission every user gets. You cannot remove this permission. Permission 2 should be reserved for Administrators. These permissions cannot be deleted.</small>
