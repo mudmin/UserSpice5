@@ -197,12 +197,14 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
         $text = "Official ";
         $img = $us_url_root . "users/images/check.png";
         $warning = "";
+
       } else {
         $class = "";
         $text = "Community ";
         $img = "";
         $warning = "warnme";
       }
+
 ?>
 
       <div class="col-12 col-sm-6 col-md-4 pb-3">
@@ -210,14 +212,16 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
           <?php if($d->category == "template"){
             $imgClass = "card-template-img";
             $showLogo = false;
+            $width = "col-6";
           }else{
+            $width = "col-12";
             $imgClass = "card-custom-img";
             $showLogo = true;
           }
           ?>
-          <div class="<?=$imgClass?>" style="background-image: url(<?php if ($d->img != '') {
-                                                                      echo $d->img;
-                                                                    } else { ?>http://res.cloudinary.com/d3/image/upload/c_scale,q_auto:good,w_1110/trianglify-v1-cs85g_cc5d2i.jpg <?php } ?>);"></div>
+          <div class="<?=$imgClass?>"
+            style="background-image: url(<?php if ($d->img != '') { echo $d->img; } else { echo $us_url_root . 'users/images/ssbg.jpg';} ?>);">
+          </div>
           <?php if($showLogo){ ?>
           <div class="card-custom-avatar">
             <?php if ($d->icon == '') {
@@ -231,10 +235,28 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
           <?php } //end show logo ?>
 
           <div class="card-body" style="overflow-y: auto">
-            <h6 class="card-title"><?= $d->project ?> v<?= $d->version . " (" . $d->status . ")"; ?></h6>
-            <p><strong><?= $text ?><?= ucfirst($d->category) ?></strong>
-              <img src="<?= $img ?>" alt="" height="15">
-            </p>
+            <div class="row">
+              <div class="<?=$width?>">
+                <h6 class="card-title"><?= $d->project ?> v<?= $d->version . " (" . $d->status . ")"; ?></h6>
+                <p><strong><?= $text ?><?= ucfirst($d->category) ?></strong>
+                  <img src="<?= $img ?>" alt="" height="15">
+                </p>
+              </div>
+              <?php if($d->category == "template"){ ?>
+              <div class="col-6 text-end">
+              <?php
+              if(isset($d->features)){
+                echo $d->features."<br>";
+              }
+
+              if(isset($d->accessibility)){
+                echo $d->accessibility;
+              }
+              ?>
+              </div>
+            <?php } ?>
+            </div>
+
             <p class="card-text"><?= $d->descrip ?></p>
           </div>
           <div class="card-footer" style="background: inherit; border-color: inherit;">

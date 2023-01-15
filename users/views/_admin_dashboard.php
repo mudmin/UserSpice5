@@ -61,8 +61,10 @@
 
 
 new Sortable(widgetList, {
-  sortable: true, draggable: '.dash-card',
-  store: {
+  sortable: true,
+  draggable: '.dash-card',
+  handle: '.grippy', // 'filtered' class is not draggable
+    store: {
         set: (sortable) => {
           var order = sortable.toArray();
           console.log(order);

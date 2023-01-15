@@ -33,7 +33,7 @@ if (!empty($_POST)) {
         usError("You cannot delete this user");
         Redirect::to("admin.php?view=user&id=" . $userdetails->id);
       }
-      if ($deletion_count = deleteUsers($userdetails->id)) {
+      if ($deletion_count = deleteUsers([$userdetails->id])) {
         logger($user->data()->id, 'User Manager', "Deleted user named $userdetails->fname.");
         $msg = lang('ACCOUNT_DELETIONS_SUCCESSFUL', [$deletion_count]);
         usSuccess($msg);

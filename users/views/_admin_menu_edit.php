@@ -359,7 +359,7 @@ if ($_POST) {
                   $parsedLabel = parseMenuLabel($child->label);
                 ?>
                   <tr class="child-sortable" data-id="<?= $child->id ?>">
-                    <td class="text-muted"><i class="fa fa-arrows"></i></td>
+                    <td class="text-muted"><i class="fa fa-arrows-v"></i></td>
                     <td><?= $parsedLabel ?></td>
                     <td>
                       <?php if ($parsedLabel != $child->label) {

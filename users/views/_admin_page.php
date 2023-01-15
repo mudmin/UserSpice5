@@ -21,27 +21,27 @@ if (Input::exists()) {
   }
   $update = 0;
 
-  if (!empty($_POST['private'])) {
-    $private = Input::get('private');
-  }
+  $private = Input::get('private');
 
   // Toggle private page setting
-  if (isset($private) and $private == 1) {
-    if ($pageDetails->private == 0) {
-      if (updatePrivate($pageId, 1)) {
-        $successes[] = lang('PAGE_PRIVATE_TOGGLED', ['private']);
-        logger($user->data()->id, 'Pages Manager', "Changed private from public to private for Page #$pageId.");
+  if ($private == 0) {
+    if ($pageDetails->private == 1) {
+      if (updatePrivate($pageId, 0)) {
+        usSuccess(lang('PAGE_PRIVATE_TOGGLED', ['public']));
+
+        logger($user->data()->id, 'Pages Manager', "Changed private from private to public for Page #$pageId.");
       } else {
         usError(lang('SQL_ERROR'));
       }
     }
   }
 
-  if (isset($private) and $private == 0) {
-    if ($pageDetails->private == 1) {
-      if (updatePrivate($pageId, 0)) {
-        $successes[] = lang('PAGE_PRIVATE_TOGGLED', ['private']);
-        logger($user->data()->id, 'Pages Manager', "Changed private from private to public for Page #$pageId.");
+  if ($private == 1) {
+
+    if ($pageDetails->private == 0) {
+      if (updatePrivate($pageId,1)) {
+        usSuccess(lang('PAGE_PRIVATE_TOGGLED', ['private']));
+        logger($user->data()->id, 'Pages Manager', "Changed private from public to private for Page #$pageId.");
       } else {
         usError(lang('SQL_ERROR'));
       }
@@ -54,7 +54,7 @@ if (Input::exists()) {
   if (!empty($_POST['removePermission'])) {
     $remove = Input::get('removePermission');
     if ($deletion_count = removePage($pageId, $remove)) {
-      $successes[] = lang('PAGE_ACCESS_REMOVED', [$deletion_count]);
+      usSuccess(lang('PAGE_ACCESS_REMOVED', [$deletion_count]));
       logger($user->data()->id, 'Pages Manager', "Deleted $deletion_count permission(s) from $pageDetails->page.");
     } else {
       usError(lang('SQL_ERROR'));
@@ -71,7 +71,7 @@ if (Input::exists()) {
       }
     }
     if ($addition_count > 0) {
-      $successes[] = lang('PAGE_ACCESS_ADDED', [$addition_count]);
+      usSuccess(lang('PAGE_ACCESS_ADDED', [$addition_count]));
       logger($user->data()->id, 'Pages Manager', "Added $addition_count permission(s) to $pageDetails->page.");
     }
   }
@@ -80,7 +80,7 @@ if (Input::exists()) {
   if ($_POST['changeTitle'] != $pageDetails->title) {
     $newTitle = Input::get('changeTitle');
     if ($db->query('UPDATE pages SET title = ? WHERE id = ?', [$newTitle, $pageDetails->id])) {
-      $successes[] = lang('PAGE_RETITLED', [$newTitle]);
+      usSuccess(lang('PAGE_RETITLED', [$newTitle]));
       logger($user->data()->id, 'Pages Manager', "Retitled '{$pageDetails->page}' to '$newTitle'.");
     } else {
       usError(lang('SQL_ERROR'));

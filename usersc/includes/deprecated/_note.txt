@@ -1,0 +1,5 @@
+Beginning in version 5.5.4, all officially deprecated functions will go in files in this folder.
+They will continue to be automatically loaded and your functionality will not change, however, they will
+not be in new installs.  If you do not need the functions in these files, you can delete them.
+
+Do not delete the folder itself.

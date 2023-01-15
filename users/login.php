@@ -64,7 +64,7 @@ if (!empty($_POST)) {
 
       if (!empty($dest)) {
         $redirect=Input::get('redirect');
-        if(!empty($redirect) || $redirect!=='') Redirect::to($redirect);
+        if(!empty($redirect) || $redirect!=='') Redirect::to(html_entity_decode($redirect));
         else Redirect::to($dest);
       } elseif (file_exists($abs_us_root.$us_url_root.'usersc/scripts/custom_login_script.php')) {
 

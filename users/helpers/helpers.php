@@ -35,12 +35,16 @@ foreach ($usplugins as $k => $v) {
 }
 
 require_once $abs_us_root.$us_url_root.'users/helpers/us_helpers.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/backup_util.php';
 require_once $abs_us_root.$us_url_root.'users/helpers/class.treeManager.php';
 require_once $abs_us_root.$us_url_root.'users/helpers/menus.php';
 require_once $abs_us_root.$us_url_root.'users/helpers/permissions.php';
 require_once $abs_us_root.$us_url_root.'users/helpers/users.php';
 require_once $abs_us_root.$us_url_root.'users/helpers/dbmenu.php';
+
+//deprecated functions and classes can go here and will autoload until you delete them.
+foreach (glob($abs_us_root.$us_url_root.'usersc/includes/deprecated/*.php') as $filename) {
+    require_once $filename;
+}
 
 define('ABS_US_ROOT', $abs_us_root);
 define('US_URL_ROOT', $us_url_root);

@@ -32,7 +32,9 @@
     #hr1 {
       display: none;
     }
-
+    td{
+      width:50%;
+    }
     @media (max-width:767px) {
       #hr {
         border: 1px black solid;
@@ -65,7 +67,7 @@
           <div class="row">
             <div class="col-md-6 text-center">
               <h3><?= ucfirst($t); ?> Theme </h3>
-              <img src="<?= $us_url_root . 'usersc/templates/' . $t . '/thumbnail.jpg' ?>" alt="thumbnail" width="300" class="border">
+              <img src="<?= $us_url_root . 'usersc/templates/' . $t . '/thumbnail.jpg' ?>" alt="thumbnail" width="70%" class="border">
 
               <div class="row mt-3">
                 <div class="col-12 col-sm-6">
@@ -146,12 +148,12 @@
                     </tr>
 
                     <tr>
-                      <td><b>Enhanced Accessibility</b></td>
+                      <td><b>Meets Accessibility Guidelines</b></td>
                       <td>
-                        <?php if (isset($xml->accessible) && $xml->accessible == 1) {
-                          echo bin(1);
+                        <?php if (!isset($xml->accessibility)) {
+                          echo "None";
                         } else {
-                          echo bin(0);
+                          echo $xml->accessibility;
                         } ?>
                       </td>
                     </tr>
