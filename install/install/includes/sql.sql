@@ -7,9 +7,9 @@
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.1.10
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+SET timezone = 'UTC';
+
+BEGIN;
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -27,14 +27,14 @@ SET time_zone = "+00:00";
 -- Table structure for table `audit`
 --
 
-CREATE TABLE `audit` (
-  `id` int(11) NOT NULL,
-  `user` int(11) NOT NULL,
-  `page` varchar(255) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `ip` varchar(255) NOT NULL,
-  `viewed` int(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE audit (
+  id serial PRIMARY KEY,
+  "user" integer NOT NULL,
+  page varchar(255) NOT NULL,
+  "timestamp" timestamptz NOT NULL DEFAULT now(),
+  ip inet NOT NULL,
+  viewed boolean NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -42,23 +42,23 @@ CREATE TABLE `audit` (
 -- Table structure for table `crons`
 --
 
-CREATE TABLE `crons` (
-  `id` int(11) NOT NULL,
-  `active` int(1) NOT NULL DEFAULT 1,
-  `sort` int(3) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `file` varchar(255) NOT NULL,
-  `createdby` int(11) NOT NULL,
-  `created` datetime DEFAULT NULL,
-  `modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE crons (
+  id serial PRIMARY KEY,
+  active smallint NOT NULL DEFAULT 1,
+  sort smallint NOT NULL,
+  name text NOT NULL,
+  file text NOT NULL,
+  createdby integer NOT NULL,
+  created timestamp DEFAULT NULL,
+  modified timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
 
 --
 -- Dumping data for table `crons`
 --
 
-INSERT INTO `crons` (`id`, `active`, `sort`, `name`, `file`, `createdby`, `created`, `modified`) VALUES
-(1, 0, 100, 'Auto-Backup', 'backup.php', 1, '2017-09-16 07:49:22', '2017-11-11 20:15:36');
+INSERT INTO crons (id, active, sort, name, file, createdby, created, modified)
+VALUES (1, 0, 100, 'Auto-Backup', 'backup.php', 1, '2017-09-16 07:49:22', '2017-11-11 20:15:36');
 
 -- --------------------------------------------------------
 
@@ -66,12 +66,12 @@ INSERT INTO `crons` (`id`, `active`, `sort`, `name`, `file`, `createdby`, `creat
 -- Table structure for table `crons_logs`
 --
 
-CREATE TABLE `crons_logs` (
-  `id` int(11) NOT NULL,
-  `cron_id` int(11) NOT NULL,
-  `datetime` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `user_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE crons_logs (
+  id serial PRIMARY KEY,
+  cron_id integer NOT NULL,
+  "datetime" timestamp without time zone NOT NULL DEFAULT now(),
+  user_id integer NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -79,31 +79,31 @@ CREATE TABLE `crons_logs` (
 -- Table structure for table `email`
 --
 
-CREATE TABLE `email` (
-  `id` int(11) NOT NULL,
-  `website_name` varchar(100) NOT NULL,
-  `smtp_server` varchar(100) NOT NULL,
-  `smtp_port` int(10) NOT NULL,
-  `email_login` varchar(150) NOT NULL,
-  `email_pass` varchar(100) NOT NULL,
-  `from_name` varchar(100) NOT NULL,
-  `from_email` varchar(150) NOT NULL,
-  `transport` varchar(255) NOT NULL,
-  `verify_url` varchar(255) NOT NULL,
-  `email_act` int(1) NOT NULL,
-  `debug_level` int(1) NOT NULL DEFAULT 0,
-  `isSMTP` int(1) NOT NULL DEFAULT 0,
-  `isHTML` varchar(5) NOT NULL DEFAULT 'true',
-  `useSMTPauth` varchar(6) NOT NULL DEFAULT 'true',
-  `authtype` varchar(50) DEFAULT 'CRAM-MD5'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE email (
+  id serial PRIMARY KEY,
+  website_name varchar(100) NOT NULL,
+  smtp_server varchar(100) NOT NULL,
+  smtp_port integer NOT NULL,
+  email_login varchar(150) NOT NULL,
+  email_pass varchar(100) NOT NULL,
+  from_name varchar(100) NOT NULL,
+  from_email varchar(150) NOT NULL,
+  transport varchar(255) NOT NULL,
+  verify_url varchar(255) NOT NULL,
+  email_act integer NOT NULL,
+  debug_level integer NOT NULL DEFAULT 0,
+  isSMTP integer NOT NULL DEFAULT 0,
+  isHTML varchar(5) NOT NULL DEFAULT 'true',
+  useSMTPauth varchar(6) NOT NULL DEFAULT 'true',
+  authtype varchar(50) DEFAULT 'CRAM-MD5'
+);
 
 --
 -- Dumping data for table `email`
 --
 
-INSERT INTO `email` (`id`, `website_name`, `smtp_server`, `smtp_port`, `email_login`, `email_pass`, `from_name`, `from_email`, `transport`, `verify_url`, `email_act`, `debug_level`, `isSMTP`, `isHTML`, `useSMTPauth`, `authtype`) VALUES
-(1, 'User Spice', 'smtp.gmail.com', 587, 'yourEmail@gmail.com', '1234', 'User Spice', 'yourEmail@gmail.com', 'tls', 'http://localhost/userspice', 0, 0, 0, 'true', 'true', 'CRAM-MD5');
+INSERT INTO email (id, website_name, smtp_server, smtp_port, email_login, email_pass, from_name, from_email, transport, verify_url, email_act, debug_level, isSMTP, isHTML, useSMTPauth, authtype) 
+VALUES (1, 'User Spice', 'smtp.gmail.com', 587, 'yourEmail@gmail.com', '1234', 'User Spice', 'yourEmail@gmail.com', 'tls', 'http://localhost/userspice', 0, 0, 0, 'true', 'true', 'CRAM-MD5');
 
 -- --------------------------------------------------------
 
@@ -111,17 +111,17 @@ INSERT INTO `email` (`id`, `website_name`, `smtp_server`, `smtp_port`, `email_lo
 -- Table structure for table `groups_menus`
 --
 
-CREATE TABLE `groups_menus` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `group_id` int(11) UNSIGNED NOT NULL,
-  `menu_id` int(11) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE groups_menus (
+  id serial PRIMARY KEY,
+  group_id INTEGER NOT NULL,
+  menu_id INTEGER NOT NULL
+);
 
 --
 -- Dumping data for table `groups_menus`
 --
 
-INSERT INTO `groups_menus` (`id`, `group_id`, `menu_id`) VALUES
+INSERT INTO groups_menus (id, group_id, menu_id) VALUES
 (5, 0, 3),
 (6, 0, 1),
 (7, 0, 2),
@@ -160,15 +160,15 @@ INSERT INTO `groups_menus` (`id`, `group_id`, `menu_id`) VALUES
 -- Table structure for table `keys`
 --
 
-CREATE TABLE `keys` (
-  `id` int(11) NOT NULL,
-  `stripe_ts` varchar(255) NOT NULL,
-  `stripe_tp` varchar(255) NOT NULL,
-  `stripe_ls` varchar(255) NOT NULL,
-  `stripe_lp` varchar(255) NOT NULL,
-  `recap_pub` varchar(100) NOT NULL,
-  `recap_pri` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE keys (
+  id serial PRIMARY KEY,
+  stripe_ts varchar(255) NOT NULL,
+  stripe_tp varchar(255) NOT NULL,
+  stripe_ls varchar(255) NOT NULL,
+  stripe_lp varchar(255) NOT NULL,
+  recap_pub varchar(100) NOT NULL,
+  recap_pri varchar(100) NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -176,15 +176,15 @@ CREATE TABLE `keys` (
 -- Table structure for table `logs`
 --
 
-CREATE TABLE `logs` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL DEFAULT 0,
-  `logdate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `logtype` varchar(25) NOT NULL,
-  `lognote` mediumtext NOT NULL,
-  `ip` varchar(75) DEFAULT NULL,
-  `metadata` blob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE logs (
+  id serial PRIMARY KEY,
+  user_id integer NOT NULL DEFAULT 0,
+  logdate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  logtype varchar(25) NOT NULL,
+  lognote text NOT NULL,
+  ip varchar(75) DEFAULT NULL,
+  metadata bytea DEFAULT NULL
+);
 
 --
 -- Dumping data for table `logs`
@@ -206,23 +206,23 @@ INSERT INTO `logs` (`id`, `user_id`, `logdate`, `logtype`, `lognote`, `ip`, `met
 -- Table structure for table `menus`
 --
 
-CREATE TABLE `menus` (
-  `id` int(10) NOT NULL,
-  `menu_title` varchar(255) NOT NULL,
-  `parent` int(10) NOT NULL,
-  `dropdown` int(1) NOT NULL,
-  `logged_in` int(1) NOT NULL,
-  `display_order` int(10) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `link` varchar(255) NOT NULL,
-  `icon_class` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE menus (
+  id serial PRIMARY KEY,
+  menu_title varchar(255) NOT NULL,
+  parent integer NOT NULL,
+  dropdown smallint NOT NULL,
+  logged_in smallint NOT NULL,
+  display_order integer NOT NULL,
+  label varchar(255) NOT NULL,
+  link varchar(255) NOT NULL,
+  icon_class varchar(255) NOT NULL
+);
 
 --
 -- Dumping data for table `menus`
 --
 
-INSERT INTO `menus` (`id`, `menu_title`, `parent`, `dropdown`, `logged_in`, `display_order`, `label`, `link`, `icon_class`) VALUES
+INSERT INTO menus (id, menu_title, parent, dropdown, logged_in, display_order, label, link, icon_class) VALUES
 (1, 'main', 2, 0, 1, 1, '{{home}}', '', 'fa fa-fw fa-home'),
 (2, 'main', -1, 1, 1, 14, '', '', 'fa fa-fw fa-cogs'),
 (3, 'main', -1, 0, 1, 11, '{{username}}', 'users/account.php', 'fa fa-fw fa-user'),
@@ -249,16 +249,16 @@ INSERT INTO `menus` (`id`, `menu_title`, `parent`, `dropdown`, `logged_in`, `dis
 -- Table structure for table `messages`
 --
 
-CREATE TABLE `messages` (
-  `id` int(11) NOT NULL,
-  `msg_from` int(11) NOT NULL,
-  `msg_to` int(11) NOT NULL,
-  `msg_body` mediumtext NOT NULL,
-  `msg_read` int(1) NOT NULL,
-  `msg_thread` int(11) NOT NULL,
-  `deleted` int(1) NOT NULL,
-  `sent_on` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE messages (
+  id integer NOT NULL,
+  msg_from integer NOT NULL,
+  msg_to integer NOT NULL,
+  msg_body text NOT NULL,
+  msg_read integer NOT NULL,
+  msg_thread integer NOT NULL,
+  deleted integer NOT NULL,
+  sent_on timestamp without time zone NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -266,18 +266,18 @@ CREATE TABLE `messages` (
 -- Table structure for table `message_threads`
 --
 
-CREATE TABLE `message_threads` (
-  `id` int(11) NOT NULL,
-  `msg_to` int(11) NOT NULL,
-  `msg_from` int(11) NOT NULL,
-  `msg_subject` varchar(255) NOT NULL,
-  `last_update` datetime NOT NULL,
-  `last_update_by` int(11) NOT NULL,
-  `archive_from` int(1) NOT NULL DEFAULT 0,
-  `archive_to` int(1) NOT NULL DEFAULT 0,
-  `hidden_from` int(1) NOT NULL DEFAULT 0,
-  `hidden_to` int(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE "message_threads" (
+  "id" serial PRIMARY KEY,
+  "msg_to" integer NOT NULL,
+  "msg_from" integer NOT NULL,
+  "msg_subject" varchar(255) NOT NULL,
+  "last_update" timestamp NOT NULL,
+  "last_update_by" integer NOT NULL,
+  "archive_from" boolean NOT NULL DEFAULT false,
+  "archive_to" boolean NOT NULL DEFAULT false,
+  "hidden_from" boolean NOT NULL DEFAULT false,
+  "hidden_to" boolean NOT NULL DEFAULT false
+);
 
 -- --------------------------------------------------------
 
@@ -285,17 +285,17 @@ CREATE TABLE `message_threads` (
 -- Table structure for table `notifications`
 --
 
-CREATE TABLE `notifications` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `message` longtext NOT NULL,
-  `is_read` tinyint(4) NOT NULL,
-  `is_archived` tinyint(1) DEFAULT 0,
-  `date_created` datetime DEFAULT NULL,
-  `date_read` datetime DEFAULT NULL,
-  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `class` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE "notifications" (
+  "id" serial PRIMARY KEY,
+  "user_id" integer NOT NULL,
+  "message" text NOT NULL,
+  "is_read" smallint NOT NULL,
+  "is_archived" boolean DEFAULT false,
+  "date_created" timestamp with time zone DEFAULT NULL,
+  "date_read" timestamp with time zone DEFAULT NULL,
+  "last_updated" timestamp with time zone DEFAULT now() NOT NULL,
+  "class" varchar(100) DEFAULT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -303,20 +303,20 @@ CREATE TABLE `notifications` (
 -- Table structure for table `pages`
 --
 
-CREATE TABLE `pages` (
-  `id` int(11) NOT NULL,
-  `page` varchar(255) DEFAULT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `private` int(11) NOT NULL DEFAULT 0,
-  `re_auth` int(1) NOT NULL DEFAULT 0,
-  `core` int(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE pages (
+  id serial PRIMARY KEY,
+  page varchar(255),
+  title varchar(255),
+  private integer NOT NULL DEFAULT 0,
+  re_auth integer NOT NULL DEFAULT 0,
+  core integer DEFAULT 0
+);
 
 --
 -- Dumping data for table `pages`
 --
 
-INSERT INTO `pages` (`id`, `page`, `title`, `private`, `re_auth`, `core`) VALUES
+INSERT INTO pages (id, page, title, private, re_auth, core) VALUES
 (1, 'index.php', 'Home', 0, 0, 1),
 (2, 'z_us_root.php', '', 0, 0, 1),
 (3, 'users/account.php', 'Account Dashboard', 1, 0, 1),
@@ -342,16 +342,16 @@ INSERT INTO `pages` (`id`, `page`, `title`, `private`, `re_auth`, `core`) VALUES
 -- Table structure for table `permissions`
 --
 
-CREATE TABLE `permissions` (
-  `id` int(11) NOT NULL,
-  `name` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE permissions (
+  id serial PRIMARY KEY,
+  name varchar(150) NOT NULL
+);
 
 --
 -- Dumping data for table `permissions`
 --
 
-INSERT INTO `permissions` (`id`, `name`) VALUES
+INSERT INTO permissions (id, name) VALUES
 (1, 'User'),
 (2, 'Administrator');
 
@@ -361,17 +361,17 @@ INSERT INTO `permissions` (`id`, `name`) VALUES
 -- Table structure for table `permission_page_matches`
 --
 
-CREATE TABLE `permission_page_matches` (
-  `id` int(11) NOT NULL,
-  `permission_id` int(11) DEFAULT NULL,
-  `page_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE permission_page_matches (
+  id serial PRIMARY KEY,
+  permission_id integer,
+  page_id integer
+);
 
 --
 -- Dumping data for table `permission_page_matches`
 --
 
-INSERT INTO `permission_page_matches` (`id`, `permission_id`, `page_id`) VALUES
+INSERT INTO permission_page_matches (id, permission_id, page_id) VALUES
 (3, 1, 24),
 (14, 2, 4),
 (15, 1, 3),
@@ -384,17 +384,17 @@ INSERT INTO `permission_page_matches` (`id`, `permission_id`, `page_id`) VALUES
 -- Table structure for table `profiles`
 --
 
-CREATE TABLE `profiles` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `bio` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE profiles (
+  id serial PRIMARY KEY,
+  user_id integer NOT NULL,
+  bio text NOT NULL
+);
 
 --
 -- Dumping data for table `profiles`
 --
 
-INSERT INTO `profiles` (`id`, `user_id`, `bio`) VALUES
+INSERT INTO profiles (id, user_id, bio) VALUES
 (1, 1, '&lt;h1&gt;This is the Admin&#039;s bio.&lt;/h1&gt;'),
 (2, 2, 'This is your bio');
 
@@ -404,85 +404,86 @@ INSERT INTO `profiles` (`id`, `user_id`, `bio`) VALUES
 -- Table structure for table `settings`
 --
 
-CREATE TABLE `settings` (
-  `id` int(50) NOT NULL,
-  `recaptcha` int(1) NOT NULL DEFAULT 0,
-  `force_ssl` int(1) NOT NULL,
-  `css_sample` int(1) NOT NULL,
-  `site_name` varchar(100) NOT NULL,
-  `language` varchar(255) NOT NULL,
-  `site_offline` int(1) NOT NULL,
-  `force_pr` int(1) NOT NULL,
-  `glogin` int(1) NOT NULL DEFAULT 0,
-  `fblogin` int(1) NOT NULL,
-  `gid` varchar(255) NOT NULL,
-  `gsecret` varchar(255) NOT NULL,
-  `gredirect` varchar(255) NOT NULL,
-  `ghome` varchar(255) NOT NULL,
-  `fbid` varchar(255) NOT NULL,
-  `fbsecret` varchar(255) NOT NULL,
-  `fbcallback` varchar(255) NOT NULL,
-  `graph_ver` varchar(255) NOT NULL,
-  `finalredir` varchar(255) NOT NULL,
-  `req_cap` int(1) NOT NULL,
-  `req_num` int(1) NOT NULL,
-  `min_pw` int(2) NOT NULL,
-  `max_pw` int(3) NOT NULL,
-  `min_un` int(2) NOT NULL,
-  `max_un` int(3) NOT NULL,
-  `messaging` int(1) NOT NULL,
-  `snooping` int(1) NOT NULL,
-  `echouser` int(11) NOT NULL,
-  `wys` int(1) NOT NULL,
-  `change_un` int(1) NOT NULL,
-  `backup_dest` varchar(255) NOT NULL,
-  `backup_source` varchar(255) NOT NULL,
-  `backup_table` varchar(255) NOT NULL,
-  `msg_notification` int(1) NOT NULL,
-  `permission_restriction` int(1) NOT NULL,
-  `auto_assign_un` int(1) NOT NULL,
-  `page_permission_restriction` int(1) NOT NULL,
-  `msg_blocked_users` int(1) NOT NULL,
-  `msg_default_to` int(1) NOT NULL,
-  `notifications` int(1) NOT NULL,
-  `notif_daylimit` int(3) NOT NULL,
-  `recap_public` varchar(100) NOT NULL,
-  `recap_private` varchar(100) NOT NULL,
-  `page_default_private` int(1) NOT NULL,
-  `navigation_type` tinyint(1) NOT NULL,
-  `copyright` varchar(255) NOT NULL,
-  `custom_settings` int(1) NOT NULL,
-  `system_announcement` varchar(255) NOT NULL,
-  `twofa` int(1) DEFAULT 0,
-  `force_notif` tinyint(1) DEFAULT NULL,
-  `cron_ip` varchar(255) DEFAULT NULL,
-  `registration` tinyint(1) DEFAULT NULL,
-  `join_vericode_expiry` int(9) UNSIGNED NOT NULL,
-  `reset_vericode_expiry` int(9) UNSIGNED NOT NULL,
-  `admin_verify` tinyint(1) NOT NULL,
-  `admin_verify_timeout` int(9) NOT NULL,
-  `session_manager` tinyint(1) NOT NULL,
-  `template` varchar(255) DEFAULT 'standard',
-  `saas` tinyint(1) DEFAULT NULL,
-  `redirect_uri_after_login` mediumtext DEFAULT NULL,
-  `show_tos` tinyint(1) DEFAULT 1,
-  `default_language` varchar(11) DEFAULT NULL,
-  `allow_language` tinyint(1) DEFAULT NULL,
-  `spice_api` varchar(75) DEFAULT NULL,
-  `announce` datetime DEFAULT NULL,
-  `bleeding_edge` tinyint(1) DEFAULT 0,
-  `err_time` int(11) DEFAULT 15,
-  `container_open_class` varchar(255) DEFAULT 'container-fluid',
-  `debug` tinyint(1) DEFAULT 0,
-  `widgets` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE settings (
+  id integer NOT NULL,
+  recaptcha integer NOT NULL DEFAULT 0,
+  force_ssl integer NOT NULL,
+  css_sample integer NOT NULL,
+  site_name varchar(100) NOT NULL,
+  language varchar(255) NOT NULL,
+  site_offline integer NOT NULL,
+  force_pr integer NOT NULL,
+  glogin integer NOT NULL DEFAULT 0,
+  fblogin integer NOT NULL,
+  gid varchar(255) NOT NULL,
+  gsecret varchar(255) NOT NULL,
+  gredirect varchar(255) NOT NULL,
+  ghome varchar(255) NOT NULL,
+  fbid varchar(255) NOT NULL,
+  fbsecret varchar(255) NOT NULL,
+  fbcallback varchar(255) NOT NULL,
+  graph_ver varchar(255) NOT NULL,
+  finalredir varchar(255) NOT NULL,
+  req_cap integer NOT NULL,
+  req_num integer NOT NULL,
+  min_pw integer NOT NULL,
+  max_pw integer NOT NULL,
+  min_un integer NOT NULL,
+  max_un integer NOT NULL,
+  messaging integer NOT NULL,
+  snooping integer NOT NULL,
+  echouser integer NOT NULL,
+  wys integer NOT NULL,
+  change_un integer NOT NULL,
+  backup_dest varchar(255) NOT NULL,
+  backup_source varchar(255) NOT NULL,
+  backup_table varchar(255) NOT NULL,
+  msg_notification integer NOT NULL,
+  permission_restriction integer NOT NULL,
+  auto_assign_un integer NOT NULL,
+  page_permission_restriction integer NOT NULL,
+  msg_blocked_users integer NOT NULL,
+  msg_default_to integer NOT NULL,
+  notifications integer NOT NULL,
+  notif_daylimit integer NOT NULL,
+  recap_public varchar(100) NOT NULL,
+  recap_private varchar(100) NOT NULL,
+  page_default_private integer NOT NULL,
+  navigation_type smallint NOT NULL,
+  copyright varchar(255) NOT NULL,
+  custom_settings integer NOT NULL,
+  system_announcement varchar(255) NOT NULL,
+  twofa integer DEFAULT 0,
+  force_notif smallint DEFAULT NULL,
+  cron_ip varchar(255) DEFAULT NULL,
+  registration smallint DEFAULT NULL,
+  join_vericode_expiry integer CHECK (join_vericode_expiry >= 0) NOT NULL,
+  reset_vericode_expiry integer CHECK (reset_vericode_expiry >= 0) NOT NULL,
+  admin_verify smallint NOT NULL,
+  admin_verify_timeout integer NOT NULL,
+  session_manager smallint NOT NULL,
+  template varchar(255) DEFAULT 'standard',
+  saas smallint DEFAULT NULL,
+  redirect_uri_after_login text DEFAULT NULL,
+  show_tos smallint DEFAULT 1,
+  default_language varchar(11) DEFAULT NULL,
+  allow_language smallint DEFAULT NULL,
+  spice_api varchar(75) DEFAULT NULL,
+  announce timestamp DEFAULT NULL,
+  bleeding_edge smallint DEFAULT 0,
+  err_time integer DEFAULT 15,
+  container_open_class varchar(255) DEFAULT 'container-fluid',
+  debug smallint DEFAULT 0,
+  widgets text DEFAULT NULL
+  PRIMARY KEY (id)
+);
 
 --
 -- Dumping data for table `settings`
 --
 
-INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `site_name`, `language`, `site_offline`, `force_pr`, `glogin`, `fblogin`, `gid`, `gsecret`, `gredirect`, `ghome`, `fbid`, `fbsecret`, `fbcallback`, `graph_ver`, `finalredir`, `req_cap`, `req_num`, `min_pw`, `max_pw`, `min_un`, `max_un`, `messaging`, `snooping`, `echouser`, `wys`, `change_un`, `backup_dest`, `backup_source`, `backup_table`, `msg_notification`, `permission_restriction`, `auto_assign_un`, `page_permission_restriction`, `msg_blocked_users`, `msg_default_to`, `notifications`, `notif_daylimit`, `recap_public`, `recap_private`, `page_default_private`, `navigation_type`, `copyright`, `custom_settings`, `system_announcement`, `twofa`, `force_notif`, `cron_ip`, `registration`, `join_vericode_expiry`, `reset_vericode_expiry`, `admin_verify`, `admin_verify_timeout`, `session_manager`, `template`, `saas`, `redirect_uri_after_login`, `show_tos`, `default_language`, `allow_language`, `spice_api`, `announce`, `bleeding_edge`, `err_time`, `container_open_class`, `debug`, `widgets`) VALUES
-(1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'bs5', NULL, NULL, 1, 'en-US', 0, NULL, '2022-12-23 07:05:43', 0, 15, 'container-fluid', 0, 'settings,misc,tools,plugins,snapshot,active_users,active-users');
+INSERT INTO "settings" ("id", "recaptcha", "force_ssl", "css_sample", "site_name", "language", "site_offline", "force_pr", "glogin", "fblogin", "gid", "gsecret", "gredirect", "ghome", "fbid", "fbsecret", "fbcallback", "graph_ver", "finalredir", "req_cap", "req_num", "min_pw", "max_pw", "min_un", "max_un", "messaging", "snooping", "echouser", "wys", "change_un", "backup_dest", "backup_source", "backup_table", "msg_notification", "permission_restriction", "auto_assign_un", "page_permission_restriction", "msg_blocked_users", "msg_default_to", "notifications", "notif_daylimit", "recap_public", "recap_private", "page_default_private", "navigation_type", "copyright", "custom_settings", "system_announcement", "twofa", "force_notif", "cron_ip", "registration", "join_vericode_expiry", "reset_vericode_expiry", "admin_verify", "admin_verify_timeout", "session_manager", "template", "saas", "redirect_uri_after_login", "show_tos", "default_language", "allow_language", "spice_api", "announce", "bleeding_edge", "err_time", "container_open_class", "debug", "widgets") 
+VALUES (1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'standard', NULL, NULL, 1, 'en-US', 0, NULL, '2020-10-07 21:26:18', 0, 15, 'container-fluid', 0, 'settings,misc,tools,plugins,snapshot,active_users,active-users');
 
 -- --------------------------------------------------------
 
@@ -490,18 +491,18 @@ INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `site_name
 -- Table structure for table `updates`
 --
 
-CREATE TABLE `updates` (
-  `id` int(11) NOT NULL,
-  `migration` varchar(15) NOT NULL,
-  `applied_on` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `update_skipped` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE updates (
+  id serial primary key,
+  migration varchar(15) NOT NULL,
+  applied_on timestamp NOT NULL DEFAULT current_timestamp,
+  update_skipped boolean
+);
 
 --
 -- Dumping data for table `updates`
 --
 
-INSERT INTO `updates` (`id`, `migration`, `applied_on`, `update_skipped`) VALUES
+INSERT INTO "updates" ("id", "migration", "applied_on", "update_skipped") VALUES
 (15, '1XdrInkjV86F', '2018-02-18 22:33:24', NULL),
 (16, '3GJYaKcqUtw7', '2018-04-25 16:51:08', NULL),
 (17, '3GJYaKcqUtz8', '2018-04-25 16:51:08', NULL),
@@ -582,52 +583,52 @@ INSERT INTO `updates` (`id`, `migration`, `applied_on`, `update_skipped`) VALUES
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `permissions` tinyint(1) NOT NULL,
-  `email` varchar(155) NOT NULL,
-  `email_new` varchar(155) DEFAULT NULL,
-  `username` varchar(255) NOT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `pin` varchar(255) DEFAULT NULL,
-  `fname` varchar(255) NOT NULL,
-  `lname` varchar(255) NOT NULL,
-  `language` varchar(255) DEFAULT 'en-US',
-  `email_verified` tinyint(1) NOT NULL DEFAULT 0,
-  `vericode` varchar(15) DEFAULT NULL,
-  `vericode_expiry` datetime DEFAULT NULL,
-  `oauth_provider` varchar(255) DEFAULT NULL,
-  `oauth_uid` varchar(255) DEFAULT NULL,
-  `gender` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `locale` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `gpluslink` varchar(255) DEFAULT NULL,
-  `account_owner` tinyint(4) NOT NULL DEFAULT 1,
-  `account_id` int(11) NOT NULL DEFAULT 0,
-  `account_mgr` int(11) NOT NULL DEFAULT 0,
-  `fb_uid` varchar(255) DEFAULT NULL,
-  `picture` varchar(255) DEFAULT NULL,
-  `created` datetime NOT NULL,
-  `protected` tinyint(1) NOT NULL DEFAULT 0,
-  `msg_exempt` tinyint(1) NOT NULL DEFAULT 0,
-  `dev_user` tinyint(1) NOT NULL DEFAULT 0,
-  `msg_notification` tinyint(1) NOT NULL DEFAULT 1,
-  `cloak_allowed` tinyint(1) NOT NULL DEFAULT 0,
-  `oauth_tos_accepted` tinyint(1) DEFAULT NULL,
-  `un_changed` tinyint(1) NOT NULL DEFAULT 0,
-  `force_pr` tinyint(1) NOT NULL DEFAULT 0,
-  `logins` int(11) UNSIGNED NOT NULL DEFAULT 0,
-  `last_login` datetime DEFAULT NULL,
-  `join_date` datetime DEFAULT NULL,
-  `modified` datetime DEFAULT NULL,
-  `active` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE users (
+  id serial NOT NULL PRIMARY KEY,
+  permissions smallint NOT NULL,
+  email varchar(155) NOT NULL,
+  email_new varchar(155),
+  username varchar(255) NOT NULL,
+  password varchar(255),
+  pin varchar(255),
+  fname varchar(255) NOT NULL,
+  lname varchar(255) NOT NULL,
+  language varchar(255) DEFAULT 'en-US',
+  email_verified boolean NOT NULL DEFAULT false,
+  vericode varchar(15),
+  vericode_expiry timestamp,
+  oauth_provider varchar(255),
+  oauth_uid varchar(255),
+  gender varchar(10) NOT NULL,
+  locale varchar(10) NOT NULL,
+  gpluslink varchar(255),
+  account_owner smallint NOT NULL DEFAULT 1,
+  account_id integer NOT NULL DEFAULT 0,
+  account_mgr integer NOT NULL DEFAULT 0,
+  fb_uid varchar(255),
+  picture varchar(255),
+  created timestamp,
+  protected boolean NOT NULL DEFAULT false,
+  msg_exempt boolean NOT NULL DEFAULT false,
+  dev_user boolean NOT NULL DEFAULT false,
+  msg_notification boolean NOT NULL DEFAULT true,
+  cloak_allowed boolean NOT NULL DEFAULT false,
+  oauth_tos_accepted boolean,
+  un_changed boolean NOT NULL DEFAULT false,
+  force_pr boolean NOT NULL DEFAULT false,
+  logins integer NOT NULL DEFAULT 0,
+  last_login timestamp,
+  join_date timestamp,
+  modified timestamp,
+  active boolean DEFAULT true
+);
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gender`, `locale`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `created`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`, `active`) VALUES
-(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', 1, 1, 0, 1, 1, NULL, 0, 0, 0, '2022-12-23 07:16:27', '2022-12-25 00:00:00', '2016-01-01 00:00:00', 1);
+INSERT INTO users (id, permissions, email, email_new, username, password, pin, fname, lname, language, email_verified, vericode, vericode_expiry, oauth_provider, oauth_uid, gender, locale, gpluslink, account_owner, account_id, account_mgr, fb_uid, picture, created, protected, msg_exempt, dev_user, msg_notification, cloak_allowed, oauth_tos_accepted, un_changed, force_pr, logins, last_login, join_date, modified, active) VALUES
+(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', true, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', true, true, false, true, true, NULL, false, false, 0, '2022-12-23 07:16:27', '2022-12-25 00:00:00', '2016-01-01 00:00:00', true);
 
 -- --------------------------------------------------------
 
@@ -635,13 +636,13 @@ INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `pas
 -- Table structure for table `users_online`
 --
 
-CREATE TABLE `users_online` (
-  `id` int(11) NOT NULL,
-  `ip` varchar(15) NOT NULL,
-  `timestamp` varchar(15) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `session` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE users_online (
+  id int NOT NULL,
+  ip varchar(15) NOT NULL,
+  "timestamp" varchar(15) NOT NULL,
+  user_id int DEFAULT NULL,
+  session varchar(50) NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -649,12 +650,12 @@ CREATE TABLE `users_online` (
 -- Table structure for table `users_session`
 --
 
-CREATE TABLE `users_session` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `hash` varchar(255) NOT NULL,
-  `uagent` mediumtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE users_session (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  hash VARCHAR(255) NOT NULL,
+  uagent TEXT
+);
 
 -- --------------------------------------------------------
 
@@ -662,17 +663,17 @@ CREATE TABLE `users_session` (
 -- Table structure for table `user_permission_matches`
 --
 
-CREATE TABLE `user_permission_matches` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `permission_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE user_permission_matches (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  permission_id INT NOT NULL
+);
 
 --
 -- Dumping data for table `user_permission_matches`
 --
 
-INSERT INTO `user_permission_matches` (`id`, `user_id`, `permission_id`) VALUES
+INSERT INTO user_permission_matches (id, user_id, permission_id) VALUES
 (100, 1, 1),
 (101, 1, 2);
 
@@ -682,15 +683,15 @@ INSERT INTO `user_permission_matches` (`id`, `user_id`, `permission_id`) VALUES
 -- Table structure for table `us_announcements`
 --
 
-CREATE TABLE `us_announcements` (
-  `id` int(11) NOT NULL,
-  `dismissed` int(11) NOT NULL,
-  `link` varchar(255) DEFAULT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `message` varchar(255) DEFAULT NULL,
-  `ignore` varchar(50) DEFAULT NULL,
-  `class` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_announcements (
+  id SERIAL PRIMARY KEY,
+  dismissed INT NOT NULL,
+  link VARCHAR(255),
+  title VARCHAR(255),
+  message VARCHAR(255),
+  ignore VARCHAR(50),
+  class VARCHAR(50)
+);
 
 -- --------------------------------------------------------
 
@@ -698,27 +699,26 @@ CREATE TABLE `us_announcements` (
 -- Table structure for table `us_fingerprints`
 --
 
-CREATE TABLE `us_fingerprints` (
-  `kFingerprintID` int(11) UNSIGNED NOT NULL,
-  `fkUserID` int(11) NOT NULL,
-  `Fingerprint` varchar(32) NOT NULL,
-  `Fingerprint_Expiry` datetime NOT NULL,
-  `Fingerprint_Added` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+CREATE TABLE us_fingerprints (
+  kFingerprintID SERIAL PRIMARY KEY,
+  fkUserID INT NOT NULL,
+  Fingerprint VARCHAR(32) NOT NULL,
+  Fingerprint_Expiry TIMESTAMP NOT NULL,
+  Fingerprint_Added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `us_fingerprint_assets`
 --
 
-CREATE TABLE `us_fingerprint_assets` (
-  `kFingerprintAssetID` int(11) UNSIGNED NOT NULL,
-  `fkFingerprintID` int(11) NOT NULL,
-  `IP_Address` varchar(255) NOT NULL,
-  `User_Browser` varchar(255) NOT NULL,
-  `User_OS` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_fingerprint_assets (
+  kFingerprintAssetID SERIAL PRIMARY KEY,
+  fkFingerprintID INT NOT NULL,
+  IP_Address VARCHAR(255) NOT NULL,
+  User_Browser VARCHAR(255) NOT NULL,
+  User_OS VARCHAR(255) NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -726,10 +726,10 @@ CREATE TABLE `us_fingerprint_assets` (
 -- Table structure for table `us_forms`
 --
 
-CREATE TABLE `us_forms` (
-  `id` int(11) NOT NULL,
-  `form` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_forms (
+  id INT NOT NULL,
+  form VARCHAR(255) NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -737,18 +737,18 @@ CREATE TABLE `us_forms` (
 -- Table structure for table `us_form_validation`
 --
 
-CREATE TABLE `us_form_validation` (
-  `id` int(11) NOT NULL,
-  `value` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `params` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_form_validation (
+  id INT NOT NULL,
+  value VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  params VARCHAR(255) NOT NULL
+);
 
 --
 -- Dumping data for table `us_form_validation`
 --
 
-INSERT INTO `us_form_validation` (`id`, `value`, `description`, `params`) VALUES
+INSERT INTO us_form_validation (id, value, description, params) VALUES
 (1, 'min', 'Minimum # of Characters', 'number'),
 (2, 'max', 'Maximum # of Characters', 'number'),
 (3, 'is_numeric', 'Must be a number', 'true'),
@@ -769,12 +769,12 @@ INSERT INTO `us_form_validation` (`id`, `value`, `description`, `params`) VALUES
 -- Table structure for table `us_form_views`
 --
 
-CREATE TABLE `us_form_views` (
-  `id` int(11) NOT NULL,
-  `form_name` varchar(255) NOT NULL,
-  `view_name` varchar(255) NOT NULL,
-  `fields` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_form_views (
+  id INT NOT NULL,
+  form_name VARCHAR(255) NOT NULL,
+  view_name VARCHAR(255) NOT NULL,
+  fields TEXT NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -782,12 +782,12 @@ CREATE TABLE `us_form_views` (
 -- Table structure for table `us_ip_blacklist`
 --
 
-CREATE TABLE `us_ip_blacklist` (
-  `id` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL,
-  `last_user` int(11) NOT NULL DEFAULT 0,
-  `reason` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_ip_blacklist (
+  id INT NOT NULL,
+  ip VARCHAR(50) NOT NULL,
+  last_user INT NOT NULL DEFAULT 0,
+  reason INT NOT NULL DEFAULT 0
+);
 
 -- --------------------------------------------------------
 
@@ -795,12 +795,25 @@ CREATE TABLE `us_ip_blacklist` (
 -- Table structure for table `us_ip_list`
 --
 
-CREATE TABLE `us_ip_list` (
-  `id` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_ip_list (
+  id SERIAL PRIMARY KEY,
+  ip VARCHAR(50) NOT NULL,
+  user_id INT NOT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.timestamp = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_timestamp
+BEFORE UPDATE ON us_ip_list
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
 
 --
 -- Dumping data for table `us_ip_list`
@@ -815,10 +828,10 @@ INSERT INTO `us_ip_list` (`id`, `ip`, `user_id`, `timestamp`) VALUES
 -- Table structure for table `us_ip_whitelist`
 --
 
-CREATE TABLE `us_ip_whitelist` (
-  `id` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_ip_whitelist (
+  id SERIAL PRIMARY KEY,
+  ip VARCHAR(50) NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -826,19 +839,19 @@ CREATE TABLE `us_ip_whitelist` (
 -- Table structure for table `us_management`
 --
 
-CREATE TABLE `us_management` (
-  `id` int(11) NOT NULL,
-  `page` varchar(255) NOT NULL,
-  `view` varchar(255) NOT NULL,
-  `feature` varchar(255) NOT NULL,
-  `access` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_management (
+  id SERIAL PRIMARY KEY,
+  page VARCHAR(255) NOT NULL,
+  view VARCHAR(255) NOT NULL,
+  feature VARCHAR(255) NOT NULL,
+  access VARCHAR(255) NOT NULL
+);
 
 --
 -- Dumping data for table `us_management`
 --
 
-INSERT INTO `us_management` (`id`, `page`, `view`, `feature`, `access`) VALUES
+INSERT INTO us_management (id, page, view, feature, access) VALUES
 (1, '_admin_manage_ip.php', 'ip', 'IP Whitelist/Blacklist', ''),
 (2, '_admin_nav.php', 'nav', 'Navigation [List/Add/Delete]', ''),
 (3, '_admin_nav_item.php', 'nav_item', 'Navigation [View/Edit]', ''),
@@ -954,13 +967,13 @@ INSERT INTO `us_menu_items` (`id`, `menu`, `type`, `label`, `link`, `icon_class`
 -- Table structure for table `us_plugins`
 --
 
-CREATE TABLE `us_plugins` (
-  `id` int(11) NOT NULL,
-  `plugin` varchar(255) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
-  `updates` mediumtext DEFAULT NULL,
-  `last_check` datetime DEFAULT '2020-01-01 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_plugins (
+  id integer NOT NULL,
+  plugin varchar(255),
+  status varchar(255),
+  updates text,
+  last_check timestamp with time zone DEFAULT '2020-01-01 00:00:00'::timestamp with time zone
+);
 
 -- --------------------------------------------------------
 
@@ -968,14 +981,14 @@ CREATE TABLE `us_plugins` (
 -- Table structure for table `us_plugin_hooks`
 --
 
-CREATE TABLE `us_plugin_hooks` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `page` varchar(255) NOT NULL,
-  `folder` varchar(255) NOT NULL,
-  `position` varchar(255) NOT NULL,
-  `hook` varchar(255) NOT NULL,
-  `disabled` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_plugin_hooks (
+  id integer NOT NULL,
+  page varchar(255) NOT NULL,
+  folder varchar(255) NOT NULL,
+  position varchar(255) NOT NULL,
+  hook varchar(255) NOT NULL,
+  disabled boolean DEFAULT false
+);
 
 -- --------------------------------------------------------
 
@@ -983,12 +996,12 @@ CREATE TABLE `us_plugin_hooks` (
 -- Table structure for table `us_saas_levels`
 --
 
-CREATE TABLE `us_saas_levels` (
-  `id` int(11) NOT NULL,
-  `level` varchar(255) NOT NULL,
-  `users` int(11) NOT NULL,
-  `details` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_saas_levels (
+  id serial PRIMARY KEY,
+  level varchar(255) NOT NULL,
+  users integer NOT NULL,
+  details text NOT NULL
+);
 
 -- --------------------------------------------------------
 
@@ -996,13 +1009,13 @@ CREATE TABLE `us_saas_levels` (
 -- Table structure for table `us_saas_orgs`
 --
 
-CREATE TABLE `us_saas_orgs` (
-  `id` int(11) NOT NULL,
-  `org` varchar(255) NOT NULL,
-  `owner` int(11) NOT NULL,
-  `level` int(11) NOT NULL,
-  `active` int(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_saas_orgs (
+  id serial PRIMARY KEY,
+  org varchar(255) NOT NULL,
+  owner integer NOT NULL,
+  level integer NOT NULL,
+  active integer NOT NULL DEFAULT 1
+);
 
 -- --------------------------------------------------------
 
@@ -1010,19 +1023,19 @@ CREATE TABLE `us_saas_orgs` (
 -- Table structure for table `us_user_sessions`
 --
 
-CREATE TABLE `us_user_sessions` (
-  `kUserSessionID` int(11) UNSIGNED NOT NULL,
-  `fkUserID` int(11) UNSIGNED NOT NULL,
-  `UserFingerprint` varchar(255) NOT NULL,
-  `UserSessionIP` varchar(255) NOT NULL,
-  `UserSessionOS` varchar(255) NOT NULL,
-  `UserSessionBrowser` varchar(255) NOT NULL,
-  `UserSessionStarted` datetime NOT NULL,
-  `UserSessionLastUsed` datetime DEFAULT NULL,
-  `UserSessionLastPage` varchar(255) NOT NULL,
-  `UserSessionEnded` tinyint(1) NOT NULL DEFAULT 0,
-  `UserSessionEnded_Time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE us_user_sessions (
+  kUserSessionID serial PRIMARY KEY,
+  fkUserID integer NOT NULL,
+  UserFingerprint varchar(255) NOT NULL,
+  UserSessionIP varchar(255) NOT NULL,
+  UserSessionOS varchar(255) NOT NULL,
+  UserSessionBrowser varchar(255) NOT NULL,
+  UserSessionStarted timestamp without time zone NOT NULL,
+  UserSessionLastUsed timestamp without time zone DEFAULT NULL,
+  UserSessionLastPage varchar(255) NOT NULL,
+  UserSessionEnded boolean NOT NULL DEFAULT false,
+  UserSessionEnded_Time timestamp without time zone DEFAULT NULL
+);
 
 --
 -- Indexes for dumped tables
@@ -1031,191 +1044,192 @@ CREATE TABLE `us_user_sessions` (
 --
 -- Indexes for table `audit`
 --
-ALTER TABLE `audit`
-  ADD PRIMARY KEY (`id`);
+/*ALTER TABLE audit
+ADD CONSTRAINT audit_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `crons`
 --
-ALTER TABLE `crons`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE crons
+ADD CONSTRAINT crons_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `crons_logs`
 --
-ALTER TABLE `crons_logs`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE crons_logs
+ADD CONSTRAINT crons_logs_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `email`
 --
-ALTER TABLE `email`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE email
+ADD CONSTRAINT email_pkey PRIMARY KEY (id);*/
 
 --
 -- Indexes for table `groups_menus`
 --
-ALTER TABLE `groups_menus`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `group_id` (`group_id`),
-  ADD KEY `menu_id` (`menu_id`);
+-- IDK WHAT TO DO HERE
+/*ALTER TABLE groups_menus
+ADD CONSTRAINT groups_menus_pkey PRIMARY KEY (id),
+ADD CONSTRAINT groups_menus_group_id_fkey FOREIGN KEY (group_id) REFERENCES groups (id),
+ADD CONSTRAINT groups_menus_fkey FOREIGN KEY (menu_id) REFERENCES menus (id);*/
 
 --
 -- Indexes for table `keys`
 --
-ALTER TABLE `keys`
-  ADD PRIMARY KEY (`id`);
+/*ALTER TABLE keys
+ADD CONSTRAINT keys_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `logs`
 --
-ALTER TABLE `logs`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE logs
+ADD CONSTRAINT logs_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `menus`
 --
-ALTER TABLE `menus`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE menus
+ADD CONSTRAINT menus_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `messages`
 --
-ALTER TABLE `messages`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE messages
+ADD CONSTRAINT messages_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `message_threads`
 --
-ALTER TABLE `message_threads`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE message_threads
+ADD CONSTRAINT message_threads_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `notifications`
 --
-ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE notifications
+ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);*/
 
 --
 -- Indexes for table `pages`
 --
-ALTER TABLE `pages`
-  ADD PRIMARY KEY (`id`);
+/*ALTER TABLE pages
+ADD CONSTRAINT pages_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `permissions`
 --
-ALTER TABLE `permissions`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE permissions
+ADD CONSTRAINT permissions_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `permission_page_matches`
 --
-ALTER TABLE `permission_page_matches`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE permission_page_matches
+ADD CONSTRAINT permission_page_matches_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `profiles`
 --
-ALTER TABLE `profiles`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE profiles
+ADD CONSTRAINT profiles_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `settings`
 --
-ALTER TABLE `settings`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE settings
+ADD CONSTRAINT settings_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `updates`
 --
-ALTER TABLE `updates`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE updates
+ADD CONSTRAINT updates_pkey PRIMARY KEY (id);*/
 
 --
 -- Indexes for table `users`
 --
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `EMAIL` (`email`) USING BTREE;
+ALTER TABLE users
+-- ADD CONSTRAINT users_pkey PRIMARY KEY (id),
+ADD CONSTRAINT users_email_key UNIQUE (email);
 
 --
 -- Indexes for table `users_online`
 --
-ALTER TABLE `users_online`
-  ADD PRIMARY KEY (`id`);
+/*ALTER TABLE users_online
+ADD CONSTRAINT users_online_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `users_session`
 --
-ALTER TABLE `users_session`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE users_session
+ADD CONSTRAINT users_sessions_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `user_permission_matches`
 --
-ALTER TABLE `user_permission_matches`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE user_permission_matches
+ADD CONSTRAINT user_permission_matches PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_announcements`
 --
-ALTER TABLE `us_announcements`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_announcements
+ADD CONSTRAINT us_announcements_pkey PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_fingerprints`
 --
-ALTER TABLE `us_fingerprints`
-  ADD PRIMARY KEY (`kFingerprintID`);
+ALTER TABLE us_fingerprints
+ADD CONSTRAINT us_fingerprints_pkey PRIMARY KEY (kFingerprintID);
 
 --
 -- Indexes for table `us_fingerprint_assets`
 --
-ALTER TABLE `us_fingerprint_assets`
-  ADD PRIMARY KEY (`kFingerprintAssetID`);
+ALTER TABLE us_fingerprint_assets
+ADD CONSTRAINT us_fingerprint_assets PRIMARY KEY (kFingerprintAssetID);
 
 --
 -- Indexes for table `us_forms`
 --
-ALTER TABLE `us_forms`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_forms
+ADD CONSTRAINT us_forms PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_form_validation`
 --
-ALTER TABLE `us_form_validation`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_form_validation
+ADD CONSTRAINT us_form_validation PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_form_views`
 --
-ALTER TABLE `us_form_views`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_form_views
+ADD CONSTRAINT us_form_views PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_ip_blacklist`
 --
-ALTER TABLE `us_ip_blacklist`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_ip_blacklist
+ADD CONSTRAINT us_ip_blacklist PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_ip_list`
 --
-ALTER TABLE `us_ip_list`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_ip_list
+ADD CONSTRAINT us_ip_list PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_ip_whitelist`
 --
-ALTER TABLE `us_ip_whitelist`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_ip_whitelist
+ADD CONSTRAINT us_ip_whitelist PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_management`
 --
-ALTER TABLE `us_management`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_management
+ADD CONSTRAINT us_management PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_menus`
@@ -1232,32 +1246,32 @@ ALTER TABLE `us_menu_items`
 --
 -- Indexes for table `us_plugins`
 --
-ALTER TABLE `us_plugins`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_plugins
+ADD CONSTRAINT us_plugins PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_plugin_hooks`
 --
-ALTER TABLE `us_plugin_hooks`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_plugin_hooks
+ADD CONSTRAINT us_plugin_hooks PRIMARY KEY (id);
 
 --
 -- Indexes for table `us_saas_levels`
 --
-ALTER TABLE `us_saas_levels`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_saas_levels
+ADD CONSTRAINT us_saas_levels PRIMARY KEY (id);
 
 --
--- Indexes for table `us_saas_orgs`
+-- Indexes for table `us_saas_orgs
 --
-ALTER TABLE `us_saas_orgs`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE us_saas_orgs
+ADD CONSTRAINT us_saas_orgs PRIMARY KEY (id);
 
 --
--- Indexes for table `us_user_sessions`
+-- Indexes for table `us_user_sessions
 --
-ALTER TABLE `us_user_sessions`
-  ADD PRIMARY KEY (`kUserSessionID`);
+ALTER TABLE us_user_sessions
+ADD CONSTRAINT us_user_sessions PRIMARY KEY (kUserSessionID);*/
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1266,182 +1280,228 @@ ALTER TABLE `us_user_sessions`
 --
 -- AUTO_INCREMENT for table `audit`
 --
-ALTER TABLE `audit`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+/*ALTER TABLE audit
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `crons`
 --
-ALTER TABLE `crons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE crons
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (START WITH 2);
 
 --
 -- AUTO_INCREMENT for table `crons_logs`
 --
-ALTER TABLE `crons_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE crons_logs
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `email`
 --
-ALTER TABLE `email`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE email
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (START WITH 2);
 
 --
 -- AUTO_INCREMENT for table `groups_menus`
 --
-ALTER TABLE `groups_menus`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+ALTER TABLE groups_menus
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (START WITH 39);
 
 --
 -- AUTO_INCREMENT for table `keys`
 --
-ALTER TABLE `keys`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE keys
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `logs`
 --
-ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+ALTER TABLE logs
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (START WITH 9);
 
 --
 -- AUTO_INCREMENT for table `menus`
 --
-ALTER TABLE `menus`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+ALTER TABLE menus
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (START WITH 23);
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
-ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE messages
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `message_threads`
 --
-ALTER TABLE `message_threads`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE message_threads
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
-ALTER TABLE `notifications`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE notifications
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `pages`
 --
-ALTER TABLE `pages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+ALTER TABLE pages
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (INCREMENT 1 START 90);
 
 --
 -- AUTO_INCREMENT for table `permissions`
 --
-ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE permissions
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (INCREMENT 1 START 3);
 
 --
 -- AUTO_INCREMENT for table `permission_page_matches`
 --
-ALTER TABLE `permission_page_matches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+ALTER TABLE permission_page_matches
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (INCREMENT 1 START 58);
 
 --
 -- AUTO_INCREMENT for table `profiles`
 --
-ALTER TABLE `profiles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+ALTER TABLE profiles
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (INCREMENT 1 START 11);
 
 --
 -- AUTO_INCREMENT for table `settings`
 --
-ALTER TABLE `settings`
-  MODIFY `id` int(50) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE settings
+ALTER COLUMN id TYPE integer,
+ALTER COLUMN id SET NOT NULL,
+ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;*/
 
 --
 -- AUTO_INCREMENT for table `updates`
 --
-ALTER TABLE `updates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
+/*ALTER TABLE updates
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+CREATE SEQUENCE updates_id_seq;
+ALTER SEQUENCE updates_id_seq RESTART WITH 82;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE users
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE users_id_seq RESTART WITH 3;
 
 --
 -- AUTO_INCREMENT for table `users_session`
 --
-ALTER TABLE `users_session`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE users_session
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE users_session_id_seq OWNED BY users_session.id;
 
 --
 -- AUTO_INCREMENT for table `user_permission_matches`
 --
-ALTER TABLE `user_permission_matches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+ALTER TABLE user_permission_matches
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE user_permission_matches_id_seq RESTART WITH 111;
 
 --
 -- AUTO_INCREMENT for table `us_announcements`
 --
-ALTER TABLE `us_announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_announcements
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_announcements_id_seq OWNED BY us_announcements.id;
 
 --
 -- AUTO_INCREMENT for table `us_fingerprints`
 --
-ALTER TABLE `us_fingerprints`
-  MODIFY `kFingerprintID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_fingerprints
+ALTER COLUMN kFingerprintID SET DATA TYPE INTEGER,
+ALTER COLUMN kFingerprintID SET NOT NULL,
+ALTER COLUMN kFingerprintID ADD GENERATED ALWAYS AS IDENTITY;*/
 
 --
 -- AUTO_INCREMENT for table `us_fingerprint_assets`
 --
-ALTER TABLE `us_fingerprint_assets`
-  MODIFY `kFingerprintAssetID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+/*ALTER TABLE us_fingerprint_assets
+ALTER COLUMN kFingerprintAssetID SET DATA TYPE INTEGER,
+ALTER COLUMN kFingerprintAssetID SET NOT NULL,
+ALTER COLUMN kFingerprintAssetID ADD GENERATED ALWAYS AS IDENTITY;
 
 --
 -- AUTO_INCREMENT for table `us_forms`
 --
-ALTER TABLE `us_forms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_forms
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_forms_id_seq OWNED BY us_forms.id;
 
 --
 -- AUTO_INCREMENT for table `us_form_validation`
 --
-ALTER TABLE `us_form_validation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+ALTER TABLE us_form_validation
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_form_validation_id_seq RESTART WITH 14;
 
 --
 -- AUTO_INCREMENT for table `us_form_views`
 --
-ALTER TABLE `us_form_views`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_form_views
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_form_views_id_seq OWNED BY us_form_views.id;
 
 --
 -- AUTO_INCREMENT for table `us_ip_blacklist`
 --
-ALTER TABLE `us_ip_blacklist`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+ALTER TABLE us_ip_blacklist
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_ip_blacklist_id_seq RESTART WITH 11;
 
 --
 -- AUTO_INCREMENT for table `us_ip_list`
 --
-ALTER TABLE `us_ip_list`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE us_ip_list
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_ip_list_id_seq RESTART WITH 3;
 
 --
 -- AUTO_INCREMENT for table `us_ip_whitelist`
 --
-ALTER TABLE `us_ip_whitelist`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+ALTER TABLE us_ip_whitelist
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_ip_whitelist_id_seq RESTART WITH 7;
 
 --
 -- AUTO_INCREMENT for table `us_management`
 --
-ALTER TABLE `us_management`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+ALTER TABLE us_management
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL,
+ALTER SEQUENCE us_management_id_seq RESTART WITH 16;
 
 --
 -- AUTO_INCREMENT for table `us_menus`
@@ -1458,33 +1518,39 @@ ALTER TABLE `us_menu_items`
 --
 -- AUTO_INCREMENT for table `us_plugins`
 --
-ALTER TABLE `us_plugins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_plugins
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL;
 
 --
 -- AUTO_INCREMENT for table `us_plugin_hooks`
 --
-ALTER TABLE `us_plugin_hooks`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_plugin_hooks
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL;
 
 --
 -- AUTO_INCREMENT for table `us_saas_levels`
 --
-ALTER TABLE `us_saas_levels`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_saas_levels
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL;
 
 --
 -- AUTO_INCREMENT for table `us_saas_orgs`
 --
-ALTER TABLE `us_saas_orgs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE us_saas_orgs
+ALTER COLUMN id SET DATA TYPE INTEGER,
+ALTER COLUMN id SET NOT NULL;
 
 --
 -- AUTO_INCREMENT for table `us_user_sessions`
 --
-ALTER TABLE `us_user_sessions`
-  MODIFY `kUserSessionID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-COMMIT;
+ALTER TABLE us_user_sessions
+ALTER COLUMN kUserSessionID SET DATA TYPE INTEGER,
+ALTER COLUMN kUserSessionID SET NOT NULL;*/
+
+-- SELECT setval('us_user_sessions_kusersessionid_seq', 2, true);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
