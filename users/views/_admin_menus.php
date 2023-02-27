@@ -18,8 +18,9 @@ $codeUsage = '<?php
   $menu = new Menu(1);
   $override = [
       "layout"=>"vertical",  //horizontal, accordion
-      "branding_html"=>"<h1>Foo</h1>",
-      "show_branding"=>true,
+      "branding_html"=>"<h1>Foo</h1>",  //override branding (logo) HTML
+      "show_branding"=>true, //show/hide branding html on menu
+      "show_active"=>true, //highlight active menu item
   ];
   $menu->display($override);
 ?>
@@ -51,6 +52,7 @@ $codeUsage = '<?php
               <th>Menu Name</th>
               <th>Menu Type</th>
               <th>Z-Index</th>
+              <th>Highlight Active Links</th>
               <th>Status</th>
               <th class="text-end">Actions</th>
             </tr>
@@ -75,6 +77,7 @@ $codeUsage = '<?php
                     <?= $menu->z_index ?>
                   </span>
                 </td>
+                <td><?= bin($menu->show_active) ?></td>
                 <td><?= $menu->disabled ? 'Disabled' : 'Active' ?></td>
                 <td class="text-end">
                   <a class="btn btn-sm btn-outline-dark mr-1" href="admin.php?view=edit_menu&menu_id=<?= $menu->id ?>" title="edit"><i class="fa fa-pencil"></i></a>

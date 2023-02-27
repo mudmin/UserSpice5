@@ -97,11 +97,11 @@ if (empty($dest = sanitizedDest('dest'))) {
 }
 ?>
 <style media="screen">
-  .img-responsive{
-    width:100% !important;
-  }
+.img-responsive{
+  width:100% !important;
+}
 </style>
-<div class="container p-2 h-100">
+<div class="container p-2 h-100 alternate-background">
 
   <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" aria-hidden="true" data-keyboard="false" data-backdrop="static">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -123,22 +123,28 @@ if (empty($dest = sanitizedDest('dest'))) {
 
             <div class="form-outline mb-4">
               <label class="form-label" for="password"><?=lang("SIGNIN_PASS")?></label>
-              <input type="password" id="password" name="password" class="form-control form-control-lg" />
+              <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                <span class="input-group-addon input-group-text see-pw" id="togglePassword">
+                  <i class="fa fa-eye" id="togglePasswordIcon" ></i>
+                </span>
+              </div>
+
 
             </div>
 
-            <?php   includeHook($hooks,'form');?>
+            <?php includeHook($hooks,'form');?>
             <input type="hidden" name="redirect" value="<?=Input::get('redirect')?>" />
             <button class="submit form-control btn btn-primary rounded submit px-3" id="next_button" type="submit"><i class="fa fa-sign-in"></i> <?=lang("SIGNIN_BUTTONTEXT","");?></button>
           </form>
           <div class="row">
-            <div class="col-sm-6"><br>
-              <a class="float-start" href='<?=$us_url_root?>users/forgot_password.php'><i class="fa fa-wrench"></i> <?=lang("SIGNIN_FORGOTPASS","");?></a>
-              <br><br>
+            <div class="col-12 text-center"><br>
+              <a class="" href='<?=$us_url_root?>users/forgot_password.php'><i class="fa fa-wrench"></i> <?=lang("SIGNIN_FORGOTPASS","");?></a>
+              <br>
             </div>
             <?php if($settings->registration==1) {?>
-              <div class="col-sm-6"><br>
-                <a class="float-end" href='<?=$us_url_root?>users/join.php'><i class="fa fa-plus-square"></i> <?=lang("SIGNUP_TEXT","");?></a><br><br>
+              <div class="col-12 text-center"><br>
+                <a class="" href='<?=$us_url_root?>users/join.php'><i class="fa fa-plus-square"></i> <?=lang("SIGNUP_TEXT","");?></a><br><br>
               </div><?php } ?>
               <?php   includeHook($hooks,'bottom');?>
             </div>
@@ -148,14 +154,33 @@ if (empty($dest = sanitizedDest('dest'))) {
     </div>
   </div>
 
-<script>
-$(document).ready(function(){
-  $("#loginModal").modal({backdrop: 'static', keyboard: false})
-  $("#loginModal").modal('show');
-  setTimeout(function (){
-    $('#username').focus();
-}, 500);
-});
+  <script>
+  $(document).ready(function(){
+    $("#loginModal").modal({backdrop: 'static', keyboard: false})
+    $("#loginModal").modal('show');
+    setTimeout(function (){
+      $('#username').focus();
+    }, 500);
 
+    const togglePassword = document.querySelector('#togglePassword');
+    const togglePasswordIcon = document.querySelector('#togglePasswordIcon');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function (e) {
+      // toggle the type attribute
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      // toggle the eye slash icon
+
+      if(type == "password"){
+        togglePasswordIcon.classList.add('fa-eye');
+        togglePasswordIcon.classList.remove('fa-eye-slash');
+      }else{
+        togglePasswordIcon.classList.add('fa-eye-slash');
+        togglePasswordIcon.classList.remove('fa-eye');
+      }
+
+    });
+  });
 </script>
 <?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

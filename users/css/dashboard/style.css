@@ -39,3 +39,10 @@ form label {font-weight:600}
 .feedback.left .dropdown-menu{ left: 0px}
 .feedback.right .dropdown-menu{ right: 0px}
 .feedback .hideme{ display: none}
+
+/* override Bootstrap default colours */
+:root {--bs-primary: #334f6b; 
+  --bs-secondary: #494e53; 
+  --bs-primary-rgb: rgb(51,79,107);
+  --bs-secondary-rgb: rgb(73,78,83);
+}

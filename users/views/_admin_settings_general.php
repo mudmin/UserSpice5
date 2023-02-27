@@ -44,9 +44,25 @@ includeHook($hooks, 'pre');
             </div>
           </div>
 
+          <!-- User Manager Search Engine -->
+          <div class="form-group">
+            <label>User Manager Search Engine <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="If you have a lot of users, you may not want to load them all when you visit the user manager. Turning this feature on will allow you to search for the users you wish to manage instead of displaying them all. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <span class="float-end offset-switch">
+              <label class="switch switch-text switch-success">
+                <div class="form-check form-switch">
+                  <input id="uman_search" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="User Manager Search" <?php if ($settings->uman_search == 1) {
+                                                                                                                                              echo 'checked="true"';
+                                                                                                                                            } ?>>
+                </div>
+                <span data-on="Yes" data-off="No" class="switch-label"></span>
+                <span class="switch-handle"></span>
+              </label>
+            </span>
+          </div>
+
           <!-- Site Offline -->
           <div class="form-group">
-            <label>Maintenance Mode (Site Offline) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Need to go into Maintenance Mode to do an upgrade? Enable this! This will display a 'Maintenance Mode Active' message for those in the default Administrator permission group (ID: 2) and redirect the remaining to the maintenance page. This will occur until the setting is disabled.Â Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>Maintenance Mode (Site Offline) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Need to go into Maintenance Mode to do an upgrade? Enable this! This will display a 'Maintenance Mode Active' message for those in the default Administrator permission group (ID: 2) and redirect the remaining to the maintenance page. This will occur until the setting is disabled. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <label class="switch switch-text switch-success">
                 <div class="form-check form-switch">
@@ -99,7 +115,7 @@ includeHook($hooks, 'pre');
 
           <!-- Force SSL -->
           <div class="form-group">
-            <label>Force HTTPS Connections <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Don't want anyone accessing your site insecurely? Enabled this. This will redirect any users from an HTTP (non-secure) connection to HTTPS. Make sure your SSL Cert is valid before doing this!Â Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>Force HTTPS Connections <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Don't want anyone accessing your site insecurely? Enabled this. This will redirect any users from an HTTP (non-secure) connection to HTTPS. Make sure your SSL Cert is valid before doing this! Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <label class="switch switch-text switch-success">
                 <div class="form-check form-switch">
@@ -136,7 +152,7 @@ includeHook($hooks, 'pre');
           </div>
 
           <div class="form-group">
-            <label>Enable Page Permission Restrictions <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Only allow one permission level per page using this setting. This is particularly good for ensuring no overlap in permission levels. You can have a permission group hierarchy such as this: User, User Manager, Database Manager, Administrator. In this case you want to give all your User Managers access to the user administration section, and yourself of course, but many not to those who manage your database only (maybe you want to give them access to site and email settings only). In any case, it will change the checkboxes on Admin Page section to radio buttons under Add Permission Level and restrict addition from the permission level settings to be added only if no other level has it.Â Default: Disabled."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>Enable Page Permission Restrictions <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Only allow one permission level per page using this setting. This is particularly good for ensuring no overlap in permission levels. You can have a permission group hierarchy such as this: User, User Manager, Database Manager, Administrator. In this case you want to give all your User Managers access to the user administration section, and yourself of course, but many not to those who manage your database only (maybe you want to give them access to site and email settings only). In any case, it will change the checkboxes on Admin Page section to radio buttons under Add Permission Level and restrict addition from the permission level settings to be added only if no other level has it. Default: Disabled."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <label class="switch switch-text switch-success">
                 <div class="form-check form-switch">
@@ -219,7 +235,7 @@ includeHook($hooks, 'pre');
 
           <!-- Force Password Reset -->
           <div class="form-group">
-            <label>Force Password Reset on Manual Creation <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="When a user is created from the admin panel, force their password to be reset upon login, this will also send them a password reset link on manual creation no matter what password you enter on the form. If you enable this, theÂ force_pr value in your users database for this user will be 1 when created.Â Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>Force Password Reset on Manual Creation <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="When a user is created from the admin panel, force their password to be reset upon login, this will also send them a password reset link on manual creation no matter what password you enter on the form. If you enable this, the force_pr value in your users database for this user will be 1 when created. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
                 <label class="switch switch-text switch-success">
@@ -240,7 +256,7 @@ includeHook($hooks, 'pre');
 
           <!-- echouser Option -->
           <div class="form-group">
-            <label>echouser Function <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="What do you want to echo when you use theÂ echouser function? You can use this to echo their name in several different formats. Need their username instead? UseÂ echousername. If it cannot find the user, it will echo Deleted.Â Default: FName LName."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>echouser Function <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="What do you want to echo when you use the echouser function? You can use this to echo their name in several different formats. Need their username instead? Use echousername. If it cannot find the user, it will echo Deleted. Default: FName LName."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <select id="echouser" class="form-control ajxnum" data-desc="echouser Function" name="echouser">
               <option value="0" <?php if ($settings->echouser == 0) {
                                   echo 'selected="selected"';

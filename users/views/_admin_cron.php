@@ -2,6 +2,7 @@
 $errors = $successes = [];
 $form_valid = TRUE;
 //Forms posted
+$cs = Token::generate();
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
   if (!Token::check($token)) {
@@ -86,13 +87,13 @@ $count = $query->count();
                                                                                                                                                                 if ($row->active == 1) { ?>Active <?php } ?></p>
             </td>
             <td>
-              <p data-field="name" class="cronname nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Rename Cron ID <?= $row->id; ?>"><?= $row->name; ?></p>
+              <p data-field="name" data-token="<?=$cs?>" class="cronname nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Rename Cron ID <?= $row->id; ?>"><?= $row->name; ?></p>
             </td>
             <td>
-              <p data-field="file" class="cronfile nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change File for <?= $row->name; ?>"><?= $row->file; ?></p>
+              <p data-field="file" data-token="<?=$cs?>" class="cronfile nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change File for <?= $row->name; ?>"><?= $row->file; ?></p>
             </td>
             <td>
-              <p data-field="sort" class="cronsort nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change sort for <?= $row->name; ?>"><?= $row->sort; ?></p>
+              <p data-field="sort" data-token="<?=$cs?>" class="cronsort nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change sort for <?= $row->name; ?>"><?= $row->sort; ?></p>
             </td>
             <td class="text-center"><?= echousername($row->createdby); ?></td>
             <td class="text-center">
@@ -150,7 +151,7 @@ $count = $query->count();
         </div>
         <div class="modal-footer">
 
-          <input type="hidden" name="csrf" value="<?= Token::generate(); ?>" />
+          <input type="hidden" name="csrf" value="<?= $cs; ?>" />
           <input class='btn btn-primary mr-2' type='submit' name="addCron" value='Add Cron' />
           <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
 
@@ -160,7 +161,7 @@ $count = $query->count();
   </div>
 </div>
 
-<script type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js"></script>
+<script type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js?v2"></script>
 <script type="text/javascript">
   function messages(data) {
     data = JSON.parse(data);
@@ -186,7 +187,7 @@ $count = $query->count();
   $(document).ready(function() {
     var options = {
       url: 'parsers/cron_post.php',
-      token: '<?= Token::generate() ?>'
+      token: '<?= $cs; ?>>'
     };
     $('.txt').oneClickEdit(options, success);
 
@@ -197,7 +198,7 @@ $count = $query->count();
         0: 'Inactive',
         1: 'Active'
       },
-      token: '<?= Token::generate() ?>'
+      token: '<?= $cs; ?>'
 
     }
     $('.cronactive').oneClickEdit(active, success);
@@ -207,7 +208,7 @@ $count = $query->count();
       var formData = {
         'value': deleteMe,
         'field': 'deleteMe',
-        'token': '<?= Token::generate() ?>',
+        'token': '<?= $cs; ?>',
       };
 
       $.ajax({

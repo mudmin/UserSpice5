@@ -84,6 +84,8 @@ $userCount = $db->query("SELECT id FROM users")->count();
     <h3>Permission Levels</h3>
   </div>
   <div class="col-12 col-sm-6">
+    <?php
+     if(isset($manage) && is_numeric($manage)){ ?>
     <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
       <?= tokenHere(); ?>
       <p class=" text-xs-center text-sm-end">
@@ -95,6 +97,7 @@ $userCount = $db->query("SELECT id FROM users")->count();
         <?php } ?>
       </p>
     </form>
+    <?php } ?>
   </div>
 </div>
 

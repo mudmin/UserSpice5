@@ -1,29 +1,24 @@
 <?php
 class Menu {
   protected $db;
-  public $id, $menu_name, $menu, $view;
+  public $id, $menu_name, $menu;
   public $items = [];
   public $tree = [];
   public $userPerms = [0];
   public $show_branding = true;
+  public $show_active = 0;
   public $disabled = 0;
 
-
   public function __construct($id) {
-    $menu = false;
     $this->db = DB::getInstance();
     $q = $this->db->query("SELECT * FROM us_menus WHERE id = ?",[$id]);
     $c = $q->count();
     if($c < 1){
-      $view = Input::get('view');
-      if($view != "edit_menu"){
-        die("Your menu is missing. If you have just upgraded UserSpice,
-        please navigate to users/updates in your browser to create your menus.
-        Otherwise, please go into your database and restore a backup or select a different menu.
-        If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to
-        attempt to create a new Main Menu");
-      }
-
+      die("Your menu is missing. If you have just upgraded UserSpice,
+      please navigate to users/updates in your browser to create your menus.
+      Otherwise, please go into your database and restore a backup or select a different menu.
+      If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to
+      attempt to create a new Main Menu");
     }else{
       $menu = $q->first();
     }
@@ -33,6 +28,7 @@ class Menu {
     $this->id = $menu->id;
     $this->menu_name = $menu->menu_name;
     $this->disabled = $menu->disabled;
+    $this->show_active = $menu->show_active;
     $this->show_branding = true;
     $this->_loadItems();
     $this->tree = $this->_loadTree(0);
@@ -49,6 +45,9 @@ class Menu {
   public function display($override = []) {
     if(isset($override["layout"]) && ($override["layout"] == "horizontal" || $override["layout"] == "vertical" || $override["layout"] == "accordion") ){
         $this->menu->type = $override["layout"] ;
+    }
+    if(isset($override["show_active"])){
+      $this->menu->show_active = $override["show_active"];
     }
 
     if(isset($override["branding_html"])){
@@ -118,12 +117,14 @@ class Menu {
     $ulId = $isDropdown? "menu_{$items[$firstKey]->menu}_dropdown_{$items[$firstKey]->parent}" : false;
     $labelledBy = $isDropdown? "aria-labelledby='{$ulId}'" : '';
     $html = "<ul class='{$ulClass}' {$labelledBy} style='{$ulStyle}' {$menuId}>";
+
     if($level == 1) {
       $brandHtml = !empty($this->menu->brand_html)? html_entity_decode($this->menu->brand_html, ENT_QUOTES, 'UTF-8') : '';
       $brandHtml = str_replace("{{root}}",$us_url_root,$brandHtml);
       if($this->show_branding == false){
         $brandHtml = "";
       }
+
       $html .= "<div class='us_brand full_screen'>{$brandHtml}</div>";
 
       if($this->menu->justify == "right"){
@@ -144,7 +145,21 @@ class Menu {
       }
       $hasDropdown = sizeof($item->items) > 0;
       $liClass = $hasDropdown? "dropdown" : "";
-      $liClass .= $item->li_class? " $item->li_class": "";
+
+      // check if the li should be active (i.e. its URL matches the current page)
+      $currentPage = substr($_SERVER["REQUEST_URI"], strrpos($_SERVER["REQUEST_URI"], "/") + 1);
+      $linkPage = substr($item->link, strrpos($item->link, "/") + 1);
+
+        if(($this->show_active == 1 || $this->show_active == true) && $currentPage == $linkPage){
+          $liClass .= " active active-style";
+        }elseif($currentPage == $linkPage){
+          $liClass .= " active";
+        }
+
+      // if($currentPage == $linkPage){
+      //   $liClass .= " active";
+      // }
+      // build link
       $linkClass = $hasDropdown? "sub-toggle" : "";
       $linkClass .= $item->a_class? " $item->a_class": "";
       $linkAttrs = "";

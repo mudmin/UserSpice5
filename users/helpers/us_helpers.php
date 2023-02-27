@@ -499,13 +499,11 @@ if (!function_exists('echodatetime')) {
 if (!function_exists('time2str')) {
   function time2str($ts)
   {
-    if ($ts === null) {
+    if ($ts === null || $ts == "") {
       return null;
     }
 
-    if (!ctype_digit($ts)) {
-      $ts = strtotime($ts);
-    }
+    $ts = strtotime($ts);
 
     $diff = time() - $ts;
     if ($diff == 0) {

@@ -1,6 +1,7 @@
 <?php
 
 require_once '../init.php';
+
 $db = DB::getInstance();
 if(!Token::check(Input::get('token'))){
   $msg = [];

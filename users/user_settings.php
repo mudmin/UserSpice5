@@ -262,7 +262,7 @@ if (!empty($_POST)) {
       ?>
 
       <!-- replicate a "well" -->
-      <div class="border bg-light p-4">
+      <div class="border bg-light p-4 alternate-background">
       <form name="updateAccount" action="" method="post">
 
         <div class="row mb-3" id="username-group">

@@ -97,6 +97,13 @@ Get groups and names
 
 <h2>Classic Navigation System</h2>
 <p>Note: This is the original database-based naviation that has been around since version since UserSpice 3. This is no longer being supported and is primarily here for those who have been using it in existing projects. It's clunky, but it works. For modern projects and templates, you should use the <a href="admin.php?view=menus">UltraMenu</a> instead. We also have a tool at the bottom of this page for migrating your exsting menu system to the UltraMenu.</p>
+<?php
+
+$navCheck = $db->query("SELECT navigation_type FROM settings")->first();
+if($navCheck->navigation_type == 0){
+?>
+<div style='color:red;' class="mb-2">Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</div>
+<?php   } ?>
 <p class="text-center mb-3">
   <a href="admin.php?view=nav&action=newDropdown" class="btn btn-dark" role="button">New Dropdown</a>
   <a href="admin.php?view=nav&action=newItem" class="btn btn-dark" role="button">New Item</a>

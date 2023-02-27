@@ -104,17 +104,17 @@ class Validate
 						$fields = is_array($rule_value) ? $rule_value[1] : [$item, '=', $value];
 
 						if ($this->_db->get($table, $fields)) {
-							$str = lang("VAL_EXISTS");
-							$str1 = lang("VAL_DB");
-							if ($this->_db->count()){
-								$this->addError(["{$display} $str {$display}",$item]);
-								$this->ruleBroken([$item,"unique",false]);
-							}
-
-						} else {
-							$this->addError([$str1,$item]);
-							$this->ruleBroken([$item,"unique",false]);
-						}
+				        $str = lang("VAL_EXISTS");
+				        if ($this->_db->count()){
+				            $this->addError(["{$display} $str {$display}",$item]);
+				            $this->ruleBroken([$item,"unique",false]);
+				        }
+				    } else {
+				        $str1 = lang("VAL_DB");  // <-- new position
+				        $this->addError([$str1,$item]);
+				        // or even combine the two lines so no need for $str1: $this->addError([lang("VAL_DB"),$item]);
+				        $this->ruleBroken([$item,"unique",false]);
+				    }
 
 						break;
 

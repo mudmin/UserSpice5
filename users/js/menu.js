@@ -2,13 +2,27 @@ document.addEventListener('DOMContentLoaded', function(){
   const drops = document.querySelectorAll('.us_menu .sub-toggle');
   for(let i = 0; i < drops.length; i++) {
     const drop = drops[i];
-    drop.addEventListener('click', openDropdown);
+    drop.addEventListener('click', toggleDropdown);
   }
   const mobileControls = document.querySelectorAll('.us_menu_mobile_control');
   for(let i = 0; i < mobileControls.length; i++) {
     mobileControls[i].addEventListener('click', mobileControlClick);
   }
 
+  // get the active menu item (accordion only)
+  var active = document.querySelector('.us_menu.accordion li.active');
+  // find out if the active element is inside a submenu. If so, open the submenu on page load (accordion only)
+  if (active) {
+    var parent = active.closest('ul');
+    if (parent.classList.contains("us_sub-menu")) {
+      var parentLi = parent.closest('li.dropdown');
+      if (parentLi) {
+        // simulate the active item's parent menu link to be clicked, so it will open
+        parentLi.firstChild.click();
+      }
+
+    }
+  }
 });
 
 function closeSiblings(dropdown) {
@@ -20,6 +34,7 @@ function closeSiblings(dropdown) {
       const dd = sibling.querySelector('.us_sub-menu.show');
       if (dd) {
         dd.classList.remove('show');
+        dd.parentNode.classList.remove('open');
       }
     }
     sibling = sibling.nextSibling;
@@ -36,7 +51,7 @@ function expandMenuIfMobile(menuId) {
   }
 }
 
-function openDropdown(e) {
+function toggleDropdown(e) {
   e.preventDefault();
   const parent = e.currentTarget.parentNode; // parent LI
   const sub = e.currentTarget.nextElementSibling; // submenu UL
@@ -65,28 +80,29 @@ function openDropdown(e) {
       sub.style.right = '0';
       sub.style.top = '100%';
     }
-    // add backdrop if not exists (only works in admin dashboard)
-    let bd = document.getElementById('us-menu-backdrop');
-    if(!bd) {
-      bd = document.createElement('div');
-      bd.id = 'us-menu-backdrop';
-      bd.className = 'us_menu_backdrop';
-      bd.addEventListener('click', backdropClick);
-      bd.style.zIndex = zIndex - 1;
-      document.body.append(bd);
+    // close menu if clicked outside it (top menu only)
+    if (document.querySelector('.us_menu.horizontal')) {
+      addOffClick(e);
     }
   }
 }
 
-function backdropClick(evt) {
-  const opens = document.querySelectorAll('.us_menu .us_sub-menu.show');
-  for(let i = 0; i < opens.length; i++) {
-    opens[i].classList.remove('show');
-    // remove open
-    var parent = opens[i].parentNode;
-    parent.classList.remove('open');
+// we only need this behaviour for the top menu, not sidebar or accordion
+const addOffClick = (e) => {
+  const offClick = (evt) => {
+    if (e !== evt) {
+      // if the menu is open and the click came from outside the menu
+      document.removeEventListener('click', offClick);
+      // find the open menu parent item and close it
+      var open = e.originalTarget.closest(".dropdown.open");
+      if (open) {
+        // simulate the active item's parent menu link to be clicked, so it will close
+        open.firstChild.click();
+      }
+    }
   }
-  evt.currentTarget.remove();
+  //menu was closed, and is now open, so we add the listener for clicks outside the menu
+  document.addEventListener('click', offClick);
 }
 
 function mobileControlClick(evt) {

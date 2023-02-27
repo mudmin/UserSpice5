@@ -196,6 +196,12 @@ if (Input::exists()) {
                 }
             }
 
+    }else{
+      foreach($validation->_errors as $e){
+        usError($e);
+
+      }
+  Redirect::to(currentPage());
     } //Validation
 } //Input exists
 

@@ -1,5 +1,6 @@
 <?php
 //we will turn off some advanced things like pagination datatabels and the more complicated views for > 2000 users
+//beginning with version 5.5.5, there is now a setting in general settings that will allow you to turn off the full list of users and provide faster performance.
 $maxUsers = 2000;
 $errors = $successes = [];
 $act = $db->query('SELECT * FROM email')->first();
@@ -141,6 +142,7 @@ if (!empty($_POST)) {
 
 
 $uCount = $db->query("SELECT id FROM users")->count();
+if($settings->uman_search == 0){
 $showAllUsers = Input::get('showAllUsers');
 if ($showAllUsers == 1) {
   if ($uCount < $maxUsers) {
@@ -170,7 +172,24 @@ if ($showAllUsers == 1) {
     $userData = fetchAllUsers('permissions DESC,id', false, false);
   }
 }
-
+}else{
+  $showAllUsers = false;
+  //search using the search form
+  if(!empty($_POST['search'])){
+    $search = Input::get('searchTerm');
+    $userData = $db->query("SELECT
+      u.*,
+      group_concat(p.name SEPARATOR ', ') AS perms
+      FROM users AS u
+      JOIN user_permission_matches AS upm ON u.id = upm.user_id
+      LEFT OUTER JOIN permissions AS p ON p.id = upm.permission_id
+      WHERE fname LIKE ? OR lname LIKE ? OR username LIKE ? OR email LIKE ?
+      GROUP BY u.id
+      ",["%$search%","%$search%","%$search%","%$search%"])->results();
+  }else{
+    $userData = new stdClass();
+  }
+}
 $random_password = random_password();
 
 foreach ($validation->errors() as $error) {
@@ -182,7 +201,7 @@ foreach ($validation->errors() as $error) {
 <div class="row">
   <div class="col-12 mb-2">
     <h2>Manage Users</h2>
-    <?php //echo resultBlock($errors, $successes); 
+    <?php //echo resultBlock($errors, $successes);
     ?>
     <?php includeHook($hooks, 'pre'); ?>
 
@@ -198,7 +217,22 @@ foreach ($validation->errors() as $error) {
         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#adduser"><i class="fa fa-plus"></i> Add User</button>
       </div>
     </div>
+  <?php
+  if($settings->uman_search == 1){ ?>
+    <div class="row">
+      <div class="col-12 col-sm-6 offset-sm-3">
+        <form class="" action="" method="post">
+          <?=tokenHere();?>
+          <div class="input-group">
+            <input type="text" name="searchTerm" value="" class="form-control" placeholder="Search for users to manage">
+            <input type="submit" name="search" value="Search" class="btn btn-outline-primary">
+          </div>
 
+          <small>Search by first name, last name, username, or email</small>
+        </form>
+      </div>
+    </div>
+  <?php } ?>
   </div>
   <div class="col-12">
     <div class="card">
@@ -396,7 +430,9 @@ foreach ($validation->errors() as $error) {
     </div>
   </div>
 </div>
-
+<?php if($uCount < $maxUsers && $settings->uman_search == 0){ ?>
+  Since you have over 2000 users, you may want to consider setting this page to User Manager Search Engine Mode in <a href="<?=$us_url_root?>users/admin?view=general">General Settings</a>.
+<?php }?>
 <script type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
 <script>
   $(document).ready(function() {

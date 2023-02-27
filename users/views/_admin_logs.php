@@ -115,7 +115,11 @@ $logs = UserSpice_getLogs(['preset' => $mode]);
             </td>
             <td>
               <?php if ($l->metadata !== null) { ?>
-                <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?php echo $l->id; ?>)" title="View<br>Metadata" data-html="true" data-toggle="tooltip"></i>
+                <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?php echo $l->id; ?>)"
+                title="View Metadata"
+                data-html="true"
+                data-toggle="tooltip"
+                data-bs-toggle="tooltip"></i>
               <?php } ?>
             </td>
           </tr>
@@ -184,10 +188,11 @@ $logs = UserSpice_getLogs(['preset' => $mode]);
   }
 
   function generateMetadataModal(logId) {
-    $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId + "&token=<?= Token::generate() ?>", function(data, status) {
+    $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId + "&token=<?= Token::generate() ?>",
+    function(data, status) {
       $("#logMetadataBody").html(data)
       $("#logMetadataID").html(logId)
-      $("#logMetadata").modal();
+      $("#logMetadata").modal("show");
     });
   }
 

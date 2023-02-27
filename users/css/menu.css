@@ -147,10 +147,21 @@ ul.us_menu.dark ul.us_sub-menu
 
 ul.us_menu.dark a, ul.us_menu.dark .us_menu_mobile_control {
   color: rgba(255, 255, 255, .55);
+  border-radius: 4px;
 }
 
 ul.us_menu.dark li:hover > a {
-  color: rgba(255, 255, 255, .75);
+  color: rgba(255, 255, 255, .75); /* fallback */
+  color: var(--menu-text-hover-color, rgba(255,255,255,0.75)); /* will be used if it exists, or default */
+  background-color: #494e53; /* fallback */
+  background-color: var(--bs-secondary, #494e53);
+}
+
+ul.us_menu.dark li.active-style > a {
+  color: white; /* fallback */
+  color: var(--menu-text-active-color, white); /* will be used if it exists, or default */
+  background-color: #334f6b; /* fallback */
+  background-color: var(--bs-primary, #334f6b);
 }
 
 ul.us_menu.dark  .us_sub-menu,

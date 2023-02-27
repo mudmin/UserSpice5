@@ -23,13 +23,13 @@ Special thanks to John Bovey for the password strength feature.
 ?>
 
 <div class="container">
-  <div class="row justify-content-md-center">
+  <div class="row justify-content-md-center alternate-background">
     <main class="col-12 col-md-10 col-lg-8">
       <?php
       includeHook($hooks, 'body');
       ?>
 
-      <h1 class="form-signin-heading mt-4 mb-3"> <?= lang("SIGNUP_TEXT", ""); ?></h1>
+      <h1 class="form-signin-heading mt-4 mb-3 alternate-background"> <?= lang("SIGNUP_TEXT", ""); ?></h1>
 
       <form class="form-signup border p-4 bg-light mb-5" action="" method="POST" id="payment-form">
 

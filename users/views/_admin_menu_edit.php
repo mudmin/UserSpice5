@@ -40,10 +40,15 @@ if($itemId == 'new' && $itemId !== 0) {
 if ($item) {
   $item->permissions = json_decode($item->permissions, true);
 }
-$menuObj = new Menu($menuId);
-$menu = $menuObj->menu;
+
+
+if($menuId != 'new'){
+  $menuObj = new Menu($menuId);
+  $menu = $menuObj->menu;
+}
+
 if ($menuId == 'new' || !$menu) {
-  $menu = (object)['id' => '', 'menu_name' => '', 'disabled' => 0, 'theme' => 'light', 'type' => 'horizontal', 'justify' => 'right', 'nav_class' => '', 'z_index' => 50, 'brand_html' => ''];
+  $menu = (object)['id' => '', 'menu_name' => '', 'disabled' => 0, 'theme' => 'light', 'show_active' => '1', 'type' => 'horizontal', 'justify' => 'right', 'nav_class' => '', 'z_index' => 50, 'brand_html' => ''];
 }
 
 $snippets = [];
@@ -92,7 +97,9 @@ if ($_POST) {
       $itemId = $db->lastId();
       $success = !$db->error();
     } else {
+
       $success = $db->update('us_menu_items', $itemId, $data);
+
       $menuObj = new Menu($menuId);
     }
     if ($success) {
@@ -106,7 +113,7 @@ if ($_POST) {
     // ];
     $data = [
       'menu_name' => Input::get('menu_name'), 'disabled' => Input::get('disabled'),
-      'theme' => Input::get('theme'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
+      'theme' => Input::get('theme'), 'show_active' => Input::get('show_active'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
       'z_index' => Input::get('z_index'), 'brand_html' => Input::get('brand_html'), 'justify' => Input::get('justify')
     ];
     if ($menuId == 'new') {
@@ -145,6 +152,13 @@ if ($_POST) {
 
 </div>
 
+    <?php
+    if($menu->id == 1) {
+    $navCheck = $db->query("SELECT navigation_type FROM settings")->first();
+    if($navCheck->navigation_type == 0){
+    ?>
+    <span style='color:red;'>Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</span>
+  <?php   }} ?>
 <div class="card">
   <div class="card-body">
     <div class="row">
@@ -152,7 +166,10 @@ if ($_POST) {
         <?php if ($item) : ?>
 
           <form method="post">
-
+            <div class="d-flex justify-content-end align-items-center">
+              <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
+              <button type="submit" onclick="setDirty(false)" class="btn btn-primary save-button">Save</button>
+            </div>
             <div class="form-group">
               <label for="menu_name">Label</label>
               <input id="label" name="label" class="form-control" value="<?= $item->label ?>" onchange="setDirty(true)" />
@@ -229,9 +246,21 @@ if ($_POST) {
             <div class="form-group" id="target_wrapper">
               <label for="link_target">Target</label>
               <select class="form-control" name="link_target" id="link_target" onchange="setDirty(true)">
-                <option value="_self">Self</option>
-                <option value="_blank">Blank</option>
-                <option value="_parent">Parent</option>
+                <option
+                  <?php if ($item->link_target == '_self') {
+                        echo "selected='selected'";
+                        } ?>
+                  value="_self">Self</option>
+                <option
+                <?php if ($item->link_target == '_blank') {
+                      echo "selected='selected'";
+                      } ?>
+                value="_blank">Blank</option>
+                <option
+                <?php if ($item->link_target == '_parent') {
+                      echo "selected='selected'";
+                      } ?>
+                value="_parent">Parent</option>
               </select>
               <small class="form-text text-muted">Default behavior is self.</small>
             </div>
@@ -266,7 +295,10 @@ if ($_POST) {
           </form>
         <?php else : ?>
           <form method="post">
-
+            <div class="d-flex justify-content-end align-items-center">
+              <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
+              <button type="submit" onclick="setDirty(false)" class="btn btn-primary">Save</button>
+            </div>
             <div class="form-group">
               <label for="menu_name">Menu Name</label>
               <input id="menu_name" name="menu_name" class="form-control" value="<?= $menu->menu_name ?>" onchange="setDirty(true)" />
@@ -303,6 +335,14 @@ if ($_POST) {
                 <option value="">Choose Theme</option>
                 <option value="light" <?= $menu->theme == 'light' ? 'selected' : '' ?>>Light</option>
                 <option value="dark" <?= $menu->theme == 'dark' ? 'selected' : '' ?>>Dark</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="theme">Highlight Active Menu Item</label>
+              <select name="show_active" id="show_active" class="form-control">
+                <option value="0" <?= $menu->show_active == '0' ? 'selected' : '' ?>>No</option>
+                <option value="1" <?= $menu->show_active == '1' ? 'selected' : '' ?>>Yes</option>
               </select>
             </div>
 
