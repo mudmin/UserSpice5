@@ -23,64 +23,68 @@ class DB {
 
 	private function __construct($config = []){
 
-		if (!$opts = Config::get('mysql/options'))
-		$opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
-		try{
-			$dbCharset = Config::get('mysql/charset')? Config::get('mysql/charset') : 'utf8';
-			if($config == []){
-				//grab the default db from the init.php file
-				$this->_pdo = new PDO('mysql:host=' .
-				Config::get('mysql/host') .';dbname='.
-				Config::get('mysql/db') . ';charset='.$dbCharset,
-				Config::get('mysql/username'),
-				Config::get('mysql/password'),
-				$opts);
-			}elseif(!is_array($config) || count($config) == 1){
-				//this allows you to pass DB::getDB('dbname') OR DB::getDB(['dbname']) to get
-				//a second db on the same server with the same username and password
-				if(is_array($config)){$config = $config[0];}
-				$this->_pdo = new PDO('mysql:host=' .
-				Config::get('mysql/host') .';dbname='.
-				($config) . ';charset='.$dbCharset,
-				Config::get('mysql/username'),
-				Config::get('mysql/password'),
-				$opts);
-			}elseif(in_array('init',$config)){
-				//this allows you to get another db from your init file that is added to your init.php config
-				//array and call it like this DB::getDB(['mysql2','init']);
-				//your init file can have as many of these sets of db creds as you would like added like this
-				// 'mysql'      => array(
-				// 'host'         => '127.0.0.1',
-				// 'username'     => 'root',
-				// 'password'     => '',
-				// 'db'           => '513',
-				// ),
-				// 'mysql2'      => array(
-				// 'host'         => 'localhost',
-				// 'username'     => 'root',
-				// 'password'     => '',
-				// 'db'           => 'dbname',
-				// ),
-				//be sure to give each one a unique name like mysql2, mysql3
+        if (!$opts = Config::get('pgsql/options'))
+        $opts = array(PDO::ATTR_EMULATE_PREPARES => false);
+        try{
+            // $dbCharset = Config::get('pgsql/charset')? Config::get('pgsql/charset') : 'utf8';
+            if($config == []){
+                //grab the default db from the init.php file
+                $this->_pdo = new PDO('pgsql:host=' .
+                Config::get('pgsql/host') .';dbname='.
+                Config::get('pgsql/db'),
+                Config::get('pgsql/username'),
+                Config::get('pgsql/password'),
+                $opts);
 
-				$this->_pdo = new PDO('mysql:host=' .
-				Config::get($config[0].'/host') .';dbname='.
-				Config::get($config[0].'/db') . ';charset='.$dbCharset,
-				Config::get($config[0].'/username'),
-				Config::get($config[0].'/password'),
-				$opts);
-			}else{
-				$this->_pdo = new PDO('mysql:host=' .
-				$config[0].';dbname='.
-				$config[1]. ';charset='.$dbCharset,
-				$config[2],
-				$config[3],
-				$opts);
-			}
-		}catch(PDOException $e){
-			die($e->getMessage());
-		}
-	}
+            }elseif(!is_array($config) || count($config) == 1){
+                //this allows you to pass DB::getDB('dbname') OR DB::getDB(['dbname']) to get
+                //a second db on the same server with the same username and password
+                if(is_array($config)){$config = $config[0];}
+                $this->_pdo = new PDO('pgsql:host=' .
+                Config::get('pgsql/host') .';dbname='.
+                Config::get('pgsql/db'),
+                Config::get('pgsql/username'),
+                Config::get('pgsql/password'),
+                $opts);
+
+            }elseif(in_array('init',$config)){
+                //this allows you to get another db from your init file that is added to your init.php config
+                //array and call it like this DB::getDB(['pgsql2','init']);
+                //your init file can have as many of these sets of db creds as you would like added like this
+                // 'pgsql'      => array(
+                // 'host'         => '127.0.0.1',
+                // 'username'     => 'root',
+                // 'password'     => '',
+                // 'db'           => '513',
+                // ),
+                // 'pgsql2'      => array(
+                // 'host'         => 'localhost',
+                // 'username'     => 'root',
+                // 'password'     => '',
+                // 'db'           => 'dbname',
+                // ),
+                //be sure to give each one a unique name like pgsql2, pgsql3
+
+                $this->_pdo = new PDO('pgsql:host=' .
+                Config::get('pgsql/host') .';dbname='.
+                Config::get('pgsql/db'),
+                Config::get('pgsql/username'),
+                Config::get('pgsql/password'),
+                $opts);
+
+            }else{
+                $this->_pdo = new PDO('pgsql:host=' .
+                $config[0].';dbname='.
+                $config[1],
+                $config[2],
+                $config[3],
+                $opts);
+            }
+        }catch(PDOException $e){
+            die($e->getMessage());
+        }
+    }
+
 
 	public static function getInstance(){
 		if (!isset(self::$_instance)) {
@@ -115,7 +119,9 @@ class DB {
 						$this->_resultsArray = json_decode(json_encode($this->_results),true);
 					}
 					$this->_count = $this->_query->rowCount();
-					$this->_lastId = $this->_pdo->lastInsertId();
+					$sequenceName = $this->_query->getColumnMeta(0)['table']."_id_seq";
+                    $this->_pdo->query("SELECT nextval('$sequenceName')");
+                    $this->_lastId = $this->_pdo->lastInsertId($sequenceName);
 				}else{
 					throw new Exception("db error");
 				}
@@ -142,18 +148,19 @@ class DB {
 		$values = array();
 		$is_ok  = true;
 
-		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
-		$sql .= " WHERE $where_text";
+		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok));
 
-		if ($is_ok)
-		if (!$this->query($sql, $values)->error())
+		$sql .= " WHERE $where_text";
+        // var_dump($sql);
+		if ($is_ok);
+		if (!$this->query($sql, $values)->error());
 		return $this;
 
 		return false;
 	}
 
 	private function _calcWhere($w, &$vals, $comboparg='and', &$is_ok=NULL) {
-		#echo "DEBUG: Entering _calcwhere(w=".print_r($w,true).",...)<br />\n";
+		// echo "DEBUG: Entering _calcwhere(w=".print_r($w,true).",...)<br />\n";
 		if (is_array($w)) {
 			#echo "DEBUG: is_array - check<br />\n";
 			$comb_ops   = ['and', 'or', 'and not', 'or not'];
@@ -314,12 +321,14 @@ class DB {
 	}
 
 	public function results($assoc = false){
-		if($assoc) return ($this->_resultsArray) ? $this->_resultsArray : [];
+        if($assoc) return ($this->_resultsArray) ? $this->_resultsArray : [];
 		return ($this->_results) ? $this->_results : [];
 	}
 
 	public function first($assoc = false){
-		return ($this->count()>0)  ?  $this->results($assoc)[0]  :  [];
+        // var_dump($this->results($assoc)[0]);
+        // var_dump($this->count());
+        return (($this->count()>0)  ?  $this->results($assoc)[0]  :  []);
 	}
 
 	public function count(){

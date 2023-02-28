@@ -250,7 +250,7 @@ INSERT INTO menus (id, menu_title, parent, dropdown, logged_in, display_order, l
 --
 
 CREATE TABLE messages (
-  id integer NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   msg_from integer NOT NULL,
   msg_to integer NOT NULL,
   msg_body text NOT NULL,
@@ -405,7 +405,7 @@ INSERT INTO profiles (id, user_id, bio) VALUES
 --
 
 CREATE TABLE settings (
-  id integer NOT NULL,
+  id serial NOT NULL,
   recaptcha integer NOT NULL DEFAULT 0,
   force_ssl integer NOT NULL,
   css_sample integer NOT NULL,
@@ -482,7 +482,7 @@ CREATE TABLE settings (
 -- Dumping data for table `settings`
 --
 
-INSERT INTO "settings" ("id", "recaptcha", "force_ssl", "css_sample", "site_name", "language", "site_offline", "force_pr", "glogin", "fblogin", "gid", "gsecret", "gredirect", "ghome", "fbid", "fbsecret", "fbcallback", "graph_ver", "finalredir", "req_cap", "req_num", "min_pw", "max_pw", "min_un", "max_un", "messaging", "snooping", "echouser", "wys", "change_un", "backup_dest", "backup_source", "backup_table", "msg_notification", "permission_restriction", "auto_assign_un", "page_permission_restriction", "msg_blocked_users", "msg_default_to", "notifications", "notif_daylimit", "recap_public", "recap_private", "page_default_private", "navigation_type", "copyright", "custom_settings", "system_announcement", "twofa", "force_notif", "cron_ip", "registration", "join_vericode_expiry", "reset_vericode_expiry", "admin_verify", "admin_verify_timeout", "session_manager", "template", "saas", "redirect_uri_after_login", "show_tos", "default_language", "allow_language", "spice_api", "announce", "bleeding_edge", "err_time", "container_open_class", "debug", "widgets") 
+INSERT INTO "settings" ("id", "recaptcha", "force_ssl", "css_sample", "site_name", "language", "site_offline", "force_pr", "glogin", "fblogin", "gid", "gsecret", "gredirect", "ghome", "fbid", "fbsecret", "fbcallback", "graph_ver", "finalredir", "req_cap", "req_num", "min_pw", "max_pw", "min_un", "max_un", "messaging", "snooping", "echouser", "wys", "change_un", "backup_dest", "backup_source", "backup_table", "msg_notification", "permission_restriction", "auto_assign_un", "page_permission_restriction", "msg_blocked_users", "msg_default_to", "notifications", "notif_daylimit", "recap_public", "recap_private", "page_default_private", "navigation_type", "copyright", "custom_settings", "system_announcement", "twofa", "force_notif", "cron_ip", "registration", "join_vericode_expiry", "reset_vericode_expiry", "admin_verify", "admin_verify_timeout", "session_manager", "template", "saas", "redirect_uri_after_login", "show_tos", "default_language", "allow_language", "spice_api", "announce", "bleeding_edge", "err_time", "container_open_class", "debug", "widgets")
 VALUES (1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'standard', NULL, NULL, 1, 'en-US', 0, NULL, '2020-10-07 21:26:18', 0, 15, 'container-fluid', 0, 'settings,misc,tools,plugins,snapshot,active_users,active-users');
 
 -- --------------------------------------------------------
@@ -637,7 +637,7 @@ INSERT INTO users (id, permissions, email, email_new, username, password, pin, f
 --
 
 CREATE TABLE users_online (
-  id int NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   ip varchar(15) NOT NULL,
   "timestamp" varchar(15) NOT NULL,
   user_id int DEFAULT NULL,
@@ -727,7 +727,7 @@ CREATE TABLE us_fingerprint_assets (
 --
 
 CREATE TABLE us_forms (
-  id INT NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   form VARCHAR(255) NOT NULL
 );
 
@@ -738,7 +738,7 @@ CREATE TABLE us_forms (
 --
 
 CREATE TABLE us_form_validation (
-  id INT NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   value VARCHAR(255) NOT NULL,
   description VARCHAR(255) NOT NULL,
   params VARCHAR(255) NOT NULL
@@ -770,7 +770,7 @@ INSERT INTO us_form_validation (id, value, description, params) VALUES
 --
 
 CREATE TABLE us_form_views (
-  id INT NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   form_name VARCHAR(255) NOT NULL,
   view_name VARCHAR(255) NOT NULL,
   fields TEXT NOT NULL
@@ -783,7 +783,7 @@ CREATE TABLE us_form_views (
 --
 
 CREATE TABLE us_ip_blacklist (
-  id INT NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   ip VARCHAR(50) NOT NULL,
   last_user INT NOT NULL DEFAULT 0,
   reason INT NOT NULL DEFAULT 0
@@ -968,7 +968,7 @@ INSERT INTO `us_menu_items` (`id`, `menu`, `type`, `label`, `link`, `icon_class`
 --
 
 CREATE TABLE us_plugins (
-  id integer NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   plugin varchar(255),
   status varchar(255),
   updates text,
@@ -982,7 +982,7 @@ CREATE TABLE us_plugins (
 --
 
 CREATE TABLE us_plugin_hooks (
-  id integer NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   page varchar(255) NOT NULL,
   folder varchar(255) NOT NULL,
   position varchar(255) NOT NULL,

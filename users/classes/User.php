@@ -86,10 +86,10 @@ class User
                 }
             }
             $data = $this->_db->get('users', [$field, '=', $user]);
-
+            // var_dump($data);
             if ($data->count()) {
                 $this->_data = $data->first();
-
+                // var_dump($this->_data);
                 return true;
             }
         }
@@ -153,8 +153,10 @@ class User
         } else {
             $user = $this->find($email, 1);
 
+            // var_dump(password_verify($password, $this->data()->password));
             if ($user) {
                 if (password_verify($password, $this->data()->password)) {
+                    echo "Password is correct";
                     Session::put($this->_sessionName, $this->data()->id);
 
                     if ($remember) {
@@ -191,6 +193,7 @@ class User
 
                     return true;
                 }
+                echo "Password is incorrect";
             }
         }
 
