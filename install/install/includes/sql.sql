@@ -599,8 +599,8 @@ CREATE TABLE users (
   vericode_expiry timestamp,
   oauth_provider varchar(255),
   oauth_uid varchar(255),
-  gender varchar(10) NOT NULL,
-  locale varchar(10) NOT NULL,
+  gender varchar(10),
+  locale varchar(10),
   gpluslink varchar(255),
   account_owner smallint NOT NULL DEFAULT 1,
   account_id integer NOT NULL DEFAULT 0,
@@ -987,7 +987,7 @@ CREATE TABLE us_plugin_hooks (
   folder varchar(255) NOT NULL,
   position varchar(255) NOT NULL,
   hook varchar(255) NOT NULL,
-  disabled boolean DEFAULT false
+  disabled int DEFAULT 0
 );
 
 -- --------------------------------------------------------

@@ -119,9 +119,11 @@ class DB {
 						$this->_resultsArray = json_decode(json_encode($this->_results),true);
 					}
 					$this->_count = $this->_query->rowCount();
-					$sequenceName = $this->_query->getColumnMeta(0)['table']."_id_seq";
-                    $this->_pdo->query("SELECT nextval('$sequenceName')");
-                    $this->_lastId = $this->_pdo->lastInsertId($sequenceName);
+					// $sequenceName = $this->_query->getColumnMeta(0)['table'] . '_id_seq';
+                    // $this->_pdo->query("SELECT nextval('$sequenceName')");
+                    // $this->_lastId = $this->_pdo->lastInsertId($sequenceName);
+                    $this->_pdo->query("SELECT nextval('users_id_seq')");
+                    $this->_lastId = $this->_pdo->lastInsertId('users_id_seq');
 				}else{
 					throw new Exception("db error");
 				}
@@ -129,6 +131,7 @@ class DB {
 				$this->_error = true;
 				$this->_results = [];
 				$this->_errorInfo = $this->_query->errorInfo();
+                echo 'ERROR: ' . $e->getMessage();
 			}
 		}
 
@@ -263,62 +266,72 @@ class DB {
 		return $this->action('DELETE',$table,array('id','=',$id));
 	}
 
-	public function insert($table, $fields=[], $update=false) {
-		$keys    = array_keys($fields);
-		$values  = [];
-		$records = 0;
+	public function insert($table, $fields = [], $update = false)
+    {
+        $keys = array_keys($fields);
+        $values = [];
+        $records = 0;
 
-		foreach ($fields as $field) {
-			$count = is_array($field) ? count($field) : 1;
+        foreach ($fields as $field) {
+            $count = is_array($field) ? count($field) : 1;
 
-			if (!isset($first_time)  ||  $count<$records) {
-				$first_time = true;
-				$records    = $count;
-			}
-		}
+            if (!isset($first_time) || $count < $records) {
+                $first_time = true;
+                $records = $count;
+            }
+        }
 
-		for ($i=0; $i<$records; $i++)
-		foreach ($fields as $field)
-		$values[] = is_array($field) ? $field[$i] : $field;
+        for ($i = 0; $i < $records; $i++) {
+            foreach ($fields as $field) {
+                $values[] = is_array($field) ? $field[$i] : $field;
+            }
+        }
 
-		$col = ",(" . substr( str_repeat(",?",count($fields)), 1) . ")";
-		$sql = "INSERT INTO {$table} (`". implode('`,`', $keys)."`) VALUES ". substr( str_repeat($col,$records), 1);
+        $col = ",(" . substr(str_repeat(",?", count($fields)), 1) . ")";
+        $sql = "INSERT INTO $table (\"" . implode('","', $keys) . "\") VALUES " . substr(str_repeat($col, $records), 1);
 
-		if ($update) {
-			$sql .= " ON DUPLICATE KEY UPDATE";
+        if ($update) {
+            $sql .= " ON CONFLICT DO UPDATE SET ";
 
-			foreach ($keys as $key)
-			if ($key != "id")
-			$sql .= " `$key` = VALUES(`$key`),";
+            foreach ($keys as $key) {
+                if ($key != "id") {
+                    $sql .= "\"$key\" = excluded.\"$key\",";
+                }
+            }
 
-			if (!empty($keys))
-			$sql = substr($sql, 0, -1);
-		}
+            if (!empty($keys)) {
+                $sql = rtrim($sql, ',');
+            }
+        }
 
-		return !$this->query($sql, $values)->error();
-	}
+        return !$this->query($sql, $values)->error();
+}
 
-	public function update($table, $id, $fields){
-		$sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) . (empty($fields) ? "" : "` = ? ");
-		$is_ok = true;
-
-		if (!is_array($id)) {
-			$sql     .= "WHERE id = ?";
-			$fields[] = $id;
-		} else {
-			if (empty($id))
-			return false;
-
-			if ($where_text = $this->_calcWhere($id, $fields, "and", $is_ok))
-			$sql .= "WHERE $where_text";
-		}
-
-		if ($is_ok)
-		if (!$this->query($sql, $fields)->error())
-		return true;
-
-		return false;
-	}
+public function update($table, $id, $fields) {
+    $sql = "UPDATE {$table} SET " . (empty($fields) ? "" : "\"") . implode("\" = ?, \"", array_keys($fields)) . (empty($fields) ? "" : "\" = ? ");
+    $is_ok = true;
+    if (!is_array($id)) {
+        $sql .= "WHERE id = ?";
+        $fields[] = $id;
+    } else {
+        if (empty($id)) {
+            return false;
+        }
+        $where_arr = [];
+        foreach ($id as $key => $value) {
+            $where_arr[] = "\"{$key}\" = ?";
+            $fields[] = $value;
+        }
+        $where_text = implode(" AND ", $where_arr);
+        $sql .= "WHERE {$where_text}";
+    }
+    if ($is_ok) {
+        if (!$this->query($sql, $fields)->error()) {
+            return true;
+        }
+    }
+    return false;
+}
 
 	public function results($assoc = false){
         if($assoc) return ($this->_resultsArray) ? $this->_resultsArray : [];
@@ -326,8 +339,6 @@ class DB {
 	}
 
 	public function first($assoc = false){
-        // var_dump($this->results($assoc)[0]);
-        // var_dump($this->count());
         return (($this->count()>0)  ?  $this->results($assoc)[0]  :  []);
 	}
 

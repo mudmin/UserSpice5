@@ -153,10 +153,8 @@ class User
         } else {
             $user = $this->find($email, 1);
 
-            // var_dump(password_verify($password, $this->data()->password));
             if ($user) {
                 if (password_verify($password, $this->data()->password)) {
-                    echo "Password is correct";
                     Session::put($this->_sessionName, $this->data()->id);
 
                     if ($remember) {
@@ -193,7 +191,6 @@ class User
 
                     return true;
                 }
-                echo "Password is incorrect";
             }
         }
 
@@ -231,7 +228,7 @@ class User
                 $settings = $this->_db->query('SELECT * FROM settings')->first();
                 $username = $email;
 
-                $insert = $this->_db->query("INSERT INTO $this->tableName SET `password` = NULL,username = '".$username."',active = '".$active."',oauth_provider = '".$oauth_provider."', oauth_uid = '".$oauth_uid."',permissions = '".$active."', email_verified = '".$active."', fname = '".$fname."', lname = '".$lname."', email = '".$email."', picture = '".$picture."', gpluslink = '".$link."', join_date = '".date('Y-m-d H:i:s')."',created = '".date('Y-m-d H:i:s')."', modified = '".date('Y-m-d H:i:s')."'") or die('Google oAuth Error');
+                $insert = $this->_db->query("INSERT INTO $this->tableName SET 'password' = NULL,username = '".$username."',active = '".$active."',oauth_provider = '".$oauth_provider."', oauth_uid = '".$oauth_uid."',permissions = '".$active."', email_verified = '".$active."', fname = '".$fname."', lname = '".$lname."', email = '".$email."', picture = '".$picture."', gpluslink = '".$link."', join_date = '".date('Y-m-d H:i:s')."',created = '".date('Y-m-d H:i:s')."', modified = '".date('Y-m-d H:i:s')."'") or die('Google oAuth Error');
                 $lastID = $insert->lastId();
 
                 $insert2 = $this->_db->query("INSERT INTO user_permission_matches SET user_id = $lastID, permission_id = 1");
