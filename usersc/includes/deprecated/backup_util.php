@@ -280,10 +280,10 @@ function backupUsTables($backupPath) {
 
     try {
 
-			$dbHost     = Config::get('mysql/host');
-			$dbDatabase = Config::get('mysql/db');
-			$dbUsername = Config::get('mysql/username');
-			$dbPassword = Config::get('mysql/password');
+			$dbHost     = Config::get('pgsql/host');
+			$dbDatabase = Config::get('pgsql/db');
+			$dbUsername = Config::get('pgsql/username');
+			$dbPassword = Config::get('pgsql/password');
 
 			$usDump = Shuttle_Dumper::create(array(
 					'host'     => $dbHost,
@@ -313,10 +313,10 @@ function backupUsTable($backupPath) {
 
     try {
 
-			$dbHost     = Config::get('mysql/host');
-			$dbDatabase = Config::get('mysql/db');
-			$dbUsername = Config::get('mysql/username');
-			$dbPassword = Config::get('mysql/password');
+			$dbHost     = Config::get('pgsql/host');
+			$dbDatabase = Config::get('pgsql/db');
+			$dbUsername = Config::get('pgsql/username');
+			$dbPassword = Config::get('pgsql/password');
 
 			$sel_table = $settings->backup_table;
 

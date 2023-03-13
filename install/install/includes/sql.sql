@@ -1037,6 +1037,8 @@ CREATE TABLE us_user_sessions (
   UserSessionEnded_Time timestamp without time zone DEFAULT NULL
 );
 
+SELECT setval('menus_id_seq', (SELECT MAX(id) FROM menus)+1);
+
 --
 -- Indexes for dumped tables
 --
