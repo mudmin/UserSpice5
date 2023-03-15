@@ -121,28 +121,29 @@ if (!empty($_POST)) {
     logger($user->data()->id, 'Email Settings', "Updated email_act from $results->debug_level to $debug_level.");
   } else {
   }
-  if ($results->isSMTP != $_POST['isSMTP']) {
-    $isSMTP = Input::get('isSMTP');
-    $fields = ['isSMTP' => $isSMTP];
+  $_POST = array_change_key_case($_POST, CASE_LOWER);
+  if ($results->issmtp != $_POST['issmtp']) {
+    $issmtp = Input::get('issmtp');
+    $fields = ['issmtp' => $issmtp];
     $db->update('email', 1, $fields);
     $successes[] = 'Updated isSMTP';
-    logger($user->data()->id, 'Email Settings', "Updated isSMTP from $results->isSMTP to $isSMTP.");
+    logger($user->data()->id, 'Email Settings', "Updated isSMTP from $results->issmtp to $issmtp.");
   } else {
   }
-  if ($results->isHTML != $_POST['isHTML']) {
-    $isHTML = Input::get('isHTML');
-    $fields = ['isHTML' => $isHTML];
+  if ($results->ishtml != $_POST['ishtml']) {
+    $ishtml = Input::get('ishtml');
+    $fields = ['ishtml' => $ishtml];
     $db->update('email', 1, $fields);
     $successes[] = 'Updated isHTML';
-    logger($user->data()->id, 'Email Settings', "Updated isHTML from $results->isHTML to $isHTML.");
+    logger($user->data()->id, 'Email Settings', "Updated isHTML from $results->ishtml to $ishtml.");
   } else {
   }
-  if ($results->useSMTPauth != $_POST['useSMTPauth']) {
-    $useSMTPauth = Input::get('useSMTPauth');
-    $fields = ['useSMTPauth' => $useSMTPauth];
+  if ($results->usesmtpauth != $_POST['usesmtpauth']) {
+    $usesmtpauth = Input::get('usesmtpauth');
+    $fields = ['usesmtpauth' => $usesmtpauth];
     $db->update('email', 1, $fields);
     $successes[] = 'Updated useSMTPauth';
-    logger($user->data()->id, 'Email Settings', "Updated useSMTPauth from $results->useSMTPauth to $useSMTPauth.");
+    logger($user->data()->id, 'Email Settings', "Updated useSMTPauth from $results->usesmtpauth to $usesmtpauth.");
   } else {
   }
   if (isset($_POST['update_and_test'])) {
@@ -234,7 +235,7 @@ if (!empty($_POST)) {
               <div class="form-group">
                 <label>Use isSMTP Feature <a href="#!" tabindex="-1"  data-trigger="focus" data-bs-trigger="focus" class="nounderline"  title="Use this if your email keeps failing and you know your credentials are correct."><i class="fa fa-question-circle offset-circle"></i></a></label>
                 <select class="form-control" width="100%" name="isSMTP">
-                  <?php if ($results->isSMTP == 0) {
+                  <?php if ($results->issmtp == 0) {
                     echo "<option value='0'>No</option>";
                     echo "<option value='1'>Yes</option>";
                   } else {
@@ -246,7 +247,7 @@ if (!empty($_POST)) {
               <div class="form-group">
                 <label>Use SMTP Authentication: (Almost always, yes)</label>
                 <select class="form-control" width="100%" name="useSMTPauth">
-                  <?php if ($results->useSMTPauth == 'false') {
+                  <?php if ($results->usesmtpauth == 'false') {
                     echo "<option value='false'>No</option>";
                     echo "<option value='true'>Yes</option>";
                   } else {
@@ -258,7 +259,7 @@ if (!empty($_POST)) {
               <div class="form-group">
                 <label>Send email as HTML by default</label>
                 <select class="form-control" width="100%" name="isHTML">
-                  <?php if ($results->isHTML == 'false') {
+                  <?php if ($results->ishtml == 'false') {
                     echo "<option value='false'>No</option>";
                     echo "<option value='true'>Yes</option>";
                   } else {

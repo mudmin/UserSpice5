@@ -119,9 +119,6 @@ class DB {
 						$this->_resultsArray = json_decode(json_encode($this->_results),true);
 					}
 					$this->_count = $this->_query->rowCount();
-					// $sequenceName = $this->_query->getColumnMeta(0)['table'] . '_id_seq';
-                    // $this->_pdo->query("SELECT nextval('$sequenceName')");
-                    // $this->_lastId = $this->_pdo->lastInsertId($sequenceName);
                     $this->_pdo->query("SELECT nextval('users_id_seq')");
                     $this->_lastId = $this->_pdo->lastInsertId('users_id_seq');
 				}else{

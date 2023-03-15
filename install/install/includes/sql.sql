@@ -1037,7 +1037,10 @@ CREATE TABLE us_user_sessions (
   UserSessionEnded_Time timestamp without time zone DEFAULT NULL
 );
 
+-- Setting the id to max + 1 when a new record is inserted
 SELECT setval('menus_id_seq', (SELECT MAX(id) FROM menus)+1);
+SELECT setval('crons_id_seq', (SELECT MAX(id) FROM crons)+1);
+SELECT setval('permissions_id_seq', (SELECT MAX(id) FROM permissions)+1);
 
 --
 -- Indexes for dumped tables
