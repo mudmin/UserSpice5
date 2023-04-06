@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE users ADD COLUMN twoDate datetime DEFAULT NULL AFTER `twoEnabled`");
+$db->query("ALTER TABLE users ADD COLUMN twoDate timestamp DEFAULT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted twoDate to users table");
 } else {

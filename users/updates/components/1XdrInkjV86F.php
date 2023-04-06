@@ -8,7 +8,7 @@
 $countE=0;
 
 $db->query("CREATE TABLE us_form_views (
-  id int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   form_name varchar(255) NOT NULL,
   view_name varchar(255) NOT NULL,
   fields text NOT NULL
@@ -23,14 +23,14 @@ if(!$db->error()) {
 }
 
 $db->query("CREATE TABLE us_form_validation (
-  id int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   value varchar(255) NOT NULL,
   description varchar(255) NOT NULL,
   params varchar(255) NOT NULL
 )");
 if(!$db->error()) {
   logger(1,"System Updates","Added us_form_validation table");
-  $db->query("INSERT INTO `us_form_validation` (`value`, `description`, `params`) VALUES
+  $db->query("INSERT INTO us_form_validation (value, description, params) VALUES
   ('min', 'Minimum # of Characters', 'number'),
   ('max', 'Maximum # of Characters', 'number'),
   ('is_numeric', 'Must be a number', 'true'),
@@ -62,7 +62,7 @@ if(!$db->error()) {
 }
 
 $db->query("CREATE TABLE us_forms (
-  id int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   form varchar(255) NOT NULL
 )");
 if(!$db->error()) {

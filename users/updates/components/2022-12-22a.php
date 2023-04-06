@@ -16,7 +16,7 @@ $countE = 0;
 
   $db->insert("us_menus",$fields);
 
-  $db->query("INSERT INTO `us_menu_items` (`menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
+  $db->query("INSERT INTO us_menu_items (menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) VALUES
   (2, 'link', 'User Manager', 'users/admin.php?view=users', 'fa fa-user', '', '', '_self', 26, 1, 0, '[\"2\"]'),
   (2, 'link', 'Spice Shaker', 'users/admin.php?view=spice', 'fa fa-user-secret', '', '', '_self', 0, 2, 0, '[\"2\"]'),
   (2, 'dropdown', 'Tools', '', 'fa fa-wrench', '', '', '_self', 0, 3, 0, '[\"2\"]'),

@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN registration tinyint(1)");
+$db->query("ALTER TABLE settings ADD COLUMN registration smallint");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted registration to settings table");
 } else {

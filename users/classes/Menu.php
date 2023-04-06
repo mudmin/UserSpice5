@@ -77,17 +77,17 @@ class Menu {
 
   private function hasPerms($item) {
     global $user;
-    $itemPerms = json_decode($item->permissions,true);
+    $itemPerms = json_decode($item->permissions, true);
     //once a user is logged in, the 0 permission on the item does not mean anything
     //and should be removed
     if($user->isLoggedIn()){
-      if (($key = array_search("0", $itemPerms)) !== false) {
-          unset($itemPerms[$key]);
-      }
+        if (is_array($itemPerms) && ($key = array_search("0", $itemPerms)) !== false) {
+            unset($itemPerms[$key]);
+        }
     }
-    if(in_array(0, $itemPerms)) return true;
-    return sizeof(array_intersect($itemPerms, $this->userPerms)) > 0;
-  }
+    if(is_array($itemPerms) && in_array(0, $itemPerms)) return true;
+    return is_array($itemPerms) && sizeof(array_intersect($itemPerms, $this->userPerms)) > 0;
+}
 
   private function _generateHtml($items, $isDropdown = false, $level = 0) {
     global $abs_us_root,$us_url_root,$lang;

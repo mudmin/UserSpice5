@@ -5,39 +5,35 @@
 
 $countE = 0;
 
-$db->query("CREATE TABLE `us_menus` (
-  `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `menu_name` varchar(255) DEFAULT NULL,
-  `type` varchar(75) DEFAULT NULL,
-  `nav_class` varchar(255) DEFAULT NULL,
-  `theme` varchar(25) DEFAULT NULL,
-  `z_index` int(11) DEFAULT NULL,
-  `brand_html` text,
-  `disabled` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-");
+$db->query("CREATE TABLE us_menus (
+    id SERIAL PRIMARY KEY,
+    menu_name varchar(255),
+    type varchar(75),
+    nav_class varchar(255),
+    theme varchar(25),
+    z_index int,
+    brand_html text,
+    disabled smallint DEFAULT 0
+  )");
 
-$db->query("INSERT INTO `us_menus` (`id`, `menu_name`, `type`, `nav_class`, `theme`, `z_index`, `brand_html`, `disabled`) VALUES
-(1, 'Main Menu', 'horizontal', '', 'dark', 50, '&lt;a href=&quot;{{root}}&quot; &gt;
-&lt;img src=&quot;{{root}}users/images/logo.png&quot; /&gt;', 0)
-");
+$db->query("INSERT INTO us_menus (id, menu_name, type, nav_class, theme, z_index, brand_html, disabled)
+            VALUES (1, 'Main Menu', 'horizontal', '', 'dark', 50, '<a href=\"{{root}}\"> <img src=\"{{root}}users/images/logo.png\" /></a>', 0)");
 
 
-$db->query("CREATE TABLE `us_menu_items` (
-  `id` int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `menu` int(11) UNSIGNED NOT NULL,
-  `type` varchar(50) DEFAULT NULL,
-  `label` varchar(255) DEFAULT NULL,
-  `link` text,
-  `icon_class` varchar(255) DEFAULT NULL,
-  `li_class` varchar(255) DEFAULT NULL,
-  `a_class` varchar(255) DEFAULT NULL,
-  `link_target` varchar(50) DEFAULT NULL,
-  `parent` int(11) DEFAULT NULL,
-  `display_order` int(11) DEFAULT NULL,
-  `disabled` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-");
+$db->query("CREATE TABLE us_menu_items (
+    id SERIAL PRIMARY KEY,
+    menu int NOT NULL,
+    type varchar(50),
+    label varchar(255),
+    link text,
+    icon_class varchar(255),
+    li_class varchar(255),
+    a_class varchar(255),
+    link_target varchar(50),
+    parent int,
+    display_order int,
+    disabled smallint DEFAULT 0
+  )");
 
 $db->query("ALTER TABLE us_menus ADD COLUMN justify varchar(10) default 'right'");
 $db->query("ALTER TABLE us_menu_items ADD COLUMN permissions varchar(1000)");

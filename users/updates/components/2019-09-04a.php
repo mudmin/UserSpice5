@@ -6,7 +6,7 @@
 //Rewrote 2019-04-27 DH
 
 $countE=0;
-$db->query("ALTER TABLE settings ADD COLUMN announce datetime");
+$db->query("ALTER TABLE settings ADD COLUMN announce timestamp");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted announcements checker to settings table");
 } else {

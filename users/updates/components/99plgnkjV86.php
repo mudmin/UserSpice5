@@ -8,13 +8,13 @@
 $countE=0;
 
 $db->query("CREATE TABLE us_plugin_hooks (
-  id int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id SERIAL PRIMARY KEY,
   page varchar(255) NOT NULL,
   folder varchar(255) NOT NULL,
   position varchar(255) NOT NULL,
   hook varchar(255) NOT NULL,
-  disabled tinyint(1) DEFAULT 0
-)");
+  disabled smallint DEFAULT 0
+  )");
 if(!$db->error()) {
   logger(1,"System Updates","Added us_plugin_hooks table");
 } else {

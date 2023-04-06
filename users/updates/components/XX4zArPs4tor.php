@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN session_manager tinyint(1) DEFAULT 0");
+$db->query("ALTER TABLE settings ADD COLUMN session_manager smallint DEFAULT 0");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted session_manager to settings table");
 } else {

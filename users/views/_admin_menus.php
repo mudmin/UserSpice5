@@ -1,7 +1,7 @@
 <?php
 $db = DB::getInstance();
 $menus = $db->query("SELECT * FROM us_menus")->results();
-$count = $db->query("SELECT z_index as z, COUNT(*) z_index FROM us_menus GROUP BY z_index HAVING z_index > 1")->results();
+$count = $db->query("SELECT z_index, COUNT(*) as count FROM us_menus GROUP BY z_index HAVING z_index > 1")->results();
 $dupes = [];
 foreach ($count as $c) {
   if ($c->z_index > 1) {

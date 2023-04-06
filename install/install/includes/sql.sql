@@ -190,7 +190,7 @@ CREATE TABLE logs (
 -- Dumping data for table `logs`
 --
 
-INSERT INTO `logs` (`id`, `user_id`, `logdate`, `logtype`, `lognote`, `ip`, `metadata`) VALUES
+INSERT INTO logs (id, user_id, logdate, logtype, lognote, ip, metadata) VALUES
 (1, 1, '2022-12-23 12:05:38', 'System Updates', 'Update 2022-05-04a successfully deployed.', '::1', NULL),
 (2, 1, '2022-12-23 12:05:43', 'login', 'User logged in.', '::1', NULL),
 (3, 1, '2022-12-23 12:06:38', 'System Updates', 'Update 2022-11-06a successfully deployed.', '::1', NULL),
@@ -305,8 +305,8 @@ CREATE TABLE "notifications" (
 
 CREATE TABLE pages (
   id serial PRIMARY KEY,
-  page varchar(255),
-  title varchar(255),
+  page varchar(255) DEFAULT NULL,
+  title varchar(255) DEFAULT NULL,
   private integer NOT NULL DEFAULT 0,
   re_auth integer NOT NULL DEFAULT 0,
   core integer DEFAULT 0
@@ -363,8 +363,8 @@ INSERT INTO permissions (id, name) VALUES
 
 CREATE TABLE permission_page_matches (
   id serial PRIMARY KEY,
-  permission_id integer,
-  page_id integer
+  permission_id integer DEFAULT NULL,
+  page_id integer DEFAULT NULL
 );
 
 --
@@ -405,7 +405,7 @@ INSERT INTO profiles (id, user_id, bio) VALUES
 --
 
 CREATE TABLE settings (
-  id serial NOT NULL,
+  id serial PRIMARY KEY NOT NULL,
   recaptcha integer NOT NULL DEFAULT 0,
   force_ssl integer NOT NULL,
   css_sample integer NOT NULL,
@@ -475,7 +475,6 @@ CREATE TABLE settings (
   container_open_class varchar(255) DEFAULT 'container-fluid',
   debug smallint DEFAULT 0,
   widgets text DEFAULT NULL
-  PRIMARY KEY (id)
 );
 
 --
@@ -495,7 +494,7 @@ CREATE TABLE updates (
   id serial primary key,
   migration varchar(15) NOT NULL,
   applied_on timestamp NOT NULL DEFAULT current_timestamp,
-  update_skipped boolean
+  update_skipped boolean DEFAULT NULL
 );
 
 --
@@ -587,39 +586,39 @@ CREATE TABLE users (
   id serial NOT NULL PRIMARY KEY,
   permissions smallint NOT NULL,
   email varchar(155) NOT NULL,
-  email_new varchar(155),
+  email_new varchar(155) DEFAULT NULL,
   username varchar(255) NOT NULL,
-  password varchar(255),
-  pin varchar(255),
+  password varchar(255) DEFAULT NULL,
+  pin varchar(255) DEFAULT NULL,
   fname varchar(255) NOT NULL,
   lname varchar(255) NOT NULL,
   language varchar(255) DEFAULT 'en-US',
   email_verified boolean NOT NULL DEFAULT false,
-  vericode varchar(15),
-  vericode_expiry timestamp,
-  oauth_provider varchar(255),
-  oauth_uid varchar(255),
-  gender varchar(10),
-  locale varchar(10),
-  gpluslink varchar(255),
+  vericode varchar(15) DEFAULT NULL,
+  vericode_expiry timestamp DEFAULT NULL,
+  oauth_provider varchar(255) DEFAULT NULL,
+  oauth_uid varchar(255) DEFAULT NULL,
+  gender varchar(10) NOT NULL,
+  locale varchar(10) NOT NULL,
+  gpluslink varchar(255) DEFAULT NULL,
   account_owner smallint NOT NULL DEFAULT 1,
   account_id integer NOT NULL DEFAULT 0,
   account_mgr integer NOT NULL DEFAULT 0,
-  fb_uid varchar(255),
-  picture varchar(255),
-  created timestamp,
+  fb_uid varchar(255) DEFAULT NULL,
+  picture varchar(255) DEFAULT NULL,
+  created timestamp NOT NULL,
   protected boolean NOT NULL DEFAULT false,
   msg_exempt boolean NOT NULL DEFAULT false,
   dev_user boolean NOT NULL DEFAULT false,
   msg_notification boolean NOT NULL DEFAULT true,
   cloak_allowed boolean NOT NULL DEFAULT false,
-  oauth_tos_accepted boolean,
+  oauth_tos_accepted boolean DEFAULT NULL,
   un_changed boolean NOT NULL DEFAULT false,
   force_pr boolean NOT NULL DEFAULT false,
   logins integer NOT NULL DEFAULT 0,
-  last_login timestamp,
-  join_date timestamp,
-  modified timestamp,
+  last_login timestamp DEFAULT NULL,
+  join_date timestamp DEFAULT NULL,
+  modified timestamp DEFAULT NULL,
   active boolean DEFAULT true
 );
 
@@ -628,7 +627,7 @@ CREATE TABLE users (
 --
 
 INSERT INTO users (id, permissions, email, email_new, username, password, pin, fname, lname, language, email_verified, vericode, vericode_expiry, oauth_provider, oauth_uid, gender, locale, gpluslink, account_owner, account_id, account_mgr, fb_uid, picture, created, protected, msg_exempt, dev_user, msg_notification, cloak_allowed, oauth_tos_accepted, un_changed, force_pr, logins, last_login, join_date, modified, active) VALUES
-(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', true, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', true, true, false, true, true, NULL, false, false, 0, '2022-12-23 07:16:27', '2022-12-25 00:00:00', '2016-01-01 00:00:00', true);
+(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$12$1v06jm2KMOXuuo3qP7erTuTIJFOnzhpds1Moa8BadnUUeX0RV3ex.', NULL, 'The', 'Admin', 'en-US', true, 'nlPsJDtyeqFWsS', NULL, '', '', '', '', '', 1, 0, 0, '', '', NOW(), true, true, false, true, true, NULL, false, false, 0, '2022-12-23 07:16:27', '2022-12-25 00:00:00', '2016-01-01 00:00:00', true);
 
 -- --------------------------------------------------------
 
@@ -654,7 +653,7 @@ CREATE TABLE users_session (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
   hash VARCHAR(255) NOT NULL,
-  uagent TEXT
+  uagent TEXT DEFAULT NULL
 );
 
 -- --------------------------------------------------------
@@ -686,11 +685,11 @@ INSERT INTO user_permission_matches (id, user_id, permission_id) VALUES
 CREATE TABLE us_announcements (
   id SERIAL PRIMARY KEY,
   dismissed INT NOT NULL,
-  link VARCHAR(255),
-  title VARCHAR(255),
-  message VARCHAR(255),
-  ignore VARCHAR(50),
-  class VARCHAR(50)
+  link VARCHAR(255) DEFAULT NULL,
+  title VARCHAR(255) DEFAULT NULL,
+  message VARCHAR(255) DEFAULT NULL,
+  ignore VARCHAR(50) DEFAULT NULL,
+  class VARCHAR(50) DEFAULT NULL
 );
 
 -- --------------------------------------------------------
@@ -727,7 +726,7 @@ CREATE TABLE us_fingerprint_assets (
 --
 
 CREATE TABLE us_forms (
-  id serial PRIMARY KEY NOT NULL,
+  id serial PRIMARY KEY,
   form VARCHAR(255) NOT NULL
 );
 
@@ -738,7 +737,7 @@ CREATE TABLE us_forms (
 --
 
 CREATE TABLE us_form_validation (
-  id serial PRIMARY KEY NOT NULL,
+  id serial PRIMARY KEY,
   value VARCHAR(255) NOT NULL,
   description VARCHAR(255) NOT NULL,
   params VARCHAR(255) NOT NULL
@@ -770,7 +769,7 @@ INSERT INTO us_form_validation (id, value, description, params) VALUES
 --
 
 CREATE TABLE us_form_views (
-  id serial PRIMARY KEY NOT NULL,
+  id serial PRIMARY KEY,
   form_name VARCHAR(255) NOT NULL,
   view_name VARCHAR(255) NOT NULL,
   fields TEXT NOT NULL
@@ -783,7 +782,7 @@ CREATE TABLE us_form_views (
 --
 
 CREATE TABLE us_ip_blacklist (
-  id serial PRIMARY KEY NOT NULL,
+  id serial PRIMARY KEY,
   ip VARCHAR(50) NOT NULL,
   last_user INT NOT NULL DEFAULT 0,
   reason INT NOT NULL DEFAULT 0
@@ -819,7 +818,7 @@ EXECUTE FUNCTION update_timestamp();
 -- Dumping data for table `us_ip_list`
 --
 
-INSERT INTO `us_ip_list` (`id`, `ip`, `user_id`, `timestamp`) VALUES
+INSERT INTO us_ip_list (id, ip, user_id, timestamp) VALUES
 (2, '::1', 1, '2022-12-23 12:05:43');
 
 -- --------------------------------------------------------
@@ -869,25 +868,25 @@ INSERT INTO us_management (id, page, view, feature, access) VALUES
 -- Table structure for table `us_menus`
 --
 
-CREATE TABLE `us_menus` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `menu_name` varchar(255) DEFAULT NULL,
-  `type` varchar(75) DEFAULT NULL,
-  `nav_class` varchar(255) DEFAULT NULL,
-  `theme` varchar(25) DEFAULT NULL,
-  `z_index` int(11) DEFAULT NULL,
-  `brand_html` text DEFAULT NULL,
-  `disabled` tinyint(1) DEFAULT 0,
-  `justify` varchar(10) DEFAULT 'right'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE us_menus (
+  id serial PRIMARY KEY,
+  menu_name varchar(255) DEFAULT NULL,
+  type varchar(75) DEFAULT NULL,
+  nav_class varchar(255) DEFAULT NULL,
+  theme varchar(25) DEFAULT NULL,
+  z_index integer DEFAULT NULL,
+  brand_html text DEFAULT NULL,
+  disabled smallint DEFAULT 0,
+  justify varchar(10) DEFAULT 'right'
+);
 
 --
 -- Dumping data for table `us_menus`
 --
 
-INSERT INTO `us_menus` (`id`, `menu_name`, `type`, `nav_class`, `theme`, `z_index`, `brand_html`, `disabled`, `justify`) VALUES
-(1, 'Main Menu', 'horizontal', '', 'dark', 50, '&lt;a href=&quot;{{root}}&quot; &gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; /&gt;', 0, 'right'),
-(2, 'Dashboard Menu', 'horizontal', NULL, 'dark', 55, '&lt;a href=&quot;{{root}}&quot; title=&quot;Home Page&quot;&gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; alt=&quot;Main logo&quot; /&gt;&lt;/a&gt;', 0, 'right');
+INSERT INTO us_menus (id, menu_name, type, nav_class, theme, z_index, brand_html, disabled, justify) VALUES
+(1, 'Main Menu', 'horizontal', '', 'dark', 50, '<a href="{{root}}" >\r\n<img src="{{root}}users/images/logo.png" /></a>', 0, 'right'),
+(2, 'Dashboard Menu', 'horizontal', NULL, 'dark', 55, '<a href="{{root}}" title="Home Page">\r\n<img src="{{root}}users/images/logo.png" alt="Main logo" /></a>', 0, 'right');
 
 -- --------------------------------------------------------
 
@@ -895,27 +894,27 @@ INSERT INTO `us_menus` (`id`, `menu_name`, `type`, `nav_class`, `theme`, `z_inde
 -- Table structure for table `us_menu_items`
 --
 
-CREATE TABLE `us_menu_items` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `menu` int(11) UNSIGNED NOT NULL,
-  `type` varchar(50) DEFAULT NULL,
-  `label` varchar(255) DEFAULT NULL,
-  `link` text DEFAULT NULL,
-  `icon_class` varchar(255) DEFAULT NULL,
-  `li_class` varchar(255) DEFAULT NULL,
-  `a_class` varchar(255) DEFAULT NULL,
-  `link_target` varchar(50) DEFAULT NULL,
-  `parent` int(11) DEFAULT NULL,
-  `display_order` int(11) DEFAULT NULL,
-  `disabled` tinyint(1) DEFAULT 0,
-  `permissions` varchar(1000) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE us_menu_items (
+  id serial PRIMARY KEY,
+  menu integer NOT NULL,
+  type varchar(50) DEFAULT NULL,
+  label varchar(255) DEFAULT NULL,
+  link text DEFAULT NULL,
+  icon_class varchar(255) DEFAULT NULL,
+  li_class varchar(255) DEFAULT NULL,
+  a_class varchar(255) DEFAULT NULL,
+  link_target varchar(50) DEFAULT NULL,
+  parent integer DEFAULT NULL,
+  display_order integer DEFAULT NULL,
+  disabled smallint DEFAULT 0,
+  permissions varchar(1000) DEFAULT NULL
+);
 
 --
 -- Dumping data for table `us_menu_items`
 --
 
-INSERT INTO `us_menu_items` (`id`, `menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
+INSERT INTO us_menu_items (id, menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) VALUES
 (1, 1, 'dropdown', '', '', 'fa fa-cogs', NULL, NULL, '_self', 0, 14, 0, '[1]'),
 (2, 1, 'link', '{{LOGGED_IN_USERNAME}}', 'users/account.php', 'fa fa-user', NULL, NULL, '_self', 0, 11, 0, '[1]'),
 (3, 1, 'dropdown', '{{MENU_HELP}}', '', 'fa fa-life-ring', NULL, NULL, '_self', 0, 3, 0, '[0]'),
@@ -969,9 +968,9 @@ INSERT INTO `us_menu_items` (`id`, `menu`, `type`, `label`, `link`, `icon_class`
 
 CREATE TABLE us_plugins (
   id serial PRIMARY KEY NOT NULL,
-  plugin varchar(255),
-  status varchar(255),
-  updates text,
+  plugin varchar(255) DEFAULT NULL,
+  status varchar(255) DEFAULT NULL,
+  updates text DEFAULT NULL,
   last_check timestamp with time zone DEFAULT '2020-01-01 00:00:00'::timestamp with time zone
 );
 
@@ -982,12 +981,12 @@ CREATE TABLE us_plugins (
 --
 
 CREATE TABLE us_plugin_hooks (
-  id serial PRIMARY KEY NOT NULL,
+  id serial PRIMARY KEY,
   page varchar(255) NOT NULL,
   folder varchar(255) NOT NULL,
   position varchar(255) NOT NULL,
   hook varchar(255) NOT NULL,
-  disabled int DEFAULT 0
+  disabled smallint DEFAULT 0
 );
 
 -- --------------------------------------------------------

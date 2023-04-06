@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN admin_verify tinyint(1)");
+$db->query("ALTER TABLE settings ADD COLUMN admin_verify smallint");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted admin_verify to settings table");
 } else {
@@ -17,7 +17,7 @@ if(!$db->error()) {
   $errors[] = "Unable to insert admin_verify to settings table, Error: ".$error;
 }
 
-$db->query("ALTER TABLE settings ADD COLUMN admin_verify_timeout int(9) NOT NULL");
+$db->query("ALTER TABLE settings ADD COLUMN admin_verify_timeout integer NOT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted admin_verify_timeout to settings table");
 } else {
@@ -27,7 +27,7 @@ if(!$db->error()) {
   $errors[] = "Unable to insert admin_verify_timeout to settings table, Error: ".$error;
 }
 
-$db->query("ALTER TABLE users ADD COLUMN pin varchar(255) DEFAULT NULL AFTER `password`");
+$db->query("ALTER TABLE users ADD COLUMN pin varchar(255) DEFAULT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted pin to users table");
 } else {

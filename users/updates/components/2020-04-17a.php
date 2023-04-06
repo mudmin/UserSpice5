@@ -7,11 +7,11 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE logs MODIFY COLUMN user_id int(11)");
-$db->query("ALTER TABLE users_online MODIFY COLUMN user_id int(11)");
-$db->query("ALTER TABLE users_online MODIFY COLUMN id int(11)");
-$db->query("ALTER TABLE permission_page_matches MODIFY COLUMN permission_id int(11)");
-$db->query("ALTER TABLE permission_page_matches MODIFY COLUMN page_id int(11)");
+$db->query("ALTER TABLE logs MODIFY COLUMN user_id integer");
+$db->query("ALTER TABLE users_online MODIFY COLUMN user_id integer");
+$db->query("ALTER TABLE users_online MODIFY COLUMN id integer");
+$db->query("ALTER TABLE permission_page_matches MODIFY COLUMN permission_id integer");
+$db->query("ALTER TABLE permission_page_matches MODIFY COLUMN page_id integer");
 
 
 if($countE==0) {

@@ -5,7 +5,7 @@
 
 $countE = 0;
 
-$db->query('ALTER TABLE settings ADD COLUMN debug tinyint(1) default 0');
+$db->query('ALTER TABLE settings ADD COLUMN debug smallint default 0');
 if (!$db->error()) {
     logger(1, 'System Updates', 'Added settings.debug');
 }

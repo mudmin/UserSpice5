@@ -7,9 +7,9 @@
 $countE=0;
 
 $db->query("ALTER TABLE groups_menus
-  MODIFY COLUMN id int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  MODIFY COLUMN group_id int(11) UNSIGNED NOT NULL,
-  MODIFY COLUMN menu_id int(11) UNSIGNED NOT NULL");
+  ALTER COLUMN id SET DATA TYPE SERIAL,
+  ALTER COLUMN group_id SET DATA TYPE INTEGER,
+  ALTER COLUMN menu_id SET DATA TYPE INTEGER");
 if(!$db->error()) {
   logger(1,"System Updates","Updated group_menu int columns to 11 and unsigned");
 } else {
@@ -19,7 +19,7 @@ if(!$db->error()) {
   $errors[] = "Unable to update group_menu int columns to 11 and unsigned, Error: ".$error;
 }
 
-$db->query("ALTER TABLE users MODIFY COLUMN logins int(11) UNSIGNED NOT NULL");
+$db->query("ALTER TABLE users MODIFY COLUMN logins integer NOT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Updated users int columns to 11 and unsigned");
 } else {

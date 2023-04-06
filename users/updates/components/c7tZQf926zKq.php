@@ -19,10 +19,10 @@ foreach($tables as $table) {
 }
 
 $db->query("CREATE TABLE us_fingerprints (
-  kFingerprintID int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  fkUserID int(11) NOT NULL,
+  kFingerprintID SERIAL PRIMARY KEY,
+  fkUserID integer NOT NULL,
   Fingerprint varchar(32) NOT NULL,
-  Fingerprint_Expiry datetime NOT NULL,
+  Fingerprint_Expiry timestamp NOT NULL,
   Fingerprint_Added timestamp NOT NULL
 )");
 if(!$db->error()) {
@@ -35,11 +35,11 @@ if(!$db->error()) {
 }
 
 $db->query("CREATE TABLE us_fingerprint_assets (
-  kFingerprintAssetID int(11) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  fkFingerprintID int(11) NOT NULL,
-  IP_Address varchar(255) NOT NULL,
-  User_Browser varchar(255) NOT NULL,
-  User_OS varchar(255) NOT NULL
+  kFingerprintAssetID SERIAL PRIMARY KEY,
+  fkFingerprintID INT NOT NULL,
+  IP_Address VARCHAR(255) NOT NULL,
+  User_Browser VARCHAR(255) NOT NULL,
+  User_OS VARCHAR(255) NOT NULL
 )");
 if(!$db->error()) {
   logger(1,"System Updates","Created table us_fingerprint_assets");

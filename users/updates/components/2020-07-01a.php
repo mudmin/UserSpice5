@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE us_plugins ADD COLUMN last_check datetime DEFAULT '2020-01-01'");
+$db->query("ALTER TABLE us_plugins ADD COLUMN last_check timestamp DEFAULT '2020-01-01 00:00:00'");
 
 
 

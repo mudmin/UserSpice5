@@ -10,7 +10,7 @@ $countE=0;
 $db->query("ALTER TABLE users DROP COLUMN vericode_expiry");
 if(!$db->error()) {
     logger(1,"System Updates","Dropped vericode_expiry in users table");
-    $db->query("ALTER TABLE users ADD COLUMN vericode_expiry datetime");
+    $db->query("ALTER TABLE users ADD COLUMN vericode_expiry timestamp");
     if(!$db->error()) {
       logger(1,"System Updates","Added vericode_expiry to users table");
     } else {

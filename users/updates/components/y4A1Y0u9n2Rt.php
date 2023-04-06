@@ -17,7 +17,7 @@ if(!$db->error()) {
   $errors[] = "Unable to add default_language column to settings, Error: ".$error;
 }
 
-$db->query("ALTER TABLE settings ADD COLUMN allow_language tinyint(1)");
+$db->query("ALTER TABLE settings ADD COLUMN allow_language smallint");
 if(!$db->error()) {
   logger(1,"System Updates","Added default language to settings table");
 } else {
@@ -41,8 +41,7 @@ if(!$db->error()) {
   $errors[] = "Unable to set default language in settings, Error: ".$error;
 }
 
-$db->query("ALTER TABLE users
-  ADD COLUMN language varchar(255) DEFAULT 'en-US'");
+$db->query("ALTER TABLE users ADD COLUMN language varchar(255) DEFAULT 'en-US'");
   if(!$db->error()) {
     logger(1,"System Updates","Added default language to settings table");
   } else {

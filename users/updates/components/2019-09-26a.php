@@ -8,7 +8,7 @@
 $countE=0;
 $settings = $db->query("SELECT * FROM settings")->first();
 logger(1,"System Updates","Added Bleeding Edge channel to get updates first");
-$db->query("ALTER TABLE settings ADD COLUMN bleeding_edge tinyint(1) DEFAULT 0");
+$db->query("ALTER TABLE settings ADD COLUMN bleeding_edge smallint DEFAULT 0");
 
 if($countE==0) {
   $db->insert('updates',['migration'=>$update]);

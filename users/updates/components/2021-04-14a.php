@@ -7,7 +7,9 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE `logs` MODIFY COLUMN `user_id` int(11) NOT NULL DEFAULT '0'");
+$db->query("ALTER TABLE logs ALTER COLUMN user_id SET NOT NULL;
+            ALTER TABLE logs ALTER COLUMN user_id SET DEFAULT 0;
+            ALTER TABLE logs ALTER COLUMN user_id SET DATA TYPE integer;");
 
 if($countE==0) {
   $db->insert('updates',['migration'=>$update]);

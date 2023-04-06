@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN force_notif tinyint(1)");
+$db->query("ALTER TABLE settings ADD COLUMN force_notif smallint");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted force_notif to settings table");
 } else {

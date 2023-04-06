@@ -14,7 +14,7 @@ $indexes = [];
 foreach ($index as $i) {
   $indexes[] = $i->z_index;
 }
-$parentOpts = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND `type` = ? ORDER BY label", [$menuId, "dropdown"])->results();
+$parentOpts = $db->query("SELECT * FROM us_menu_items WHERE menu = $1 AND \"type\" = $2 ORDER BY label", [$menuId, "dropdown"])->results();
 $switchParent = ["0" => "Top Level"];
 foreach ($parentOpts as $p) {
   $switchParent[$p->id] = $p->label;
@@ -31,11 +31,11 @@ if ($parentId) {
 }
 $children = [];
 if ($itemId !== 'new') {
-  $item = $db->query("SELECT * FROM us_menu_items WHERE id = ? AND menu = ?", [$itemId, $menuId])->first();
-  $children = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND parent = ? ORDER BY display_order", [$menuId, $itemId])->results();
+  $item = $db->query("SELECT * FROM us_menu_items WHERE id = $1 AND menu = $2", [$itemId, $menuId])->first();
+  $children = $db->query("SELECT * FROM us_menu_items WHERE menu = $1 AND parent = $2 ORDER BY display_order", [$menuId, $itemId])->results();
 }
 if($itemId == 'new' && $itemId !== 0) {
-  $item = (object)['id' => '', 'menu' => $menuId, 'type' => 'link',  'label' => '', 'link' => '', 'icon_class' => '', 'link_target' => '_self', 'parent' => $parentId, 'display_order' => $lastOrder + 1, 'li_class' => '', 'a_class' => '', 'permissions' => "[0]", 'disabled' => "0"];
+  $item = (object)['id' => '', 'menu' => $menuId, 'type' => 'link',  'label' => '', 'link' => '', 'icon_class' => '', 'link_target' => '_self', 'parent' => $parentId, 'display_order' => $lastOrder + 1, 'li_class' => '', 'a_class' => '', 'permissions' => "[0]", 'disabled' => 0];
 }
 if ($item) {
   $item->permissions = json_decode($item->permissions, true);
@@ -282,10 +282,11 @@ if ($_POST) {
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $item->disabled ? "checked" : "" ?> onchange="setDirty(true)">
+              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $item->disabled ? "checked" : 0 ?> onchange="setDirty(true)">
               <label class="form-check-label" for="disabled">
                 Disabled
               </label>
+              <input type="hidden" name="disabled" value="0">
             </div>
 
             <div class="d-flex justify-content-end align-items-center">
@@ -363,10 +364,11 @@ if ($_POST) {
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $menu->disabled ? "checked" : "" ?> onchange="setDirty(true)">
+              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $menu->disabled ? "checked" : 0 ?> onchange="setDirty(true)">
               <label class="form-check-label" for="disabled">
                 Disabled
               </label>
+              <input type="hidden" name="disabled" value="0">
             </div>
 
             <div class="d-flex justify-content-end align-items-center">

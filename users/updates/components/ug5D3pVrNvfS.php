@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN join_vericode_expiry int(9) UNSIGNED NOT NULL");
+$db->query("ALTER TABLE settings ADD COLUMN join_vericode_expiry integer NOT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted join_vericode_expiry to settings table");
 } else {
@@ -17,7 +17,7 @@ if(!$db->error()) {
   $errors[] = "Unable to insert join_vericode_expiry to settings table, Error: ".$error;
 }
 
-$db->query("ALTER TABLE settings ADD COLUMN reset_vericode_expiry int(9) UNSIGNED NOT NULL");
+$db->query("ALTER TABLE settings ADD COLUMN reset_vericode_expiry integer NOT NULL");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted reset_vericode_expiry to settings table");
 } else {

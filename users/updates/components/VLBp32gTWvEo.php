@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE users ADD COLUMN vericode_expiry timestamp AFTER `vericode`");
+$db->query("ALTER TABLE users ADD COLUMN vericode_expiry timestamp AFTER vericode");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted vericode_expiry to users table");
 } else {

@@ -7,10 +7,10 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE users ADD COLUMN oauth_tos_accepted tinyint(1)");
+$db->query("ALTER TABLE users ADD COLUMN oauth_tos_accepted boolean");
 if(!$db->error()) {
   logger(1,"System Updates","Inserted oauth_tos_accepted to users table");
-  $db->query("UPDATE users SET oauth_tos_accepted=1");
+  $db->query("UPDATE users SET oauth_tos_accepted=true");
   if(!$db->error()) {
     logger(1,"System Updates","Upated tos accepted for existing users");
   } else {

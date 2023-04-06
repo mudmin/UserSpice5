@@ -4,13 +4,13 @@
 
 $countE = 0;
 
-$db->query("ALTER TABLE `pages` MODIFY COLUMN `page` VARCHAR (255)");
-$db->query("ALTER TABLE `pages` MODIFY COLUMN `title` VARCHAR (255)");
+$db->query("ALTER TABLE pages ALTER COLUMN page TYPE VARCHAR(255)");
+$db->query("ALTER TABLE pages ALTER COLUMN title TYPE VARCHAR(255)");
 
 //this is a temporary fix until we get the user class and plugins cleaned up
-$db->query("ALTER TABLE `users` ADD COLUMN `gender` VARCHAR (50)");
-$db->query("ALTER TABLE `users` ADD COLUMN `locale` VARCHAR (50)");
-$db->query("ALTER TABLE `users` ADD COLUMN `created` DATETIME");
+$db->query("ALTER TABLE users ADD COLUMN gender VARCHAR(50)");
+$db->query("ALTER TABLE users ADD COLUMN locale VARCHAR(50)");
+$db->query("ALTER TABLE users ADD COLUMN created timestamp");
 
 
 if ($countE == 0) {

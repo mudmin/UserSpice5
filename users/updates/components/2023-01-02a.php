@@ -3,7 +3,7 @@
 $countE = 0;
 
 $db->query("DELETE FROM us_menu_items WHERE menu = 2");
-$db->query("INSERT INTO `us_menu_items` (`menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
+$db->query("INSERT INTO us_menu_items (menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) VALUES
   (2, 'dropdown', 'Tools', '', 'fa fa-wrench', '', '', '_self', 0, 3, 0, '[2]')
 ");
 $id = $db->lastId();
@@ -25,8 +25,8 @@ foreach($fields as $f){
 $db->insert("us_menu_items",$f);
 }
 
-$db->query("INSERT INTO `us_menu_items` (`menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
-  (2, 'dropdown', 'Settings', '', 'fa fa-gear', '', '', '_self', 0, 4, 0, '[2]')
+$db->query("INSERT INTO us_menu_items (menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) 
+  VALUES (2, 'dropdown', 'Settings', '', 'fa fa-gear', '', '', '_self', 0, 4, 0, '[2]');
 ");
 
 $id = $db->lastId();
@@ -45,7 +45,7 @@ foreach($fields as $f){
 $db->insert("us_menu_items",$f);
 }
 
-$db->query("INSERT INTO `us_menu_items` (`menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
+$db->query("INSERT INTO us_menu_items (menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) VALUES
   (2, 'dropdown', 'Plugins', '#', 'fa fa-plug', '', '', '_self', 0, 5, 0, '[2]')
 ");
 
@@ -60,7 +60,7 @@ foreach($fields as $f){
 $db->insert("us_menu_items",$f);
 }
 // dump($db->errorString());
-$db->query("INSERT INTO `us_menu_items` (`menu`, `type`, `label`, `link`, `icon_class`, `li_class`, `a_class`, `link_target`, `parent`, `display_order`, `disabled`, `permissions`) VALUES
+$db->query("INSERT INTO us_menu_items (menu, type, label, link, icon_class, li_class, a_class, link_target, parent, display_order, disabled, permissions) VALUES
 (2, 'link', 'Spice Shaker', 'users/admin.php?view=spice', 'fa fa-user-secret', '', '', '_self', 0, 2, 0, '[2]'),
 (2, 'link', 'Home', '#', 'fa fa-home', '', '', '_self', 0, 1, 0, '[2]'),
 (2, 'link', 'Dashboard', 'users/admin.php', 'fa-solid fa-desktop', '', '', '_self', 0, 1, 0, '[2]')

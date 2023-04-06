@@ -5,7 +5,7 @@
 //Release Date Unknown
 //Rewrote 2019-02-19 BA
 
-$db->query("UPDATE logs SET logtype = ? WHERE logtype = ? AND lognote LIKE ?",array("IP Logging","User","%blacklisted%attempted%visit"));
+$db->query("UPDATE logs SET logtype = ? WHERE logtype = ? AND lognote LIKE ?", ["IP Logging", "User", "%blacklisted%attempted%visit"]);
 if(!$db->error()) {
   logger(1,"System Updates","Updated logtype for Blacklisted Logs to IP Logging");
   $db->insert('updates',['migration'=>$update]);

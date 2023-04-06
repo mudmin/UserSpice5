@@ -4,7 +4,7 @@
 
 $countE = 0;
 
-$db->query("ALTER TABLE users ADD COLUMN active tinyint(1) DEFAULT 1");
+$db->query("ALTER TABLE users ADD COLUMN active boolean DEFAULT true");
     logger(1, 'System Updates', 'Added active to users table');
 
 if ($countE == 0) {

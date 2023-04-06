@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$db->query("ALTER TABLE settings ADD COLUMN err_time int(11) DEFAULT 15");
+$db->query("ALTER TABLE settings ADD COLUMN err_time integer DEFAULT 15");
 
 
 
