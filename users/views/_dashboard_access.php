@@ -17,6 +17,34 @@
 if (!in_array($user->data()->id, $master_account)) {
   Redirect::to('admin.php');
 }
+
+function customDashAccessEncode($input)
+{
+  $characters = str_split($input);
+  $encoded = '';
+
+  foreach ($characters as $char) {
+    $encoded .= ord($char) . '-';
+  }
+
+  // Remove the trailing dash
+  $encoded = rtrim($encoded, '-');
+
+  return $encoded;
+}
+
+function customDashAccessDecode($input)
+{
+  $encodedChars = explode('-', $input);
+  $decoded = '';
+
+  foreach ($encodedChars as $encodedChar) {
+    $decoded .= chr((int)$encodedChar);
+  }
+
+  return $decoded;
+}
+
 $features = $db->query("SELECT DISTINCT id, feature, access FROM us_management ORDER BY feature")->results();
 
 $adminID = $db->query("SELECT id FROM pages WHERE page = ?", ["users/admin.php"])->first();
@@ -33,17 +61,21 @@ foreach ($matches as $m) {
 
 
 if (!empty($_POST)) {
-  // dnd($_POST);
+
   $token = $_POST['csrf'];
   if (!Token::check($token)) {
     include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
   }
   foreach ($features as $f) {
     $pages = $db->query("SELECT * FROM us_management WHERE feature = ?", [$f->feature])->results();
-    $str = str_replace(" ", "_", $f->feature);
+
+    $str = customDashAccessEncode($f->feature);
+
     foreach ($pages as $p) {
       if (isset($_POST[$str])) {
+
         $implode = implode(",", $_POST[$str]);
+
         $db->update('us_management', $p->id, ['access' => $implode]);
       } else {
         $db->update('us_management', $p->id, ['access' => ""]);
@@ -102,7 +134,13 @@ $token = Token::generate();
               ?>
                 <td>
                   <div class="form-check">
-                    <input class="me-2" type="checkbox" name="<?= $f->feature ?>[]" value="<?= $key ?>" <?= $isChecked ?> id="<?= $elId ?>">
+                    <?php
+                    $name = customDashAccessEncode($f->feature);
+
+
+                    ?>
+
+                    <input class="me-2" type="checkbox" name="<?= $name ?>[]" value="<?= $key ?>" <?= $isChecked ?> id="<?= $elId ?>">
                     <label class="form-check-label" for="<?= $elId ?>"><?= $value ?></label>
                   </div>
                 </td>

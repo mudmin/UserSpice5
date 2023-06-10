@@ -233,15 +233,17 @@ if ($_POST) {
               <select class="form-control" name="snippet" id="snippet" onchange="setDirty(true)">
                 <option value=""></option>
                 <?php foreach ($snippets as $s) {
-                  $s = str_replace($us_url_root, "", $s);
+                  if($us_url_root != "/"){
+                    $s = str_replace($us_url_root, "", $s);
+                  }
+                  $alt = substr($s, 1);
+
                 ?>
-                  <option <?php if ($item->link == $s) {
+                  <option <?php if ($item->link == $s || $item->link == $alt) {
                             echo "selected='selected'";
                           } ?> value="<?= $s ?>"><?= $s ?></option>
                 <?php } ?>
               </select>
-              <small class="form-text text-muted">Snippets can be located in usersc/hooks/menu or in a plug-in's menu_hooks folder.</small>
-            </div>
 
             <div class="form-group" id="target_wrapper">
               <label for="link_target">Target</label>
@@ -359,7 +361,7 @@ if ($_POST) {
               <label for="brand_html">Brand HTML</label>
               <textarea id="brand_html" name="brand_html" class="form-control" rows="10" onchange="setDirty(true)"><?= trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8')) ?>
                 </textarea>
-              <small class="form-text text-muted">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root.</small>
+              <small class="form-text text-muted">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root. "a" tags are automatically closed.</small>
             </div>
 
             <div class="form-check">
@@ -400,7 +402,23 @@ if ($_POST) {
                 ?>
                   <tr class="child-sortable" data-id="<?= $child->id ?>">
                     <td class="text-muted"><i class="fa fa-arrows-v"></i></td>
-                    <td><?= $parsedLabel ?></td>
+                    <td>
+                      <?php if($parsedLabel != ""){
+                        echo $parsedLabel;
+                      }else{
+                        if($child->icon_class != ""){
+                        echo "<i class='".$child->icon_class."'></i> ";
+                        }
+
+                        echo $child->type;
+
+                        if($child->link != ""){
+
+                          echo " " . substr($child->link,0,30);
+                        }
+                      }
+                      ?>
+                    </td>
                     <td>
                       <?php if ($parsedLabel != $child->label) {
                         echo $child->label;

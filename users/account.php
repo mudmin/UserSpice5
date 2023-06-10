@@ -77,7 +77,7 @@ if($hooks['bottom'] == []){ //no plugin hooks present
         <p class="mt-3" <?=$resize['nameSize']?>><span id="fname" class="font-weight-bold fw-bold"><?=$user->data()->fname.' '.$user->data()->lname; ?> </span>
         <br />
         <span class="idd">@<?=$user->data()->username?></span></p>
-        <p><a href="<?=$us_url_root?>users/user_settings.php" class="btn btn-primary btn-block mt-3">Edit Info</a></p>
+        <p><a href="<?=$us_url_root?>users/user_settings.php" class="btn btn-primary btn-block mt-3"><?=lang('ACCT_EDIT'); ?></a></p>
 
         <?php if (isset($_SESSION['cloak_to'])) { ?>
         <form class="" action="" method="post">

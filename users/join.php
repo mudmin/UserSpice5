@@ -159,11 +159,9 @@ if (Input::exists()) {
                     'vericode_expiry' => $vericode_expiry,
                     'oauth_tos_accepted' => true,
                     'language'=>$newLang,
-                                ];
-                $activeCheck = $db->query('SELECT active FROM users');
-                if (!$activeCheck->error()) {
-                    $fields['active'] = 1;
-                }
+                    'active'=>1
+                    ];
+
                 $theNewId = $user->create($fields);
 
                 includeHook($hooks, 'post');

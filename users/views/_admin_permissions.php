@@ -3,11 +3,44 @@ $validation = new Validate();
 $permission_exempt = array(1, 2);
 $manage = Input::get('manage');
 
+if(is_numeric($manage)){
+  if($db->query("SELECT id FROM permissions WHERE id = ?",[$manage])->count() < 1){
+    usError("Permission not found");
+    Redirect::to("admin.php?view=permissions");
+  }
+}
 
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
   if (!Token::check($token)) {
     include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
+  }
+
+  $add = Input::get('add');
+  $remove = Input::get('remove');
+  if($remove != ""){
+    foreach($remove as $r){
+      $db->query("DELETE FROM permission_page_matches WHERE page_id = ? AND permission_id = ?",[$r,$manage]);
+      usSuccess("Page id $r removed from permission level $manage");
+      logger($user->data()->id, "Permissions Manager", "Removed page id $r from permission level $manage");
+    }
+  }
+
+  if($add != ""){
+    foreach($add as $r){
+      $fields = [
+        'page_id'=>$r,
+        'permission_id'=>$manage
+      ];
+      $db->insert("permission_page_matches",$fields);
+
+      usSuccess("Page id $r added to permission level $manage");
+      logger($user->data()->id, "Permissions Manager", "Added page id $r to permission level $manage");
+    }
+  }
+
+  if($add != "" || $remove != ""){
+    Redirect::to("admin.php?view=permissions&manage=".$manage);
   }
 
   //Create new permission level
@@ -75,7 +108,7 @@ if (!empty($_POST)) {
 }
 
 
-$perms = $db->query("SELECT * FROM permissions ORDER BY name")->results();
+$perms = $db->query("SELECT * FROM permissions ORDER BY id")->results();
 $userCount = $db->query("SELECT id FROM users")->count();
 ?>
 
@@ -184,7 +217,7 @@ $userCount = $db->query("SELECT id FROM users")->count();
           <form class="" action="" method="post">
             <?= tokenHere(); ?>
             <p class="text-center mt-3">
-              <input type="submit" name="updatePerms" value="Update Permissions" class="btn btn-outline-primary">
+              <input type="submit" name="updatePerms" value="Update Permissions" class="btn btn-primary btn-sm">
             </p>
             <div class="row mt-3">
               <div class="col-12 col-lg-6">
@@ -268,7 +301,85 @@ $userCount = $db->query("SELECT id FROM users")->count();
       </div>
   </div>
 </div>
+<?php
+if(is_numeric($manage)) {
+//we've already verified that the permission level exists, so we don't need to bind it.
+$pages = $db->query("SELECT p.*, m.id as perm_id
+  FROM pages AS p
+  LEFT OUTER JOIN permission_page_matches AS m on m.page_id = p.id AND m.permission_id = $manage
+  ORDER BY page")->results();
 
+?>
+<form class="" action="" method="post">
+  <?=tokenHere();?>
+
+<hr>
+<div class="row">
+  <div class="col-12">
+    <h5 class="text-center">Manage Pages
+    <input type="submit" name="updatePages" value="Update Pages" class="btn btn-primary btn-sm">
+    </h5>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12 col-sm-6">
+    <h6>Pages with this permission<small>(Check to remove)</small></h6>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Page</th>
+          <th>Link</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach($pages as $p){
+          if($p->perm_id == ""){ continue; }
+        ?>
+        <tr>
+          <td><?=$p->id?></td>
+          <td><?=$p->page?></td>
+          <td><?=$p->title?></td>
+          <td>
+            <input type="checkbox" name="remove[<?=$p->id?>]" value="<?=$p->id?>">
+          </td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-12 col-sm-6">
+    <h6>Pages without this permission<small>(Check to add)</small></h6>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Page</th>
+          <th>Link</th>
+          <th>Add</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach($pages as $p){
+          if($p->perm_id != ""){ continue; }
+        ?>
+        <tr>
+          <td><?=$p->id?></td>
+          <td><?=$p->page?></td>
+          <td><?=$p->title?></td>
+          <td>
+            <input type="checkbox" name="add[<?=$p->id?>]" value="<?=$p->id?>">
+          </td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+</form>
+<?php } ?>
 <script>
   $(document).ready(function() {
     $('.addAll').on('click', function(e) {

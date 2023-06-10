@@ -10,9 +10,9 @@ else $pageTitle = '';
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <link rel="stylesheet" href="css/dashboard/normalize.css">
-  <link rel="stylesheet" href="css/dashboard/style.css">
-  <link rel="stylesheet" href="css/dashboard/minimap.css">
+  <link rel="stylesheet" href="<?=$us_url_root?>users/css/dashboard/normalize.css">
+  <link rel="stylesheet" href="<?=$us_url_root?>users/css/dashboard/style.css?v2">
+  <link rel="stylesheet" href="<?=$us_url_root?>users/css/dashboard/minimap.css">
 
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
   <script src="<?=$us_url_root?>users/js/sortable.min.js"></script>

@@ -23,6 +23,9 @@ $codeUsage = '<?php
       "show_active"=>true, //highlight active menu item
   ];
   $menu->display($override);
+
+  //to force a specific menu on a page, just after init.php use 
+  $menu_override = 2; //where 2 is the menu ID
 ?>
 ';
 

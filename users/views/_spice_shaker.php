@@ -132,7 +132,8 @@ if (!extension_loaded("zip")) {
   echo "<span style='color:red'>We see that you do not have the PHP zip extension installed on your server.  Please make sure it is enabled.</span><br>";
   $failed = 1;
 }
-if (!is_writable($abs_us_root . $us_url_root . 'users/parsers/.htaccess')) {
+
+if (!is_writable($abs_us_root . $us_url_root . 'users/parsers/downloader.php')) {
   echo "<span style='color:red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</span><br>";
   $failed = 1;
 }

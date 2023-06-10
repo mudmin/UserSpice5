@@ -140,7 +140,7 @@ if ($settings->spice_api != '') {
               <td><span class="hideMe"><?= sprintf('%08d', $p->kIssueID) ?></span> Issue #<?= $p->kIssueID ?></td>
               <td><?= $p->Issue_Title ?></td>
               <td><?= $p->Issue_Resolution_Title ?></td>
-              <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= $p->kIssueID ?>">View Ticket</a></td>
+              <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= $p->kIssueID ?>&source=userspice">View Ticket</a></td>
             </tr>
           <?php } ?>
         </tbody>

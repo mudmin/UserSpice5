@@ -9,14 +9,13 @@ $errors = [];
 $successes = [];
 $userId = (int) Input::get('id');
 
-//Check if selected user exists
-if (!userIdExists($userId)) {
+$userdetailsQ = $db->query("SELECT * FROM users WHERE id =  ?", [$userId]);
+$userdetailsC = $userdetailsQ->count();
+if ($userdetailsC < 1) {
   usError("That user does not exist");
   Redirect::to($us_url_root . 'users/admin.php?view=users');
-  die();
 }
-
-$userdetails = fetchUserDetails(null, null, $userId); //Fetch user details
+$userdetails = $userdetailsQ->first();
 
 //Forms posted
 if (!empty($_POST)) {
@@ -139,8 +138,8 @@ if (!empty($_POST)) {
         logger($user->data()->id, 'User Manager', "Updated first name for $userdetails->fname from $userdetails->fname to $fname.");
       } else {
 ?><?php if (!$validation->errors() == '') {
-                        display_errors($validation->errors());
-                      } ?>
+          display_errors($validation->errors());
+        } ?>
 <?php
       }
     }
@@ -364,7 +363,13 @@ if (!empty($_POST)) {
       require_once $abs_us_root . $us_url_root . 'usersc/includes/admin_user_system_settings_post.php';
     }
 
-    $userdetails = fetchUserDetails(null, null, $userId);
+    $userdetailsQ = $db->query("SELECT * FROM users WHERE id =  ?", [$userId]);
+    $userdetailsC = $userdetailsQ->count();
+    if ($userdetailsC < 1) {
+      usError("That user does not exist");
+      Redirect::to($us_url_root . 'users/admin.php?view=users');
+    }
+    $userdetails = $userdetailsQ->first();
   }
 
   if ($errors == [] && Input::get('return') != '') {
@@ -594,12 +599,12 @@ if ($user->data()->cloak_allowed != 1) {
                               echo "selected='selected'";
                             } else {
                               if (!in_array($user->data()->id, $master_account)) {  ?>disabled<?php }
-                                                                                            } ?>>Yes</option>
+                                                                                          } ?>>Yes</option>
           <option value="0" <?php if ($userdetails->cloak_allowed == 0) {
                               echo "selected='selected'";
                             } else {
                               if (!in_array($user->data()->id, $master_account)) {  ?>disabled<?php }
-                                                                                            } ?>>No</option>
+                                                                                          } ?>>No</option>
         </select>
       </div>
 

@@ -16,8 +16,13 @@ if (!empty($_POST)) {
         usSuccess("New IP whitelisted");
         Redirect::to($us_url_root . 'users/admin.php?view=ip');
       } else {
-        logger($user->data()->id, "Setting Change", "Blacklisted " . $ip);
-        $db->insert('us_ip_blacklist', ['ip' => $ip]);
+        if($ip == ipCheck()){
+          usError("You cannot blacklist your own IP");
+          Redirect::to($us_url_root . 'users/admin.php?view=ip');
+        }else{
+          logger($user->data()->id, "Setting Change", "Blacklisted " . $ip);
+          $db->insert('us_ip_blacklist', ['ip' => $ip]);
+        }  
         usSuccess("New IP blacklisted");
         Redirect::to($us_url_root . 'users/admin.php?view=ip');
       }

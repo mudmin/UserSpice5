@@ -256,3 +256,8 @@ ul.us_menu.dark .dropdown-divider{
 .caret{
   margin-left:.25rem;
 }
+
+.additional-mobile-icons {
+  position: absolute;
+  right: 3.0rem;
+}

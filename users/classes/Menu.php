@@ -131,9 +131,25 @@ class Menu {
           $html .= "<div class='flex-grow-1'></div>";
       }
 
-      $html .= "<div class='us_menu_mobile_wrapper'><div class='us_brand'>{$brandHtml}</div><div class='us_menu_mobile_control' data-target='{$this->menu->id}{$uniq}'><i class='fa fa-bars'></i></div></div>";
-    }
 
+      $html .= "<div class='us_menu_mobile_wrapper'><div class='us_brand'>{$brandHtml}</div>";
+
+
+      $html .= "<span class='additional-mobile-icons'>";
+            $mobile_menu_hooks = $abs_us_root . $us_url_root . "usersc/hooks/mobile_menu/";
+      $php_files = glob($mobile_menu_hooks . "*.php");
+      
+      foreach ($php_files as $php_file) {
+        ob_start();
+        include $php_file;
+        $data = ob_get_clean();
+        $html .=  $data;
+        @ob_end_flush();
+      }
+      $html .= "</span>";
+      $html .= "<div class='us_menu_mobile_control' data-target='{$this->menu->id}{$uniq}'><i class='fa fa-bars'></i></div></div>";
+ 
+    }
     foreach($items as $item) {
       // dump(parseMenuLabel($item->label));
       // dump($this->hasPerms($item));
@@ -145,6 +161,7 @@ class Menu {
       }
       $hasDropdown = sizeof($item->items) > 0;
       $liClass = $hasDropdown? "dropdown" : "";
+      $liClass .= $item->li_class ? " $item->li_class": "";
 
       // check if the li should be active (i.e. its URL matches the current page)
       $currentPage = substr($_SERVER["REQUEST_URI"], strrpos($_SERVER["REQUEST_URI"], "/") + 1);
@@ -162,7 +179,11 @@ class Menu {
       // build link
       $linkClass = $hasDropdown? "sub-toggle" : "";
       $linkClass .= $item->a_class? " $item->a_class": "";
-      $linkAttrs = "";
+   
+      $linkAttrs = " target='";
+      $linkAttrs .= $item->link_target ? $item->link_target : "_self";
+      $linkAttrs .= "' ";
+      
       if($hasDropdown) {
         $toggle = "menu_{$item->menu}{$uniq}_dropdown_{$item->id}";
         $linkAttrs = "id='{$toggle}' role='button' aria-haspopup='true' aria-expanded='false' data-toggle='dropdown' data-target='#{$toggle}'";

@@ -21,48 +21,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 $lang = [];
-if (file_exists($abs_us_root.$us_url_root.'usersc/includes/custom_functions.php')) {
-  require_once $abs_us_root.$us_url_root.'usersc/includes/custom_functions.php';
+if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/custom_functions.php')) {
+  require_once $abs_us_root . $us_url_root . 'usersc/includes/custom_functions.php';
 }
 
-$usplugins = parse_ini_file($abs_us_root.$us_url_root.'usersc/plugins/plugins.ini.php', true);
+$usplugins = parse_ini_file($abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php', true);
 foreach ($usplugins as $k => $v) {
   if ($v == 1) {
-    if (file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/override.php')) {
-      include $abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/override.php';
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $k . '/override.php')) {
+      include $abs_us_root . $us_url_root . 'usersc/plugins/' . $k . '/override.php';
     }
   }
 }
 
-require_once $abs_us_root.$us_url_root.'users/helpers/us_helpers.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/class.treeManager.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/menus.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/permissions.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/users.php';
-require_once $abs_us_root.$us_url_root.'users/helpers/dbmenu.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/us_helpers.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/class.treeManager.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/menus.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/permissions.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/users.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/dbmenu.php';
 
 //deprecated functions and classes can go here and will autoload until you delete them.
-foreach (glob($abs_us_root.$us_url_root.'usersc/includes/deprecated/*.php') as $filename) {
-    require_once $filename;
+foreach (glob($abs_us_root . $us_url_root . 'usersc/includes/deprecated/*.php') as $filename) {
+  require_once $filename;
 }
 
 define('ABS_US_ROOT', $abs_us_root);
 define('US_URL_ROOT', $us_url_root);
 
-if (file_exists($abs_us_root.$us_url_root.'usersc/vendor/autoload.php')) {
-  require_once $abs_us_root.$us_url_root.'usersc/vendor/autoload.php';
+if (file_exists($abs_us_root . $us_url_root . 'usersc/vendor/autoload.php')) {
+  require_once $abs_us_root . $us_url_root . 'usersc/vendor/autoload.php';
 }
 
-if (file_exists($abs_us_root.$us_url_root.'users/vendor/autoload.php')) {
-  require_once $abs_us_root.$us_url_root.'users/vendor/autoload.php';
+if (file_exists($abs_us_root . $us_url_root . 'users/vendor/autoload.php')) {
+  require_once $abs_us_root . $us_url_root . 'users/vendor/autoload.php';
 }
 
 
 
-require $abs_us_root.$us_url_root.'users/classes/phpmailer/PHPMailerAutoload.php';
+require $abs_us_root . $us_url_root . 'users/classes/phpmailer/PHPMailerAutoload.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 
-require_once $abs_us_root.$us_url_root.'users/includes/user_spice_ver.php';
+require_once $abs_us_root . $us_url_root . 'users/includes/user_spice_ver.php';
 
 // Readeable file size
 if (!function_exists('size')) {
@@ -117,38 +118,43 @@ if (!function_exists('currentFolder')) {
 if (!function_exists('money')) {
   function money($ugly)
   {
-    return '$'.number_format($ugly, 2, '.', ',');
+    return '$' . number_format((float)$ugly, 2, '.', ',');
   }
 }
 
 //updated in 5.3.0 to now use the built in system messages feature
 if (!function_exists('display_errors')) {
-    function display_errors($errors = []){
-      foreach($errors as $k=>$v){
-        if(array_key_exists($errors[$k][1],$errors)){
-          unset($errors[$k][1]);
-        }
-      } sessionValMessages($errors);
+  function display_errors($errors = [])
+  {
+    foreach ($errors as $k => $v) {
+      if (array_key_exists($errors[$k][1], $errors)) {
+        unset($errors[$k][1]);
+      }
     }
+    sessionValMessages($errors);
+  }
 }
 
 if (!function_exists('display_successes')) {
   function display_successes($successes = [])
   {
-    foreach($successes as $k=>$v){
-      if(array_key_exists($successes[$k][1],$successes)){
+    foreach ($successes as $k => $v) {
+      if (array_key_exists($successes[$k][1], $successes)) {
         unset($successes[$k][1]);
       }
     }
-    sessionValMessages([],$successes);
+    sessionValMessages([], $successes);
   }
 }
 
 if (!function_exists('email')) {
   function email($to, $subject, $body, $opts = [], $attachment = null)
   {
-   global $abs_us_root,$us_url_root;
-    /*you can now pass in
+    global $abs_us_root, $us_url_root;
+
+    /*
+    As of v5.6, $to can now be an array of email addresses
+    you can now pass in
     $opts = array(
     'email' => 'from_email@aol.com',
     'name'  => 'Bob Smith',
@@ -156,57 +162,67 @@ if (!function_exists('email')) {
     'bcc'   => 'bcc@example.com'
   );
   */
-  $db = DB::getInstance();
-  $query = $db->query('SELECT * FROM email');
-  $results = $query->first();
+    $db = DB::getInstance();
+    $query = $db->query('SELECT * FROM email');
+    $results = $query->first();
 
-  $mail = new PHPMailer();
-  $mail->CharSet = 'UTF-8';
-  $mail->SMTPDebug = $results->debug_level;               // Enable verbose debug output
-  if ($results->isSMTP == 1) {
-    $mail->isSMTP();
-  }             // Set mailer to use SMTP
-  $mail->Host = $results->smtp_server;  									// Specify SMTP server
-  $mail->SMTPAuth = $results->useSMTPauth;                // Enable SMTP authentication
-  $mail->Username = $results->email_login;                 // SMTP username
-  $mail->Password = html_entity_decode($results->email_pass);    // SMTP password
-  $mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
-  $mail->Port = $results->smtp_port;                       // TCP port to connect to
+    $mail = new PHPMailer();
+    $mail->CharSet = 'UTF-8';
+    $mail->SMTPDebug = $results->debug_level;               // Enable verbose debug output
+    if ($results->isSMTP == 1) {
+      $mail->isSMTP();
+    }             // Set mailer to use SMTP
+    $mail->Host = $results->smtp_server;                    // Specify SMTP server
+    $mail->SMTPAuth = $results->useSMTPauth;                // Enable SMTP authentication
+    $mail->Username = $results->email_login;                 // SMTP username
+    $mail->Password = html_entity_decode($results->email_pass);    // SMTP password
+    $mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
+    $mail->Port = $results->smtp_port; 
+    if($results->authtype != ""){
+      $mail->AuthType = $results->authtype; 
+    }                      
+ 
 
-  if($attachment != false){
-            $mail->addAttachment($attachment);
-          }
+    if ($attachment != false) {
+      $mail->addAttachment($attachment);
+    }
 
-          if(isset($opts['email']) && isset($opts['name'])){
-            $mail->setFrom($opts['email'], $opts['name']);
-          }else{
-            $mail->setFrom($results->from_email, $results->from_name);
-          }
+    if (isset($opts['email']) && isset($opts['name'])) {
+      $mail->setFrom($opts['email'], $opts['name']);
+    } else {
+      $mail->setFrom($results->from_email, $results->from_name);
+    }
 
-          if(isset($opts['cc'])){
-            $mail->addCC($opts['cc']);
-          }
+    if (isset($opts['cc'])) {
+      $mail->addCC($opts['cc']);
+    }
 
-          if(isset($opts['bcc'])){
-            $mail->addBCC($opts['bcc']);
-          }
+    if (isset($opts['bcc'])) {
+      $mail->addBCC($opts['bcc']);
+    }
 
-  	$mail->addAddress(rawurldecode($to));
-    if($results->isHTML == 'true'){
+    if (is_array($to)) {
+      foreach ($to as $t) {
+        $mail->addAddress(rawurldecode($t));
+      }
+    } else {
+      $mail->addAddress(rawurldecode($to));
+    }
+    if ($results->isHTML == 'true') {
       $mail->isHTML(true);
     }
 
-  	$mail->Subject = $subject;
-  	$mail->Body    = $body;
+    $mail->Subject = $subject;
+    $mail->Body    = $body;
     if (!empty($attachment)) $mail->addAttachment($attachment);
-    if(file_exists($abs_us_root.$us_url_root."usersc/scripts/email_function_override.php")){
-      include $abs_us_root.$us_url_root."usersc/scripts/email_function_override.php";
+    if (file_exists($abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php")) {
+      include $abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php";
     }
-  	$result = $mail->send();
+    $result = $mail->send();
 
-  	return $result;
+    return $result;
   }
-  }
+}
 
 if (!function_exists('email_body')) {
   function email_body($template, $options = [])
@@ -214,10 +230,10 @@ if (!function_exists('email_body')) {
     global $abs_us_root, $us_url_root;
     extract($options);
     ob_start();
-    if (file_exists($abs_us_root.$us_url_root.'usersc/views/'.$template)) {
-      require $abs_us_root.$us_url_root.'usersc/views/'.$template;
-    } elseif (file_exists($abs_us_root.$us_url_root.'users/views/'.$template)) {
-      require $abs_us_root.$us_url_root.'users/views/'.$template;
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/views/' . $template)) {
+      require $abs_us_root . $us_url_root . 'usersc/views/' . $template;
+    } elseif (file_exists($abs_us_root . $us_url_root . 'users/views/' . $template)) {
+      require $abs_us_root . $us_url_root . 'users/views/' . $template;
     }
 
     return ob_get_clean();
@@ -288,8 +304,8 @@ if (!function_exists('redirect')) {
 //PLUGIN Stuff
 foreach ($usplugins as $k => $v) {
   if ($v == 1) {
-    if (file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/functions.php')) {
-      include $abs_us_root.$us_url_root.'usersc/plugins/'.$k.'/functions.php';
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $k . '/functions.php')) {
+      include $abs_us_root . $us_url_root . 'usersc/plugins/' . $k . '/functions.php';
     }
   }
 }
@@ -302,10 +318,10 @@ if (!function_exists('write_ini_file')) {
       if (is_array($val)) {
         $res[] = "[$key]";
         foreach ($val as $skey => $sval) {
-          $res[] = "$skey = ".(is_numeric($sval) ? $sval : '"'.$sval.'"');
+          $res[] = "$skey = " . (is_numeric($sval) ? $sval : '"' . $sval . '"');
         }
       } else {
-        $res[] = "$key = ".(is_numeric($val) ? $val : '"'.$val.'"');
+        $res[] = "$key = " . (is_numeric($val) ? $val : '"' . $val . '"');
       }
     }
     safefilerewrite($file, implode("\r\n", $res));
@@ -329,7 +345,7 @@ if (!function_exists('safefilerewrite')) {
 
       //file was locked so now we can store information
       if ($canWrite) {
-        fwrite($fp, $security.PHP_EOL.$dataToSave);
+        fwrite($fp, $security . PHP_EOL . $dataToSave);
         flock($fp, LOCK_UN);
       }
       fclose($fp);

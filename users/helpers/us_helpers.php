@@ -105,6 +105,7 @@ if (!function_exists('usernameExists')) {
 if (!function_exists('getPageFiles')) {
   function getPageFiles()
   {
+    global $us_url_root;
     $directory = '../';
     $pages = glob($directory.'*.php');
     foreach ($pages as $page) {
@@ -120,6 +121,7 @@ if (!function_exists('getPageFiles')) {
 if (!function_exists('getUSPageFiles')) {
   function getUSPageFiles()
   {
+    global $us_url_root;
     $directory = '../users/';
     $pages = glob($directory.'*.php');
     foreach ($pages as $page) {
@@ -379,34 +381,7 @@ if (!function_exists('updateFields2')) {
   }
 }
 
-if (!function_exists('mqtt')) {
-  function mqtt($id, $topic, $message)
-  {
-    //id is the server id in the mqtt_settings.php
-    $db = DB::getInstance();
-    $query = $db->query('SELECT * FROM mqtt WHERE id = ?', [$id]);
-    $count = $query->count();
-    if ($count > 0) {
-      $server = $query->first();
 
-      $host = $server->server;
-      $port = $server->port;
-      $username = $server->username;
-      $password = $server->password;
-
-      $mqtt = new phpMQTT($host, $port, 'ClientID'.rand());
-
-      if ($mqtt->connect(true, null, $username, $password)) {
-        $mqtt->publish($topic, $message, 0);
-        $mqtt->close();
-      } else {
-        echo 'Fail or time out';
-      }
-    } else {
-      echo 'Server not found. Please check your id.';
-    }
-  }
-}
 
 if (!function_exists('clean')) {
   //Cleaning function
@@ -626,6 +601,7 @@ if (!function_exists('returnError')) {
     $responseAr['success'] = true;
     $responseAr['error'] = true;
     $responseAr['errorMsg'] = $errorMsg;
+    header('Content-Type: application/json;');
     exit(json_encode($responseAr));
   }
 }
@@ -964,6 +940,7 @@ if (!function_exists('importSQL')) {
   {
     $db = DB::getInstance();
     $lines = file($file);
+    $templine = '';
     // Loop through each line
     foreach ($lines as $line) {
       // Skip it if it's a comment
@@ -1472,16 +1449,16 @@ if(!function_exists("fetchFolderFiles")){
 
 //examples
 //30 days from today
-//echo dateOffset(30);
+//echo offsetDate(30);
 
 //7 days ago
-//echo dateOffset(-7);
+//echo offsetDate(-7);
 
 //can be hours, months, days, years, etc
 // Or what the day will be in 17 hours with
-// echo dateOffset(17,"","hours");
+// echo offsetDate(17,"","hours");
 // Or you can do it from another date so 20 days from Jan 1, 2023
-// echo dateOffset(20,"2023-01-01");
+// echo offsetDate(20,"2023-01-01");
 
 function offsetDate($number, $datestring = "", $unit = "days"){
      if($datestring == ""){

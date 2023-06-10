@@ -58,15 +58,13 @@ if (!function_exists('fetchUserPermissions')) {
 if (!function_exists('fetchPermissionUsers')) {
     function fetchPermissionUsers($permission_id)
     {
-        $db = DB::getInstance();
+        global $user,$db;
+
         $query = $db->query('SELECT id, user_id FROM user_permission_matches WHERE permission_id = ?', [$permission_id]);
         $results = $query->results();
 
         return $results;
-        $row[$user] = ['id' => $id, 'user_id' => $user];
-        if (isset($row)) {
-            return $row;
-        }
+
     }
 }
 
