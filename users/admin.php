@@ -25,7 +25,9 @@ require_once '../users/init.php';
 // change container_open_class so pages will be full-height.
 $settings->container_open_class = "container-fluid d-flex flex-column flex-grow-1";
 $settings->navigation_type = 1;
-require_once $abs_us_root . $us_url_root . 'usersc/includes/dashboard_overrides.php';
+if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/dashboard_overrides.php')){
+  require_once $abs_us_root . $us_url_root . 'usersc/includes/dashboard_overrides.php';
+}
 if (isset($template_override)) {
   $settings->template = $template_override;
 }
@@ -138,7 +140,7 @@ if ($view == '' || $view == 'dashboard') {
 
 <div class="row flex-grow-1" id="page-wrap">
   <?php
-  if ($dashboard_sidebar_menu == true) {
+  if (isset($dashboard_sidebar_menu) && $dashboard_sidebar_menu == true) {
     if (file_exists($abs_us_root . $us_url_root . "usersc/views/_admin_sidebar.php")) {
       require_once $abs_us_root . $us_url_root . 'usersc/views/_admin_sidebar.php';
     } else {

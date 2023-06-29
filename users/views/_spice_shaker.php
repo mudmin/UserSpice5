@@ -193,6 +193,8 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
   $counter = 0;
   if (!is_null($dev)) {
     foreach ($dev as $d) {
+      $status = shakerIsInstalled($d->category, $d->reserved);
+
       if ($d->release_type == 1) {
         $class = "card-official";
         $text = "Official ";
@@ -238,7 +240,12 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
           <div class="card-body" style="overflow-y: auto">
             <div class="row">
               <div class="<?=$width?>">
-                <h6 class="card-title"><?= $d->project ?> v<?= $d->version . " (" . $d->status . ")"; ?></h6>
+                <h6 class="card-title"><?= $d->project ?> v<?= $d->version . " (" . $d->status . ")"; ?>
+                <?php if($status["installed"] == "true" && $status['ver'] != "0.0.0"){
+                  $msg = spiceShakerBadge($d->version, $status['ver']);
+                  echo '<span class="' . $msg['badge']['class'] . ' spice-badge-'.$counter.'">' . $msg['badge']['text'] . '</span>';
+                 } ?>
+                </h6>
                 <p><strong><?= $text ?><?= ucfirst($d->category) ?></strong>
                   <img src="<?= $img ?>" alt="" height="15">
                 </p>
@@ -263,12 +270,18 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
           <div class="card-footer" style="background: inherit; border-color: inherit;">
             <a href="#" class="btn btn-default install" style="display:none;">Please Wait</a>
             <?php
-            if (shakerIsInstalled($d->category, $d->reserved)) {
+            if ($status["installed"] == true) {
               if ($d->category == "plugin" && file_exists($abs_us_root . $us_url_root . "usersc/plugins/" . $d->reserved . "/.noupdate")) {
                 echo "This plugin is locked and cannot be updated";
               } else {
             ?>
-                <button type="button" name="button" class="btn btn-danger installme <?= $warning ?>" data-res="<?= $d->reserved ?>" data-type="<?= $d->category ?>" data-url="<?= $d->dd ?>" data-hash="<?= $d->hash ?>" data-counter="<?= $counter ?>">Update</button>
+                <?php if(isset($msg['text'])){
+                  $labelText = $msg['text'];
+                }else{
+                  $labelText = "Update";
+                }
+                ?>
+                <button type="button" name="button" class="btn btn-danger installme <?= $warning ?>" data-res="<?= $d->reserved ?>" data-type="<?= $d->category ?>" data-url="<?= $d->dd ?>" data-hash="<?= $d->hash ?>" data-counter="<?= $counter ?>"><?=$labelText?></button>
               <?php
               } //end noupdate
             } else { ?>
@@ -320,11 +333,14 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
       })
 
       .done(function(data) {
+
         if (data.success == true) {
           $("#" + counter).css('display', 'inline');
           $("a").closest(".visit").attr("href", data.url);
           $(".installme").show();
           $(".install").hide();
+          $('.spice-badge-' + counter).hide();
+
         } else {
           alert(data.error);
           $(".installme").show();

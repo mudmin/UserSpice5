@@ -1141,19 +1141,57 @@ if (!function_exists('shakerIsInstalled')) {
   function shakerIsInstalled($type, $reserved)
   {
     global $abs_us_root, $us_url_root;
+
+    $response = ["installed"=>false, "ver"=>"0.0.0"];
+
     if ($type == 'translation') {
-      return true;
+      $response = ["installed"=>true, "ver"=>"0.0.0"];
+      return $response;
+
     } elseif ($type == 'plugin' || $type == 'widget' || $type == 'template') {
       $type = $type.'s';
       if (file_exists($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved)) {
-        return true;
+        $response = ["installed"=>true, "ver"=>"0.0.0"];
+        if(file_exists($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved.'/info.xml')){
+          $xml = simplexml_load_file($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved.'/info.xml');
+          if(isset($xml->version)){
+            $response["ver"] = $xml->version;
+          }
+        }
+        return $response;
       } else {
-        return false;
+        return $response;
       }
     } else {
-      return false;
+      return $response;
     }
   }
+}
+
+function spiceShakerBadge($shaker, $installed) {
+  $result = array();
+
+  // Check if $shaker is newer than $installed
+  if (version_compare($shaker, $installed, '>')) {
+      $result['text'] = 'Update';
+  } else {
+      $result['text'] = 'Reload';
+  }
+
+  // Check if the version numbers match
+  if ($shaker == $installed) {
+      $result['badge'] = array(
+          'class' => 'badge bg-info',
+          'text' => 'Current'
+      );
+  } else {
+      $result['badge'] = array(
+          'class' => 'badge bg-danger',
+          'text' => 'Installed: ' . $installed
+      );
+  }
+
+  return $result;
 }
 
 

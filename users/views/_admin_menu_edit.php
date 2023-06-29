@@ -244,7 +244,7 @@ if ($_POST) {
                           } ?> value="<?= $s ?>"><?= $s ?></option>
                 <?php } ?>
               </select>
-
+            </div>
             <div class="form-group" id="target_wrapper">
               <label for="link_target">Target</label>
               <select class="form-control" name="link_target" id="link_target" onchange="setDirty(true)">

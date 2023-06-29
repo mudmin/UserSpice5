@@ -25,7 +25,7 @@ if (!empty($_POST)) {
     include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
   } else {
     includeHook($hooks, 'post');
-
+    $db->update('users', $userdetails->id, ['modified'=>date("Y-m-d")]);
 
     if (!empty($_POST['delete'])) {
       if ($userdetails->id == $user->data()->id || in_array($userdetails->id, $master_account)) {

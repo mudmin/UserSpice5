@@ -48,6 +48,9 @@ if (!empty($_POST)) {
     include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
   } else {
     includeHook($hooks, 'post');
+
+    //if you make it this far, we're going to mark your account as modified.  This will allow other plugins to work.  And it's not that serious.
+    $db->update('users',$user->data()->id,['modified' => date("Y-m-d")]);
     $displayname = Input::get('username');
     if ($userdetails->username != $displayname && ($settings->change_un == 1 || (($settings->change_un == 2) && ($user->data()->un_changed == 0)))) {
       $fields = [
@@ -238,7 +241,7 @@ if (!empty($_POST)) {
     }
   }
 
-  sessionValMessages($successes, $errors);
+  sessionValMessages($errors, $successes);
   Redirect::to("user_settings.php");
 }
 ?>
