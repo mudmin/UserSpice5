@@ -16,33 +16,34 @@ if (!empty($_POST)) {
     include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
   }
 
-  $add = Input::get('add');
-  $remove = Input::get('remove');
-  if($remove != ""){
-    foreach($remove as $r){
-      $db->query("DELETE FROM permission_page_matches WHERE page_id = ? AND permission_id = ?",[$r,$manage]);
-      usSuccess("Page id $r removed from permission level $manage");
-      logger($user->data()->id, "Permissions Manager", "Removed page id $r from permission level $manage");
-    }
+  if (!empty($_POST['updatePages'])) {
+      $add = Input::get('add');
+      $remove = Input::get('remove');
+      if ($remove != '') {
+          foreach ($remove as $r) {
+              $db->query('DELETE FROM permission_page_matches WHERE page_id = ? AND permission_id = ?', [$r, $manage]);
+              usSuccess("Page id $r removed from permission level $manage");
+              logger($user->data()->id, 'Permissions Manager', "Removed page id $r from permission level $manage");
+          }
+      }
+
+      if ($add != '') {
+          foreach ($add as $r) {
+              $fields = [
+                'page_id' => $r,
+                'permission_id' => $manage,
+              ];
+              $db->insert('permission_page_matches', $fields);
+
+              usSuccess("Page id $r added to permission level $manage");
+              logger($user->data()->id, 'Permissions Manager', "Added page id $r to permission level $manage");
+          }
+      }
+
+      if ($add != '' || $remove != '') {
+          Redirect::to('admin.php?view=permissions&manage='.$manage);
+      }
   }
-
-  if($add != ""){
-    foreach($add as $r){
-      $fields = [
-        'page_id'=>$r,
-        'permission_id'=>$manage
-      ];
-      $db->insert("permission_page_matches",$fields);
-
-      usSuccess("Page id $r added to permission level $manage");
-      logger($user->data()->id, "Permissions Manager", "Added page id $r to permission level $manage");
-    }
-  }
-
-  if($add != "" || $remove != ""){
-    Redirect::to("admin.php?view=permissions&manage=".$manage);
-  }
-
   //Create new permission level
   if (!empty($_POST['create'])) {
     $permission = Input::get('name');
