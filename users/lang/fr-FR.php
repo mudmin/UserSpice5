@@ -37,7 +37,7 @@ $lang = array();
 //You defiitely want to customize these for your language
 $lang = array_merge($lang,array(
 "THIS_LANGUAGE"	=>"French",
-"THIS_CODE"			=>"en-US",
+"THIS_CODE" => "fr-FR",
 "MISSING_TEXT"	=>"Texte manquant",
 ));
 
