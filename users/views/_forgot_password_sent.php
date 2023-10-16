@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 ?>
 <div class="row">
-  <div class="col-sm-12">
+<div class="col-12 col-sm-8 offeset-sm-1 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
     <?=lang("VER_SENT");?><?=$settings->reset_vericode_expiry?> <?=lang("T_MINUTES");?>.</p>
     <br />
   </div><!-- /.col -->

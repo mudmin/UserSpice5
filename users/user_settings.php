@@ -368,7 +368,7 @@ if (!empty($_POST)) {
             <input class="btn btn-primary" type="submit" value="<?= lang('GEN_UPDATE'); ?>" />
           </div>
           <div class="col-6 text-left text-start">
-            <a class="btn btn-secondary" href="../users/account.php"><?= lang('GEN_CANCEL'); ?></a>
+            <a class="btn btn-secondary" href="<?=$us_url_root?>users/account.php"><?= lang('GEN_CANCEL'); ?></a>
           </div>
         </div>
 
@@ -385,4 +385,30 @@ if (!empty($_POST)) {
   </div>
 </div>
 
+<script>
+$(document).ready(function() {
+  // $('body').removeClass('is-collapsed');
+	// $('.meetingPag').DataTable({searching: false, paging: false, info: false});
+
+  
+  $('.password_view_control').hover(function () {
+          $('#password').attr('type', 'text');
+          $('#confirm').attr('type', 'text');
+          $('#old').attr('type', 'text');
+        }, function () {
+          $('#password').attr('type', 'password');
+          $('#confirm').attr('type', 'password');
+          $('#old').attr('type', 'password');
+        });
+
+
+        $('[data-toggle="popover"], .pwpopover').popover();
+        $('.pwpopover').on('click', function (e) {
+          $('.pwpopover').not(this).popover('hide');
+        });
+        $('.modal').on('hidden.bs.modal', function () {
+          $('.pwpopover').popover('hide');
+        });
+});
+</script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

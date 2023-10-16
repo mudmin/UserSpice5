@@ -21,6 +21,7 @@ $codeUsage = '<?php
       "branding_html"=>"<h1>Foo</h1>",  //override branding (logo) HTML
       "show_branding"=>true, //show/hide branding html on menu
       "show_active"=>true, //highlight active menu item
+      "theme"=>"dark", //override the theme (light, dark)
   ];
   $menu->display($override);
 

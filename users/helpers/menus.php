@@ -192,12 +192,17 @@ if(!function_exists("migrateUSMainMenu")){
     if($o->logged_in == 0 && ($newPerms == "[]" || $newPerms == "[0]")){
       $newPerms = "[0]";
     }
-    if($o->logged_in == 1 && $newPerms == "[0]"){
-      $newPerms = "[1]";
-    }
-    $db->update("us_menu_items",$id,["permissions"=>$newPerms]);
-    // dump("Perm Update " . $db->errorString());
-  }
+	if($o->logged_in == 1 && $newPerms == "[0]"){
+		$newPerms = "[1]";
+	  }
+	  if($newPerms == "" || $newPerms == "[]"){
+		  $newPerms = "[0]";
+	  }
+   
+	  $db->update("us_menu_items",$id,["permissions"=>$newPerms]);
+	  // dump("Perm Update " . $db->errorString());
+	}
+ 
 
 
   $new = $db->query("SELECT * FROM us_menu_items WHERE menu = 1")->results();

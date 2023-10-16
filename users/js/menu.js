@@ -87,23 +87,23 @@ function toggleDropdown(e) {
   }
 }
 
-// we only need this behaviour for the top menu, not sidebar or accordion
+// we only need this <?=$us_url_root?>users/account.php for the top menu, not sidebar or accordion
 const addOffClick = (e) => {
   const offClick = (evt) => {
-    if (e !== evt) {
+    if (e.target !== evt.target) {
       // if the menu is open and the click came from outside the menu
       document.removeEventListener('click', offClick);
       // find the open menu parent item and close it
-      var open = e.originalTarget.closest(".dropdown.open");
+      var open = e.target.closest(".dropdown.open");
       if (open) {
         // simulate the active item's parent menu link to be clicked, so it will close
         open.firstChild.click();
       }
     }
-  }
-  //menu was closed, and is now open, so we add the listener for clicks outside the menu
+  };
+  // menu was closed, and is now open, so we add the listener for clicks outside the menu
   document.addEventListener('click', offClick);
-}
+};
 
 function mobileControlClick(evt) {
   evt.preventDefault();

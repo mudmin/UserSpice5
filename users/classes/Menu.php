@@ -58,6 +58,10 @@ class Menu {
       $this->show_branding = false;
     }
 
+    if(isset($override["theme"]) && $override["theme"] == false){
+      $this->menu->theme = $override["theme"];
+    }
+
     $html = $this->generate();
     echo $html;
   }

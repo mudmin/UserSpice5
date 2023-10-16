@@ -20,9 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 ?>
 <div class="row">
-  <div class="col-sm-12">
-    <h2><?=lang("VER_OOPS");?></h2>
-    <p><a href="forgot_password.php" class="btn btn-primary"><?=lang("PW_RESET");?></a></p>
+  <div class="col-12 col-sm-8 offeset-sm-1 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+    <h2><?= lang("VER_OOPS"); ?></h2>
+    <p><a href="forgot_password.php" class="btn btn-primary"><?= lang("PW_RESET"); ?></a></p>
     <br />
   </div><!-- /.col -->
 </div><!-- /.row -->

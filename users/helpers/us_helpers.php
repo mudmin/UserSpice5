@@ -23,8 +23,7 @@ $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] :
 if (!function_exists('ipCheck')) {
   function ipCheck()
   {
-    $ip = $_SERVER['REMOTE_ADDR'];
-
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     return $ip;
   }
 }
