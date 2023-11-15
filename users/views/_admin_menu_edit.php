@@ -229,7 +229,8 @@ if ($_POST) {
             </div>
 
             <div class="form-group" id="snippet_wrapper">
-              <label for="snippet">Snippet</label>
+              <label for="snippet">Snippet</label><br>
+              <small class="form-text text-muted">Snippets can be placed in usersc/hooks/menu or can be found in plugins. They are php files that return html. You can use them to add custom html to your menu. <span class="text-danger">Due to the way snippets are rendered, it is VERY important that you minify whitespace in your snippet files.</span></small>
               <select class="form-control" name="snippet" id="snippet" onchange="setDirty(true)">
                 <option value=""></option>
                 <?php foreach ($snippets as $s) {

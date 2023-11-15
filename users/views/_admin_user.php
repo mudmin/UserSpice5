@@ -25,7 +25,7 @@ if (!empty($_POST)) {
     include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
   } else {
     includeHook($hooks, 'post');
-    $db->update('users', $userdetails->id, ['modified'=>date("Y-m-d")]);
+    $db->update('users', $userdetails->id, ['modified' => date("Y-m-d")]);
 
     if (!empty($_POST['delete'])) {
       if ($userdetails->id == $user->data()->id || in_array($userdetails->id, $master_account)) {
@@ -409,14 +409,17 @@ if (in_array($user->data()->id, $master_account) && !in_array($userId, $master_a
 if ($user->data()->cloak_allowed != 1) {
   $cloakId = $user->data()->id;
   $rsn = "Your account has cloaking disabled. Enable it <a href='?admin.php&view=user&id=$cloakId'>here</a>";
+} elseif ($userdetails->permissions == 0) {
+  $rsn = "This user is blocked from the site. Cloaking is disabled.";
+} elseif ($userdetails->email_verified == 0){
+  $rsn = "This user has not verified their email. Cloaking is disabled.";
 }
-?>
 
-<?= resultBlock($errors, $successes); ?>
-<?php if (!$validation->errors() == '') {
+echo resultBlock($errors, $successes);
+if (!$validation->errors() == '') {
   display_errors($validation->errors());
-} ?>
-<?php includeHook($hooks, 'body'); ?>
+}
+includeHook($hooks, 'body'); ?>
 
 <div class="row">
   <div class="col-2 col-sm-1">
@@ -651,11 +654,9 @@ if ($user->data()->cloak_allowed != 1) {
     </div>
   </div>
 </form>
-<?php includeHook($hooks, 'bottom'); ?>
-
-
-
-<?php if ($protectedprof == 1) { ?>
+<?php 
+includeHook($hooks, 'bottom'); 
+if ($protectedprof == 1) { ?>
   <script>
     $('#adminUser').find('input:enabled, select:enabled, textarea:enabled').attr('disabled', 'disabled');
   </script>

@@ -1,29 +1,31 @@
 <?php
-function parseMenuLabel($string){
-	global $lang,$user,$settings;
+function parseMenuLabel($string) {
+    global $lang, $user, $settings;
 
-	if(substr($string, 0, 2) != "{{"){
-		$newString =  $string;
-	}elseif($string == "{{LOGGED_IN_USERNAME}}"){
-			if(isset($user) && $user->isLoggedIn()){
+    // Check if the string contains "{{LOGGED_IN_USERNAME}}"
+    if (strpos($string, "{{LOGGED_IN_USERNAME}}") !== false) {
+        // Replace "{{LOGGED_IN_USERNAME}}" with the appropriate value
+        if (isset($user) && $user->isLoggedIn()) {
+            $newString = echouser($user->data()->id, $settings->echouser, true);
+			
+        } else {
+            $newString = "";
+        }
+		$newString = str_replace("{{LOGGED_IN_USERNAME}}", $newString, $string);
+    } else {
+        // No "{{LOGGED_IN_USERNAME}}" found, so keep the original string
+        $newString = $string;
+    }
 
-			$newString = echouser($user->data()->id,$settings->echouser,true);
-
-		}else{
-			$newString = "";
-		}
-		return $newString;
-	}else{
-		$newString = str_replace(['{', '}'], '', $string);
-		if(array_key_exists($newString,$lang)){
-			return $lang[$newString];
-		}else{
-			return $newString;
-		}
-
-	}
-	return $newString;
+    // Perform additional checks and replacements
+    $newString = str_replace(['{', '}'], '', $newString);
+    if (array_key_exists($newString, $lang)) {
+        return $lang[$newString];
+    } else {
+        return $newString;
+    }
 }
+
 
 function _assert( $expr, $msg){ if( !$expr ) print "<br/><b>ASSERTION FAIL: </b>{$msg}<br>";  }
 

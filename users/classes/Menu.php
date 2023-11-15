@@ -129,14 +129,14 @@ class Menu {
         $brandHtml = "";
       }
 
-      $html .= "<div class='us_brand full_screen'>{$brandHtml}</div>";
+      $html .= "<div class='us_brand full_screen'>{$brandHtml}</a></div>";
 
       if($this->menu->justify == "right"){
           $html .= "<div class='flex-grow-1'></div>";
       }
 
 
-      $html .= "<div class='us_menu_mobile_wrapper'><div class='us_brand'>{$brandHtml}</div>";
+      $html .= "<div class='us_menu_mobile_wrapper'><div class='us_brand'>{$brandHtml}</a></div>";
 
 
       $html .= "<span class='additional-mobile-icons'>";
@@ -196,14 +196,14 @@ class Menu {
       if($item->type == "snippet" && file_exists($abs_us_root . $us_url_root . $item->link)){
         //check file exists
 
-        $html .= "<li class='{$liClass}'>";
+        $html .= "";
         //we're going to capture the OUTPUT of the php file as html and inject it into the menu
         ob_start();
         include $abs_us_root . $us_url_root . $item->link;
         $data = ob_get_clean();
         $html .=  $data;
         @ob_end_flush();
-        $html .= "</li>";
+        $html .= "";
       }else{
         $html .= "<li class='{$liClass}' data-menu='{$item->menu}'>";
         if(strtolower(substr($item->link,0,5) != "http:") && strtolower(substr($item->link,0,6) != "https:")){

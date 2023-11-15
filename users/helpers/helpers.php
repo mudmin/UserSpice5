@@ -240,10 +240,20 @@ if (!function_exists('email_body')) {
   }
 }
 
+
 //preformatted var_dump function
 if (!function_exists('dump')) {
-  function dump($var, $adminOnly = false, $localhostOnly = false)
+  function dump($var, $adminOnly = false, $localhostOnly = false, $fromdnd = false)
   {
+    if (isDebugModeActive() && !$fromdnd) {
+      $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+
+      echo '<pre>';
+      echo "File: <span style=\"font-weight:bold\">" . $trace[0]["file"] . "</span><br>";
+      echo "Line: <span style=\"font-weight:bold\">" . $trace[0]["line"] . "</span><br>";
+      echo '</pre>';
+    }
+
     if ($adminOnly && isAdmin() && !$localhostOnly) {
       echo '<pre>';
       var_dump($var);
@@ -267,11 +277,36 @@ if (!function_exists('dump')) {
   }
 }
 
+if (!function_exists("isDebugModeActive")) {
+  function isDebugModeActive()
+  {
+    global $settings, $user;
+    if (isset($settings->debug) && $settings->debug > 0) {
+      if ($settings->debug == 2 || ($settings->debug == 1 && isUserLoggedIn() && $user->data()->id == 1)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+}
+
 //preformatted dump and die function
 if (!function_exists('dnd')) {
   function dnd($var, $adminOnly = false, $localhostOnly = false)
   {
-    dump($var, $adminOnly, $localhostOnly);
+
+    if (isDebugModeActive()) {
+      $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+
+      echo '<pre>';
+      echo "File: <span style=\"font-weight:bold\">" . $trace[0]["file"] . "</span><br>";
+      echo "Line: <span style=\"font-weight:bold\">" . $trace[0]["line"] . "</span><br>";
+      echo '</pre>';
+    }
+    dump($var, $adminOnly, $localhostOnly, true);
     die();
   }
 }

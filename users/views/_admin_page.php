@@ -110,7 +110,7 @@ $countCountQ = $countQ->count();
   <h2>Page Permissions</h2>
   <div class="row">
     <div class="col-12 col-sm-6">
-      <h4><span style="color:blue;"><?= $pageDetails->page; ?></span></h4>
+      <h4><a href="<?= $us_url_root . $pageDetails->page?>" target="_blank"><span style="color:blue;"><?= $pageDetails->page; ?></span></a></h4>
       <h5>Page ID: <?= $pageDetails->id ?></h5>
     </div>
     <div class="col-12 col-sm-6">

@@ -121,7 +121,7 @@ class User
                     $date = date('Y-m-d H:i:s');
                     $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
                     $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
-                    $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => $_SERVER['REMOTE_ADDR']]);
+                    $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
                     $ip = ipCheck();
                     $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
                     $c = $q->count();
@@ -172,8 +172,9 @@ class User
                     $date = date('Y-m-d H:i:s');
                     $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
                     $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
-                    $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $_SERVER['REMOTE_ADDR']]);
                     $ip = ipCheck();
+                    $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $ip]);
+                    
                     $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
                     $c = $q->count();
                     if ($c < 1) {

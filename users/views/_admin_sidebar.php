@@ -44,6 +44,9 @@
 </style>
 <?php
 if ($dashboard_sidebar_menu == true && $hide_top_navigation == true) {
+  if(file_exists($abs_us_root . $us_url_root . "usersc/views/_admin_sidebar_fallback_menu.php")){
+    require_once $abs_us_root . $us_url_root . "usersc/views/_admin_sidebar_fallback_menu.php";
+  }else{
 ?>
   <div class="col-12 sidebar-fallback w-100 border-bottom bg-light mb-4">
     <nav>
@@ -53,7 +56,9 @@ if ($dashboard_sidebar_menu == true && $hide_top_navigation == true) {
       </ul>
     </nav>
   </div>
-<?php } ?>
+<?php } 
+}
+?>
 
 
 <div class="col-xs-3 col-xl-2 ps-0 sidebar-wrapper">

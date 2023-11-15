@@ -1,5 +1,10 @@
 <!-- Begin Widgets -->
 <!-- <div class="col-sm-12 mb-6"> -->
+<div class="row">
+    <div class="col-12 text-center mb-1">
+      Filter: <input type="text" id="filter" size="50" autofocus>
+    </div>
+  </div>
 <div class="row" id="widgetList">
   <?php
   $ordered = explode(",",$settings->widgets);
@@ -78,4 +83,58 @@ new Sortable(widgetList, {
       }
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  const filterInput = document.getElementById("filter");
+  const dashCards = document.querySelectorAll(".dash-card"); // Select all dash-card elements
+  const filterableElements = document.querySelectorAll(".icon-link, .dashboard-icon-label, .filterable-card"); // Select all filterable elements including cards without icons
+
+  filterInput.addEventListener("keyup", function () {
+    const filterText = filterInput.value.toLowerCase();
+
+    // Check if the filter input is empty
+    if (filterText.length === 0) {
+      // If it's empty, show all dash cards and all filterable elements
+      dashCards.forEach(function (dashCard) {
+        dashCard.style.display = "block";
+      });
+
+      filterableElements.forEach(function (element) {
+        element.style.display = "block";
+      });
+
+      return;
+    }
+
+    // Loop through each dash-card element
+    dashCards.forEach(function (dashCard) {
+      const iconsInCard = dashCard.querySelectorAll(".icon-link"); // Select icons within the current dash-card
+
+      // Check if there are any icons within the current card
+      const cardHasIcons = Array.from(iconsInCard).some(function (iconLink) {
+        const label = iconLink.querySelector(".dashboard-icon-label");
+        return label.textContent.toLowerCase().includes(filterText);
+      });
+
+      // Check if the card has the class 'manual-filter'
+      const hasManualFilter = dashCard.querySelector(".manual-filter");
+
+      // Show or hide the dash-card based on whether it has icons and the manual-filter class
+      if ((cardHasIcons || hasManualFilter) && !hasManualFilter) {
+        dashCard.style.display = "block";
+      } else {
+        dashCard.style.display = "none";
+      }
+    });
+
+    // Loop through each filterable element
+    filterableElements.forEach(function (element) {
+      // Check if the text content of the element contains the filter text
+      if (element.textContent.toLowerCase().includes(filterText)) {
+        element.style.display = "block";
+      } else {
+        element.style.display = "none";
+      }
+    });
+  });
+});
 </script>

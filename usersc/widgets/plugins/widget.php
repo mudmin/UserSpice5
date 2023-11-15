@@ -23,7 +23,7 @@
                 $img_src = $us_url_root . 'users/images/plugin.png';
               }
                   ?>
-                <div class="col-3 col-sm-2 mb-4 text-center">
+                <div class="col-3 col-sm-2 mb-4 text-center icon-link">
                   <a href="?view=plugins_config&plugin=<?=$p?>" data-bs-toggle="tooltip" title="<?=$buttonTitle?>">
                   <img src="<?=$us_url_root?>usersc/plugins/<?=$p?>/logo.png" alt="" height="50em">
                 </a>

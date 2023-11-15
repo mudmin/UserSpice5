@@ -1509,3 +1509,10 @@ function offsetDate($number, $datestring = "", $unit = "days"){
      }
      return date("Y-m-d",strtotime($symbol . $number . $unit,strtotime($datestring)));
 }
+
+if (!function_exists("hed")) {
+  function hed($string) 
+  {
+    return htmlspecialchars_decode(html_entity_decode($string ?? "", ENT_QUOTES, "UTF-8"));
+  }
+}
