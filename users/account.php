@@ -73,7 +73,7 @@ if($hooks['bottom'] == []){ //no plugin hooks present
   <div class="col-12 <?=$resize['cardClass']?> mt-2 mb-4 p-3 d-flex justify-content-center">
     <div class="card p-4 alternate-background" style="width:100%">
       <div class="image text-center">
-        <img src="<?=$grav; ?>" width="60%" alt="Generic placeholder thumbnail">
+        <img src="<?=$grav; ?>" width="60%" alt="profile thumbnail" class="profile-replacer">
         <p class="mt-3" <?=$resize['nameSize']?>><span id="fname" class="font-weight-bold fw-bold"><?=$user->data()->fname.' '.$user->data()->lname; ?> </span>
         <br />
         <span class="idd">@<?=$user->data()->username?></span></p>

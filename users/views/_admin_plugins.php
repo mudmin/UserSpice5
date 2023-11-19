@@ -93,7 +93,7 @@ if (!empty($_POST)) {
       include $abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/uninstall.php';
     }
     usSuccess("$plugin deactivated. You may click the trash can icon to delete the plugin");
-    dump("About to redirect");
+
     Redirect::to('admin.php?view=plugins&activation_code=' . uniqid() . $jump);
   }
 

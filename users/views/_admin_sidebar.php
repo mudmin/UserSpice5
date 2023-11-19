@@ -65,6 +65,13 @@ if ($dashboard_sidebar_menu == true && $hide_top_navigation == true) {
   <div class="d-flex flex-column p-2 text-bg-dark sidebar">
     <?php
     // $menu_override is the menu you specified in usersc/includes/dashboard_overrides.php
+
+    //There is a new sidebar_menu_id that allows you to set a different menu in the sidebar than the top in dashboard_overrides. If it's not there, you can add it.
+
+    if(isset($sidebar_menu_id)){
+      $menu_override = $sidebar_menu_id;
+    }
+    
     $menu = new Menu($menu_override);
     $override = [
       "layout" => "accordion",  //horizontal, accordion

@@ -1,8 +1,8 @@
 <!-- Begin Widgets -->
 <!-- <div class="col-sm-12 mb-6"> -->
 <div class="row">
-    <div class="col-12 text-center mb-1">
-      Filter: <input type="text" id="filter" size="50" autofocus>
+    <div class="col-12 col-sm-6 offset-sm-3 col-md-4 offset-md-4 text-center mb-1">
+      <input type="text" id="filter" style="width:100%" autofocus placeholder="Filter">
     </div>
   </div>
 <div class="row" id="widgetList">
@@ -86,8 +86,7 @@ new Sortable(widgetList, {
 document.addEventListener("DOMContentLoaded", function () {
   const filterInput = document.getElementById("filter");
   const dashCards = document.querySelectorAll(".dash-card"); // Select all dash-card elements
-  const filterableElements = document.querySelectorAll(".icon-link, .dashboard-icon-label, .filterable-card"); // Select all filterable elements including cards without icons
-
+  const filterableElements = document.querySelectorAll(".icon-link, .dashboard-icon-label, .filterable-card"); 
   filterInput.addEventListener("keyup", function () {
     const filterText = filterInput.value.toLowerCase();
 

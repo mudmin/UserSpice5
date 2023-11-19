@@ -100,11 +100,11 @@ if (!empty($_POST)) {
     }
 
     //Update display name
-    $displayname = Input::get('unx');
+    $displayname = Input::get('username');
     if ($userdetails->username != $displayname) {
       $fields = ['username' => $displayname];
       $validation->check($_POST, [
-        'unx' => [
+        'username' => [
           'display' => 'Username',
           'required' => true,
           'unique_update' => 'users,' . $userId,
@@ -163,7 +163,7 @@ if (!empty($_POST)) {
       } else {
 ?>
   <?php if (!$validation->errors() == '') {
-          display_errors($validation->errors());
+           display_errors($validation->errors());
         } ?>
 <?php
       }
@@ -233,11 +233,11 @@ if (!empty($_POST)) {
     }
 
     //Update email
-    $email = Input::get('emx');
+    $email = Input::get('email');
     if ($userdetails->email != $email) {
       $fields = ['email' => $email];
       $validation->check($_POST, [
-        'emx' => [
+        'email' => [
           'display' => 'Email',
           'required' => true,
           'valid_email' => true,
@@ -246,11 +246,13 @@ if (!empty($_POST)) {
           'max' => 75,
         ],
       ]);
+
       if ($validation->passed()) {
         $db->update('users', $userId, $fields);
         $successes[] = 'Email Updated';
         logger($user->data()->id, 'User Manager', "Updated email for $userdetails->fname from $userdetails->email to $email.");
       } else {
+       
 ?>
   <?php if (!$validation->errors() == '') {
           display_errors($validation->errors());
@@ -371,6 +373,22 @@ if (!empty($_POST)) {
     }
     $userdetails = $userdetailsQ->first();
   }
+  if(!$validation->errors() == ''){
+
+    foreach($validation->errors()  as $key=>$e){
+        $found = false;
+        foreach($errors as $k=>$v){
+          if($v == $e){
+            $found = true;
+          }
+        }
+        if(!$found){
+          $errors[] = $e;
+        }
+
+
+    }
+  }
 
   if ($errors == [] && Input::get('return') != '') {
     usSuccess("Saved");
@@ -415,7 +433,6 @@ if ($user->data()->cloak_allowed != 1) {
   $rsn = "This user has not verified their email. Cloaking is disabled.";
 }
 
-echo resultBlock($errors, $successes);
 if (!$validation->errors() == '') {
   display_errors($validation->errors());
 }
@@ -523,12 +540,12 @@ includeHook($hooks, 'body'); ?>
     <div class="col-12 col-sm-6">
       <div class="form-group" id="username-group">
         <label>Username:</label>
-        <input class='form-control' type='search' name='unx' value='<?= $userdetails->username; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='username' value='<?= $userdetails->username; ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="email-group">
         <label>Email:</label>
-        <input class='form-control' type='search' name='emx' value='<?= $userdetails->email; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='email' value='<?= $userdetails->email; ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="fname-group">

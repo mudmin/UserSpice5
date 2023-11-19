@@ -5,6 +5,7 @@ class Menu {
   public $items = [];
   public $tree = [];
   public $userPerms = [0];
+  public $userTags = [];
   public $show_branding = true;
   public $show_active = 0;
   public $disabled = 0;
@@ -38,6 +39,14 @@ class Menu {
       $perms = $this->db->query("SELECT * FROM user_permission_matches WHERE user_id = ?",[$user->data()->id])->results();
       foreach($perms as $perm) {
         $this->userPerms[] = $perm->permission_id;
+      }
+      if(pluginActive("usertags",true)){
+        $tags = $this->db->query("SELECT * FROM plg_tags_matches WHERE user_id = ?",[$user->data()->id])->results();
+
+        foreach($tags as $tag) {
+          $this->userTags[] = $tag->tag_id;
+        }
+ 
       }
     }
   }
@@ -81,17 +90,27 @@ class Menu {
 
   private function hasPerms($item) {
     global $user;
-    $itemPerms = json_decode($item->permissions,true);
-    //once a user is logged in, the 0 permission on the item does not mean anything
-    //and should be removed
-    if($user->isLoggedIn()){
-      if (($key = array_search("0", $itemPerms)) !== false) {
-          unset($itemPerms[$key]);
-      }
+
+    $itemPerms = json_decode($item->permissions ?? "", true);
+    if($itemPerms == "") $itemPerms = [];
+    $itemTags = json_decode($item->tags ?? "", true);
+    if($itemTags == "") $itemTags = [];
+
+    // Once a user is logged in, the 0 permission on the item does not mean anything
+    // and should be removed
+    if ($user->isLoggedIn() && in_array("0", $itemPerms)) {
+        unset($itemPerms[array_search("0", $itemPerms)]);
     }
-    if(in_array(0, $itemPerms)) return true;
-    return sizeof(array_intersect($itemPerms, $this->userPerms)) > 0;
-  }
+
+    // Check if the user has any permissions in common with the item's permissions
+    $hasPermission = sizeof(array_intersect($itemPerms, $this->userPerms)) > 0;
+
+    // Check if the user has any tags in common with the item's permissions
+    $hasTag = sizeof(array_intersect($itemTags, $this->userTags)) > 0;
+
+    // Return true if either permission or tag is present
+    return $hasPermission || $hasTag;
+}
 
   private function _generateHtml($items, $isDropdown = false, $level = 0) {
     global $abs_us_root,$us_url_root,$lang;
@@ -215,8 +234,8 @@ class Menu {
         }
 
         $parsedLabel = parseMenuLabel($item->label);
-        if ($parsedLabel == "") {
-          $parsedLabel = "Menu"; // for accessibility, don't allow blank labels - they are meaningless to screen readers
+        if ($parsedLabel == ""  && isset($this->menu->screen_reader_mode) && $this->menu->screen_reader_mode == 1) {
+            $parsedLabel = lang("MENU_MENU");// for accessibility, don't allow blank labels - they are meaningless to screen readers
         }
         $html .= "<span class='labelText'>" . $parsedLabel . "</span>";
         // $html .= $item->label;

@@ -22,7 +22,11 @@ class Validate
 	public
 	$_errors = [],
 	$_db     = null,
-	$_rules_broken = [];
+	$_rules_broken = [],
+	$_alias = [
+		'unx'=>'username',
+		'emx'=>'email',
+	]; 
 
 
 	public function __construct()  {
@@ -100,37 +104,61 @@ class Validate
 						break;
 
 						case 'unique':
-						$table  = is_array($rule_value) ? $rule_value[0] : $rule_value;
-						$fields = is_array($rule_value) ? $rule_value[1] : [$item, '=', $value];
+							$table  = is_array($rule_value) ? $rule_value[0] : $rule_value;		
+							if($table == "users" && array_key_exists($item, $this->_alias)) {
+								$orig = $item;
+								$item = $this->_alias[$item];
+							}
 
-						if ($this->_db->get($table, $fields)) {
-				        $str = lang("VAL_EXISTS");
-				        if ($this->_db->count()){
-				            $this->addError(["{$display} $str {$display}",$item]);
-				            $this->ruleBroken([$item,"unique",false]);
-				        }
-				    } else {
-				        $str1 = lang("VAL_DB");  // <-- new position
-				        $this->addError([$str1,$item]);
-				        // or even combine the two lines so no need for $str1: $this->addError([lang("VAL_DB"),$item]);
-				        $this->ruleBroken([$item,"unique",false]);
-				    }
+							$field = $item; // The field name to be checked
+							if ($table == "users" && ($field == "username" || $field == "email")) {
+								// Special logic for users table when checking username or email
+								$query = "SELECT id FROM users WHERE (email = ?) OR (username = ?)";
+								$count = $this->_db->query($query, [$value, $value])->count();
+				
+							} else {
+								// Standard logic for other tables/fields
+								$query = "SELECT id FROM {$table} WHERE {$field} = ?";
+								$count = $this->_db->query($query, [$value])->count();
+							}
+							if(isset($orig)){
+								$item = $orig;
+							}
+							$str = lang("VAL_EXISTS");
+							if ($count > 0) {
+								$this->addError(["{$display} $str {$display}", $item]);
+								$this->ruleBroken([$item, "unique", false]);
+							}
 
-						break;
-
+							break;
+						
 						case 'unique_update':
-						$t     = explode(',', $rule_value);
-						$table = $t[0];
-						$id    = $t[1];
-						$query = "SELECT * FROM {$table} WHERE id != {$id} AND {$item} = '{$value}'";
-						$check = $this->_db->query($query);
-						$str = lang("VAL_EXISTS");
-						if ($check->count()){
-							$this->addError(["{$display} $str {$display}",$item]);
-							$this->ruleBroken([$item,"unique_update",false]);
-						}
+							$t     = explode(',', $rule_value);
+							$table = $t[0];
+							$id    = $t[1];
+							if($table == "users" && array_key_exists($item, $this->_alias)) {
+								$orig = $item;
+								$item = $this->_alias[$item];
+							}
 
-						break;
+							if ($table == "users" && ($item == "username" || $item == "email")) {
+						
+								$query = "SELECT id FROM users WHERE id != ? AND ((email = ?) OR (username = ?))";
+								$count = $this->_db->query($query, [$id, $value, $value])->count();
+							} else {
+								$query = "SELECT id FROM {$table} WHERE id != ? AND {$item} = ?";
+								$count = $this->_db->query($query, [$id, $value])->count();
+							}
+							if(isset($orig)){
+								$item = $orig;
+							}
+							$str = lang("VAL_EXISTS");
+							if ($count > 0) {
+								$this->addError(["{$display} $str {$display}", $item]);
+								$this->ruleBroken([$item, "unique_update", false]);
+							}
+	
+							break;
 
 						case 'is_numeric': case 'is_num':
 						$str = lang("VAL_NUM");

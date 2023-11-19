@@ -9,6 +9,12 @@ $permNames = ["0" => "Public"];
 foreach ($perms as $p) {
   $permNames[$p->id] = $p->name;
 }
+if(pluginActive("usertags",true)){
+   $tagsQ = $db->query("SELECT * FROM plg_tags ORDER BY tag");
+   $tagsC = $tagsQ->count();
+   $tags = $tagsQ->results();
+}
+
 $index = $db->query("SELECT DISTINCT z_index FROM us_menus ORDER BY z_index")->results();
 $indexes = [];
 foreach ($index as $i) {
@@ -39,6 +45,8 @@ if($itemId == 'new' && $itemId !== 0) {
 }
 if ($item) {
   $item->permissions = json_decode($item->permissions, true);
+  $item->tags = json_decode($item->tags ?? "", true);
+  if($item->tags == ""){ $item->tags = [];}
 }
 
 
@@ -91,6 +99,7 @@ if ($_POST) {
       $data['link'] = "#";
     }
     $data['permissions'] = json_encode(Input::get('permissions'));
+    $data['tags'] = json_encode(Input::get('tags'));
     if ($itemId == 'new') {
       $data['display_order'] = $lastOrder + 1;
       $db->insert('us_menu_items', $data);
@@ -113,7 +122,7 @@ if ($_POST) {
     // ];
     $data = [
       'menu_name' => Input::get('menu_name'), 'disabled' => Input::get('disabled'),
-      'theme' => Input::get('theme'), 'show_active' => Input::get('show_active'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
+      'theme' => Input::get('theme'),'screen_reader_mode' => Input::get('screen_reader_mode'), 'show_active' => Input::get('show_active'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
       'z_index' => Input::get('z_index'), 'brand_html' => Input::get('brand_html'), 'justify' => Input::get('justify')
     ];
     if ($menuId == 'new') {
@@ -190,6 +199,20 @@ if ($_POST) {
               <?php endforeach; ?>
               <br><small class="form-text text-muted">"Public" is for non logged in users. If you want all users to see a menu item, use the permission "User".</small>
             </div>
+
+            <?php if(pluginActive("usertags",true)){ ?>
+              <div class="form-group">
+              <label for="permissions">Tags</label><br>
+
+              <?php foreach ($tags as $tag) : ?>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input other-tags tag-check" type="checkbox" id="tag_<?= $perm->id ?>" name="tags[]" value="<?= $tag->id ?>" <?= in_array($tag->id, $item->tags) ? 'checked' : "" ?>>
+                  <label class="form-check-label" for="tag_<?= $tag->id ?>"><?= $tag->tag ?></label>
+                </div>
+              <?php endforeach; ?>
+              <br><small class="form-text text-muted">User Tags are an alternative permission system for UserSpice. If you select a tag and a permission, if the user has any one of them, they will be allowed to see the link.</small>
+            </div>
+            <?php } ?>
 
 
             <div class="form-group">
@@ -329,7 +352,7 @@ if ($_POST) {
             <div class="form-group">
               <label for="nav_class">Menu Class</label>
               <input id="nav_class" name="nav_class" class="form-control" value="<?= $menu->nav_class ?>" onchange="setDirty(true)" />
-              <small class="form-text text-muted">Add custom class to the top level UL element. You can often use bg-primary to or bg-danger etc to use one of your template button colors as a menu background to make your menu feel more integrated.</small>
+              <div class="explain">Add custom class to the top level UL element. You can often use bg-primary to or bg-danger etc to use one of your template button colors as a menu background to make your menu feel more integrated.</div>
             </div>
 
             <div class="form-group">
@@ -342,7 +365,7 @@ if ($_POST) {
             </div>
 
             <div class="form-group">
-              <label for="theme">Highlight Active Menu Item</label>
+              <label for="show_active">Highlight Active Menu Item</label>
               <select name="show_active" id="show_active" class="form-control">
                 <option value="0" <?= $menu->show_active == '0' ? 'selected' : '' ?>>No</option>
                 <option value="1" <?= $menu->show_active == '1' ? 'selected' : '' ?>>Yes</option>
@@ -350,10 +373,20 @@ if ($_POST) {
             </div>
 
             <div class="form-group">
+              <label for="screen_reader_mode">Screen Reader Mode</label>
+              
+              <select name="screen_reader_mode" id="screen_reader_mode" class="form-control">
+                <option value="0" <?= $menu->screen_reader_mode == '0' ? 'selected' : '' ?>>No</option>
+                <option value="1" <?= $menu->screen_reader_mode == '1' ? 'selected' : '' ?>>Yes</option>
+              </select>
+              <div class="explain">Forces a name on unlabeled menu items for better accessibility. Will provide some additional functionality over time. Note that if you do not label your menu items, you absolutely need to use an icon.</div>
+            </div>
+
+            <div class="form-group">
               <label for="z_index">Z Index</label>
               <input id="z_index" name="z_index" type="number" step="5" min="0" class="form-control" value="<?= $menu->z_index ?>" onchange="setDirty(true)" />
               Currently used z-indexes: <b><?= oxfordList($indexes); ?></b>
-              <small class="form-text text-muted">If you have multiple menus you most likely will want to set different z-index so that they do not clash. </small>
+              <div class="explain">If you have multiple menus you most likely will want to set different z-index so that they do not clash. </div>
 
 
             </div>
@@ -362,7 +395,7 @@ if ($_POST) {
               <label for="brand_html">Brand HTML</label>
               <textarea id="brand_html" name="brand_html" class="form-control" rows="10" onchange="setDirty(true)"><?= trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8')) ?>
                 </textarea>
-              <small class="form-text text-muted">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root. "a" tags are automatically closed.</small>
+              <div class="explain">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root. "a" tags are automatically closed.</div>
             </div>
 
             <div class="form-check">
@@ -469,7 +502,13 @@ if ($_POST) {
     </div>
   </div>
 </div>
-
+<style>
+  .explain {
+    font-size: .7rem;
+    color: #999;
+    line-height: .9rem;
+  }
+</style>
 <script>
   let dirty = false;
 
