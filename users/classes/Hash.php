@@ -23,9 +23,11 @@ class Hash{
 		return hash('sha256', $string . $salt);
 	}
 
-	public static function salt($length){
-		return mcrypt_create_iv($length);
-	}
+	//Deprecated because mcrypt_create_iv is no longer availabe in modern php versions.
+	
+	// public static function salt($length){
+	// 	return mcrypt_create_iv($length);
+	// }
 
 	public static function unique(){
 		return self::make(uniqid());

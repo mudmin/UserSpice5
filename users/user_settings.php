@@ -130,11 +130,11 @@ if (!empty($_POST)) {
     }
     if (!empty($_POST['password']) || $userdetails->email != $_POST['email'] || !empty($_POST['resetPin'])) {
       //Check password for email or pw update
-      if (is_null($userdetails->password) || password_verify(Input::get('old'), $user->data()->password)) {
+  
         //Update email
         $email = Input::get('email');
         if ($userdetails->email != $email) {
-          $confemail = Input::get('confemail');
+          
           $fields = ['email' => $email];
           $validation->check($_POST, [
             'email' => [
@@ -143,11 +143,10 @@ if (!empty($_POST)) {
               'valid_email' => true,
               'unique_update' => 'users,' . $userId,
               'min' => 5,
-              'max' => 100,
+              'max' => 200,
             ],
           ]);
           if ($validation->passed()) {
-            if ($confemail == $email) {
               if ($emailR->email_act == 0) {
                 $db->update('users', $userId, $fields);
                 $successes[] = lang('GEN_EMAIL') . ' ' . lang('GEN_UPDATED');
@@ -176,10 +175,7 @@ if (!empty($_POST)) {
                 if ($emailR->email_act == 1) {
                   logger($user->data()->id, 'User', "Requested change email from $userdetails->email to $email. Verification email sent.");
                 }
-              }
-            } else {
-              $errors[] = lang('EML_MAT');
-            }
+              
           } else {
             //validation did not pass
             foreach ($validation->errors() as $error) {
@@ -187,6 +183,7 @@ if (!empty($_POST)) {
             }
           }
         }
+      }
         if (!empty($_POST['password'])) {
           $validation->check($_POST, [
             'password' => [
@@ -204,8 +201,10 @@ if (!empty($_POST)) {
           foreach ($validation->errors() as $error) {
             $errors[] = $error;
           }
-          if (empty($errors) && Input::get('old') != Input::get('password')) {
+       
+          if (empty($errors)) {
             //process
+            
             $new_password_hash = password_hash(Input::get('password'), PASSWORD_BCRYPT, ['cost' => 12]);
             $user->update(['password' => $new_password_hash, 'force_pr' => 0, 'vericode' => randomstring(15)], $user->data()->id);
             $successes[] = lang('PW_UPD');
@@ -223,10 +222,6 @@ if (!empty($_POST)) {
                 $errors[] = lang('ERR_FAIL_ACT') . $passwordResetKillSessions;
               }
             }
-          } else {
-            if (Input::get('old') == Input::get('password')) {
-              $errors[] = lang('ERR_PW_SAME');
-            }
           }
         }
         if (!empty($_POST['resetPin']) && Input::get('resetPin') == 1) {
@@ -235,9 +230,7 @@ if (!empty($_POST)) {
           $successes[] = lang('SET_PIN');
           $successes[] = lang('SET_PIN_NEXT');
         }
-      } else {
-        $errors[] = lang('ERR_PW_FAIL');
-      }
+      
     }
   }
 
@@ -248,12 +241,12 @@ if (!empty($_POST)) {
 <div class="container my-5">
   <div class="row">
     <aside class="col-sm-12 col-md-2">
-      <p><img src="<?= $grav; ?>" class="img-thumbnail" alt="Generic placeholder thumbnail"></p>
+      <p><img src="<?= $grav; ?>" class="img-thumbnail profile-replacer" alt="Generic placeholder thumbnail"></p>
 </aside>
     <main class="col-sm-12 col-md-10">
       <h1><?= lang('SET_UPDATE'); ?></h1>
       <?php if (!pluginActive('profile_pic', true)) {
-        echo "<div class='alert alert-info p-3 mt-3 mb-4'>" . lang('SET_GRAVITAR') . "</div>";
+        echo "<div class='alert alert-info gravitar-message p-3 mt-3 mb-4'>" . lang('SET_GRAVITAR') . "</div>";
       } ?>
       <?php if (!$errors == '') {
         display_errors($errors);
@@ -315,13 +308,6 @@ if (!empty($_POST)) {
           </div>
         </div>
 
-        <div class="row mb-3" id="confemail-group">
-          <label id="confemail-label" for="confemail" class="col-form-label col-12 col-md-4 text-md-right text-md-end"><?= lang('EML_CONF'); ?></label>
-          <div class="col-12 col-md-8">
-            <input class="form-control" type="text" id="confemail" name="confemail" autocomplete="off" />
-          </div>
-        </div>
-
         <div class="row mb-3" id="password-group">
           <label id="password-label" for="password" class="col-form-label col-12 col-md-4 text-md-right text-md-end"><?= lang('PW_NEW'); ?> <small>(<?= lang('GEN_MIN'); ?> <?= $settings->min_pw; ?> <?= lang('GEN_AND'); ?> <?= lang('GEN_MAX'); ?> <?= $settings->max_pw; ?> <?= lang('GEN_CHAR'); ?>)</small></label>
           <div class="col-12 col-md-8">
@@ -351,16 +337,7 @@ if (!empty($_POST)) {
           </div>
         <?php } ?>
 
-        <div class="row mb-3" id="old-group">
-          <label id="old-label" for="old" class="col-form-label col-12 col-md-4 text-md-right text-md-end"><?= lang('PW_OLD'); ?><?php if (!is_null($userdetails->password)) { ?>, <?= lang('SET_PW_REQ'); ?><?php } ?></label>
-          <div class="col-12 col-md-8">
-          <div class="input-group" data-container="body">
-            <span class="btn btn-secondary input-group-addon password_view_control" id="addon6"><span class="fa fa-eye"></span></span>
-            <input class="form-control" type="password" id="old" name="old" <?php if (is_null($userdetails->password)) { ?>disabled<?php } ?> autocomplete="off" />
-            <span class="btn btn-secondary input-group-addon" id="addon5" data-container="body" data-toggle="tooltip" data-placement="top" title="<?= lang('SET_PW_REQI'); ?>">?</span>
-          </div>
-        </div>
-        </div>
+
         <?php includeHook($hooks, 'form'); ?>
         <input type="hidden" name="csrf" value="<?= Token::generate(); ?>" />
         <div class="row my-4">
@@ -390,15 +367,13 @@ $(document).ready(function() {
   // $('body').removeClass('is-collapsed');
 	// $('.meetingPag').DataTable({searching: false, paging: false, info: false});
 
-  
+
   $('.password_view_control').hover(function () {
           $('#password').attr('type', 'text');
           $('#confirm').attr('type', 'text');
-          $('#old').attr('type', 'text');
         }, function () {
           $('#password').attr('type', 'password');
           $('#confirm').attr('type', 'password');
-          $('#old').attr('type', 'password');
         });
 
 

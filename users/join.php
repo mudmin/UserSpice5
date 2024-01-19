@@ -130,16 +130,13 @@ if (Input::exists()) {
                       'vericode' => $vericode,
                       'join_vericode_expiry' => $settings->join_vericode_expiry,
                         ];
-            $vericode_expiry = date('Y-m-d H:i:s');
-
-            if ($act == 1) {
-                //Verify email address settings
-                $to = rawurlencode($email);
-                $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
-                $body = email_body('_email_template_verify.php', $params);
-                email($to, $subject, $body);
+            
+            if($act == 1){
                 $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
+            }else{
+                $vericode_expiry = date('Y-m-d H:i:s');
             }
+
             try {
                 if(isset($_SESSION['us_lang'])){
                   $newLang = $_SESSION['us_lang'];
@@ -165,6 +162,14 @@ if (Input::exists()) {
                 $theNewId = $user->create($fields);
 
                 includeHook($hooks, 'post');
+                if ($act == 1) {
+                    //Verify email address settings
+                    $to = rawurlencode($email);
+                    $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
+                    $body = email_body('_email_template_verify.php', $params);
+                    email($to, $subject, $body);
+                    
+                }
             } catch (Exception $e) {
                 if ($eventhooks = getMyHooks(['page' => 'joinFail'])) {
                     includeHook($eventhooks, 'body');

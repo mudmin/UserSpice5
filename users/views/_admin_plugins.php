@@ -197,7 +197,7 @@ $token = Token::generate();
                         <?php } ?>
                       </div>
 
-                      <div class="d-flex flex-column">
+                      <div class="d-flex flex-column ps-3">
                         <h4 class="mb-1"><?= $xml->name ?></h4>
                         <small class="ml-2"><strong>Author: </strong><a class="text-dark" href="<?= $xml->website ?>"><?= $xml->author ?></a></small>
                         <small class="ml-2"><strong>Released: </strong><?= $xml->release ?></small>

@@ -1091,7 +1091,7 @@ if (!function_exists('includeHook')) {
       foreach ($hooks[$position] as $h) {
         if (isset($h) && file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$h) && $h != '') {
           $plugin = strstr($h, '/', 'before_needle');
-          if ($usplugins[$plugin] == 1) {//only include this file if plugin is installed and active.
+          if (isset($usplugins[$plugin]) && $usplugins[$plugin] == 1) {//only include this file if plugin is installed and active.
             include $abs_us_root.$us_url_root.'usersc/plugins/'.$h;
           }
         } else {
