@@ -16,14 +16,16 @@ class Menu
   public function __construct($idormenuname)
   {
     $this->db = DB::getInstance();
-    if (is_int($idormenuname))
+    if (is_numeric($idormenuname)) {
+      //echo "$idormenuname is int";	
       $q = $this->db->query("SELECT * FROM us_menus WHERE id = ?", [$idormenuname]);
-    else
+    } else {
+      //echo "$idormenuname is not int";
       $q = $this->db->query("SELECT * FROM us_menus WHERE menu_name = ?", [$idormenuname]);
-
+    }
     $c = $q->count();
     if ($c < 1) {
-      die("Your menu is missing. If you have just upgraded UserSpice,
+      die("Your menu $idormenuname is missing. If you have just upgraded UserSpice,
       please navigate to users/updates in your browser to create your menus.
       Otherwise, please go into your database and restore a backup or select a different menu.
       If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to
