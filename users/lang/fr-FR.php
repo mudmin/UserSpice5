@@ -330,7 +330,7 @@ $lang = array_merge($lang,array(
 		"SET_NOCHANGE"	=> "L'administrateur a désactivé la capacité de changer de nom d'utilisateur.",
 		"SET_ONECHANGE"	=> "L'administrateur n'a autorisé qu'un changement de nom d'utilisateur et vous avez déjà utilisé cette possibilité.",
 
-		"SET_GRAVITAR"	=> "<strong>Voulez vous changer votre photo? </strong><br> Visitez <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> et créez votre compte avec le même courriel que vous utilisez sur ce site . Cela fonctionne pour des millions de sites. C'est rapide et facile! utilisée sur ce site",
+		"SET_GRAVITAR"	=> "<strong>Voulez vous changer votre photo? </strong><br> Visitez <a href='https://en.gravatar.com/'https://en.gravatar.com/</a> et créez votre compte avec le même courriel que vous utilisez sur ce site . Cela fonctionne pour des millions de sites. C'est rapide et facile! utilisée sur ce site",
 
 		"SET_NOTE1"			=> "<p><strong>S.V.P., notez</strong> qu'il y a une demande en attente pour mettre à jour votre courriel à",
 
