@@ -34,16 +34,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $lang = array();
 
-	//important strings
-	//You defiitely want to customize these for your language
-$lang = array_merge($lang,array(
-	"THIS_LANGUAGE"	=>"한국어",
-	"THIS_CODE"		=>"ko-KR",
-	"MISSING_TEXT"	=>"누락된 텍스트",
+//important strings
+//You defiitely want to customize these for your language
+$lang = array_merge($lang, array(
+	"THIS_LANGUAGE"	=> "한국어",
+	"THIS_CODE"		=> "ko-KR",
+	"MISSING_TEXT"	=> "누락된 텍스트",
 ));
 
-	//Database Menus
-$lang = array_merge($lang,array(
+//Database Menus
+$lang = array_merge($lang, array(
 	"MENU_HOME"		=> "홈",
 	"MENU_HELP"		=> "도움말",
 	"MENU_ACCOUNT"	=> "내 계정",
@@ -56,15 +56,15 @@ $lang = array_merge($lang,array(
 	"MENU_LOGOUT"	=> "로그아웃",
 ));
 
-	// Signup
-$lang = array_merge($lang,array(
+// Signup
+$lang = array_merge($lang, array(
 	"SIGNUP_TEXT"			=> "계정 만들기",
 	"SIGNUP_BUTTONTEXT"		=> "나를 등록",
 	"SIGNUP_AUDITTEXT"		=> "등록됨",
-	));
+));
 
-	// Signin
-$lang = array_merge($lang,array(
+// Signin
+$lang = array_merge($lang, array(
 	"SIGNIN_FAIL"		=> "** 로그인하지 못했습니다 **",
 	"SIGNIN_PLEASE_CHK" => "사용자 이름과 암호를 확인하고 다시 시도하세요",
 	"SIGNIN_UORE"		=> "아이디 또는 이메일 주소",
@@ -73,15 +73,15 @@ $lang = array_merge($lang,array(
 	"SIGNIN_TEXT"		=> "로그인",
 	"SIGNOUT_TEXT"		=> "로그아웃",
 	"SIGNIN_BUTTONTEXT"	=> "로그인",
-		/* doesn't translate directly. does the Remember Me feature remember username, password, or both? */
+	/* doesn't translate directly. does the Remember Me feature remember username, password, or both? */
 	"SIGNIN_REMEMBER"	=> "사용자 이름 저장",
 	"SIGNIN_AUDITTEXT"	=> "로그인됨",
 	"SIGNIN_FORGOTPASS"	=> "암호 찾기",
 	"SIGNOUT_AUDITTEXT"	=> "로그아웃됨",
-	));
+));
 
-	// Account Page
-$lang = array_merge($lang,array(
+// Account Page
+$lang = array_merge($lang, array(
 	"ACCT_EDIT"				=> "계정 편집",
 	"ACCT_2FA"				=> "2단계 인증 관리",
 	"ACCT_SESS"				=> "세션 관리",
@@ -90,10 +90,10 @@ $lang = array_merge($lang,array(
 	"ACCT_LOGINS"			=> "로그인 횟수",
 	"ACCT_SESSIONS"			=> "활성 세션 수",
 	"ACCT_MNG_SES"			=> "Click the Manage Sessions button in the left sidebar for more information.",
-	));
+));
 
-	//General Terms
-$lang = array_merge($lang,array(
+//General Terms
+$lang = array_merge($lang, array(
 	"GEN_ENABLED"		=> "사용",
 	"GEN_DISABLED"		=> "사용 안 함",
 	"GEN_ENABLE"		=> "사용 하다",
@@ -135,10 +135,10 @@ $lang = array_merge($lang,array(
 	"GEN_REQ"			=> "필요한 공간",
 	"GEN_AND"			=> "and", //context?
 	"GEN_SAME"			=> "길이가 같아야 합니다",
-	));
+));
 
-	//validation class
-$lang = array_merge($lang,array(
+//validation class
+$lang = array_merge($lang, array(
 	"VAL_SAME"			=> "길이가 같아야 합니다",
 	"VAL_EXISTS"		=> "이미 있습니다. 다른 값 주소를 선택하세요", //this doesn't translate well. verb-surbject-object order requires a generic object be used.
 	"VAL_DB"			=> "데이터베이스 오류",
@@ -161,8 +161,8 @@ $lang = array_merge($lang,array(
 	"VAL_NA_PHONE"		=> "올바른 전화 번호여야 합니다 (북아메리카)", //not a 1:1 translation
 ));
 
-	//Time
-$lang = array_merge($lang,array(
+//Time
+$lang = array_merge($lang, array(
 	"T_YEARS"		=> "년도",
 	"T_YEAR"		=> "년도",
 	"T_MONTHS"		=> "월",
@@ -177,11 +177,11 @@ $lang = array_merge($lang,array(
 	"T_MINUTE"		=> "분",
 	"T_SECONDS"		=> "초",
 	"T_SECOND"		=> "초",
-	));
+));
 
 
-	//Passwords
-$lang = array_merge($lang,array(
+//Passwords
+$lang = array_merge($lang, array(
 	"PW_NEW"		=> "새 비밀번호",
 	"PW_OLD"		=> "기존 비밀번호",
 	"PW_CONF"		=> "비밀번호 확인",
@@ -190,11 +190,11 @@ $lang = array_merge($lang,array(
 	"PW_SHOULD"		=> "비밀번호는 반드시",
 	"PW_SHOW"		=> "비밀번호 표시",
 	"PW_SHOWS"		=> "비밀번호 표시",
-	));
+));
 
 
-	//Join
-$lang = array_merge($lang,array(
+//Join
+$lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "시작 - ",
 	"JOIN_THANKS"	=> "제품을 등록해주셔서 감사합니다.",
 	"JOIN_HAVE"		=> "이상이어야 합니다 ", //papago
@@ -205,15 +205,15 @@ $lang = array_merge($lang,array(
 	"JOIN_ACCEPTTC" => "사용 약관에 동의합니다",
 	"JOIN_CHANGED"	=> "약관이 변경되었습니다.",
 	"JOIN_ACCEPT" 	=> "사용자 이용약관에 동의하고 계속하기",
-	));
+));
 
-	//Sessions
-$lang = array_merge($lang,array(
+//Sessions
+$lang = array_merge($lang, array(
 	"SESS_SUC"		=> " 종료함",
-	));
+));
 
-	//Messages
-$lang = array_merge($lang,array(
+//Messages
+$lang = array_merge($lang, array(
 	"MSG_SENT"		=> "메시지를 보냈습니다.",
 	"MSG_MASS"		=> "그룹 메시지 보냈습니다.",
 	"MSG_NEW"		=> "새 메시지",
@@ -246,10 +246,10 @@ $lang = array_merge($lang,array(
 	"MSG_UN_THR"	=> "Unarchive Selected Threads", //no idea
 	"MSG_DEL_THR"	=> "선택한 항목 삭제",
 	"MSG_SEND"		=> "메시지 보내기",
-	));
+));
 
-	//2 Factor Authentication
-$lang = array_merge($lang,array(
+//2 Factor Authentication
+$lang = array_merge($lang, array(
 	"2FA"			=> "2단계 인증",
 	"2FA_CONF"		=> "2단계 인증을 사용하지 않도록 설정하시겠습니까? 계정이 더 이상 보호되지 않습니다.", //papago
 	"2FA_SCAN"		=> "인증 앱으로 이 QR 코드를 스캔하거나 키를 입력하십시오.", //papago
@@ -262,13 +262,13 @@ $lang = array_merge($lang,array(
 	"2FA_ACTIVE"	=> "활성 세션",
 	"2FA_NOT_FN"	=> "지문을 찾을 수 없습니다",
 	"2FA_FP"		=> "Fingerprints", //what?
-	"2FA_NP"		=> "<strong>로그인 실패</strong> 2단계 인증 코드가 제공되지 않았습니다. 다시 시도하십시오.",
-	"2FA_INV"		=> "<strong>로그인 실패</strong> 2단계 인증 코드가 잘못되었습니다. 다시 시도하십시오.",
-	"2FA_FATAL"		=> "<strong>오류</strong> 시스템 관리자에게 문의하십시오.",
-	));
+	"2FA_NP"		=> "로그인 실패  2단계 인증 코드가 제공되지 않았습니다. 다시 시도하십시오.",
+	"2FA_INV"		=> "로그인 실패  2단계 인증 코드가 잘못되었습니다. 다시 시도하십시오.",
+	"2FA_FATAL"		=> "오류  시스템 관리자에게 문의하십시오.",
+));
 
-	//Redirect Messages - These get a plus between each word
-$lang = array_merge($lang,array(
+//Redirect Messages - These get a plus between each word
+$lang = array_merge($lang, array(
 	"REDIR_2FA"				=> "%EC%A3%84%EC%86%A1%ED%95%A9%EB%8B%88%EB%8B%A4.+%EC%A7%80%EA%B8%88%EC%9D%80+2%EB%8B%A8%EA%B3%84+%EC%9D%B8%EC%A6%9D%EC%9D%84+%EC%82%AC%EC%9A%A9%ED%95%A0+%EC%88%98+%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.", //assuming you want a URL encode here
 	"REDIR_2FA_EN"			=> "2%EB%8B%A8%EA%B3%84+%EC%9D%B8%EC%A6%9D%EC%9D%84+%EC%82%AC%EC%9A%A9%ED%95%A0+%EC%88%98+%EC%9E%88%EC%8A%B5%EB%8B%88%EB%8B%A4.",
 	"REDIR_2FA_DIS"			=> "2%EB%8B%A8%EA%B3%84%20%EC%9D%B8%EC%A6%9D%EC%9D%84%20%EC%82%AC%EC%9A%A9%ED%95%A0%20%EC%88%98%20%EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.",
@@ -277,10 +277,10 @@ $lang = array_merge($lang,array(
 	"REDIR_MSG_NOEX"		=> "%ED%95%B4%EB%8B%B9+%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4+%EC%8A%A4%EB%A0%88%EB%93%9C%EB%8A%94+%EC%82%AC%EC%9A%A9%EC%9E%90%EC%9D%98+%EA%B2%83%EC%9D%B4+%EC%95%84%EB%8B%88%EA%B1%B0%EB%82%98+%EC%A1%B4%EC%9E%AC%ED%95%98%EC%A7%80+%EC%95%8A%EC%8A%B5%EB%8B%88%EB%8B%A4.",
 	"REDIR_UN_ONCE"			=> "%EC%82%AC%EC%9A%A9%EC%9E%90+%EC%9D%B4%EB%A6%84%EC%9D%B4+%EC%9D%B4%EB%AF%B8+%ED%95%9C+%EB%B2%88+%EB%B3%80%EA%B2%BD%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.",
 	"REDIR_EM_SUCC"			=> "%EC%A0%84%EC%9E%90+%EB%A9%94%EC%9D%BC+%EC%A3%BC%EC%86%8C%EA%B0%80+%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.",
-	));
+));
 
-	//Emails
-$lang = array_merge($lang,array(
+//Emails
+$lang = array_merge($lang, array(
 	"EML_CONF"			=> "전자 메일 주소 확인",
 	"EML_VER"			=> "전자 메일 확인",
 	"EML_CHK"			=> "전자 메일 요청이 수신되었습니다. 확인을 수행하려면 전자 메일을 확인하십시오. 다음 날짜에 확인 링크가 만료되면 스팸 및 정크 폴더를 확인하십시오.", //impossible to translate correctly in this order?
@@ -301,27 +301,27 @@ $lang = array_merge($lang,array(
 	"EML_EML"			=> "사용자 계정 내에서 전자 메일 주소 변경 요청이 수행되었습니다.",
 	"EML_VER_EML"		=> "가입해 주셔서 감사합니다.  이메일 주소를 확인하면 로그인할 준비가 됩니다! 아래 링크를 클릭하여 이메일 주소를 확인하십시오.",
 
-	));
+));
 
-	//Verification
-$lang = array_merge($lang,array(
+//Verification
+$lang = array_merge($lang, array(
 	"VER_SUC"		=> "이메일이 확인되었습니다!",
 	"VER_FAIL"		=> "계정을 확인할 수 없습니다. 다시 시도하십시오.",
 	"VER_RESEND"	=> "확인 이메일을 다시 보내",
 	"VER_AGAIN"		=> "이메일 주소를 입력하고 다시 시도하십시오.",
 	"VER_PAGE"		=> "<li>이메일을 확인하고 사용자에게 전송된 링크를 클릭합니다</li><li>완료</li>",
-	"VER_RES_SUC" 	=> "<p>확인 링크가 전자 메일 주소로 전송되었습니다.</p><p>전자 메일의 링크를 클릭하여 확인을 완료합니다. 전자 메일이 받은 편지함에 없으면 스팸 폴더를 확인하십시오.</p><p>확인 링크는 0분 동안만 유효합니다",
+	"VER_RES_SUC" 	=> " 확인 링크가 전자 메일 주소로 전송되었습니다.  전자 메일의 링크를 클릭하여 확인을 완료합니다. 전자 메일이 받은 편지함에 없으면 스팸 폴더를 확인하십시오.  확인 링크는 0분 동안만 유효합니다",
 	"VER_OOPS"		=> "오류가 발생했습니다. 이전 암호 재설정 링크가 클릭되었을 수 있습니다. 다시 시도하려면 아래를 클릭하십시오.",
 	"VER_RESET"		=> "암호가 재설정되었습니다!",
 	"VER_INS"		=> "<li>전자 메일 주소를 입력하고 재설정 단추를 클릭합니다.</li> <li>이메일을 확인하고 사용자에게 전송된 링크를 클릭합니다.</li>
 										<li>화면에 나타나는 지침을 따릅니다.</li>",
-	"VER_SENT"		=> "<p>암호 재설정 링크가 사용자의 전자 메일 주소로 전송되었습니다.</p>
-	    							<p>전자 메일의 링크를 클릭하여 암호를 재설정합니다. 전자 메일이 받은 편지함에 없으면 스팸 폴더를 확인하십시오.</p><p>재설정 링크는 0분 동안만 유효합니다",
+	"VER_SENT"		=> " 암호 재설정 링크가 사용자의 전자 메일 주소로 전송되었습니다. 
+	    							 전자 메일의 링크를 클릭하여 암호를 재설정합니다. 전자 메일이 받은 편지함에 없으면 스팸 폴더를 확인하십시오.  재설정 링크는 0분 동안만 유효합니다",
 	"VER_PLEASE"	=> "암호를 재설정하십시오",
-	));
+));
 
-	//User Settings
-$lang = array_merge($lang,array(
+//User Settings
+$lang = array_merge($lang, array(
 	"SET_PIN"			=> "PIN 초기화",
 	"SET_WHY"			=> "왜 이걸 바꿀 수 없나요?",
 	"SET_PW_MATCH"		=> "새 암호와 일치해야 합니다.",
@@ -331,20 +331,20 @@ $lang = array_merge($lang,array(
 	"SET_NOCHANGE"		=> "관리자가 사용자 이름 변경을 사용 불가능으로 설정했습니다.",
 	"SET_ONECHANGE"		=> "관리자가 사용자 이름 변경을 한 번만 수행하도록 설정했으며 사용자가 이미 변경했습니다.",
 
-	"SET_GRAVITAR"		=> "<strong>프로필 사진을 바꾸고 싶으신가요? </strong><br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a>을 방문하여 이 사이트에서 사용한 것과 동일한 전자 메일로 계정을 설정하십시오. 수백만 개의 사이트에서 작동합니다. 그것은 빠르고 쉽습니다!",
+	"SET_GRAVITAR"		=> "프로필 사진을 바꾸고 싶으신가요?  <br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a>을 방문하여 이 사이트에서 사용한 것과 동일한 전자 메일로 계정을 설정하십시오. 수백만 개의 사이트에서 작동합니다. 그것은 빠르고 쉽습니다!",
 
-	"SET_NOTE1"			=> "<p><strong>부디 참고하세요</strong> 이메일을 업데이트하기 위한 보류 중인 요청이 있습니다. 으로", //the order in this translation doesn't match
+	"SET_NOTE1"			=> " 부디 참고하세요  이메일을 업데이트하기 위한 보류 중인 요청이 있습니다. 으로", //the order in this translation doesn't match
 
-	"SET_NOTE2"			=> ".</p><p>확인 이메일을 사용하여 이 요청을 완료하십시오.</p>
-	<p>새 확인 이메일이 필요한 경우 위의 이메일을 다시 입력하고 요청을 다시 제출하십시오.</p>",
+	"SET_NOTE2"			=> ".  확인 이메일을 사용하여 이 요청을 완료하십시오. 
+	 새 확인 이메일이 필요한 경우 위의 이메일을 다시 입력하고 요청을 다시 제출하십시오. ",
 
 	"SET_PW_REQ" 		=> "암호, 전자 메일 또는 PIN을 재설정하는 데 필요합니다",
 	"SET_PW_REQI" 		=> "암호를 변경하는 데 필요합니다",
 
-	));
+));
 
-	//Errors
-$lang = array_merge($lang,array(
+//Errors
+$lang = array_merge($lang, array(
 	"ERR_FAIL_ACT"		=> "활성 세션을 종료하지 못했습니다. 오류: ",
 	"ERR_EMAIL"			=> "오류로 인해 전자 메일이 전송되지 않습니다. 사이트 관리자에게 문의하십시오.",
 	"ERR_EM_DB"			=> "해당 전자 메일 주소가 데이터베이스에 없습니다.",
@@ -352,25 +352,25 @@ $lang = array_merge($lang,array(
 	"ERR_CAP"			=> "캡차 테스트를 통과하지 못했습니다. 당신은 로봇이에요!",
 	"ERR_PW_SAME"		=> "이전 암호는 새 암호와 같을 수 없습니다.",
 	"ERR_PW_FAIL"		=> "현재 암호를 확인하지 못했습니다. 업데이트에 실패했습니다. 다시 시도하십시오.",
-	"ERR_GOOG"			=> "<strong>메모</strong> 원래 Google 또는 Facebook 계정으로 등록한 경우 암호를 변경하려면 암호 분실 링크를 사용해야 합니다.",
+	"ERR_GOOG"			=> "메모  원래 Google 또는 Facebook 계정으로 등록한 경우 암호를 변경하려면 암호 분실 링크를 사용해야 합니다.",
 	"ERR_EM_VER"		=> "전자 메일 확인이 활성화되지 않았습니다. 시스템 관리자에게 문의하십시오.",
 	"ERR_EMAIL_STR"		=> "뭔가 잘못됐어요. 전자 메일을 다시 확인하십시오. 불편을 드려 죄송합니다.",
 
-	));
+));
 
-	//Maintenance Page
-$lang = array_merge($lang,array(
+//Maintenance Page
+$lang = array_merge($lang, array(
 	"MAINT_HEAD"		=> "그 웹사이트는 곧 다시 온라인 상태가 될 것입니다!",
 	"MAINT_MSG"			=> "불편을 끼쳐 드려 죄송합니다만, 현재 약간의 정비를 진행하고 있습니다<br>곧 다시 접속하겠습니다!",
 	"MAINT_BAN"			=> "죄송합니다. 금지되었습니다. 오류가 발생한 경우 관리자에게 문의하십시오.",
 	"MAINT_TOK"			=> "양식에 오류가 있습니다. 돌아가서 다시 시도하십시오. 페이지를 새로 고쳐서 양식을 제출하면 오류가 발생합니다. 이 문제가 계속 발생하면 관리자에게 문의하십시오.",
 	"MAINT_OPEN"		=> "오픈 소스 PHP 사용자 관리 프레임워크",
 	"MAINT_PLEASE"		=> "UserSpice가 성공적으로 설치되었습니다!<br>시작 설명서를 보려면 아래 링크를 클릭하십시오"
-	));
+));
 
-	//dataTables Added in 4.4.08
-	//NOTE: do not change the words like _START_ between the two _ symbols!
-$lang = array_merge($lang,array(
+//dataTables Added in 4.4.08
+//NOTE: do not change the words like _START_ between the two _ symbols!
+$lang = array_merge($lang, array(
 	"DAT_SEARCH"    	=> "검색",
 	"DAT_FIRST" 	    => "첫 번째 결과",
 	"DAT_LAST"      	=> "마지막 결과",
@@ -386,13 +386,13 @@ $lang = array_merge($lang,array(
 	"DAT_NO_REC"        => "일치하는 레코드를 찾을 수 없음",
 	"DAT_ASC"           => "열을 오름차순으로 정렬하려면 클릭하십시오.",
 	"DAT_DESC"          => "열을 내림차순으로 정렬하려면 클릭하십시오.",
-	));
+));
 
 
 ///////////////////////////////////////////////////////////////
 
-	//Backend Translations for UserSpice
-$lang = array_merge($lang,array(
+//Backend Translations for UserSpice
+$lang = array_merge($lang, array(
 	"BE_DASH"    			=> "대시보드",
 	"BE_SETTINGS"     		=> "설정",
 	"BE_GEN"				=> "일반",
@@ -407,7 +407,7 @@ $lang = array_merge($lang,array(
 ));
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
-if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
-	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
+if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
+	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }
  //do not put a closing php tag here

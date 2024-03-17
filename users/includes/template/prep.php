@@ -14,7 +14,7 @@ require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->tem
   if(!$ignoreTemplateFix){
   if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/bs5/header.php')){
     $db->update('settings',1,['template'=>'bs5']);
-    $settings->template = "bsf";
+    $settings->template = "bs5";
     require_once $abs_us_root . $us_url_root . 'usersc/templates/bs5/header.php';
     err("Template missing. Falling back to Standard Template");
   }else{

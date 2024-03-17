@@ -35,35 +35,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $lang = array();
 //important strings
 //You defiitely want to customize these for your language
-$lang = array_merge($lang,array(
-"THIS_LANGUAGE"	=>"Afrikaans",
-"THIS_CODE"	=>"af-AF",
-"MISSING_TEXT"	=>"Ontbrekende teks",
+$lang = array_merge($lang, array(
+	"THIS_LANGUAGE"	=> "Afrikaans",
+	"THIS_CODE"	=> "af-AF",
+	"MISSING_TEXT"	=> "Ontbrekende teks",
 ));
 
 //Database Menus
-$lang = array_merge($lang,array(
-"MENU_HOME"	=> "Tuis",
-"MENU_HELP"	=> "Hulp",
-"MENU_ACCOUNT"	=> "Rekening",
-"MENU_DASH"	=> "Beheerpaneel",
-"MENU_USER_MGR"	=> "Gebruikersbestuur",
-"MENU_PAGE_MGR"	=> "Bladsybestuur",
-"MENU_PERM_MGR"	=> "Toestemmingsbestuur",
-"MENU_MSGS_MGR"	=> "Toestemmingsbestuur",
-"MENU_LOGS_MGR"	=> "Stelsellogboeke",
-"MENU_LOGOUT"	=> "Afmeld",
+$lang = array_merge($lang, array(
+	"MENU_HOME"	=> "Tuis",
+	"MENU_HELP"	=> "Hulp",
+	"MENU_ACCOUNT"	=> "Rekening",
+	"MENU_DASH"	=> "Beheerpaneel",
+	"MENU_USER_MGR"	=> "Gebruikersbestuur",
+	"MENU_PAGE_MGR"	=> "Bladsybestuur",
+	"MENU_PERM_MGR"	=> "Toestemmingsbestuur",
+	"MENU_MSGS_MGR"	=> "Toestemmingsbestuur",
+	"MENU_LOGS_MGR"	=> "Stelsellogboeke",
+	"MENU_LOGOUT"	=> "Afmeld",
 ));
 
 // Signup
-$lang = array_merge($lang,array(
+$lang = array_merge($lang, array(
 	"SIGNUP_TEXT"		=> "Registreer",
 	"SIGNUP_BUTTONTEXT"	=> "Registreer my",
 	"SIGNUP_AUDITTEXT"	=> "Geregistreer",
-	));
+));
 
 // Signin
-$lang = array_merge($lang,array(
+$lang = array_merge($lang, array(
 	"SIGNIN_FAIL"		=> "** MISLUKTE AANMELDING **",
 	"SIGNIN_PLEASE_CHK" 	=> "Gaan u gebruikersnaam en wagwoord na en probeer weer",
 	"SIGNIN_UORE"		=> "Gebruikersnaam OF E-pos",
@@ -74,12 +74,12 @@ $lang = array_merge($lang,array(
 	"SIGNIN_BUTTONTEXT"	=> "Teken in",
 	"SIGNIN_REMEMBER"	=> "Onthou my",
 	"SIGNIN_AUDITTEXT"	=> "Aangemeld",
-	"SIGNIN_FORGOTPASS"	=>"Wagwoord vergeet",
+	"SIGNIN_FORGOTPASS"	=> "Wagwoord vergeet",
 	"SIGNOUT_AUDITTEXT"	=> "Uitgeteken",
-	));
+));
 
 // Account Page
-$lang = array_merge($lang,array(
+$lang = array_merge($lang, array(
 	"ACCT_EDIT"		=> "Wysig rekeninginligting",
 	"ACCT_2FA"		=> "Bestuur 2-faktor-verifikasie",
 	"ACCT_SESS"		=> "Sessies bestuur",
@@ -88,10 +88,10 @@ $lang = array_merge($lang,array(
 	"ACCT_LOGINS"		=> "Aantal aanmeldings",
 	"ACCT_SESSIONS"		=> "Aantal aktiewe sessies",
 	"ACCT_MNG_SES"		=> "Klik op die knoppie Beheer sessies in die linker sidebalk vir meer inligting.",
-	));
+));
 
-	//General Terms
-	$lang = array_merge($lang,array(
+//General Terms
+$lang = array_merge($lang, array(
 	"GEN_ENABLED"		=> "Geaktiveer",
 	"GEN_DISABLED"		=> "Uitgeskakel",
 	"GEN_ENABLE"		=> "Aktiveer",
@@ -133,10 +133,10 @@ $lang = array_merge($lang,array(
 	"GEN_REQ"		=> "vereis",
 	"GEN_AND"		=> "en",
 	"GEN_SAME"		=> "moet dieselfde wees",
-		));
+));
 
 //validation class
-	$lang = array_merge($lang,array(
+$lang = array_merge($lang, array(
 	"VAL_SAME"		=> "moet dieselfde wees",
 	"VAL_EXISTS"		=> "bestaan reeds. Kies 'n ander",
 	"VAL_DB"		=> "Databasisfout",
@@ -157,10 +157,10 @@ $lang = array_merge($lang,array(
 	"VAL_TIME"		=> "moet 'n geldige tyd wees",
 	"VAL_SEL"		=> "is nie 'n geldige keuse nie",
 	"VAL_NA_PHONE"		=> "moet 'n geldige Noord-Amerikaanse telefoonnommer wees",
-	));
+));
 
-		//Time
-	$lang = array_merge($lang,array(
+//Time
+$lang = array_merge($lang, array(
 	"T_YEARS"		=> "Jare",
 	"T_YEAR"		=> "Jaar",
 	"T_MONTHS"		=> "Maande",
@@ -175,11 +175,11 @@ $lang = array_merge($lang,array(
 	"T_MINUTE"		=> "Minuut",
 	"T_SECONDS"		=> "Sekondes",
 	"T_SECOND"		=> "Sekond",
-		));
+));
 
 
-		//Passwords
-	$lang = array_merge($lang,array(
+//Passwords
+$lang = array_merge($lang, array(
 	"PW_NEW"		=> "Nuwe wagwoord",
 	"PW_OLD"		=> "Ou wagwoord",
 	"PW_CONF"		=> "Bevestig wagwoord",
@@ -188,11 +188,11 @@ $lang = array_merge($lang,array(
 	"PW_SHOULD"		=> "Wagwoorde moet ...",
 	"PW_SHOW"		=> "Wys wagwoord",
 	"PW_SHOWS"		=> "Wys wagwoorde",
-		));
+));
 
 
-		//Join
-	$lang = array_merge($lang,array(
+//Join
+$lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "Welkom by ",
 	"JOIN_THANKS"		=> "Dankie dat u geregistreer het!",
 	"JOIN_HAVE"		=> "Het ten minste ",
@@ -203,15 +203,15 @@ $lang = array_merge($lang,array(
 	"JOIN_ACCEPTTC" 	=> "Ek aanvaar gebruikersbepalings en -voorwaardes",
 	"JOIN_CHANGED"		=> "Ons bepalings het verander",
 	"JOIN_ACCEPT" 		=> "Aanvaar gebruikersbepalings en gaan voort",
-		));
+));
 
-		//Sessions
-	$lang = array_merge($lang,array(
+//Sessions
+$lang = array_merge($lang, array(
 	"SESS_SUC"		=> "Suksesvol uitgewis ", // Suksesvol doodgemaak
-		));
+));
 
-		//Messages
-	$lang = array_merge($lang,array(
+//Messages
+$lang = array_merge($lang, array(
 	"MSG_SENT"		=> "U boodskap is gestuur!",
 	"MSG_MASS"		=> "U massaboodskap is gestuur!",
 	"MSG_NEW"		=> "Nuwe boodskap",
@@ -244,10 +244,10 @@ $lang = array_merge($lang,array(
 	"MSG_UN_THR"		=> "Uittrek van geselekteerde onderwerpe",
 	"MSG_DEL_THR"		=> "Verwyder geselekteerde onderwerpe",
 	"MSG_SEND"		=> "Stuur boodskap",
-		));
+));
 
-	//2 Factor Authentication
-	$lang = array_merge($lang,array(
+//2 Factor Authentication
+$lang = array_merge($lang, array(
 	"2FA"				=> "2-faktor-verifikasie",
 	"2FA_CONF"	=> "Is u seker dat u 2FA wil deaktiveer? U rekening sal nie meer beskerm word nie.",
 	"2FA_SCAN"	=> "Skandeer hierdie QR-kode met u verifikasieprogram of voer die sleutel in",
@@ -260,14 +260,14 @@ $lang = array_merge($lang,array(
 	"2FA_ACTIVE"	=> "Aktiewe sessies",
 	"2FA_NOT_FN"	=> "Geen vingerafdrukke gevind nie",
 	"2FA_FP"	=> "Vingerafdrukke",
-	"2FA_NP"	=> "<strong>Aanmelding het misluk </strong> Twee faktor-outentiekode was nie beskikbaar nie. Probeer asseblief weer.",
-	"2FA_INV"	=> "<strong> Aanmelding het misluk </strong> Auth-kode met twee faktore was ongeldig. Probeer asseblief weer.",
-	"2FA_FATAL"	=> "<strong> fatale fout </strong> Kontak asseblief die stelselbeheerder.",
-		));
+	"2FA_NP"	=> "Aanmelding het misluk   Twee faktor-outentiekode was nie beskikbaar nie. Probeer asseblief weer.",
+	"2FA_INV"	=> " Aanmelding het misluk   Auth-kode met twee faktore was ongeldig. Probeer asseblief weer.",
+	"2FA_FATAL"	=> " fatale fout   Kontak asseblief die stelselbeheerder.",
+));
 
-	//Redirect Messages - These get a plus between each word
-  // It seems pointless to me to translate these. Feel free to contribute, Voel Vry!
-	$lang = array_merge($lang,array(
+//Redirect Messages - These get a plus between each word
+// It seems pointless to me to translate these. Feel free to contribute, Voel Vry!
+$lang = array_merge($lang, array(
 	"REDIR_2FA"		=> "Sorry.Two+factor+is+not+enabled+at+this+time",
 	"REDIR_2FA_EN"		=> "2+Factor+Authentication+Enabled",
 	"REDIR_2FA_DIS"		=> "2+Factor+Authentication+Disabled",
@@ -276,10 +276,10 @@ $lang = array_merge($lang,array(
 	"REDIR_MSG_NOEX"	=> "That+thread+does+not+belong+to+you+or+does+not+exist.",
 	"REDIR_UN_ONCE"		=> "Username+has+already+been+changed+once.",
 	"REDIR_EM_SUCC"		=> "Email+Updated+Successfully",
-		));
+));
 
-	//Emails
-	$lang = array_merge($lang,array(
+//Emails
+$lang = array_merge($lang, array(
 	"EML_CONF"		=> "Bevestig e-posadres",
 	"EML_VER"		=> "Verifieer u e-posadres",
 	"EML_CHK"		=> "E-posversoek ontvang. Gaan asseblief u e-pos na om verifikasie uit te voer. Gaan seker dat u die strooipos van spam en rommel nagaan, aangesien die verifikasieskakel verval ",
@@ -300,29 +300,29 @@ $lang = array_merge($lang,array(
 	"EML_EML"		=> "'n Versoek om u e-posadres te verander, is vanuit u gebruikersrekening gerig.", // backslash escaped the single apostrophe
 	"EML_VER_EML"		=> "Dankie dat u ingeteken het. Sodra u u e-posadres geverifieer het, is u gereed om aan te meld! Klik op die skakel hieronder om u e-posadres te verifieer.",
 
-		));
+));
 
-		//Verification
-		$lang = array_merge($lang,array(
+//Verification
+$lang = array_merge($lang, array(
 	"VER_SUC"		=> "U e-posadres is geverifieer!",
 	"VER_FAIL"		=> "Ons kon nie u rekening verifieer nie. Probeer asseblief weer.",
 	"VER_RESEND"		=> "Stuur verifikasie-e-pos weer",
 	"VER_AGAIN"		=> "Voer u e-posadres in en probeer weer",
 	"VER_PAGE"		=> "<li> Gaan u e-pos na en klik op die skakel wat aan u gestuur word </li> <li> Klaar </li>",
-	"VER_RES_SUC" 		=> "<p> U verifikasieskakel is na u e-posadres gestuur. </p> <p> Klik op die skakel in die e-posadres om die verifikasie te voltooi. Kontroleer u strooiposmap as die e-pos nie in u posbus. </p> <p> Verifikasie skakels is slegs geldig vir ",
+	"VER_RES_SUC" 		=> "  U verifikasieskakel is na u e-posadres gestuur.     Klik op die skakel in die e-posadres om die verifikasie te voltooi. Kontroleer u strooiposmap as die e-pos nie in u posbus.     Verifikasie skakels is slegs geldig vir ",
 	"VER_OOPS"		=> "Oeps ... iets het verkeerd gegaan, miskien 'n ou reset-skakel waarop u geklik het. Klik hieronder om weer te probeer",
 	"VER_RESET"		=> "U wagwoord is herstel!",
 	"VER_INS"		=> "<li> Voer u e-posadres in en klik op Herstel </li>
 					<li> Kontroleer u e-posadres en klik op die skakel wat aan u gestuur word. </li>
 					<li> Volg die instruksies op die skerm </li> ",
-	"VER_SENT"		=> "<p> U skakel vir die herstel van wagwoord is na u e-posadres gestuur. </p>
-					<p> Klik op die skakel in die e-pos om u wagwoord terug te stel. Maak seker dat u u strooipos van die strooipos nagaan as die e-pos nie in u posbus is nie. </p>
-					<p> Terugstelskakels is slegs geldig vir ",
+	"VER_SENT"		=> "  U skakel vir die herstel van wagwoord is na u e-posadres gestuur.  
+					  Klik op die skakel in die e-pos om u wagwoord terug te stel. Maak seker dat u u strooipos van die strooipos nagaan as die e-pos nie in u posbus is nie.  
+					  Terugstelskakels is slegs geldig vir ",
 	"VER_PLEASE"		=> "Stel u wagwoord asseblief terug",
-			));
+));
 
-	//User Settings
-	$lang = array_merge($lang,array(
+//User Settings
+$lang = array_merge($lang, array(
 	"SET_PIN"	=> "Stel PIN terug",
 	"SET_WHY"	=> "Waarom kan ek dit nie verander nie?",
 	"SET_PW_MATCH"	=> "Moet ooreenstem met die nuwe wagwoord",
@@ -330,17 +330,17 @@ $lang = array_merge($lang,array(
 	"SET_UPDATE"	=> "Dateer u gebruikersinstellings op",
 	"SET_NOCHANGE"	=> "Die administrateur het veranderende gebruikersname uitgeskakel.",
 	"SET_ONECHANGE"	=> "Die administrateur het ingestel dat gebruikersnaamveranderings slegs een keer plaasvind en u het dit al gedoen.",
-	"SET_GRAVITAR"	=> "<strong> Wil u profielfoto verander? </strong> <br>Besoek <a href='https://af.gravatar.com/'>https://en.gravatar.com/</a> en stel 'n rekening op met dieselfde e-pos as wat u op hierdie webwerf gebruik het. Dit werk op miljoene webwerwe. Dit is vinnig en maklik! ",
-	"SET_NOTE1"	=> "<p> <strong> Let wel </strong> daar is 'n hangende versoek om u e-pos op te dateer na",
-	"SET_NOTE2"	=> ". </p> <p> Gebruik die verifikasie-e-pos om hierdie versoek te voltooi. </p>
-				<p> As u 'n nuwe verifikasie-e-posadres benodig, voer dan weer die e-pos hierbo in en dien die versoek weer in. </p>",
+	"SET_GRAVITAR"	=> " Wil u profielfoto verander?   <br>Besoek <a href='https://af.gravatar.com/'>https://en.gravatar.com/</a> en stel 'n rekening op met dieselfde e-pos as wat u op hierdie webwerf gebruik het. Dit werk op miljoene webwerwe. Dit is vinnig en maklik! ",
+	"SET_NOTE1"	=> "   Let wel   daar is 'n hangende versoek om u e-pos op te dateer na",
+	"SET_NOTE2"	=> ".     Gebruik die verifikasie-e-pos om hierdie versoek te voltooi.  
+				  As u 'n nuwe verifikasie-e-posadres benodig, voer dan weer die e-pos hierbo in en dien die versoek weer in.  ",
 	"SET_PW_REQ" 	=> "benodig om wagwoord, e-posadres te verander of PIN te herstel",
 	"SET_PW_REQI" 	=> "Vereis om u wagwoord te verander",
 
-		));
+));
 
-	//Errors
-	$lang = array_merge($lang,array(
+//Errors
+$lang = array_merge($lang, array(
 	"ERR_FAIL_ACT"	=> "Kon nie aktiewe sessies doodmaak nie, fout: ",
 	"ERR_EMAIL"	=> "E-pos word NIE gestuur as gevolg van 'n fout nie. Kontak die webwerfadministrateur.",
 	"ERR_EM_DB"	=> "Die e-posadres bestaan nie in ons databasis nie",
@@ -348,24 +348,24 @@ $lang = array_merge($lang,array(
 	"ERR_CAP"	=> "U het die Captcha-toets misluk, Robot!",
 	"ERR_PW_SAME"	=> "U ou wagwoord kan nie dieselfde wees as u nuwe nie",
 	"ERR_PW_FAIL"	=> "Huidige wagwoordverifikasie het misluk. Opdatering het misluk. Probeer asseblief weer.",
-	"ERR_GOOG"	=> "<strong> OPMERKING: </strong> As u oorspronklik by u Google / Facebook-rekening aangemeld het, moet u die skakel vir vergeet wagwoord gebruik om u wagwoord te verander ... tensy u regtig goed is met raai. ",
+	"ERR_GOOG"	=> " OPMERKING:   As u oorspronklik by u Google / Facebook-rekening aangemeld het, moet u die skakel vir vergeet wagwoord gebruik om u wagwoord te verander ... tensy u regtig goed is met raai. ",
 	"ERR_EM_VER"	=> "E-posverifikasie is nie geaktiveer nie. Kontak asseblief die stelseladministrateur.",
 	"ERR_EMAIL_STR"	=> "Iets is vreemd. Verifieer asseblief u e-pos weer. Ons is jammer oor die ongerief",
-		));
+));
 
-	//Maintenance Page
-	$lang = array_merge($lang,array(
+//Maintenance Page
+$lang = array_merge($lang, array(
 	"MAINT_HEAD"	=> "Ons sal binnekort weer terugkom!",
 	"MAINT_MSG"	=> "Jammer vir die ongerief, maar ons is op die oomblik besig met onderhoud. <br> Ons sal binnekort weer aanlyn wees!",
 	"MAINT_BAN"	=> "Jammer. U is verban. Kontak die administrateur as u meen dat dit 'n fout is.",
 	"MAINT_TOK"	=> "Daar was 'n fout met u vorm. Gaan terug en probeer weer. Let daarop dat die indien van die vorm deur die bladsy te verfris 'n fout sal veroorsaak. As dit aanhou gebeur, kontak die administrateur.",
 	"MAINT_OPEN"	=> "\'n Open source PHP-gebruikersbestuurraamwerk.",
 	"MAINT_PLEASE"	=> "U het UserSpice suksesvol geïnstalleer! <br>  Om aan die slag te kom met dokumentasie, Besoek graag "
-		));
+));
 
-	//dataTables Added in 4.4.08
-	//NOTE: do not change the words like _START_ between the two _ symbols!
-	$lang = array_merge($lang,array(
+//dataTables Added in 4.4.08
+//NOTE: do not change the words like _START_ between the two _ symbols!
+$lang = array_merge($lang, array(
 	"DAT_SEARCH"	=> "Soek",
 	"DAT_FIRST"	=> "Eerste",
 	"DAT_LAST"	=> "Laaste",
@@ -381,30 +381,30 @@ $lang = array_merge($lang,array(
 	"DAT_NO_REC"	=> "Geen ooreenstemmende rekords gevind nie",
 	"DAT_ASC"	=> "Aktiveer om kolom oplopend te sorteer",
 	"DAT_DESC"	=> "Aktiveer om kolom dalend te sorteer",
-		));
+));
 
 
 ///////////////////////////////////////////////////////////////
 
 //Backend Translations for UserSpice
-$lang = array_merge($lang,array(
-"BE_DASH"	=> "Dashboard",
-"BE_SETTINGS"	=> "Instellings",
-"BE_GEN"	=> "Algemeen",
-"BE_REG"	=> "Registrasie",
-"BE_CUS"	=> "Aangepaste instellings",
-"BE_DASH_ACC"	=> "Dashboard toegang",
-"BE_TOOLS"	=> "Gereedskap",
-"BE_BACKUP"	=> "Rugsteun",
-"BE_UPDATE"	=> "Updates",
-"BE_CRON"	=> "Cron Jobs",
-"BE_IP"		=> "IP bestuurder",
+$lang = array_merge($lang, array(
+	"BE_DASH"	=> "Dashboard",
+	"BE_SETTINGS"	=> "Instellings",
+	"BE_GEN"	=> "Algemeen",
+	"BE_REG"	=> "Registrasie",
+	"BE_CUS"	=> "Aangepaste instellings",
+	"BE_DASH_ACC"	=> "Dashboard toegang",
+	"BE_TOOLS"	=> "Gereedskap",
+	"BE_BACKUP"	=> "Rugsteun",
+	"BE_UPDATE"	=> "Updates",
+	"BE_CRON"	=> "Cron Jobs",
+	"BE_IP"		=> "IP bestuurder",
 ));
 
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
-if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
-	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
+if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
+	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }
  //do not put a closing php tag here

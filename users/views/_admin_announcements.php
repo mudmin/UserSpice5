@@ -47,20 +47,19 @@ if(count(get_included_files()) ==1) die(); //Direct Access Not Permitted
   }
 // dump($ignore);
 // dump($user_spice_ver);
+$message = "testing123";
 if(isset($message) && $message != ''){  ?>
-<div class="sufee-alert alert with-close alert-<?=$class?> alert-dismissible fade show">
-  <span class="badge badge-pill badge-<?=$class?>"><?php echo htmlspecialchars($title);?></span> <a href="<?php echo htmlspecialchars($link);?>"><?php echo htmlspecialchars($message);?></a>
-  <button type="button" class="close dismiss-announcement" data-dismiss="alert" data-bs-dismiss="alert"
-  data-dis="<?=$dis?>"
-  data-ignore="<?=$ignore?>"
-  data-title="<?=$title?>"
-  data-class="<?=$class?>"
-  data-link="<?=$link?>"
-  data-message="<?=$message?>"
-  aria-label="Close">
-  <span aria-hidden="true">&times;</span>
-</button>
+<div class="sufee-alert alert alert-<?= $class ?> alert-dismissible fade show">
+  <span class="badge badge-pill badge-<?= $class ?>"><?php echo htmlspecialchars($title); ?></span> <a href="<?php echo htmlspecialchars($link); ?>"><?php echo htmlspecialchars($message); ?></a>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+    data-dis="<?= $dis ?>"
+    data-ignore="<?= $ignore ?>"
+    data-title="<?= htmlspecialchars($title) ?>"
+    data-class="<?= $class ?>"
+    data-link="<?= htmlspecialchars($link) ?>"
+    data-message="<?= htmlspecialchars($message) ?>"></button>
 </div>
+
 <?php } ?>
 
 <script type="text/javascript">

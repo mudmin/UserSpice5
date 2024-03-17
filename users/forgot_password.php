@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 require_once '../users/init.php';
+
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if(isset($user) && $user->isLoggedIn()){
   Redirect::to($us_url_root."users/user_settings.php");
@@ -84,6 +85,7 @@ if (Input::get('forgotten_password')) {
             $encoded_email=rawurlencode($email);
             $body =  email_body('_email_template_forgot_password.php',$options);
             $email_sent=email($email,$subject,$body);
+   
             logger($fuser->data()->id,"User","Requested password reset.");
             if(!$email_sent){
                 $errors[] = lang("ERR_EMAIL");
@@ -100,9 +102,17 @@ if (Input::get('forgotten_password')) {
 }
 
 if($email_sent){
+    if(file_exists($abs_us_root . $us_url_root . 'usersc/views/_forgot_password_sent.php')){
+      require $abs_us_root.$us_url_root.'usersc/views/_forgot_password_sent.php';
+    }else{
     require $abs_us_root.$us_url_root.'users/views/_forgot_password_sent.php';
+    }
 }else{
-    require $abs_us_root.$us_url_root.'users/views/_forgot_password.php';
+    if(file_exists($abs_us_root . $us_url_root . 'usersc/views/_forgot_password.php')){
+      require $abs_us_root.$us_url_root.'usersc/views/_forgot_password.php';
+    }else{
+      require $abs_us_root.$us_url_root.'users/views/_forgot_password.php';
+    }
 }
 
 includeHook($hooks,'bottom');

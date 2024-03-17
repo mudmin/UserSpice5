@@ -37,6 +37,7 @@ $modules = [
   "system_messages", //successs/fail messages etc
   "content_close",
   "system_messages_footer",
+  "footer", //footer and plugin footers
   "dashboard_js", //ajax calls and general dashboard javascript
 ];
 foreach($modules as $m){

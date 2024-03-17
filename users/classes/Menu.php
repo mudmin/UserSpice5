@@ -10,12 +10,17 @@ class Menu {
   public $show_active = 0;
   public $disabled = 0;
 
-  public function __construct($id) {
+  public function __construct($id_or_name) {
     $this->db = DB::getInstance();
-    $q = $this->db->query("SELECT * FROM us_menus WHERE id = ?",[$id]);
+    if(is_numeric($id_or_name)) {
+      $col = "id";
+    } else {
+      $col = "menu_name";
+    }
+    $q = $this->db->query("SELECT * FROM us_menus WHERE $col = ?",[$id_or_name]);
     $c = $q->count();
     if($c < 1){
-      die("Your menu is missing. If you have just upgraded UserSpice,
+      die("Your menu $id_or_name is missing. If you have just upgraded UserSpice,
       please navigate to users/updates in your browser to create your menus.
       Otherwise, please go into your database and restore a backup or select a different menu.
       If you do not have a backup, you can also create a UserSpice file and run the function migrateUSMainMenu() to

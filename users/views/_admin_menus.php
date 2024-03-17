@@ -10,8 +10,8 @@ foreach ($count as $c) {
 }
 
 $codeUsage = '<?php
-  // replace ID with the ID from the table below for the menu you want to display.
-  $menu = new Menu(ID);
+  // replace ID with the ID (or menu name string) from the table below for the menu you want to display.
+  $menu = new Menu(ID); 
   $menu->display();
 
   // some features can be overridden between instantiation and displaying the menu.
