@@ -45,9 +45,7 @@ if(count(get_included_files()) ==1) die(); //Direct Access Not Permitted
       }
     }
   }
-// dump($ignore);
-// dump($user_spice_ver);
-$message = "testing123";
+
 if(isset($message) && $message != ''){  ?>
 <div class="sufee-alert alert alert-<?= $class ?> alert-dismissible fade show">
   <span class="badge badge-pill badge-<?= $class ?>"><?php echo htmlspecialchars($title); ?></span> <a href="<?php echo htmlspecialchars($link); ?>"><?php echo htmlspecialchars($message); ?></a>
