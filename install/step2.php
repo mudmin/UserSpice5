@@ -1,33 +1,33 @@
 <?php
-require_once("install/includes/header.php");
+require_once("includes/header.php");
 $go = 0;
 ?>
 
 <div class="container">
-	<div class="row justify-content-center mt-4">
-		<div class="col-6">
-			<div class="list-group list-group-horizontal-xl">
-				<a href="#" class="list-group-item list-group-item-action">
-					<div class="d-flex w-100 justify-content-between">
-						<h5 class="mb-1">Step 1</h5>
-					</div>
-					<p class="mb-1"><?= $step1 ?></p>
-				</a>
-				<a href="#" class="list-group-item list-group-item-action active">
-					<div class="d-flex w-100 justify-content-between">
-						<h5 class="mb-1">Step 2</h5>
-					</div>
-					<p class="mb-1"><?= $step2 ?></p>
-				</a>
-				<a href="#" class="list-group-item list-group-item-action">
-					<div class="d-flex w-100 justify-content-between">
-						<h5 class="mb-1">Step 3</h5>
-					</div>
-					<p class="mb-1"><?= $step3 ?></p>
-				</a>
-			</div>
-		</div>
-	</div>
+    <div class="row justify-content-center my-4">
+        <div class="col-6">
+            <div class="list-group list-group-horizontal-xl">
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Step 1</h5>
+                    </div>
+                    <p class="mb-1"><?= $step1 ?></p>
+                </div>
+                <div class="list-group-item list-group-item-action active">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Step 2</h5>
+                    </div>
+                    <p class="mb-1"><?= $step2 ?></p>
+                </div>
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Step 3</h5>
+                    </div>
+                    <p class="mb-1"><?= $step3 ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
 	<div class="row">
 		<div class="col-12 mt-4">
@@ -36,10 +36,10 @@ $go = 0;
 				echo '<div class="alert alert-primary" role="alert">We are importing the tables... one moment please!</div>';
 			}
 			?>
-			<h3>Please fill in your information</h3>
-			<form class="form" action="" method="post">
-				<div class="form-group row">
-					<label for="timezone" class="col-sm-4 control-label">Region/Timezone (required)</label>
+			<h3 class="mb-4">Database</h3>
+			<form action="" method="post">
+                <div class="row mb-3">
+					<label for="timezone" class="col-sm-4 col-form-label">Region/Timezone (required)</label>
 					<div class="col-sm-8">
 						<?php
 						$regions = array(
@@ -88,41 +88,42 @@ $go = 0;
 							print '</select>';?>
 						</div>
 					</div>
-					<div class="form-group row">
-						<label for="dbh" class="col-sm-4 control-label">Database Host (required)</label>
+
+                    <div class="row mb-3">
+						<label for="dbh" class="col-sm-4 col-form-label">Database Host (required)</label>
 						<div class="col-sm-8">
-							<input required class="form-control" type="text" name="dbh" value="<?php if (!empty($_POST['dbh'])){ print $_POST['dbh']; } ?>" required>
+							<input id="dbh" placeholder="localhost" required class="form-control" type="text" name="dbh" value="<?php if (!empty($_POST['dbh'])){ print $_POST['dbh']; } ?>">
 						</div>
 					</div>
 
-					<div class="form-group row">
-						<label for="port" class="col-sm-4 control-label">Database Port (required) (Normally 3306)</label>
+                    <div class="row mb-3">
+						<label for="port" class="col-sm-4 col-form-label">Database Port (required) (Normally 3306)</label>
 						<div class="col-sm-8">
-							<input required class="form-control" type="text" name="port" value="<?php if (!empty($_POST['port'])){ print $_POST['port']; }else{ echo "3306"; } ?>" required>
+							<input id="port" required class="form-control" type="text" name="port" value="<?php if (!empty($_POST['port'])){ print $_POST['port']; }else{ echo "3306"; } ?>">
 						</div>
 					</div>
 
-					<div class="form-group row">
-						<label for="dbu" class="col-sm-4 control-label">Database User (required)</label>
+					<div class="row mb-3">
+						<label for="dbu" class="col-sm-4 col-form-label">Database User (required)</label>
 						<div class="col-sm-8">
-							<input required class="form-control" type="text" name="dbu" value="<?php if (!empty($_POST['dbu'])){ print $_POST['dbu']; } ?>" required>
+							<input id="dbu" placeholder="root" required class="form-control" type="text" name="dbu" value="<?php if (!empty($_POST['dbu'])){ print $_POST['dbu']; } ?>">
 						</div>
 					</div>
-					<div class="form-group row">
-						<label for="dbp" class="col-sm-4 control-label">Database Password (usually required)</label>
+					<div class="row mb-3">
+						<label for="dbp" class="col-sm-4 col-form-label">Database Password (usually required)</label>
 						<div class="col-sm-8">
-							<input class="form-control" type="text" name="dbp" value="<?php if (!empty($_POST['dbp'])){ print $_POST['dbp']; } ?>">
+							<input id="dbp" placeholder="****" class="form-control" type="password" name="dbp" value="<?php if (!empty($_POST['dbp'])){ print $_POST['dbp']; } ?>">
 						</div>
 					</div>
-					<div class="form-group row">
-						<label for="dbn" class="col-sm-4 control-label">Database Name (required)</label>
+					<div class="row mb-3">
+						<label for="dbn" class="col-sm-4 col-form-label">Database Name (required)</label>
 						<div class="col-sm-8">
-							<input class="form-control" type="text" name="dbn" value="<?php if (!empty($_POST['dbn'])){ print $_POST['dbn']; } ?>" required>
+							<input id="dbn" placeholder="userspice" required class="form-control" type="text" name="dbn" value="<?php if (!empty($_POST['dbn'])){ print $_POST['dbn']; } ?>">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row mb-3">
 						<div class="col-sm-12 text-right">
-							<input style="display:none;" id="sub" class="btn btn-primary" type="submit" name="test" value="Try These Settings (This will take a moment)">
+							<input style="display:none;" id="sub" class="btn btn-primary" type="submit" name="test" value="Connect to database">
 							<a href="#" id="nosub" class="btn btn-warning">Please Select a Timezone</a>
 						</div>
 					</div>
@@ -169,14 +170,14 @@ $go = 0;
 					$dbp_syn . $dbp . $end . PHP_EOL .
 					$dbn_syn . $dbn . $end . PHP_EOL
 				);
-				$chunk1 = file_get_contents("install/chunks/chunk1.php");
+				$chunk1 = file_get_contents("chunks/chunk1.php");
 				file_put_contents($config_file, $chunk1, FILE_APPEND);
 				fclose($fh);
 				$fh=fopen($config_file , "a+");
 				$end = "';";
 				fwrite($fh , $timezone_syn . $tz . $end . PHP_EOL);
 				fclose($fh);
-				$chunk2 = file_get_contents("install/chunks/chunk2.php");
+				$chunk2 = file_get_contents("chunks/chunk2.php");
 				file_put_contents($config_file, $chunk2, FILE_APPEND);
 				redirect("step3.php");
 			}
@@ -282,34 +283,4 @@ $go = 0;
 	</div>
 </div>
 
-
-<?php require_once("install/includes/footer.php"); ?>
-<script type="text/javascript">
-$( document ).ready(function() {
-	var tz = $("#timezone").val();
-	if(tz != null){
-		console.log("not");
-		$("#sub").show();
-		$("#nosub").hide();
-	}
-});
-$("#timezone").change(function () {
-	var tz = this.value;
-	if(tz != ""){
-		$("#sub").show();
-		$("#nosub").hide();
-	}else{
-		$("#sub").hide();
-		$("#nosub").show();
-	}
-});
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/css/bootstrap-select.min.css" integrity="sha256-jwJEU4p1YdtymLFwAjYfam5Pj5NOnylms63k7LYQ9Jk=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/js/bootstrap-select.min.js" integrity="sha256-FXzZGmaRFZngOjUKy3lWZJq/MflaMpffBbu3lPT0izE=" crossorigin="anonymous"></script>
-<script>
-$(function () {
-	$('select').selectpicker();
-});
-
-
-</script>
+<?php require_once("includes/footer.php"); ?>
