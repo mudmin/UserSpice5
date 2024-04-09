@@ -146,15 +146,33 @@ class User
         return false;
     }
 
-    public function loginEmail($email = null, $password = null, $remember = false)
-    {
+    public function loginEmail($email = null, $password = null, $remember = false, $rawpassword = null)
+    {   
+        $success = false;
         if (!$email && !$password && $this->exists()) {
             Session::put($this->_sessionName, $this->data()->id);
         } else {
             $user = $this->find($email, 1);
 
             if ($user) {
-                if (password_verify($password, $this->data()->password)) {
+                $strength = substr($this->data()->password, 3, 2);
+                if(!is_numeric($strength)){
+                    $strength = 999;
+                }
+
+                if(password_verify($password, $this->data()->password)){
+                    $success = true;
+                //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
+                }elseif(!is_null($rawpassword) && $strength < 13){
+                    if(password_verify(Input::sanitize($rawpassword,true,true), $this->data()->password)){
+                        $success = true;
+                    }
+                }
+                
+                if ($success) {
+                    if($strength < 13){
+                        $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);
+                    }
                     Session::put($this->_sessionName, $this->data()->id);
 
                     if ($remember) {
@@ -225,7 +243,7 @@ class User
             } else {
                 //If a user has neither UserSpice nor oAuth creds
                 //die("user has neither");
-                //$password = password_hash(Token::generate(),PASSWORD_BCRYPT,array('cost' => 12));
+                //$password = password_hash(Token::generate(),PASSWORD_BCRYPT,array('cost' => 13));
                 $settings = $this->_db->query('SELECT * FROM settings')->first();
                 $username = $email;
 

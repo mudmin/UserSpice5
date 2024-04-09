@@ -200,6 +200,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Vítejte na webu ",
 	"JOIN_THANKS"		=> "Děkujeme za registraci!",
 	"JOIN_HAVE"			=> "Mít alespoň ",
+	"JOIN_LOWER"		=> " malé písmeno",
+	"JOIN_SYMBOL"		=> " speciální znak",
 	"JOIN_CAP"			=> " velké písmeno",
 	"JOIN_TWICE"		=> "být dvakrát správně napsáno",
 	"JOIN_CLOSED"		=> "Bohužel, registrace je nyní vypnutá. Pokud máte jakékoliv dotazy, kontaktujte prosím administrátora stránky.",
@@ -207,6 +209,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Souhlasím s podmínkami použití",
 	"JOIN_CHANGED"	=> "Naše podmínky se změnily",
 	"JOIN_ACCEPT" 	=> "Souhlasit s podmínkami použití a pokračovat",
+	"JOIN_SCORE" => "Skóre:",
+	"JOIN_INVALID_PW" => "Vaše heslo je neplatné",
+
 ));
 
 //Sessions
@@ -283,6 +288,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Přihlásit se pomocí:",
+	"EML_FEATURE_DISABLED" => "Tato funkce je zakázána",
+	"EML_PASSWORDLESS_SENT" => "Prosím, zkontrolujte si svůj e-mail pro odkaz k přihlášení.",
+	"EML_PASSWORDLESS_SUBJECT" => "Prosím, ověřte svůj e-mail pro přihlášení.",
+	"EML_PASSWORDLESS_BODY" => "Prosím, ověřte svou e-mailovou adresu kliknutím na níže uvedený odkaz. Budete automaticky přihlášeni.",
+
 	"EML_CONF"			=> "Potvrdit Email",
 	"EML_VER"				=> "Ověřit svůj Email",
 	"EML_CHK"				=> "Požadavek odeslán. Pro ověření prosím zkontrolujte svůj email. Zkontrolujte také spam složku, neboť platnost ověrovacího odkazu vyprší za ",

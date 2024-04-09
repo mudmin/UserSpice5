@@ -195,7 +195,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "Bienvenido A ",
 	"JOIN_THANKS"	=> "Gracias por registrarte",
 	"JOIN_HAVE"		=> "Tener al menos ",
-	"JOIN_CAP"		=> " letra may&uacute;scula",
+	"JOIN_LOWER"	=>	" letra min&uacute;scula",
+	"JOIN_SYMBOL"		=> " s&iacute;mbolo",
 	"JOIN_CAP"		=> " letra may&uacute;scula",
 	"JOIN_TWICE"	=> "Ser esctrito correctamente dos veces",
 	"JOIN_CLOSED"	=> "En estos momentos el registrarse est&aacute; deshabilitado. por favor, contacta con el Administrador del Sitio para cualquier duda.",
@@ -203,6 +204,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Acepto las Condiciones y T&eacute;rminos de Usuario",
 	"JOIN_CHANGED"	=> "Nuestror T&eacute;rminos han Cambiado",
 	"JOIN_ACCEPT" 	=> "Aceptar las Condiciones y T&eacute;rminos de Usuario y Continuar",
+	"JOIN_SCORE" => "Puntos:",
+	"JOIN_INVALID_PW" => "Su contraseña es inválida",
+
 ));
 
 
@@ -280,6 +284,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Iniciar sesión con:",
+	"EML_FEATURE_DISABLED" => "Esta función está desactivada",
+	"EML_PASSWORDLESS_SENT" => "Por favor, revise su correo electrónico para obtener un enlace para iniciar sesión.",
+	"EML_PASSWORDLESS_SUBJECT" => "Por favor, verifique su correo electrónico para iniciar sesión.",
+	"EML_PASSWORDLESS_BODY" => "Por favor, verifique su dirección de correo electrónico haciendo clic en el enlace a continuación. Se iniciará sesión automáticamente.",
+
 	"EML_CONF"				=> "Confirmar Email",
 	"EML_VER"				=> "Verifica Tu Email",
 	"EML_CHK"				=> "Solicitud Recibida. Por favor, comprueba tu correo para la verificaci&oacute;n. Aseg&uacute;rate de revisar tu carpeta de Spam y Junk, ya que el enlace de verificaci&oacute;n caduca en ",

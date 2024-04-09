@@ -1,4 +1,4 @@
-    <?php
+<?php
     switch ($view) {
       case 'access':
         $path = usView('_dashboard_access.php');
@@ -85,12 +85,21 @@
         include $path;
         break;
       case 'permission':
-        $path = usView('_admin_permissions.php'); //compatibility
+        $path = usView('_admin_permission.php');
         include $path;
         break;
       case 'permissions':
         $path = usView('_admin_permissions.php');
         include $path;
+        break;
+      case 'phpinfo':
+        if(in_array($user->data()->id,$master_account)){
+        $path = usView('_phpinfo.php');
+        include $path;
+        }else{
+          include $abs_us_root . $us_url_root . 'users/views/_admin_dashboard.php';
+        }
+        
         break;
       case 'pin':
         $path = usView('_admin_pin.php');
@@ -142,12 +151,20 @@
         $path = usView('_admin_user.php');
         include $path;
         break;
+      case 'user_tags':
+        $path = usView('_admin_tags.php');
+        include $path;
+        break;
       case 'users':
         $path = usView('_admin_users.php');
         include $path;
         break;
       case 'verify':
         $path = usView('_admin_verify.php');
+        include $path;
+        break;
+      case 'prev_announcements':
+        $path = usView('_admin_prev_announcements.php');
         include $path;
         break;
       default:

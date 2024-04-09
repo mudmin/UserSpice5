@@ -196,13 +196,18 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC" => "Welkom bij",
 	"JOIN_THANKS" => "Bedankt voor het registreren!",
 	"JOIN_HAVE" => "Heeft tenminste",
-	"JOIN_CAP" => "hoofdletter",
-	"JOIN_TWICE" => "Twee keer correct worden getypt",
+	"JOIN_LOWER"	=> " kleine letter",
+	"JOIN_SYMBOL"		=> " symbool",
+	"JOIN_CAP" => " hoofdletter",
+	"JOIN_TWICE" => " Twee keer correct worden getypt",
 	"JOIN_CLOSED" => "Helaas is registratie momenteel uitgeschakeld. Neem contact op met de sitebeheerder als u vragen of opmerkingen hebt.",
 	"JOIN_TC" => "Algemene gebruiksvoorwaarden voor registratie",
 	"JOIN_ACCEPTTC" => "Ik accepteer de gebruikersvoorwaarden",
 	"JOIN_CHANGED" => "Onze voorwaarden zijn gewijzigd",
 	"JOIN_ACCEPT" => "Gebruikersvoorwaarden accepteren en doorgaan",
+	"JOIN_SCORE" => "Score:",
+	"JOIN_INVALID_PW" => "Uw wachtwoord is ongeldig",
+
 ));
 
 // Sessions
@@ -279,6 +284,12 @@ $lang = array_merge($lang, array(
 
 // Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Inloggen met:",
+	"EML_FEATURE_DISABLED" => "Deze functie is uitgeschakeld",
+	"EML_PASSWORDLESS_SENT" => "Controleer uw e-mail voor een link om in te loggen.",
+	"EML_PASSWORDLESS_SUBJECT" => "Controleer uw e-mail om in te loggen.",
+	"EML_PASSWORDLESS_BODY" => "Controleer uw e-mailadres door op de onderstaande link te klikken. U wordt automatisch ingelogd.",
+
 	"EML_CONF" => "E-mail bevestigen",
 	"EML_VER" => "Verifieer uw e-mail",
 	"EML_CHK" => "E-mailverzoek ontvangen. Controleer uw e-mail om verificatie uit te voeren. Controleer uw map met ongewenste e-mail en spam omdat de verificatielink verloopt over",

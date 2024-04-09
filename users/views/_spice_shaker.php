@@ -39,7 +39,8 @@ if ($settings->spice_api != '') {
       'key' => $settings->spice_api,
       'type' => $type,
       'call' => 'loadtype',
-      'generation' => 2
+      'generation' => 2,
+      'version'=> $user_spice_ver
     );
     $payload = json_encode($data);
 
@@ -75,7 +76,8 @@ if ($settings->spice_api != '') {
       'key' => $settings->spice_api,
       'search' => $search,
       'call' => 'search',
-      'generation' => 2
+      'generation' => 2,
+      'version'=> $user_spice_ver,
     );
     $payload = json_encode($data);
     if ($diag) {

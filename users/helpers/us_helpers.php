@@ -31,14 +31,15 @@ if (!function_exists('ipCheck')) {
 if (!function_exists('ipCheckBan')) {
   function ipCheckBan()
   {
-    $db = DB::getInstance();
+    global $db;
+
     $ip = ipCheck();
     $ban = $db->query('SELECT id FROM us_ip_blacklist WHERE ip = ?', [$ip])->count();
     if ($ban > 0) {
       $unban = $db->query('SELECT id FROM us_ip_whitelist WHERE ip = ?', [$ip])->count();
       if ($unban == 0) {
         //on blacklist and not on whitelist
-        logger(0, 'IP Logging', 'Blacklisted '.$ip.' attempted visit');
+        logger(0, 'IP Logging', 'Blacklisted ' . $ip . ' attempted visit');
         if ($eventhooks = getMyHooks(['page' => 'hitBanned'])) {
           includeHook($eventhooks, 'body');
         }
@@ -76,9 +77,9 @@ if (!function_exists('get_gravatar')) {
     $url .= md5(strtolower(trim($email)));
     $url .= "?s=$s&d=$d&r=$r";
     if ($img) {
-      $url = '<img src="'.$url.'"';
+      $url = '<img src="' . $url . '"';
       foreach ($atts as $key => $val) {
-        $url .= ' '.$key.'="'.$val.'"';
+        $url .= ' ' . $key . '="' . $val . '"';
       }
       $url .= ' />';
     }
@@ -92,7 +93,8 @@ if (!function_exists('get_gravatar')) {
 if (!function_exists('usernameExists')) {
   function usernameExists($username)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $query = $db->query('SELECT * FROM users WHERE username = ?', [$username]);
     $results = $query->results();
 
@@ -106,9 +108,9 @@ if (!function_exists('getPageFiles')) {
   {
     global $us_url_root;
     $directory = '../';
-    $pages = glob($directory.'*.php');
+    $pages = glob($directory . '*.php');
     foreach ($pages as $page) {
-      $fixed = str_replace('../', '/'.$us_url_root, $page);
+      $fixed = str_replace('../', '/' . $us_url_root, $page);
       $row[$fixed] = $fixed;
     }
 
@@ -122,9 +124,9 @@ if (!function_exists('getUSPageFiles')) {
   {
     global $us_url_root;
     $directory = '../users/';
-    $pages = glob($directory.'*.php');
+    $pages = glob($directory . '*.php');
     foreach ($pages as $page) {
-      $fixed = str_replace('../users/', '/'.$us_url_root.'users/', $page);
+      $fixed = str_replace('../users/', '/' . $us_url_root . 'users/', $page);
       $row[$fixed] = $fixed;
     }
 
@@ -139,8 +141,9 @@ if (!function_exists('sanitizedDest')) {
   {
     if ($dest = Input::get($varname)) {
       // if it exists in the database then it is a legitimate destination
-      $db = DB::getInstance();
-      $query = $db->query('SELECT id, page, private FROM pages WHERE page = ?', [$dest]);
+      global $db;
+
+      $query = $db->query('SELECT id, page, private FROM pages WHERE `page` = ?', [$dest]);
       $count = $query->count();
       if ($count > 0) {
         return $dest;
@@ -184,7 +187,7 @@ if (!function_exists('lang')) {
         $str = $lang[$key];
         $iteration = 1;
         foreach ($markers as $marker) {
-          $str = str_replace('%m'.$iteration.'%', $marker, $str);
+          $str = str_replace('%m' . $iteration . '%', $marker, $str);
           ++$iteration;
         }
       } else {
@@ -207,7 +210,7 @@ if (!function_exists('lang')) {
           $save = 'en-US';
         }
         //if it is NOT English, we are going to try to grab the key from the English translation
-        include $abs_us_root.$us_url_root.'users/lang/en-US.php';
+        include $abs_us_root . $us_url_root . 'users/lang/en-US.php';
         if ($markers == null) {
           if (isset($lang[$key])) {
             $str = $lang[$key];
@@ -220,7 +223,7 @@ if (!function_exists('lang')) {
             $str = $lang[$key];
             $iteration = 1;
             foreach ($markers as $marker) {
-              $str = str_replace('%m'.$iteration.'%', $marker, $str);
+              $str = str_replace('%m' . $iteration . '%', $marker, $str);
               ++$iteration;
             }
           } else {
@@ -228,7 +231,7 @@ if (!function_exists('lang')) {
           }
         }
         $lang = [];
-        include $abs_us_root.$us_url_root."users/lang/$save.php";
+        include $abs_us_root . $us_url_root . "users/lang/$save.php";
         if ($str == '') {
           //This means that we went to the English file and STILL did not find the language key, so...
           $str = "{ $missing }";
@@ -266,7 +269,8 @@ if (!function_exists('emailExists')) {
   //Check if an email exists in the DB
   function emailExists($email)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $query = $db->query('SELECT email FROM users WHERE email = ?', [$email]);
     $num_returns = $query->count();
     if ($num_returns > 0) {
@@ -281,7 +285,8 @@ if (!function_exists('updateEmail')) {
   //Update a user's email
   function updateEmail($id, $email)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $fields = ['email' => $email];
     $db->update('users', $id, $fields);
 
@@ -292,7 +297,8 @@ if (!function_exists('updateEmail')) {
 if (!function_exists('echoId')) {
   function echoId($id, $table, $column)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $query = $db->query("SELECT $column FROM $table WHERE id = $id LIMIT 1");
     $count = $query->count();
 
@@ -327,7 +333,8 @@ if (!function_exists('bin')) {
 if (!function_exists('generateForm')) {
   function generateForm($table, $id, $skip = [])
   {
-    $db = DB::getInstance();
+    global $db;
+
     $fields = [];
     $q = $db->query("SELECT * FROM {$table} WHERE id = ?", [$id]);
     $r = $q->first();
@@ -335,8 +342,8 @@ if (!function_exists('generateForm')) {
     foreach ($r as $field => $value) {
       if (!in_array($field, $skip)) {
         echo '<div class="form-group">';
-        echo '<label for="'.$field.'">'.ucfirst($field).'</label>';
-        echo '<input type="text" class="form-control" name="'.$field.'" id="'.$field.'" value="'.$value.'">';
+        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
+        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="' . $value . '">';
         echo '</div>';
       }
     }
@@ -348,7 +355,8 @@ if (!function_exists('generateForm')) {
 if (!function_exists('generateAddForm')) {
   function generateAddForm($table, $skip = [])
   {
-    $db = DB::getInstance();
+    global $db;
+
     $fields = [];
     $q = $db->query("SELECT * FROM {$table}");
     $r = $q->first();
@@ -356,8 +364,8 @@ if (!function_exists('generateAddForm')) {
     foreach ($r as $field => $value) {
       if (!in_array($field, $skip)) {
         echo '<div class="form-group">';
-        echo '<label for="'.$field.'">'.ucfirst($field).'</label>';
-        echo '<input type="text" class="form-control" name="'.$field.'" id="'.$field.'" value="">';
+        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
+        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="">';
         echo '</div>';
       }
     }
@@ -396,7 +404,8 @@ if (!function_exists('clean')) {
 if (!function_exists('stripPagePermissions')) {
   function stripPagePermissions($id)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $result = $db->query('DELETE from permission_page_matches WHERE page_id = ?', [$id]);
 
     return $result;
@@ -415,12 +424,12 @@ if (!function_exists('encodeURIComponent')) {
 if (!function_exists('logger')) {
   function logger($user_id = "", $logtype = "", $lognote = "", $metadata = null)
   {
-    $db = DB::getInstance();
-    global $user;
-    if(!isset($user_id) || $user_id == ""){
-      if(isset($user) && $user->isLoggedIn()){
+    global $db, $user;
+
+    if (!isset($user_id) || $user_id == "") {
+      if (isset($user) && $user->isLoggedIn()) {
         $user_id = $user->data()->id;
-      }else{
+      } else {
         $user_id = 0;
       }
     }
@@ -492,23 +501,23 @@ if (!function_exists('time2str')) {
           return '1 minute ago';
         }
         if ($diff < 3600) {
-          return floor($diff / 60).' minutes ago';
+          return floor($diff / 60) . ' minutes ago';
         }
         if ($diff < 7200) {
           return '1 hour ago';
         }
         if ($diff < 86400) {
-          return floor($diff / 3600).' hours ago';
+          return floor($diff / 3600) . ' hours ago';
         }
       }
       if ($day_diff == 1) {
         return 'Yesterday';
       }
       if ($day_diff < 7) {
-        return $day_diff.' days ago';
+        return $day_diff . ' days ago';
       }
       if ($day_diff < 31) {
-        return ceil($day_diff / 7).' weeks ago';
+        return ceil($day_diff / 7) . ' weeks ago';
       }
       if ($day_diff < 60) {
         return 'last month';
@@ -523,13 +532,13 @@ if (!function_exists('time2str')) {
           return 'in a minute';
         }
         if ($diff < 3600) {
-          return 'in '.floor($diff / 60).' minutes';
+          return 'in ' . floor($diff / 60) . ' minutes';
         }
         if ($diff < 7200) {
           return 'in an hour';
         }
         if ($diff < 86400) {
-          return 'in '.floor($diff / 3600).' hours';
+          return 'in ' . floor($diff / 3600) . ' hours';
         }
       }
       if ($day_diff == 1) {
@@ -546,7 +555,7 @@ if (!function_exists('time2str')) {
         return 'next week';
       }
       if (ceil($day_diff / 7) < 4) {
-        return 'in '.ceil($day_diff / 7).' weeks';
+        return 'in ' . ceil($day_diff / 7) . ' weeks';
       }
       if (date('n', $ts) == date('n') + 1) {
         return 'next month';
@@ -573,7 +582,8 @@ if (!function_exists('ipReason')) {
 if (!function_exists('checkBan')) {
   function checkBan($ip)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $c = $db->query('SELECT id FROM us_ip_blacklist WHERE ip = ?', [$ip])->count();
     if ($c > 0) {
       return true;
@@ -619,7 +629,7 @@ if (!function_exists('requestCheck')) {
     }
     $diffAr = array_diff_key(array_flip($expectedAr), $requestAr);
     if (count($diffAr) > 0) {
-      returnError('Missing variables: '.implode(',', array_flip($diffAr)).'.');
+      returnError('Missing variables: ' . implode(',', array_flip($diffAr)) . '.');
     } else {
       return $requestAr;
     }
@@ -629,15 +639,17 @@ if (!function_exists('requestCheck')) {
 if (!function_exists('adminNotifications')) {
   function adminNotifications($type, $threads, $user_id)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $i = 0;
     foreach ($threads as $id) {
+      $id = (int) $id;
       if ($type == 'read') {
-        $db->query("UPDATE notifications SET is_read = 1 WHERE id = $id");
+        $db->query("UPDATE notifications SET is_read = 1 WHERE id = ?", [$id]);
         logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id read.");
       }
       if ($type == 'unread') {
-        $db->query("UPDATE notifications SET is_read = 0,is_archived=0 WHERE id = $id");
+        $db->query("UPDATE notifications SET is_read = 0,is_archived=0 WHERE id = ?", [$id]);
         logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id unread.");
       }
       if ($type == 'delete') {
@@ -654,15 +666,15 @@ if (!function_exists('adminNotifications')) {
 if (!function_exists('lognote')) {
   function lognote($logid)
   {
-    $db = DB::getInstance();
-    $logQ = $db->query('SELECT * FROM logs WHERE id=?', [$logid]);
+    global $db;
+
+    $logQ = $db->query('SELECT * FROM logs WHERE id = ?', [$logid]);
     if ($logQ->count() > 0) {
       $log = $logQ->first();
       if (1 == 2) {
         return 'This is a placeholder';
       }
-      /* elseif here for your custom hooks! */
-      else {
+      /* elseif here for your custom hooks! */ else {
         return $log->lognote;
       }
       /*With this function you can use whatever hooks you want within your admin logs. Say for example you track each the Page ID the user visits, and you
@@ -677,10 +689,10 @@ if (!function_exists('lognote')) {
     TO USE THIS FUNCTION:
     Copy it all except the function_exists (outside wrapper) to your usersc/includes/custom_functions.php. It will override any
     chages we make to this helper and avoids you from editing core files. */
-  } else {
-    return false;
+    } else {
+      return false;
+    }
   }
-}
 }
 
 if (!function_exists('isLocalhost')) {
@@ -709,7 +721,7 @@ if (!function_exists('currentPageStrict')) {
       array_splice($self_path, $self_path_length - $i, $i);
       // $us_url_root=implode("/",$self_path)."/";
 
-      if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')) {
+      if (file_exists($abs_us_root . $us_url_root . 'z_us_root.php')) {
         $file_found = true;
         break;
       } else {
@@ -727,8 +739,8 @@ if (!function_exists('currentPageStrict')) {
 if (!function_exists('UserSessionCount')) {
   function UserSessionCount()
   {
-    global $user;
-    $db = DB::getInstance();
+    global $db, $user;
+
     $q = $db->query('SELECT * FROM us_user_sessions WHERE fkUserID = ? AND UserSessionEnded=0', [$user->data()->id]);
 
     return $q->count();
@@ -738,8 +750,8 @@ if (!function_exists('UserSessionCount')) {
 if (!function_exists('fetchUserSessions')) {
   function fetchUserSessions($all = false)
   {
-    global $user;
-    $db = DB::getInstance();
+    global $db, $user;
+
     if (!$all) {
       $q = $db->query('SELECT * FROM us_user_sessions WHERE fkUserID = ? AND UserSessionEnded=0 ORDER BY UserSessionStarted', [$user->data()->id]);
     } else {
@@ -756,8 +768,8 @@ if (!function_exists('fetchUserSessions')) {
 if (!function_exists('fetchAdminSessions')) {
   function fetchAdminSessions($all = false)
   {
-    global $user;
-    $db = DB::getInstance();
+    global $db, $user;
+
     if (!$all) {
       $q = $db->query('SELECT * FROM us_user_sessions WHERE UserSessionEnded=0 ORDER BY UserSessionStarted');
     } else {
@@ -774,8 +786,8 @@ if (!function_exists('fetchAdminSessions')) {
 if (!function_exists('killSessions')) {
   function killSessions($sessions, $admin = false)
   {
-    global $user;
-    $db = DB::getInstance();
+    global $db, $user;
+
     $i = 0;
     foreach ($sessions as $session) {
       if (is_numeric($session)) {
@@ -804,8 +816,8 @@ if (!function_exists('killSessions')) {
 if (!function_exists('passwordResetKillSessions')) {
   function passwordResetKillSessions($uid = null)
   {
-    global $user;
-    $db = DB::getInstance();
+    global $db, $user;
+
     if (is_null($uid)) {
       if (isset($_SESSION['kUserSessionID'])) {
         $q = $db->query('UPDATE us_user_sessions SET UserSessionEnded=1,UserSessionEnded_Time=NOW() WHERE fkUserID = ? AND UserSessionEnded=0 AND kUserSessionID <> ?', [$user->data()->id, $_SESSION['kUserSessionID']]);
@@ -835,9 +847,9 @@ if (!function_exists('passwordResetKillSessions')) {
     } else {
       $error = $db->errorString();
       if (is_null($uid)) {
-        logger($user->data()->id, 'User Tracker', 'Password Reset Session Kill failed, Error: '.$error);
+        logger($user->data()->id, 'User Tracker', 'Password Reset Session Kill failed, Error: ' . $error);
       } else {
-        logger($user->data()->id, 'User Tracker', "Password Reset Session Kill failed for UID $uid, Error: ".$error);
+        logger($user->data()->id, 'User Tracker', "Password Reset Session Kill failed for UID $uid, Error: " . $error);
       }
 
       return $error;
@@ -848,8 +860,8 @@ if (!function_exists('passwordResetKillSessions')) {
 if (!function_exists('username_helper')) {
   function username_helper($fname, $lname, $email)
   {
-    $db = DB::getInstance();
-    $settings = $db->query('SELECT * FROM settings')->first();
+    global $db, $settings;
+
     $preusername = $fname[0];
     $preusername .= $lname;
     $preusername = strtolower(clean($preusername));
@@ -892,7 +904,7 @@ if (!function_exists('oxfordList')) {
         for ($i = 0; $i <= $c; ++$i) {
           if (isset($data[$i])) {
             if ($i == $c - 1) {
-              $msg .= ' '.$final.' ';
+              $msg .= ' ' . $final . ' ';
             }
 
             $msg .= $data[$i];
@@ -920,7 +932,7 @@ if (!function_exists('currentFile')) {
     for ($i = 1; $i < $self_path_length; ++$i) {
       array_splice($self_path, $self_path_length - $i, $i);
 
-      if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')) {
+      if (file_exists($abs_us_root . $us_url_root . 'z_us_root.php')) {
         $file_found = true;
         break;
       } else {
@@ -937,7 +949,8 @@ if (!function_exists('currentFile')) {
 if (!function_exists('importSQL')) {
   function importSQL($file)
   {
-    $db = DB::getInstance();
+    global $db;
+
     $lines = file($file);
     $templine = '';
     // Loop through each line
@@ -963,14 +976,17 @@ if (!function_exists('importSQL')) {
 if (!function_exists('pluginActive')) {
   function pluginActive($plugin, $checkOnly = false)
   {
-    global $us_url_root;
-    $db = DB::getInstance();
+    global $db, $us_url_root;
+    $integrated = ["usertags"];
+    if (in_array($plugin, $integrated)) {
+      return true;
+    }
     $check = $db->query('SELECT id FROM us_plugins WHERE plugin = ? and status = ?', [$plugin, 'active'])->count();
     if ($check != 1) {
 
       if (!$checkOnly) {
         usError("Plugin is disabled");
-        Redirect::to($us_url_root.'users/admin.php?view=plugins');
+        Redirect::to($us_url_root . 'users/admin.php?view=plugins');
       }
 
       return false;
@@ -983,8 +999,8 @@ if (!function_exists('pluginActive')) {
 if (!function_exists('languageSwitcher')) {
   function languageSwitcher()
   {
-    $db = DB::getInstance();
-    global $user,$abs_us_root,$us_url_root,$currentPage,$settings,$token;
+
+    global $db, $user, $abs_us_root, $us_url_root, $currentPage, $settings, $token;
     if ($settings->allow_language != 1) {
       return false;
     }
@@ -1017,11 +1033,11 @@ if (!function_exists('languageSwitcher')) {
         if (isUserLoggedIn()) {
           $db->update('users', $user->data()->id, ['language' => $set]);
         }
-        header('Refresh:0');
+        Redirect::to(currentPage());
       }
     }
     $_SESSION['your_token'] = $your_token;
-    $languages = scandir($abs_us_root.$us_url_root.'users/lang'); ?>
+    $languages = scandir($abs_us_root . $us_url_root . 'users/lang'); ?>
 
     <form class="" action="" method="post">
       <p align="center">
@@ -1031,27 +1047,27 @@ if (!function_exists('languageSwitcher')) {
         <?php
         foreach ($languages as $k => $v) {
           $languages[$k] = substr($v, 0, -4);
-          if (file_exists($abs_us_root.$us_url_root.'users/lang/flags/'.$languages[$k].'.png')) {?>
-            <input type="image" title="<?php echo $languages[$k]; ?>" alt="<?php echo $languages[$k]; ?>" name="<?php echo $languages[$k]; ?>" src="<?php echo $us_url_root.'users/lang/flags/'.$languages[$k].'.png'; ?>" border="0" alt="Submit" style="width: 40px;" />
-          <?php }
+          if (file_exists($abs_us_root . $us_url_root . 'users/lang/flags/' . $languages[$k] . '.png')) { ?>
+            <input type="image" title="<?php echo $languages[$k]; ?>" alt="<?php echo $languages[$k]; ?>" name="<?php echo $languages[$k]; ?>" src="<?php echo $us_url_root . 'users/lang/flags/' . $languages[$k] . '.png'; ?>" border="0" alt="Submit" style="width: 40px;" />
+        <?php }
         } ?>
       </p>
       <input type="hidden" name="csrf" value="<?php echo $token; ?>">
     </form>
-    <?php
+  <?php
   }
 }
 
 if (!function_exists('getMyHooks')) {
   function getMyHooks($opts = [])
   {
-    global $currentPage;
-    $db = DB::getInstance();
+    global $db, $currentPage;
+
 
     if ($opts == []) {
-      $hooks = $db->query('SELECT * FROM us_plugin_hooks WHERE page = ? AND disabled = 0', [$currentPage])->results();
+      $hooks = $db->query('SELECT * FROM us_plugin_hooks WHERE `page` = ? AND `disabled` = 0', [$currentPage])->results();
     } elseif (isset($opts['page']) && $opts['page'] != '') {
-      $hooks = $db->query('SELECT * FROM us_plugin_hooks WHERE page = ? AND disabled = 0', [$opts['page']])->results();
+      $hooks = $db->query('SELECT * FROM us_plugin_hooks WHERE `page` = ? AND `disabled` = 0', [$opts['page']])->results();
     }
     $data = [];
     $data['pre'] = [];
@@ -1062,15 +1078,15 @@ if (!function_exists('getMyHooks')) {
     $counter = 0;
     foreach ($hooks as $h) {
       if ($h->position == 'pre') {
-        $data['pre'][$counter] = $h->folder.'/'.$h->hook;
+        $data['pre'][$counter] = $h->folder . '/' . $h->hook;
       } elseif ($h->position == 'post') {
-        $data['post'][$counter] = $h->folder.'/'.$h->hook;
+        $data['post'][$counter] = $h->folder . '/' . $h->hook;
       } elseif ($h->position == 'form') {
-        $data['form'][$counter] = $h->folder.'/'.$h->hook;
+        $data['form'][$counter] = $h->folder . '/' . $h->hook;
       } elseif ($h->position == 'body') {
-        $data['body'][$counter] = $h->folder.'/'.$h->hook;
+        $data['body'][$counter] = $h->folder . '/' . $h->hook;
       } elseif ($h->position == 'bottom') {
-        $data['bottom'][$counter] = $h->folder.'/'.$h->hook;
+        $data['bottom'][$counter] = $h->folder . '/' . $h->hook;
       }
       ++$counter;
     }
@@ -1082,17 +1098,17 @@ if (!function_exists('getMyHooks')) {
 if (!function_exists('includeHook')) {
   function includeHook($hooks, $position)
   {
-    global $abs_us_root, $us_url_root, $usplugins,$hookData;
-    if(is_null($hookData)){
+    global $db, $abs_us_root, $us_url_root, $usplugins, $hookData;
+    if (is_null($hookData)) {
       $hookData = [];
     }
-    $db = DB::getInstance();
-    if(is_array($hooks) && isset($hooks[$position])){
+
+    if (is_array($hooks) && isset($hooks[$position])) {
       foreach ($hooks[$position] as $h) {
-        if (isset($h) && file_exists($abs_us_root.$us_url_root.'usersc/plugins/'.$h) && $h != '') {
+        if (isset($h) && file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $h) && $h != '') {
           $plugin = strstr($h, '/', 'before_needle');
-          if (isset($usplugins[$plugin]) && $usplugins[$plugin] == 1) {//only include this file if plugin is installed and active.
-            include $abs_us_root.$us_url_root.'usersc/plugins/'.$h;
+          if (isset($usplugins[$plugin]) && $usplugins[$plugin] == 1) { //only include this file if plugin is installed and active.
+            include $abs_us_root . $us_url_root . 'usersc/plugins/' . $h;
           }
         } else {
           //automatically disable hook ...eventually
@@ -1105,10 +1121,10 @@ if (!function_exists('includeHook')) {
 if (!function_exists('registerHooks')) {
   function registerHooks($hooks, $plugin_name)
   {
-    $db = DB::getInstance();
+    global $db;
     foreach ($hooks as $k => $v) {
       foreach ($v as $key => $value) {
-        $checkQ = $db->query('SELECT * FROM us_plugin_hooks WHERE page = ? AND folder = ? AND position = ? AND hook = ?', [$k, $plugin_name, $key, $value]);
+        $checkQ = $db->query('SELECT * FROM us_plugin_hooks WHERE `page` = ? AND folder = ? AND position = ? AND hook = ?', [$k, $plugin_name, $key, $value]);
 
         $checkC = $checkQ->count();
         if ($checkC > 0) {
@@ -1131,7 +1147,7 @@ if (!function_exists('registerHooks')) {
 if (!function_exists('deRegisterHooks')) {
   function deRegisterHooks($plugin_name)
   {
-    $db = DB::getInstance();
+    global $db;
     $hooks = $db->query('UPDATE us_plugin_hooks SET disabled = 1 WHERE folder = ?', [$plugin_name]);
   }
 }
@@ -1141,19 +1157,18 @@ if (!function_exists('shakerIsInstalled')) {
   {
     global $abs_us_root, $us_url_root;
 
-    $response = ["installed"=>false, "ver"=>"0.0.0"];
+    $response = ["installed" => false, "ver" => "0.0.0"];
 
     if ($type == 'translation') {
-      $response = ["installed"=>true, "ver"=>"0.0.0"];
+      $response = ["installed" => true, "ver" => "0.0.0"];
       return $response;
-
     } elseif ($type == 'plugin' || $type == 'widget' || $type == 'template') {
-      $type = $type.'s';
-      if (file_exists($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved)) {
-        $response = ["installed"=>true, "ver"=>"0.0.0"];
-        if(file_exists($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved.'/info.xml')){
-          $xml = simplexml_load_file($abs_us_root.$us_url_root.'usersc/'.$type.'/'.$reserved.'/info.xml');
-          if(isset($xml->version)){
+      $type = $type . 's';
+      if (file_exists($abs_us_root . $us_url_root . 'usersc/' . $type . '/' . $reserved)) {
+        $response = ["installed" => true, "ver" => "0.0.0"];
+        if (file_exists($abs_us_root . $us_url_root . 'usersc/' . $type . '/' . $reserved . '/info.xml')) {
+          $xml = simplexml_load_file($abs_us_root . $us_url_root . 'usersc/' . $type . '/' . $reserved . '/info.xml');
+          if (isset($xml->version)) {
             $response["ver"] = $xml->version;
           }
         }
@@ -1167,27 +1182,28 @@ if (!function_exists('shakerIsInstalled')) {
   }
 }
 
-function spiceShakerBadge($shaker, $installed) {
+function spiceShakerBadge($shaker, $installed)
+{
   $result = array();
 
   // Check if $shaker is newer than $installed
   if (version_compare($shaker, $installed, '>')) {
-      $result['text'] = 'Update';
+    $result['text'] = 'Update';
   } else {
-      $result['text'] = 'Reload';
+    $result['text'] = 'Reload';
   }
 
   // Check if the version numbers match
   if ($shaker == $installed) {
-      $result['badge'] = array(
-          'class' => 'badge bg-info',
-          'text' => 'Current'
-      );
+    $result['badge'] = array(
+      'class' => 'badge bg-info',
+      'text' => 'Current'
+    );
   } else {
-      $result['badge'] = array(
-          'class' => 'badge bg-danger',
-          'text' => 'Installed: ' . $installed
-      );
+    $result['badge'] = array(
+      'class' => 'badge bg-danger',
+      'text' => 'Installed: ' . $installed
+    );
   }
 
   return $result;
@@ -1197,29 +1213,25 @@ function spiceShakerBadge($shaker, $installed) {
 if (!function_exists('verifyadmin')) {
   function verifyadmin($page)
   {
-    global $user;
-    global $us_url_root;
+    global $db, $user, $us_url_root, $settings;
     $actual_link = encodeURIComponent("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
-    $db = DB::getInstance();
-    $settings = $db->query('SELECT * FROM settings WHERE id=1')->first();
     $null = $settings->admin_verify_timeout - 1;
     if (isset($_SESSION['last_confirm']) && $_SESSION['last_confirm'] != '' && !is_null($_SESSION['last_confirm'])) {
       $last_confirm = $_SESSION['last_confirm'];
     } else {
-      $last_confirm = date('Y-m-d H:i:s', strtotime('-'.$null.' day', strtotime(date('Y-m-d H:i:s'))));
+      $last_confirm = date('Y-m-d H:i:s', strtotime('-' . $null . ' day', strtotime(date('Y-m-d H:i:s'))));
     }
     $current = date('Y-m-d H:i:s');
     $ctFormatted = date('Y-m-d H:i:s', strtotime($current));
-    $dbPlus = date('Y-m-d H:i:s', strtotime('+'.$settings->admin_verify_timeout.' minutes', strtotime($last_confirm)));
+    $dbPlus = date('Y-m-d H:i:s', strtotime('+' . $settings->admin_verify_timeout . ' minutes', strtotime($last_confirm)));
     if (strtotime($ctFormatted) > strtotime($dbPlus)) {
       $q = $db->query('SELECT pin FROM users WHERE id = ?', [$user->data()->id]);
       if (is_null($q->first()->pin)) {
-        Redirect::to($us_url_root.'users/admin_pin.php?actual_link='.$actual_link.'&page='.$page);
+        Redirect::to($us_url_root . 'users/admin_pin.php?actual_link=' . $actual_link . '&page=' . $page);
       } else {
-        Redirect::to($us_url_root.'users/admin_verify.php?actual_link='.$actual_link.'&page='.$page);
+        Redirect::to($us_url_root . 'users/admin_verify.php?actual_link=' . $actual_link . '&page=' . $page);
       }
     } else {
-      $db = DB::getInstance();
       $_SESSION['last_confirm'] = $current;
     }
   }
@@ -1244,29 +1256,29 @@ if (!function_exists('parseSessionMessages')) {
     $messages = [];
     $keys = ['genMsg', 'valSuc', 'valErr'];
     foreach ($keys as $key) {
-      if (isset($_SESSION[$sn.$key])) {
-        if (is_array($_SESSION[$sn.$key])) {
+      if (isset($_SESSION[$sn . $key])) {
+        if (is_array($_SESSION[$sn . $key])) {
           $string = '';
-          foreach ($_SESSION[$sn.$key] as $s) {
+          foreach ($_SESSION[$sn . $key] as $s) {
             //deal with compatibility of display_errors function
             if (is_array($s)) {
               foreach ($s as $str) {
-                $string .= '<li>'.$str.'</li>';
+                $string .= '<li>' . $str . '</li>';
               }
-            } elseif (count($_SESSION[$sn.$key]) > 1) {
-              $string .= '<li>'.$s.'</li>';
+            } elseif (count($_SESSION[$sn . $key]) > 1) {
+              $string .= '<li>' . $s . '</li>';
             } else {
               $string .= $s;
             }
           }
           $messages[$key] = $string;
         } else {
-          $messages[$key] = $_SESSION[$sn.$key];
+          $messages[$key] = $_SESSION[$sn . $key];
         }
       } else {
         $messages[$key] = '';
       }
-      $_SESSION[$sn.$key] = '';
+      $_SESSION[$sn . $key] = '';
     }
 
     return $messages;
@@ -1283,48 +1295,52 @@ if (!function_exists('sessionValMessages')) {
   {
     $keys = ['valErr', 'valSuc', 'genMsg'];
     foreach ($keys as $key) {
-      if(isset($_SESSION[Config::get('session/session_name').$key])
-      && is_array($_SESSION[Config::get('session/session_name').$key])
-      && $$key != []
-      && $$key != null
-    ) {
-      $_SESSION[Config::get('session/session_name').$key][] = $$key;
-    } elseif (
-      isset($_SESSION[Config::get('session/session_name').$key])
-      && $_SESSION[Config::get('session/session_name').$key] != ''
-      && $$key != []
-      && $$key != null
-    ) {
-      $save = $_SESSION[Config::get('session/session_name').$key];
-      $_SESSION[Config::get('session/session_name').$key] = [];
-      $_SESSION[Config::get('session/session_name').$key][] = $save;
-      $_SESSION[Config::get('session/session_name').$key][] = $$key;
-    } elseif ($$key != [] && $$key != null) {
-      $_SESSION[Config::get('session/session_name').$key] = $$key;
+      if (
+        isset($_SESSION[Config::get('session/session_name') . $key])
+        && is_array($_SESSION[Config::get('session/session_name') . $key])
+        && $$key != []
+        && $$key != null
+      ) {
+        $_SESSION[Config::get('session/session_name') . $key][] = $$key;
+      } elseif (
+        isset($_SESSION[Config::get('session/session_name') . $key])
+        && $_SESSION[Config::get('session/session_name') . $key] != ''
+        && $$key != []
+        && $$key != null
+      ) {
+        $save = $_SESSION[Config::get('session/session_name') . $key];
+        $_SESSION[Config::get('session/session_name') . $key] = [];
+        $_SESSION[Config::get('session/session_name') . $key][] = $save;
+        $_SESSION[Config::get('session/session_name') . $key][] = $$key;
+      } elseif ($$key != [] && $$key != null) {
+        $_SESSION[Config::get('session/session_name') . $key] = $$key;
+      }
     }
   }
-}
 }
 
 
 //Alias for passing error messages. Can be a message or array of messsages.
-if(!function_exists("usError")){
-  function usError($msg){
+if (!function_exists("usError")) {
+  function usError($msg)
+  {
     sessionValMessages($msg);
   }
 }
 
 //Alias for passing success messages. Can be a message or array of messsages.
-if(!function_exists("usSuccess")){
-  function usSuccess($msg){
-    sessionValMessages("",$msg);
+if (!function_exists("usSuccess")) {
+  function usSuccess($msg)
+  {
+    sessionValMessages("", $msg);
   }
 }
 
 //Alias for passing generic messages. Can be a message or array of messsages.
-if(!function_exists("usMessage")){
-  function usMessage($msg){
-    sessionValMessages("","",$msg);
+if (!function_exists("usMessage")) {
+  function usMessage($msg)
+  {
+    sessionValMessages("", "", $msg);
   }
 }
 
@@ -1341,35 +1357,38 @@ if (!function_exists('isUserLoggedIn')) {
 }
 
 //slightly shortens repetitive code for checkbox, radio, and dropdown form elements
-if(!function_exists('isSelected')){
-  function isSelected($one,$two,$output = "selected='selected'"){
-    if($one == $two){
-      echo $output." ";
+if (!function_exists('isSelected')) {
+  function isSelected($one, $two, $output = "selected='selected'")
+  {
+    if ($one == $two) {
+      echo $output . " ";
     }
   }
 }
 
-if(!function_exists('checkAPIkey')){
-  function checkAPIkey($key){
+if (!function_exists('checkAPIkey')) {
+  function checkAPIkey($key)
+  {
     $msg = "";
-    if($key == ""){
+    if ($key == "") {
       $msg = "<h6><span style='color:blue'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</span> </h6>";
-    }elseif(!preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/",trim($key))
-    && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/",trim($key)) )
-    {
+    } elseif (
+      !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/", trim($key))
+      && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/", trim($key))
+    ) {
       $msg = "<h4><span style='color:red'>The API Key does not appear to be valid.</span> </h4>";
-    }else{
+    } else {
       $msg =  "<h4><span style='color:green'><span>&#10003;</span> Your API Key appears to be valid.</span> </h4>";
     }
     return $msg;
   }
 }
 
-if(!function_exists('UserSpice_getLogs')){
+if (!function_exists('UserSpice_getLogs')) {
   function UserSpice_getLogs($opts = [])
   {
-    $db = DB::getInstance();
-    global $user;
+
+    global $db, $user;
     if ($user->isLoggedIn()) {
       $userId = $user->data()->id;
     } else {
@@ -1418,29 +1437,31 @@ if(!function_exists('UserSpice_getLogs')){
 }
 
 //creates a form csrf security token
-if(!function_exists("tokenHere")){
-  function tokenHere(){
-    ?>
-    <input type="hidden" name="csrf" value="<?=Token::generate();?>">
-    <?php
+if (!function_exists("tokenHere")) {
+  function tokenHere()
+  {
+  ?>
+    <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
+<?php
   }
 }
 
-if(!function_exists("fetchProfilePicture")){
-  function fetchProfilePicture($userid){
-    $db = DB::getInstance();
-    $q = $db->query("SELECT * FROM users WHERE id = ?",[$userid]);
+if (!function_exists("fetchProfilePicture")) {
+  function fetchProfilePicture($userid)
+  {
+    global $db;
+    $q = $db->query("SELECT * FROM users WHERE id = ?", [$userid]);
     $c = $q->count();
-    if($c < 1){
+    if ($c < 1) {
       //build in default photo
       $grav = get_gravatar(strtolower(trim("userspicephp@gmail.com")));
-    }else{
+    } else {
       $u = $q->first();
       if (isset($u->steam_avatar) && $u->steam_avatar != '') {
         $grav = $u->steam_avatar;
       } elseif (isset($u->picture) && $u->picture != '') {
         $grav = $u->picture;
-      }else{
+      } else {
         $grav = get_gravatar(strtolower(trim($u->email)));
       }
     }
@@ -1448,37 +1469,38 @@ if(!function_exists("fetchProfilePicture")){
   }
 }
 
-if(!function_exists("fetchFolderFiles")){
-  function fetchFolderFiles($folder,$extension = "php"){
-    global $abs_us_root,$us_url_root;
-    if(!is_array($extension)){
+if (!function_exists("fetchFolderFiles")) {
+  function fetchFolderFiles($folder, $extension = "php")
+  {
+    global $abs_us_root, $us_url_root;
+    if (!is_array($extension)) {
       $extension = (array)$extension;
     }
 
     $files = [];
     $links = [];
     $direct = [];
-    if(substr($folder,-1) != "/"){
+    if (substr($folder, -1) != "/") {
       $folder = $folder . "/";
     }
     $linkpath = $us_url_root .  $folder;
     $basepath = $abs_us_root . $linkpath;
 
-    if(is_dir($basepath)) {
-    $scan_arr = scandir($basepath);
-    $files_arr = array_diff($scan_arr, array('.','..') );
+    if (is_dir($basepath)) {
+      $scan_arr = scandir($basepath);
+      $files_arr = array_diff($scan_arr, array('.', '..'));
 
-    foreach ($files_arr as $file) {
-      $file_path = $basepath.$file;
-      $file_ext = pathinfo($file_path, PATHINFO_EXTENSION);
-      if (in_array($file_ext,$extension)) {
-        $files[] = $file;
-        $links[] = $linkpath  . $file;
-        $direct[] = $basepath . $file;
+      foreach ($files_arr as $file) {
+        $file_path = $basepath . $file;
+        $file_ext = pathinfo($file_path, PATHINFO_EXTENSION);
+        if (in_array($file_ext, $extension)) {
+          $files[] = $file;
+          $links[] = $linkpath  . $file;
+          $direct[] = $basepath . $file;
+        }
       }
     }
-    }
-    $response = ["files"=>$files,"direct"=>$direct,"links"=>$links];
+    $response = ["files" => $files, "direct" => $direct, "links" => $links];
     return $response;
   }
 }
@@ -1497,22 +1519,152 @@ if(!function_exists("fetchFolderFiles")){
 // Or you can do it from another date so 20 days from Jan 1, 2023
 // echo offsetDate(20,"2023-01-01");
 
-function offsetDate($number, $datestring = "", $unit = "days"){
-     if($datestring == ""){
-       $datestring = date("Y-m-d");
-     }
-     $first = substr($number, 0, 1);
-     if($first != "+" && $first != "-"){
-       $symbol = "+ ";
-     }else{
-       $symbol = "";
-     }
-     return date("Y-m-d",strtotime($symbol . $number . $unit,strtotime($datestring)));
+function offsetDate($number, $datestring = "", $unit = "days")
+{
+  if ($datestring == "") {
+    $datestring = date("Y-m-d");
+  }
+  $first = substr($number, 0, 1);
+  if ($first != "+" && $first != "-") {
+    $symbol = "+ ";
+  } else {
+    $symbol = "";
+  }
+  return date("Y-m-d", strtotime($symbol . $number . $unit, strtotime($datestring)));
 }
 
 if (!function_exists("hed")) {
-  function hed($string) 
+  function hed($string)
   {
     return htmlspecialchars_decode(html_entity_decode($string ?? "", ENT_QUOTES, "UTF-8"));
   }
+}
+
+function checkInternet($host = 'www.google.com')
+{
+  $result = @dns_get_record($host, DNS_A); // Check for A records of the host
+  if (!empty($result)) {
+    return true; // Internet seems to be available
+  } else {
+    return false; // No internet connection
+  }
+}
+
+
+// This function checks the strength of the password and uses the score from userSpicePasswordScore.
+if (!function_exists("userSpicePasswordStrength")) {
+  function userSpicePasswordStrength($password)
+  {
+    global $pw_settings, $db;
+
+
+    if (!isset($pw_settings->min_length)) {
+      $pw_settings = $db->query("SELECT * FROM us_password_strength")->first();
+    }
+
+    $result = array(
+      'isValid' => true,
+      'strength' => 0,
+      'errors' => []
+    );
+
+    if (!isset($pw_settings->min_length) || $pw_settings->enforce_rules == 0) {
+      $result['strength'] = 100;
+      return $result;
+    }
+
+    // Calculate the score using the dedicated function
+    $result['strength'] = userSpicePasswordScore($password, $pw_settings);
+
+    // Individual Checks
+    if (strlen($password) < $pw_settings->min_length) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must be at least " . $pw_settings->min_length . " characters long.";
+    }
+
+    if (strlen($password) > $pw_settings->max_length) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password cannot be longer than " . $pw_settings->max_length . " characters.";
+    }
+
+    if ($pw_settings->require_uppercase && !preg_match('/[A-Z]/', $password)) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must contain at least one uppercase letter.";
+    }
+
+    if ($pw_settings->require_lowercase && !preg_match('/[a-z]/', $password)) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must contain at least one lowercase letter.";
+    }
+
+    if ($pw_settings->require_numbers && !preg_match('/[0-9]/', $password)) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must contain at least one number.";
+    }
+
+    if ($pw_settings->require_symbols && !preg_match('/[^A-Za-z0-9]/', $password)) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must contain at least one symbol.";
+    }
+
+    if ($result['strength'] < $pw_settings->min_score) {
+      $result['isValid'] = false;
+      $result['errors'][] = "Password must meet the minimum strength score.";
+    }
+
+
+    return $result;
+  }
+}
+
+// This function computes the password score based on its characteristics.
+function userSpicePasswordScore($password)
+{
+  global $pw_settings, $db;
+
+  if (!isset($pw_settings->min_length)) {
+    $pw_settings = $db->query("SELECT * FROM us_password_strength")->first();
+  }
+
+  $score = 0;
+
+  // Score computation logic
+  // Adjusting the score computation logic based on password length
+  $score += (strlen($password) >= 8) ? $pw_settings->greater_eight : 0;
+  $score += (strlen($password) >= 12) ? $pw_settings->greater_twelve : 0;
+  $score += (strlen($password) > 16) ? $pw_settings->greater_sixteen : 0;
+
+  // Scoring based on character types
+  $score += (preg_match('/[A-Z]/', $password)) ? $pw_settings->uppercase_score : 0;
+  $score += (preg_match('/[a-z]/', $password)) ? $pw_settings->lowercase_score : 0;
+  $score += (preg_match('/[0-9]/', $password)) ? $pw_settings->number_score : 0;
+  $score += (preg_match('/[^A-Za-z0-9]/', $password)) ? $pw_settings->symbol_score : 0;
+
+  // Adding additional points for length, capped at 20
+  $score += min(20, strlen($password) * 2);
+
+  //if score is > 74 but is missing one of the key rules, we're going to drop it back down to 74
+  if ($score > 74) {
+    if (
+      strlen($password) < $pw_settings->min_length ||
+      strlen($password) > $pw_settings->max_length ||
+      !$pw_settings->require_lowercase ||
+      !$pw_settings->require_uppercase ||
+      !$pw_settings->require_numbers ||
+      !$pw_settings->require_symbols ||
+      !preg_match('/[a-z]/', $password) ||
+      !preg_match('/[A-Z]/', $password) ||
+      !preg_match('/[0-9]/', $password) ||
+      !preg_match('/[^A-Za-z0-9]/', $password)
+    ) {
+      $score = 74;
+    }
+  }
+
+  // Ensure the score does not exceed 100
+  if ($score > 100) {
+    $score = 100;
+  }
+
+  return $score;
 }

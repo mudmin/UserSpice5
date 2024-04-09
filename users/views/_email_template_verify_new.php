@@ -2,6 +2,9 @@
 $db = DB::getInstance();
 $query = $db->query("SELECT * FROM email");
 $results = $query->first();
+if(!isset($url)){
+  $url = "users/verify.php?new=1&email=".$email."&vericode=".$vericode;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -12,7 +15,7 @@ $results = $query->first();
 <body>
   <p><?=lang("EML_HI")?> <?=$fname;?>,</p>
   <p><?=lang("EML_EML");?></p>
-  <p><a href="<?=$results->verify_url?>users/verify.php?new=1&email=<?=$email;?>&vericode=<?=$vericode;?>" class="nounderline"><?=lang("EML_VER")?></a></p>
+  <p><a href="<?=$results->verify_url?><?=$url?>" class="nounderline"><?=lang("EML_VER")?></a></p>
   <sup><p><?=lang("EML_VER_EXP")?><?=$join_vericode_expiry?> <?=lang("T_HOURS")?>.</p></sup>
 </body>
 </html>

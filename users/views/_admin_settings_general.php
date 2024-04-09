@@ -1,7 +1,11 @@
 <?php
-$settings = $db->query("SELECT * FROM settings")->first();
+
 $hooks = getMyHooks(['page' => 'admin.php?view=general']);
 includeHook($hooks, 'pre');
+$verify_url = $db->query("SELECT verify_url FROM email")->first()->verify_url;
+$no_passwords = "This feature removes the ability for users to login with a username and password in favor of OAuth, Passkey, and Email login options. It is your responsibility to make sure you have these options configured and tested before enabling this option.";
+
+$email_login = "This feature allows users to login with their email address instead of their username and password. It is your responsibility to make sure you have the ability to send emails configured and tested before enabling this option. It requires the user to go into their email and click a magic link to sign in. While it is an extra step for the user, it removes your responsibility of storing passwords and the user's responsibility of remembering them.";
 ?>
 
 <!-- Site Settings -->
@@ -51,8 +55,8 @@ includeHook($hooks, 'pre');
               <label class="switch switch-text switch-success">
                 <div class="form-check form-switch">
                   <input id="uman_search" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="User Manager Search" <?php if ($settings->uman_search == 1) {
-                                                                                                                                              echo 'checked="true"';
-                                                                                                                                            } ?>>
+                                                                                                                                                        echo 'checked="true"';
+                                                                                                                                                      } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
@@ -196,42 +200,48 @@ includeHook($hooks, 'pre');
 
     <!-- right column -->
     <div class="col-md-6">
-      <div class="card mt-4">
-        <div class="card-header">
-          <h3>Debug Mode</h3>
-          Track down hard to find problems on your site. This causes MANY more things to be written to your logs and should only be used for short periods of time.<br>
-        </div>
-        <div class="card-body">
-          <!-- Bleeding Edge -->
-          <div class="form-group">
-            <label>Enable Debug Mode <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success"></label>
-              <a style="color:blue;" href="admin.php?view=logs&mode=debug" class="">View Debug Logs</a>
-            </span>
-            <select id="debug" class="form-control ajxnum" data-desc="Debug Mode" name="debug">
-              <option <?php if ($settings->debug == 0) {
-                        echo "selected='selected'";
-                      } ?> value="0">Off (Mode 0)</option>
-
-              <option <?php if ($settings->debug == 1) {
-                        echo "selected='selected'";
-                      } ?> value="1">On for User ID 1 Only (Mode 1)</option>
-
-              <option <?php if ($settings->debug == 2) {
-                        echo "selected='selected'";
-                      } ?> value="2">On For Everyone (Mode 2)</option>
-            </select>
-
-          </div>
-        </div>
-      </div>
 
       <div class="card mt-4">
         <div class="card-header">
           <h3>User Settings</h3>
         </div>
         <div class="card-body">
+          <!-- Remove Password Logins -->
+          <div class="form-group">
+            <label>Remove Password Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <span class="float-end offset-switch">
+              <div class="form-check form-switch">
+                <label class="switch switch-text switch-success">
+                  <input id="no_passwords" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="No Passwords Feature" <?php if ($settings->no_passwords == 1) {
+                                                                                                                                                          echo 'checked="true"';
+                                                                                                                                                        } ?>>
+              </div>
+              <span data-on="Yes" data-off="No" class="switch-label"></span>
+              <span class="switch-handle"></span>
+              </label>
+            </span>
+          </div>
+                                                                                                                                   
+          <!-- Enable Email Logins -->
+          <div class="form-group">
+            <label>Allow Passwordless Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $email_login ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
+
+  
+            <span class="float-end offset-switch">
+              <div class="form-check form-switch">
+                <label class="switch switch-text switch-success">
+                  <input id="email_login" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Email Login" <?php if ($settings->email_login == 1) {
+                                                                                                                                                echo 'checked="true"';
+                                                                                                                                              } ?>>
+              </div>
+              <span data-on="Yes" data-off="No" class="switch-label"></span>
+              <span class="switch-handle"></span>
+              </label>
+            </span>
+            <br>
+            <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="admin.php?view=email" style="color:blue;"> here</a>.</small>
+          </div>
+
 
           <!-- Force Password Reset -->
           <div class="form-group">
@@ -274,6 +284,38 @@ includeHook($hooks, 'pre');
                                   echo 'selected="selected"';
                                 } ?>>4. FName First Initial of LName</option>
             </select>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3>Debug Mode</h3>
+          Track down hard to find problems on your site. This causes MANY more things to be written to your logs and should only be used for short periods of time.<br>
+        </div>
+        <div class="card-body">
+          <!-- Bleeding Edge -->
+          <div class="form-group">
+            <label>Enable Debug Mode <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <span class="float-end offset-switch">
+              <label class="switch switch-text switch-success"></label>
+              <a style="color:blue;" href="admin.php?view=logs&mode=debug" class="">View Debug Logs</a>
+            </span>
+            <select id="debug" class="form-control ajxnum" data-desc="Debug Mode" name="debug">
+              <option <?php if ($settings->debug == 0) {
+                        echo "selected='selected'";
+                      } ?> value="0">Off (Mode 0)</option>
+
+              <option <?php if ($settings->debug == 1) {
+                        echo "selected='selected'";
+                      } ?> value="1">On for User ID 1 Only (Mode 1)</option>
+
+              <option <?php if ($settings->debug == 2) {
+                        echo "selected='selected'";
+                      } ?> value="2">On For Everyone (Mode 2)</option>
+            </select>
+
           </div>
         </div>
       </div>
@@ -358,6 +400,23 @@ includeHook($hooks, 'pre');
 <?php if (in_array($user->data()->id, $master_account)) { ?>
   <script type="text/javascript">
     $(document).ready(function() {
+
+      $('#no_passwords').change(function() {
+        if ($(this).is(':checked')) {
+          alert("<?= $no_passwords ?>");
+        }
+      });
+
+
+
+      $('#email_login').change(function() {
+
+        if ($(this).is(':checked')) {
+          alert("<?= $email_login ?>");
+        }
+
+      });
+
 
 
       $('#recapatcha_public_show').hover(function() {

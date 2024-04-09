@@ -18,6 +18,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+if($settings->no_passwords == 1){
+$user = $verify;
+$user->login();
+$abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+Redirect::to($us_url_root . $settings->redirect_uri_after_login);
+}
 ?>
 <div class="row">
   <div class="col-sm-12">

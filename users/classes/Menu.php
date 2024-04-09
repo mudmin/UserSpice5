@@ -11,9 +11,13 @@ class Menu {
   public $disabled = 0;
 
   public function __construct($id_or_name) {
+    if($id_or_name == 0) {
+      return true;
+    }
     $this->db = DB::getInstance();
     if(is_numeric($id_or_name)) {
       $col = "id";
+
     } else {
       $col = "menu_name";
     }
@@ -118,6 +122,9 @@ class Menu {
 }
 
   private function _generateHtml($items, $isDropdown = false, $level = 0) {
+    if(!isset($this->menu->id) || $this->menu->id == 0){
+      return "";
+    }
     global $abs_us_root,$us_url_root,$lang;
     $uniq = "_" . uniqid();
     // $uniq = "";

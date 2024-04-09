@@ -200,6 +200,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Velkommen til ",
 	"JOIN_THANKS"		=> "Takk for registrering!",
 	"JOIN_HAVE"			=> "Ha mind ",
+	"JOIN_LOWER"	=> " liten bokstav",
+	"JOIN_SYMBOL"		=> " symbol",
 	"JOIN_CAP"			=> " stor bokstav",
 	"JOIN_TWICE"		=> "Være tastet riktig to ganger",
 	"JOIN_CLOSED"		=> "Beklageligvis er registrering for tiden deaktivert. Vennlingst kontakt administratoren av nettsiden dersom du har spørsmål eller bekymringer.",
@@ -207,6 +209,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Jeg aksepterer brukervilkårene",
 	"JOIN_CHANGED"	=> "Våre brukervilkår har blitt endret",
 	"JOIN_ACCEPT" 	=> "Aksepter brukervilkårene og fortsett",
+	"JOIN_SCORE" => "Poeng:",
+	"JOIN_INVALID_PW" => "Passordet ditt er ugyldig",
+
 ));
 
 //Sessions
@@ -271,18 +276,24 @@ $lang = array_merge($lang, array(
 
 //Redirect Messages - These get a plus between each word
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "Sorry.Two+factor+is+not+enabled+at+this+time",
-	"REDIR_2FA_EN"				=> "2+Factor+Authentication+Enabled",
-	"REDIR_2FA_DIS"				=> "2+Factor+Authentication+Disabled",
-	"REDIR_2FA_VER"				=> "2+Factor+Authentication+Verified+and+Enabled",
-	"REDIR_SOM_TING_WONG" => "Something+went+wrong.+Please+try+again.",
-	"REDIR_MSG_NOEX"			=> "That+thread+does+not+belong+to+you+or+does+not+exist.",
-	"REDIR_UN_ONCE"				=> "Username+has+already+been+changed+once.",
-	"REDIR_EM_SUCC"				=> "Email+Updated+Successfully",
+	"REDIR_2FA" => "Beklager. To-faktor er ikke aktivert på dette tidspunktet.",
+	"REDIR_2FA_EN" => "To-faktor autentisering aktivert",
+	"REDIR_2FA_DIS" => "To-faktor autentisering deaktivert",
+	"REDIR_2FA_VER" => "To-faktor autentisering bekreftet og aktivert",
+	"REDIR_SOM_TING_WONG" => "Noe gikk galt. Vennligst prøv igjen.",
+	"REDIR_MSG_NOEX" => "Denne tråden tilhører ikke deg eller eksisterer ikke.",
+	"REDIR_UN_ONCE" => "Brukernavnet har allerede blitt endret én gang.",
+	"REDIR_EM_SUCC" => "E-post oppdatert vellykket",
 ));
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Logg inn med:",
+	"EML_FEATURE_DISABLED" => "Denne funksjonen er deaktivert",
+	"EML_PASSWORDLESS_SENT" => "Vennligst sjekk e-posten din for en lenke for å logge inn.",
+	"EML_PASSWORDLESS_SUBJECT" => "Vennligst bekreft e-posten din for å logge inn.",
+	"EML_PASSWORDLESS_BODY" => "Vennligst bekreft din e-postadresse ved å klikke på lenken nedenfor. Du vil bli automatisk logget inn.",
+
 	"EML_CONF"			=> "Bekreft e-postadresse",
 	"EML_VER"				=> "Verifiser e-posten din",
 	"EML_CHK"				=> "E-postforespørsel mottatt. Vennligst sjekk e-posten din for å utføre verifisering. Se i spam og søppelpost ettersom verifiseringlenken utgår om ",

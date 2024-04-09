@@ -198,6 +198,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"        => "ようこそ",
 	"JOIN_THANKS"     => "登録ありがとうございます！",
 	"JOIN_HAVE"       => "少なくとも",
+	"JOIN_LOWER"	=> "小文字のアルファベット",
+	"JOIN_SYMBOL"		=> "記号",
 	"JOIN_CAP"        => "大文字のアルファベット",
 	"JOIN_TWICE"      => "2回正しく入力されている必要があります",
 	"JOIN_CLOSED"     => "申し訳ありませんが、現在登録は無効になっています。ご質問や懸念がある場合は、サイト管理者にお問い合わせください。",
@@ -205,6 +207,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC"   => "ユーザー登録規約に同意する",
 	"JOIN_CHANGED"    => "規約が変更されました",
 	"JOIN_ACCEPT"     => "ユーザー登録規約に同意して続行",
+	"JOIN_SCORE" => "スコア：",
+	"JOIN_INVALID_PW" => "パスワードが無効です",
+
 ));
 
 //Sessions
@@ -281,6 +286,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "次でサインイン：",
+	"EML_FEATURE_DISABLED" => "この機能は無効です",
+	"EML_PASSWORDLESS_SENT" => "ログイン用のリンクをメールで確認してください。",
+	"EML_PASSWORDLESS_SUBJECT" => "ログインするにはメールを確認してください。",
+	"EML_PASSWORDLESS_BODY" => "以下のリンクをクリックしてメールアドレスを確認してください。自動的にログインされます。",
+
 	"EML_CONF"      => "メールの確認",
 	"EML_VER"       => "メールの確認",
 	"EML_CHK"       => "メールリクエストが受信されました。確認を行うためにメールを確認してください。確認リンクの有効期限は ",
@@ -320,20 +331,20 @@ $lang = array_merge($lang, array(
 
 //User Settings
 $lang = array_merge($lang, array(
-"SET_PIN"           => "PINのリセット",
-"SET_WHY"           => "なぜこれを変更できないのですか？",
-"SET_PW_MATCH"      => "新しいパスワードと一致する必要があります",
-"SET_PIN_NEXT"      => "次に認証が必要な際に新しいPINを設定できます",
-"SET_UPDATE"        => "ユーザー設定を更新してください",
-"SET_NOCHANGE"      => "管理者はユーザー名の変更を無効にしました。",
-"SET_ONECHANGE"     => "管理者はユーザー名の変更を一度だけ許可し、既に変更されています。",
-"SET_GRAVITAR"      => "<strong>プロフィール画像を変更したいですか？ </strong><br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> を訪れ、このサイトで使用したメールと同じメールでアカウントを設定してください。数百万のサイトで動作します。速くて簡単です！",
-"SET_NOTE1"         => "<p><strong>注意：</strong> メールを更新するための保留中のリクエストがあります",
-"SET_NOTE2"         => "。</p><p>このリクエストを完了するために確認メールを使用してください。</p>
+	"SET_PIN"           => "PINのリセット",
+	"SET_WHY"           => "なぜこれを変更できないのですか？",
+	"SET_PW_MATCH"      => "新しいパスワードと一致する必要があります",
+	"SET_PIN_NEXT"      => "次に認証が必要な際に新しいPINを設定できます",
+	"SET_UPDATE"        => "ユーザー設定を更新してください",
+	"SET_NOCHANGE"      => "管理者はユーザー名の変更を無効にしました。",
+	"SET_ONECHANGE"     => "管理者はユーザー名の変更を一度だけ許可し、既に変更されています。",
+	"SET_GRAVITAR"      => "<strong>プロフィール画像を変更したいですか？ </strong><br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> を訪れ、このサイトで使用したメールと同じメールでアカウントを設定してください。数百万のサイトで動作します。速くて簡単です！",
+	"SET_NOTE1"         => "<p><strong>注意：</strong> メールを更新するための保留中のリクエストがあります",
+	"SET_NOTE2"         => "。</p><p>このリクエストを完了するために確認メールを使用してください。</p>
     <p>新しい確認メールが必要な場合は、上記のメールを再入力してリクエストを再送信してください。</p>",
 
-"SET_PW_REQ"        => "パスワード、メールの変更、またはPINのリセットには必須です",
-"SET_PW_REQI"       => "パスワードを変更するには必須です",
+	"SET_PW_REQ"        => "パスワード、メールの変更、またはPINのリセットには必須です",
+	"SET_PW_REQI"       => "パスワードを変更するには必須です",
 ));
 
 //Errors

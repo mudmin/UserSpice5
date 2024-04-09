@@ -33,60 +33,69 @@ class Input {
 		}
 	}
 
-	public static function get($item){
+	public static function get($item, $trim = true, $fallback = false){
 		if (isset($_POST[$item])) {
 			/*
 			If the $_POST item is an array, process each item independently, and return array of sanitized items.
 			*/
-			return self::sanitize($_POST[$item]);
+			return self::sanitize($_POST[$item], $trim, $fallback);
 
 		} elseif(isset($_GET[$item])){
 			/*
 			If the $_GET item is an array, process each item independently, and return array of sanitized items.
 			*/
-			return self::sanitize($_GET[$item]);
+			return self::sanitize($_GET[$item], $trim, $fallback);
 		}
 		return '';
 	}
 
-	public static function sanitize($item){
+	public static function sanitize($item, $trim = true, $fallback = false){
 		if($item == []){
 			return $item;
 		}
 		if (is_array($item)){
 			foreach ($item as $key => $itemValue){
-				$postItems[$key]=self::sanitize($itemValue);
+				$postItems[$key]=self::sanitize($itemValue, $trim, $fallback);
 			}
 			return $postItems;
 		}elseif(is_object($item)){
 			$item = (array)$item;
 			foreach ($item as $key => $itemValue){
-				$postItems[$key]=self::sanitize($itemValue);
+				$postItems[$key]=self::sanitize($itemValue, $trim, $fallback);
 			}
 			return (object)$postItems;
 		}else{
 			if(is_bool($item)){
 				return $item;
 			}else{
-			return trim(htmlentities($item, ENT_QUOTES, 'UTF-8'));
+			//optional trim and fallback from htmlspecialchars to htmlentities
+				if($fallback){
+					$item = htmlentities($item, ENT_QUOTES, 'UTF-8');
+				}else{
+			 		$item = htmlspecialchars($item, ENT_QUOTES, 'UTF-8');
+				}
+				if($trim){
+					return trim($item);
+				}
+				return $item;
 		}
 	}
 }
 
-public static function recursive($object){
+public static function recursive($object, $trim = true, $fallback = false){
 	foreach($object as $key => $val){
 		if(is_array($val)){
-			$object[$key] = self::recursive($val);
+			$object[$key] = self::recursive($val, $trim, $fallback);
 		} else {
-			$object[$key] = self::sanitize($val);
+			$object[$key] = self::sanitize($val, $trim, $fallback);
 		}
 	}
 	return $object;
 }
 
-public static function json($json, $associative = false, $encode = false) {
+public static function json($json, $associative = false, $encode = false, $trim = true, $fallback = false) {
 	if(is_string($json)) $json = json_decode($json, true);
-	$cleaned = self::recursive($json);
+	$cleaned = self::recursive($json, $trim, $fallback);
 	$encoded = json_encode($cleaned);
 	if($encode) return $encoded;
 	return json_decode($encoded, $associative);

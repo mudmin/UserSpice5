@@ -164,7 +164,7 @@ if ($settings->force_ssl==1){
 if(isset($_SESSION['us_lang'])){ $html_lang = substr($_SESSION['us_lang'],0,2);}else{$html_lang = 'en';}
 
 
-if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $user->data()->force_pr == 1){
+if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $currentPage != 'logout.php' && $user->data()->force_pr == 1){
 	$resetMsg = lang("VER_PLEASE");
 	usError($resetMsg);
 	Redirect::to($us_url_root.'users/user_settings.php');

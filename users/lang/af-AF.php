@@ -196,6 +196,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "Welkom by ",
 	"JOIN_THANKS"		=> "Dankie dat u geregistreer het!",
 	"JOIN_HAVE"		=> "Het ten minste ",
+	"JOIN_LOWER"		=> " kleinletter",
+	"JOIN_SYMBOL"		=> " simbool",
 	"JOIN_CAP"		=> " hoofletter",
 	"JOIN_TWICE"		=> "Word twee keer korrek getik",
 	"JOIN_CLOSED"		=> "Registrasie is op hierdie stadium ongelukkig uitgeskakel. Kontak asseblief die webwerfadministrateur as u enige vrae of probleme het.",
@@ -203,6 +205,8 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" 	=> "Ek aanvaar gebruikersbepalings en -voorwaardes",
 	"JOIN_CHANGED"		=> "Ons bepalings het verander",
 	"JOIN_ACCEPT" 		=> "Aanvaar gebruikersbepalings en gaan voort",
+	"JOIN_SCORE" => "Punte:",
+	"JOIN_INVALID_PW" => "Jou wagwoord is ongeldig",
 ));
 
 //Sessions
@@ -268,18 +272,26 @@ $lang = array_merge($lang, array(
 //Redirect Messages - These get a plus between each word
 // It seems pointless to me to translate these. Feel free to contribute, Voel Vry!
 $lang = array_merge($lang, array(
-	"REDIR_2FA"		=> "Sorry.Two+factor+is+not+enabled+at+this+time",
-	"REDIR_2FA_EN"		=> "2+Factor+Authentication+Enabled",
-	"REDIR_2FA_DIS"		=> "2+Factor+Authentication+Disabled",
-	"REDIR_2FA_VER"		=> "2+Factor+Authentication+Verified+and+Enabled",
-	"REDIR_SOM_TING_WONG"	=> "Something+went+wrong.+Please+try+again.",
-	"REDIR_MSG_NOEX"	=> "That+thread+does+not+belong+to+you+or+does+not+exist.",
-	"REDIR_UN_ONCE"		=> "Username+has+already+been+changed+once.",
-	"REDIR_EM_SUCC"		=> "Email+Updated+Successfully",
+	"REDIR_2FA"             => "Jammer. Twee+factor+is+nou+nie+geaktiveer+nie.",
+	"REDIR_2FA_EN"          => "2+Factor+Verifikasie+Geaktiveer",
+	"REDIR_2FA_DIS"         => "2+Factor+Verifikasie+Gedeaktiveer",
+	"REDIR_2FA_VER"         => "2+Factor+Verifikasie+Geverifieer+en+Geaktiveer",
+	"REDIR_SOM_TING_WONG"   => "Iets+het+verkeerd+geloop.+Probeer+asseblief+weer.",
+	"REDIR_MSG_NOEX"        => "Daardie+draad+behoort+niet+aan+jou+nie+of+bestaan+nie.",
+	"REDIR_UN_ONCE"         => "Gebruikersnaam+is+reeds+een+keer+verander.",
+	"REDIR_EM_SUCC"         => "E-pos+Suksesvol+Opgedateer",
+
 ));
 
 //Emails
 $lang = array_merge($lang, array(
+
+	"EML_SIGN_IN_WITH" => "Teken aan met:",
+	"EML_FEATURE_DISABLED" => "Hierdie funksie is uitgeskakel",
+	"EML_PASSWORDLESS_SENT" => "Kyk asseblief na jou e-pos vir 'n skakel om in te teken.",
+	"EML_PASSWORDLESS_SUBJECT" => "Verifieer asseblief jou e-pos om in te teken.",
+	"EML_PASSWORDLESS_BODY" => "Verifieer asseblief jou e-posadres deur op die skakel hieronder te klik. Jy sal outomaties ingeteken word.",
+
 	"EML_CONF"		=> "Bevestig e-posadres",
 	"EML_VER"		=> "Verifieer u e-posadres",
 	"EML_CHK"		=> "E-posversoek ontvang. Gaan asseblief u e-pos na om verifikasie uit te voer. Gaan seker dat u die strooipos van spam en rommel nagaan, aangesien die verifikasieskakel verval ",

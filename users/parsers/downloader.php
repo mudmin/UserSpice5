@@ -1,7 +1,7 @@
 <?php
 include "../init.php";
 $db = DB::getInstance();
-$settings = $db->query("SELECT * FROM settings")->first();
+
 
 if (!isset($user) || (!in_array($user->data()->id, $master_account))) {
   die("Permission denied");

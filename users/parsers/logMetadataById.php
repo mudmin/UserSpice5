@@ -1,7 +1,7 @@
 <?php
 require_once '../init.php';
 $db = DB::getInstance();
-$settings = $db->query('SELECT * FROM settings')->first();
+
 if ((!isset($user) || !$user->isLoggedIn()) || !hasPerm([2], $user->data()->id) ) {
     die('You do not have permission to be here.');
 }

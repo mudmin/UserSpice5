@@ -1,6 +1,8 @@
 <?php
 $hooks = getMyHooks(['page' => 'admin.php?view=user']);
 includeHook($hooks, 'pre');
+$pw_settings = $db->query("SELECT * FROM us_password_strength")->first();
+
 $validation = new Validate();
 //PHP Goes Here!
 $email = $db->query('SELECT email_act FROM email')->first();
@@ -26,6 +28,32 @@ if (!empty($_POST)) {
   } else {
     includeHook($hooks, 'post');
     $db->update('users', $userdetails->id, ['modified' => date("Y-m-d")]);
+
+    if(!empty($_POST['addTag'])){
+      $add = Input::get('addTag');
+    
+      foreach($add as $a){
+        $tagQ = $db->query("SELECT * FROM plg_tags WHERE id = ?",[$a]);
+        $tagC = $tagQ->count();
+        if($tagC < 1){  continue;  }
+        $tag = $tagQ->first();
+        $db->query("DELETE FROM plg_tags_matches WHERE user_id = ? AND tag_id = ?",[$userdetails->id,$a]);
+        $db->insert("plg_tags_matches",[
+          'tag_id'=>$a,
+          'tag_name'=>$tag->tag,
+          'user_id'=>$userdetails->id,
+        ]);
+      }
+      usSuccess("Tags Updated");
+    }
+    
+    if(!empty($_POST['removeTag'])){
+      $remove = Input::get('removeTag');
+      foreach($remove as $r){
+        $db->query("DELETE FROM plg_tags_matches WHERE id = ?",[$r]);
+      }
+      usSuccess("Tags Removed");
+    }
 
     if (!empty($_POST['delete'])) {
       if ($userdetails->id == $user->data()->id || in_array($userdetails->id, $master_account)) {
@@ -163,7 +191,7 @@ if (!empty($_POST)) {
       } else {
 ?>
   <?php if (!$validation->errors() == '') {
-           display_errors($validation->errors());
+          display_errors($validation->errors());
         } ?>
 <?php
       }
@@ -186,7 +214,7 @@ if (!empty($_POST)) {
 
       if (!$validation->errors()) {
         //process
-        $new_password_hash = password_hash(Input::get('pwx', true), PASSWORD_BCRYPT, ['cost' => 12]);
+        $new_password_hash = password_hash(Input::get('pwx', true), PASSWORD_BCRYPT, ['cost' => 13]);
         $user->update(['password' => $new_password_hash], $userId);
         $successes[] = 'Password updated.';
         logger($user->data()->id, 'User Manager', "Updated password for $userdetails->fname.");
@@ -213,7 +241,7 @@ if (!empty($_POST)) {
       }
     }
     $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->reset_vericode_expiry minutes", strtotime(date('Y-m-d H:i:s'))));
-    $vericode = randomstring(15);
+    $vericode = uniqid().randomstring(15);
     $db->update('users', $userdetails->id, ['vericode' => $vericode, 'vericode_expiry' => $vericode_expiry]);
     if (isset($_POST['sendPwReset'])) {
       $params = [
@@ -252,7 +280,7 @@ if (!empty($_POST)) {
         $successes[] = 'Email Updated';
         logger($user->data()->id, 'User Manager', "Updated email for $userdetails->fname from $userdetails->email to $email.");
       } else {
-       
+
 ?>
   <?php if (!$validation->errors() == '') {
           display_errors($validation->errors());
@@ -373,20 +401,18 @@ if (!empty($_POST)) {
     }
     $userdetails = $userdetailsQ->first();
   }
-  if(!$validation->errors() == ''){
+  if (!$validation->errors() == '') {
 
-    foreach($validation->errors()  as $key=>$e){
-        $found = false;
-        foreach($errors as $k=>$v){
-          if($v == $e){
-            $found = true;
-          }
+    foreach ($validation->errors()  as $key => $e) {
+      $found = false;
+      foreach ($errors as $k => $v) {
+        if ($v == $e) {
+          $found = true;
         }
-        if(!$found){
-          $errors[] = $e;
-        }
-
-
+      }
+      if (!$found) {
+        $errors[] = $e;
+      }
     }
   }
 
@@ -429,7 +455,7 @@ if ($user->data()->cloak_allowed != 1) {
   $rsn = "Your account has cloaking disabled. Enable it <a href='?admin.php&view=user&id=$cloakId'>here</a>";
 } elseif ($userdetails->permissions == 0) {
   $rsn = "This user is blocked from the site. Cloaking is disabled.";
-} elseif ($userdetails->email_verified == 0){
+} elseif ($userdetails->email_verified == 0) {
   $rsn = "This user has not verified their email. Cloaking is disabled.";
 }
 
@@ -448,7 +474,7 @@ includeHook($hooks, 'body'); ?>
       <span id="fname"><?= $userdetails->fname; ?></span>
       <span id="lname"><?= $userdetails->lname; ?></span>
       <span id="slash"> - </span>
-      <span id="username"><?= $userdetails->username; ?></span>
+      <span id="ud-username"><?= $userdetails->username; ?></span>
     </h3>
 
     <p><label>User ID: <?= $userdetails->id; ?>
@@ -561,6 +587,45 @@ includeHook($hooks, 'body'); ?>
       <div class="form-group">
         <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email? Will expire in <?= $settings->reset_vericode_expiry; ?> minutes.</label><br>
       </div>
+      <?php
+      $tagsQ = $db->query("SELECT * FROM plg_tags ORDER BY tag");
+      $tagsC = $tagsQ->count();
+      if ($tagsC > 0) {
+        $tags = $tagsQ->results();
+        $mytags = $db->query("SELECT * FROM plg_tags_matches WHERE user_id = ?", [$userdetails->id])->results();
+        $usedtags = [];
+      ?>
+        <div class="row">
+          <div class="col-12 col-sm-6">
+            <div class="panel-heading"><strong>Current Tags</strong></div>
+            <div class="panel-body">
+              <?php foreach ($mytags as $t) {
+                $usedtags[] = $t->tag_id;
+              ?>
+                <label class="normal">
+                  <input type="checkbox" name="removeTag[]" value="<?= $t->id ?>"> <?= $t->tag_name; ?>
+                </label><br>
+              <?php } ?>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="panel-heading"><strong>Add Tags</strong></div>
+            <div class="panel-body">
+              <?php foreach ($tags as $t) {
+                if (in_array($t->id, $usedtags)) {
+                  continue;
+                }
+              ?>
+                <label class="normal">
+                  <input type="checkbox" name="addTag[]" value="<?= $t->id ?>"> <?= $t->tag; ?>
+                </label><br>
+              <?php } ?>
+            </div>
+          </div>
+        </div>
+        <br>
+
+      <?php } ?>
 
       <?php includeHook($hooks, 'form'); ?>
       <div class="row">
@@ -602,8 +667,16 @@ includeHook($hooks, 'body'); ?>
       </div>
     </div>
     <div class="col-12 col-sm-6">
-      <div class="form-group">
-        <label>New Password (<?= $settings->min_pw; ?> char min, <?= $settings->max_pw; ?> max.)</label>
+      <div class="row">
+        <?php if($pw_settings->meter_active == 1){
+          $secondCol = "col-6";
+        }else{
+          $secondCol = "col-12";
+        } ?>
+       
+        <div class="<?=$secondCol?>">
+        <div class="form-group">
+        <label>New Password</label>
         <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) { ?>disabled<?php } ?> />
       </div>
 
@@ -611,7 +684,22 @@ includeHook($hooks, 'body'); ?>
         <label>Confirm Password</label>
         <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) { ?>disabled<?php } ?> />
       </div>
+        </div>
+        <?php if($pw_settings->meter_active == 1){ ?>
+        <div class="col-6">
+        <?php 
+              if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php')) {
+                include($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php');
+              } else {
+                include($abs_us_root . $us_url_root . 'users/includes/password_meter.php');
+              }
+            ?>
+            <small class="text-muted">These rules are not enforced</small>
+        </div>
+        <?php } ?>
+      </div>
 
+    
       <div class="form-group">
         <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
         <select name="cloak_allowed" class="form-control">
@@ -671,8 +759,8 @@ includeHook($hooks, 'body'); ?>
     </div>
   </div>
 </form>
-<?php 
-includeHook($hooks, 'bottom'); 
+<?php
+includeHook($hooks, 'bottom');
 if ($protectedprof == 1) { ?>
   <script>
     $('#adminUser').find('input:enabled, select:enabled, textarea:enabled').attr('disabled', 'disabled');

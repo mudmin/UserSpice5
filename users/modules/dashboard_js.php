@@ -32,10 +32,12 @@
 
       var field = $(this).attr("id"); //the id in the input tells which field to update
       var desc = $(this).attr("data-desc"); //For messages
+      var table = $(this).attr("data-table");
       var formData = {
         'value': value,
         'field': field,
         'desc': desc,
+        'table': table,
         'type': 'toggle',
         'token': "<?= Token::generate() ?>",
       };
@@ -76,10 +78,12 @@
 
       var field = $(this).attr("id"); //the id in the input tells which field to update
       var desc = $(this).attr("data-desc"); //For messages
+      var table = $(this).attr("data-table");
       var formData = {
         'value': value,
         'field': field,
         'desc': desc,
+        'table': table,
         'type': 'num',
         'token': "<?= Token::generate() ?>",
       };
@@ -102,10 +106,12 @@
 
       var field = $(this).attr("id"); //the id in the input tells which field to update
       var desc = $(this).attr("data-desc"); //For messages
+      var table = $(this).attr("data-table");
       var formData = {
         'value': value,
         'field': field,
         'desc': desc,
+        'table': table,
         'type': 'txt',
         'token': "<?= Token::generate() ?>",
       };

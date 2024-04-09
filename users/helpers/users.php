@@ -22,7 +22,7 @@ if (!function_exists('userIdExists')) {
 if (!function_exists('fetchAllUsers')) {
     function fetchAllUsers($orderBy = null, $desc = false, $disabled = true)
     {
-        $db = DB::getInstance();
+        global $db;
         $q = 'SELECT * FROM users';
         if (!$disabled) {
             $q .= ' WHERE permissions=1';
@@ -45,7 +45,7 @@ if (!function_exists('fetchAllUsers')) {
 if (!function_exists('fetchUser')) {
   function fetchUser($id)
   {
-    $db = DB::getInstance();
+    global $db;
     $query = $db->query("SELECT * FROM users WHERE id = ?", [$id]);
     if ($query->count() > 0) {
       return $query->first();
@@ -60,7 +60,7 @@ if (!function_exists('fetchUser')) {
 if (!function_exists('fetchUserDetails')) {
   function fetchUserDetails($column = null, $term = null, $id = null)
   {
-    $db = DB::getInstance();
+    global $db;
     if($column == null || $column == ""){
       $column = "id";
     }
@@ -83,8 +83,8 @@ if (!function_exists('fetchUserDetails')) {
 if (!function_exists('deleteUsers')) {
     function deleteUsers($users)
     {
-        global $abs_us_root, $us_url_root;
-        $db = DB::getInstance();
+        global $db, $abs_us_root, $us_url_root;
+
         $i = 0;
         foreach ($users as $id) {
             $query1 = $db->query('DELETE FROM users WHERE id = ?', [$id]);
@@ -103,7 +103,7 @@ if (!function_exists('echouser')) {
     function echouser($id, $echoType = null, $return = false)
     {
 
-        $db = DB::getInstance();
+        global $db, $settings;
         if($id == "" || $id == 0){
           $string = "Guest";
           if($return){
@@ -118,8 +118,6 @@ if (!function_exists('echouser')) {
         if ($echoType !== null) {
             $echoType = (int) $echoType;
         } else {
-            $settingsQ = $db->query('SELECT echouser FROM settings');
-            $settings = $settingsQ->first();
             $echoType = $settings->echouser;
         }
         $string = "Unknown";
@@ -175,7 +173,7 @@ if (!function_exists('echouser')) {
 if (!function_exists('echousername')) {
     function echousername($id)
     {
-        $db = DB::getInstance();
+        global $db;
         $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
         $count = $query->count();
         if ($count > 0) {
@@ -192,10 +190,13 @@ if (!function_exists('updateUser')) {
     //Update User
     function updateUser($column, $id, $value)
     {
-        $db = DB::getInstance();
+        global $db, $user;
+        if(isset($user->data()->column)){ //check for a valid column
         $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
-
         return $result;
+        }else{
+          return false;
+        }
     }
 }
 
@@ -203,6 +204,7 @@ if (!function_exists('fetchUserName')) {
     //Fetchs CONCAT of Fname Lname
     function fetchUserName($username = null, $token = null, $id = null)
     {
+        global $db;
         if ($username != null) {
             $column = 'username';
             $data = $username;
@@ -210,8 +212,8 @@ if (!function_exists('fetchUserName')) {
             $column = 'id';
             $data = $id;
         }
-        $db = DB::getInstance();
-        $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = $data LIMIT 1");
+
+        $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = ? LIMIT 1",[$data]);
         $count = $query->count();
         if ($count > 0) {
             $results = $query->first();
@@ -237,7 +239,7 @@ if (!function_exists('isAdmin')) {
 if (!function_exists('name_from_id')) {
     function name_from_id($id)
     {
-        $db = DB::getInstance();
+        global $db;
         $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
         $count = $query->count();
         if ($count > 0) {
@@ -247,5 +249,255 @@ if (!function_exists('name_from_id')) {
         } else {
             return '-';
         }
+    }
+}
+
+
+//checks if a user has a tag by either tag id or tag name (case sensitive)
+if (!function_exists("hasTag")) {
+  function hasTag($tag, $user_id = "")
+  {
+    global $db, $user;
+ 
+    if ($user_id == "") {
+      if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
+        $user_id = $user->data()->id;
+      }
+    }
+ 
+    if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
+      return false;
+    }
+ 
+    if (is_numeric($tag)) {
+      $c = $db->query("SELECT * FROM plg_tags_matches WHERE tag_id = ? AND user_id = ?", [$tag, $user_id])->count();
+      if ($c < 1) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      $c = $db->query("SELECT * FROM plg_tags_matches WHERE tag_name = ? AND user_id = ?", [$tag, $user_id])->count();
+      if ($c < 1) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+ 
+//user must have at least one of the tags in the array
+if(!function_exists("hasOneTag")){
+  function hasOneTag($tags, $user_id = ""){
+    global $db, $user;
+    if ($user_id == "") {
+      if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
+        $user_id = $user->data()->id;
+      }
+    }
+ 
+    if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
+      return false;
+    }
+ 
+    if(!is_array($tags)){
+      return false;
+    }
+ 
+    foreach($tags as $t){
+      if(hasTag($t, $user_id)){
+        return true;
+      }
+    }
+    return false;
+  }
+}
+ 
+//user must have all of the tags in the array
+if(!function_exists("hasAllTags")){
+  function hasAllTags($tags, $user_id = ""){
+    global $db, $user;
+    if ($user_id == "") {
+      if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
+        $user_id = $user->data()->id;
+      }
+    }
+ 
+    if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
+      return false;
+    }
+ 
+    if(!is_array($tags)){
+      return false;
+    }
+ 
+    foreach($tags as $t){
+      if(!hasTag($t, $user_id)){
+        return false;
+      }
+    }
+    return true;
+  }
+}
+ 
+ 
+//returns an array of users with a given tag by tag name or id
+if (!function_exists("usersWithTag")) {
+  function usersWithTag($tag)
+  {
+    $db = DB::getInstance();
+    $users = [];
+    if (is_numeric($tag)) {
+      $q = $db->query("SELECT user_id FROM plg_tags_matches WHERE tag_id = ?", [$tag])->results();
+      foreach ($q as $t) {
+        $users[] = $t->user_id;
+      }
+      return $users;
+    } else {
+      $q = $db->query("SELECT user_id FROM plg_tags_matches WHERE tag_name = ?", [$tag])->results();
+      foreach ($q as $t) {
+        $users[] = $t->user_id;
+      }
+      return $users;
+    }
+    return $users;
+  }
+}
+ 
+
+if (!function_exists('socialLogin')) {
+    function socialLogin($email, $username, $idArray, $fields)
+    {
+        global $db, $settings, $abs_us_root, $us_url_root;
+
+        $idQuery = "";
+        foreach ($idArray as $key => $value) {
+            $idQuery .= " OR $key = ?";
+        }
+        // Handle no registration allowed, verify email already exists
+        if ($settings->registration == 0) {
+            $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
+            if ($findExistingUS->count() === 0) {
+                session_destroy();
+                Redirect::to($us_url_root . 'users/join.php');
+                die();
+            }
+        }
+
+        //Handle already existing UserSpice account with matching email
+        $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
+        if ($findExistingUS->count() > 0) {
+            $user = new User($findExistingUS->first()->id);
+            $date = date('Y-m-d H:i:s');
+            $db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $user->data()->id]);
+            $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+            $db->insert('logs', ['logdate' => $date, 'user_id' => $user->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
+            $ip = ipCheck();
+            $q = $db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
+            $c = $q->count();
+            if ($c < 1) {
+                $db->insert('us_ip_list', [
+                    'user_id' => $user->data()->id,
+                    'ip' => $ip,
+                ]);
+            } else {
+                $f = $q->first();
+                $db->update('us_ip_list', $f->id, [
+                    'user_id' => $user->data()->id,
+                    'ip' => $ip,
+                ]);
+            }
+
+            $user->update($fields);
+
+            // Handle new user
+        } else {
+            $user = new User();
+
+            if (isset($_SESSION['us_lang'])) {
+                $newLang = $_SESSION['us_lang'];
+            } else {
+                $newLang = $settings->default_language;
+            }
+            $date = date("Y-m-d H:i:s");
+            $defaultFields = [
+                'username' => generateUsername($username, $fields['fname'] ?? "", $fields['lname'] ?? "", $fields['email'] ?? ""),
+                'email' => $email,
+                'password' => null,
+                'permissions' => 1,
+                'join_date' => date('Y-m-d H:i:s'),
+                'oauth_tos_accepted' => false,
+                'language' => $newLang,
+                'logins' => 1,
+                'join_date' => $date,
+                'last_login' => $date,
+                'email_verified' => 1,
+            ];
+
+            $fields = array_merge($defaultFields, $fields);
+
+            $activeCheck = $db->query('SELECT active FROM users');
+            if (!$activeCheck->error()) {
+                $fields['active'] = 1;
+            }
+
+            $theNewId = $user->create($fields);
+            $user->find($theNewId);
+
+            if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {
+                include $abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php';
+            }
+
+            logger($theNewId, 'User', 'Registration completed using Social Login.');
+        }
+        $user->login();
+        $_POST['redirect'] = $_SESSION['redirect'];
+        $redirect = Input::get('redirect');
+        $_POST['dest'] = $_SESSION['dest'];
+        $dest = sanitizedDest('dest');
+
+        $hooks = getMyHooks(['page' => 'loginSuccess']);
+        includeHook($hooks, 'body');
+
+        if (!empty($dest)) {
+            if (!empty($redirect) || $redirect !== '') {
+                Redirect::to($redirect);
+            } else {
+                Redirect::to($dest);
+            }
+        }
+        if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php ')) {
+            require_once $abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php ';
+        }
+        if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+            require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+        }
+
+        Redirect::to($settings->redirect_uri_after_login);
+    }
+}
+
+if (!function_exists('generateUsername')) {
+    function generateUsername($username, $first, $last, $email)
+    {
+        global $db, $settings;
+        if ($username !== null) {
+            $count = $db->query("SELECT * FROM users WHERE username = ?", [$username])->count();
+            if ($count == 0) {
+                return $username;
+            }
+        }
+
+        if ($settings->auto_assign_un == 1) {
+            $username = username_helper($first, $last, $email);
+            if (!$username) {
+                $username = null;
+            }
+        } else {
+            $username = $email;
+        }
+        return $username;
     }
 }

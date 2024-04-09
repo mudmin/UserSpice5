@@ -2,8 +2,7 @@
 //NOTE: This also serves as the reference file for how to do One Click Edit with UserSpice. See comments below.
   require_once '../init.php';
   $db = DB::getInstance();
-
-  $settings = $db->query("SELECT * FROM settings")->first();
+  
   if (!isset($user) || (!hasPerm([2], $user->data()->id) ) ) {
   die("You do not have permission to be here.");
   }
@@ -20,8 +19,37 @@ $type = Input::get('type');
 $field = Input::get('field');
 $value = Input::get('value');
 $desc = Input::get('desc');
+$table = Input::get('table');
 $token = Input::get('token');
+if($table == ""){
+  $table = "settings";
+}elseif(!substr($table,0,4) == "plg_"){
+  $table = "settings";
+}else{
+  if(isset($config['mysql']['db'])){
+    $dbname = $config['mysql']['db'];
+  }else{
+    die("no db name");
+  }
+  
+  $query = $db->query("SELECT table_name 
+  FROM information_schema.tables
+  WHERE table_schema = '$dbname'
+  AND table_name LIKE 'plg%';")->results();
 
+  $whitelist = ['settings',"us_password_strength"];
+  foreach($query as $q){
+    $whitelist[] = $q->table_name;
+  }
+  if(!in_array($table,$whitelist)){
+    $msg['success'] = "false";
+    $msg['msg'] = $desc." Not Updated! Illegal table specified";
+    echo json_encode($msg); die;
+  }
+
+
+}
+$current = $db->query("SELECT * FROM $table")->first();
 $hooks =  getMyHooks(['page'=>'admin_settings.php']);
 includeHook($hooks,'pre');
 
@@ -33,13 +61,13 @@ if($type == 'resetPW'){
 }
 if($type == 'toggle'){
   //check for tomfoolery and make sure the old option was numeric
-  if(is_numeric($settings->$field)){
+  if(is_numeric($current->$field)){
     if($value == 'true'){
       $value = 1;
     }else{
       $value = 0;
     }
-    $db->update('settings',1,[$field=>$value]);
+    $db->update($table,1,[$field=>$value]);
     $msg['success'] = "true";
     $msg['msg'] = $desc." Updated!";
   }else{
@@ -50,8 +78,8 @@ if($type == 'toggle'){
 
 if($type == 'num'){
   //check for tomfoolery and make sure the old option was numeric
-  if(is_numeric($settings->$field)){
-    $db->update('settings',1,[$field=>$value]);
+  if(is_numeric($current->$field)){
+    $db->update($table,1,[$field=>$value]);
     $msg['success'] = "true";
     $msg['msg'] = $desc." Updated!";
   }else{
@@ -62,7 +90,7 @@ if($type == 'num'){
 
 if($type == 'txt'){
 
-    $db->update('settings',1,[$field=>$value]);
+    $db->update($table,1,[$field=>$value]);
     $msg['success'] = "true";
     $msg['msg'] = $desc." Updated!!!";
   }
@@ -74,4 +102,5 @@ if($field == "spice_api"){
 
 
 includeHook($hooks,'bottom');
-echo json_encode($msg);
+echo json_encode($msg); die;
+ 

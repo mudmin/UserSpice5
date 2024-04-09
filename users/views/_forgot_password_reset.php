@@ -33,6 +33,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				<label for="confirm"><?=lang("PW_CONF");?>:</label>
 				<input type="password" name="confirm" value="" id="confirm" class="form-control" autocomplete='new-password'>
 			</div>
+			<?php 
+			if($pw_settings->meter_active == 1){
+				    
+				if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php')) {
+					include($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php');
+				} else {
+					include($abs_us_root . $us_url_root . 'users/includes/password_meter.php');
+				}
+					
+			}
+			?>
 			<input type="hidden" name="csrf" value="<?=Token::generate();?>">
 			<input type="hidden" name="email" value="<?=$email;?>">
 			<input type="hidden" name="vericode" value="<?=$vericode;?>">

@@ -196,6 +196,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Bem vindo a ",
 	"JOIN_THANKS"		=> "Obrigado por se registrar",
 	"JOIN_HAVE"			=> "Ter no mínimo ",
+	"JOIN_LOWER"	=> " letra minúscula",
+	"JOIN_SYMBOL"		=> " símbolo",
 	"JOIN_CAP"			=> " letra maiúscula",
 	"JOIN_CAPS"			=> " letras maiúsculas",
 	"JOIN_TWICE"		=> "Seja digitado corretamente duas vezes",
@@ -204,6 +206,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Eu aceito os termos de registro e condições",
 	"JOIN_CHANGED"	=> "Nossos termos foram modificados",
 	"JOIN_ACCEPT" 	=> "Aceite os termos e condições e continue",
+	"JOIN_SCORE" => "Pontuação:",
+	"JOIN_INVALID_PW" => "A sua senha é inválida",
+
 ));
 
 //Sessions
@@ -280,25 +285,32 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Entrar com:",
+	"EML_FEATURE_DISABLED" => "Esta funcionalidade está desativada",
+	"EML_PASSWORDLESS_SENT" => "Por favor, verifique o seu email para um link de login.",
+	"EML_PASSWORDLESS_SUBJECT" => "Por favor, verifique o seu email para fazer login.",
+	"EML_PASSWORDLESS_BODY" => "Por favor, verifique o seu endereço de email clicando no link abaixo. Será automaticamente autenticado.",
+
 	"EML_CONF"			=> "Confirme o Email",
 	"EML_VER"				=> "Verifique Seu Email",
 	"EML_CHK"				=> "Solicitação de email recebida. Por favor, verifique seu e-mail para realizar a verificação. Certifique-se de verificar sua pasta Spam e Lixeira à medida que o link de verificação expira em",
 	"EML_MAT"				=> "Seu email não coincidiu.",
 	"EML_HELLO"			=> "Olá de ",
-	"EML_HI"				=> "Hi ",
-	"EML_AD_HAS"		=> "An Administrator has reset your password.",
-	"EML_AC_HAS"		=> "An Administrator has created your account.",
-	"EML_REQ"				=> "You will be required to set your password using the link above.",
-	"EML_EXP"				=> "Please note, Password links expire in ",
-	"EML_VER_EXP"		=> "Please note, Verification links expire in ",
-	"EML_CLICK"			=> "Click here to login.",
-	"EML_REC"				=> "It is recommended to change your password upon logging in.",
-	"EML_MSG"				=> "You have a new message from",
-	"EML_REPLY"			=> "Click here to reply or view the thread",
-	"EML_WHY"				=> "You are receiving this email because a request was made to reset your password. If this was not you, you may disregard this email.",
-	"EML_HOW"				=> "If this was you, click the link below to continue with the password reset process.",
-	"EML_EML"				=> "A request to change your email was made from within your user account.",
-	"EML_VER_EML"		=> "Thanks for signing up.  Once you verify your email address you will be ready to login! Please click the link below to verify your email address.",
+	"EML_HI" => "Olá ",
+	"EML_AD_HAS" => "Um administrador redefiniu sua senha.",
+	"EML_AC_HAS" => "Um administrador criou sua conta.",
+	"EML_REQ" => "Será necessário definir sua senha usando o link acima.",
+	"EML_EXP" => "Por favor, observe que os links de senha expiram em ",
+	"EML_VER_EXP" => "Por favor, observe que os links de verificação expiram em ",
+	"EML_CLICK" => "Clique aqui para fazer login.",
+	"EML_REC" => "É recomendável alterar sua senha ao fazer login.",
+	"EML_MSG" => "Você tem uma nova mensagem de",
+	"EML_REPLY" => "Clique aqui para responder ou visualizar a conversa",
+	"EML_WHY" => "Você está recebendo este email porque foi feito um pedido para redefinir sua senha. Se isso não foi você, você pode ignorar este email.",
+	"EML_HOW" => "Se isso foi você, clique no link abaixo para continuar com o processo de redefinição de senha.",
+	"EML_EML" => "Foi feito um pedido para alterar seu email dentro da sua conta de usuário.",
+	"EML_VER_EML" => "Obrigado por se inscrever. Assim que você verificar seu endereço de email, estará pronto para fazer login! Por favor, clique no link abaixo para verificar seu endereço de email.",
+
 ));
 
 //Verification

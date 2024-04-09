@@ -201,6 +201,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Üdvözöllek a ",
 	"JOIN_THANKS"		=> "Köszönjük, hogy regisztráltál!",
 	"JOIN_HAVE"			=> "Tartalmaznia kell ",
+	"JOIN_LOWER"	=> " kisbetűt",
+	"JOIN_SYMBOL"		=> " szimbólumot",
 	"JOIN_CAP"			=> " nagybetűt",
 	"JOIN_TWICE"		=> "kétszer be lett írva helyesen",
 	"JOIN_CLOSED"		=> "Sajnos a regisztráció jelenleg le van tiltva. Ha bármilyen kérdésed vagy aggályod van, fordulj az adminisztrátorhoz.",
@@ -208,6 +210,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Elfogadom a felhasználási feltételeket",
 	"JOIN_CHANGED"	=> "Feltételeink megváltoztak",
 	"JOIN_ACCEPT" 	=> "Fogadd el a felhasználási feltételeket és folytasd",
+	"JOIN_SCORE" => "Pont:",
+	"JOIN_INVALID_PW" => "A jelszava érvénytelen",
+
 ));
 
 //Sessions
@@ -284,6 +289,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Bejelentkezés itt:",
+	"EML_FEATURE_DISABLED" => "Ez a funkció letiltva van",
+	"EML_PASSWORDLESS_SENT" => "Kérjük, ellenőrizze e-mailját a bejelentkezési hivatkozásért.",
+	"EML_PASSWORDLESS_SUBJECT" => "Kérjük, erősítse meg e-mailcímét a bejelentkezéshez.",
+	"EML_PASSWORDLESS_BODY" => "Kérjük, erősítse meg e-mailcímét az alábbi hivatkozásra kattintva. Automatikusan bejelentkezik.",
+
 	"EML_CONF"			=> "E-mail megerősítése",
 	"EML_VER"				=> "Hitelesítsd az e-mail címed",
 	"EML_CHK"				=> "Hitelesítő e-mail kiküldve. Kérlek ellenőrizd a megadott e-mail fiókot és kövesd a hitelesítési igazolást tartalmazó üzenet utasításait. Ha nem találod elsőre a levelet győződj meg róla, hogy ellenőrizted a Spam és a Junk mappákat is. A hitelesítési hivatkozás lejárati ideje: ",

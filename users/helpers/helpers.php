@@ -150,7 +150,7 @@ if (!function_exists('display_successes')) {
 if (!function_exists('email')) {
   function email($to, $subject, $body, $opts = [], $attachment = null)
   {
-    global $abs_us_root, $us_url_root;
+    global $db, $abs_us_root, $us_url_root;
 
     /*
     As of v5.6, $to can now be an array of email addresses
@@ -162,9 +162,7 @@ if (!function_exists('email')) {
     'bcc'   => 'bcc@example.com'
   );
   */
-    $db = DB::getInstance();
-    $query = $db->query('SELECT * FROM email');
-    $results = $query->first();
+    $results = $db->query('SELECT * FROM email')->first();
 
     $mail = new PHPMailer();
     $mail->CharSet = 'UTF-8';
@@ -177,11 +175,11 @@ if (!function_exists('email')) {
     $mail->Username = $results->email_login;                 // SMTP username
     $mail->Password = html_entity_decode($results->email_pass);    // SMTP password
     $mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
-    $mail->Port = $results->smtp_port; 
+    $mail->Port = $results->smtp_port;
     if($results->authtype != ""){
-      $mail->AuthType = $results->authtype; 
-    }                      
- 
+      $mail->AuthType = $results->authtype;
+    }
+
 
     if ($attachment != false) {
       $mail->addAttachment($attachment);

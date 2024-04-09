@@ -24,7 +24,12 @@ ini_set('allow_url_fopen', 1);
 header('X-Frame-Options: DENY');
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
-
+$pw_settings = $db->query("SELECT * FROM us_password_strength WHERE id = 1")->first();
+if (!isset($pw_settings->meter_active)) {
+    $pw_settings->meter_active = 0;
+    $pw_settings->enforce_rules = 0;
+}
+$socials = $db->query("SELECT * FROM plg_social_logins WHERE built_in = 0 ORDER BY `provider`;")->results();
 $hooks = getMyHooks();
 
 if ($user->isLoggedIn()) {
@@ -35,18 +40,17 @@ includeHook($hooks, 'pre');
 
 $form_method = 'POST';
 $form_action = 'join.php';
-$vericode = randomstring(15);
+$vericode = uniqid().randomstring(15);
 
 //Decide whether or not to use email activation
 $act = $db->query('SELECT * FROM email')->first()->email_act;
-
 
 $form_valid = false;
 
 //If you say in email settings that you do NOT want email activation,
 //new users are active in the database, otherwise they will become
 //active after verifying their email.
-if ($act == 1) {
+if ($act == 1 || $settings->no_passwords == 1) {
     $pre = 0;
 } else {
     $pre = 1;
@@ -70,52 +74,64 @@ if (Input::exists()) {
         } else {
             $is_not_email = true;
         }
+        $valArray = [
+            'username' => [
+                  'display' => lang('GEN_UNAME'),
+                  'is_not_email' => $is_not_email,
+                  'required' => true,
+                  'min' => $settings->min_un,
+                  'max' => $settings->max_un,
+                  'unique' => 'users',
+            ],
+            'fname' => [
+                  'display' => lang('GEN_FNAME'),
+                  'required' => true,
+                  'min' => 1,
+                  'max' => 60,
+            ],
+            'lname' => [
+                  'display' => lang('GEN_LNAME'),
+                  'required' => true,
+                  'min' => 1,
+                  'max' => 60,
+            ],
+            'email' => [
+                  'display' => lang('GEN_EMAIL'),
+                  'required' => true,
+                  'valid_email' => true,
+                  'unique' => 'users',
+                  'min' => 5,
+                  'max' => 100,
+            ],
+        ];
+        if($settings->no_passwords == 0){
+            $valArray['password'] = [
+                    'display' => lang('PW_PASS'),
+                    'required' => true,
+                    'min' => $settings->min_pw,
+                    'max' => $settings->max_pw,
+            ];
+            $valArray['confirm'] = [
+                    'display' => lang('PW_CONF'),
+                    'required' => true,
+                    'matches' => 'password',
+            ];
 
-        $validation->check($_POST, [
-          'username' => [
-                'display' => lang('GEN_UNAME'),
-                'is_not_email' => $is_not_email,
-                'required' => true,
-                'min' => $settings->min_un,
-                'max' => $settings->max_un,
-                'unique' => 'users',
-          ],
-          'fname' => [
-                'display' => lang('GEN_FNAME'),
-                'required' => true,
-                'min' => 1,
-                'max' => 60,
-          ],
-          'lname' => [
-                'display' => lang('GEN_LNAME'),
-                'required' => true,
-                'min' => 1,
-                'max' => 60,
-          ],
-          'email' => [
-                'display' => lang('GEN_EMAIL'),
-                'required' => true,
-                'valid_email' => true,
-                'unique' => 'users',
-                'min' => 5,
-                'max' => 100,
-          ],
-
-          'password' => [
-                'display' => lang('GEN_PASS'),
-                'required' => true,
-                'min' => $settings->min_pw,
-                'max' => $settings->max_pw,
-          ],
-          'confirm' => [
-                'display' => lang('PW_CONF'),
-                'required' => true,
-                'matches' => 'password',
-          ],
-        ]);
+        }else{
+            $_POST['password'] = randomstring(25);
+        }
+        $validation->check($_POST, $valArray);
 
     if ($eventhooks = getMyHooks(['page' => 'joinAttempt'])) {
         includeHook($eventhooks, 'body');
+    }
+
+    if($pw_settings->meter_active == 1 && $pw_settings->enforce_rules == 1){
+        $doubleCheckPassword = userSpicePasswordStrength(Input::get('password'));
+        if($doubleCheckPassword['isValid'] == false){
+            //inject error before processing
+            $validation->addError([lang("JOIN_INVALID_PW"), 'password']);
+        }
     }
 
     if ($validation->passed()) {
@@ -131,7 +147,7 @@ if (Input::exists()) {
                       'join_vericode_expiry' => $settings->join_vericode_expiry,
                         ];
             
-            if($act == 1){
+            if($act == 1 || $settings->no_passwords == 1){
                 $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
             }else{
                 $vericode_expiry = date('Y-m-d H:i:s');
@@ -148,7 +164,7 @@ if (Input::exists()) {
                     'fname' => ucfirst(Input::get('fname')),
                     'lname' => ucfirst(Input::get('lname')),
                     'email' => Input::get('email'),
-                    'password' => password_hash(Input::get('password', true), PASSWORD_BCRYPT, ['cost' => 12]),
+                    'password' => password_hash(Input::get('password', true), PASSWORD_BCRYPT, ['cost' => 13]),
                     'permissions' => 1,
                     'join_date' => $join_date,
                     'email_verified' => $pre,
@@ -162,7 +178,7 @@ if (Input::exists()) {
                 $theNewId = $user->create($fields);
 
                 includeHook($hooks, 'post');
-                if ($act == 1) {
+                if ($act == 1 || $settings->no_passwords == 1) {
                     //Verify email address settings
                     $to = rawurlencode($email);
                     $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
@@ -180,7 +196,7 @@ if (Input::exists()) {
               //this allows the plugin hook to kill the post but it must delete the created user
                 include $abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php';
 
-                if ($act == 1) {
+                if ($act == 1 || $settings->no_passwords == 1) {
                     logger($theNewId, 'User', 'Registration completed and verification email sent.');
 
                     Redirect::to($us_url_root . "users/complete.php?action=thank_you_verify");
@@ -229,7 +245,7 @@ includeHook($hooks, 'bottom');
 
 <script type="text/javascript">
     $(document).ready(function(){
-        $('#password_view_control').hover(function () {
+        $('.password_view_control').hover(function () {
             $('#password').attr('type', 'text');
             $('#confirm').attr('type', 'text');
         }, function () {

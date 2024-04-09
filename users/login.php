@@ -21,13 +21,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ini_set("allow_url_fopen", 1);
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
+
+
 $hooks =  getMyHooks();
 includeHook($hooks, 'pre');
 $emailSet = $db->query("SELECT * FROM email")->first();
-if ($emailSet->email_login == "yourEmail@gmail.com" || $emailSet->email_login == "" || $emailSet->email_pass == "1234") {
+if (!isset($settings->no_passwords)) {
+  $settings->no_passwords = 0;
+}
+if ($emailSet->email_login == "yourEmail@gmail.com" || $emailSet->email_login == "" || $emailSet->email_pass == "1234" || $settings->no_passwords == 1) {
   $showForgot = false;
 } else {
   $showForgot = true;
+}
+
+if ($settings->no_passwords == 1) {
+  $topPad = "";
+} else {
+  // $topPad = " py-2 p-md-5";
+  $topPad = "";
+}
+if ($showForgot == true && $settings->registration == 1) {
+  $bottomClass = "col-12 col-lg-6";
+  $showBottom = true;
+  $forgotClass = "";
+  $regClass = "text-end";
+} elseif ($showForgot == true || $settings->registration == 1) {
+  $showBottom = true;
+  $bottomClass = "col-12";
+  $forgotClass = "text-center";
+  $regClass = "text-end";
+} else {
+  $showBottom = false;
 }
 
 $errors = $successes = [];
@@ -63,7 +88,8 @@ if (!empty($_POST)) {
   if ($validated) {
     //Log user in
     $user = new User();
-    $login = $user->loginEmail($username, $password, $remember);
+    $rawpassword = $_POST['password'];
+    $login = $user->loginEmail($username, $password, $remember, $rawpassword);
     if ($login) {
       $hooks =  getMyHooks(['page' => 'loginSuccess']);
       includeHook($hooks, 'body');
@@ -109,6 +135,7 @@ if (empty($dest = sanitizedDest('dest'))) {
     width: 100% !important;
   }
 </style>
+
 <div class="container p-2 h-100 alternate-background">
 
   <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" aria-hidden="true" data-keyboard="false" data-backdrop="static">
@@ -119,45 +146,86 @@ if (empty($dest = sanitizedDest('dest'))) {
           <a href="<?= $us_url_root ?>" aria-label="Close" class="close btn-close" style="top: 1rem!important;"></a>
 
         </div>
-        <div class="modal-body p-4 py-5 p-md-5">
-          <?php includeHook($hooks, 'body'); ?>
-          <form name="login" id="login-form" class="form-signin" action="" method="post">
-            <?= tokenHere(); ?>
-            <div class="form-outline mb-4">
-              <label class="form-label" for="username"><?= lang("SIGNIN_UORE") ?></label>
-              <input type="username" id="username" name="username" class="form-control form-control-lg" required autocomplete="username" />
+        <div class="modal-body p-4 <?= $topPad ?>">
 
-            </div>
-
-            <div class="form-outline mb-4">
-              <label class="form-label" for="password"><?= lang("SIGNIN_PASS") ?></label>
-              <div class="input-group">
-                <input type="password" id="password" name="password" class="form-control form-control-lg" />
-                <span class="input-group-addon input-group-text see-pw" id="togglePassword">
-                  <i class="fa fa-eye" id="togglePasswordIcon"></i>
-                </span>
-              </div>
-
-
-            </div>
-
-            <?php includeHook($hooks, 'form'); ?>
-            <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
-            <button class="submit form-control btn btn-primary rounded submit px-3" id="next_button" type="submit"><i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT", ""); ?></button>
-          </form>
-          <div class="row">
-            <?php if ($showForgot) { ?>
-              <div class="col-12 text-center"><br>
-                <a class="" href='<?= $us_url_root ?>users/forgot_password.php'><i class="fa fa-wrench"></i> <?= lang("SIGNIN_FORGOTPASS", ""); ?></a>
-                <br>
+          <div class="usmsgblock">
+            <?php
+            $usmsgs = array(
+              'err',    //url err= messages
+              'msg',    //urk msg= messages
+              'valSuc', //Validation class success messages
+              'valErr', //Validation class error messages
+              'genMsg', //misc messages
+            );
+            foreach ($usmsgs as $u) { ?>
+              <div style="" id="<?= $u ?>UserSpiceMessages" class="show d-none">
+                <span id="<?= $u ?>UserSpiceMessage"></span>
+                <button type="button" class="close btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
             <?php } ?>
-            <?php if ($settings->registration == 1) { ?>
-              <div class="col-12 text-center"><br>
-                <a class="" href='<?= $us_url_root ?>users/join.php'><i class="fa fa-plus-square"></i> <?= lang("SIGNUP_TEXT", ""); ?></a><br><br>
-              </div><?php } ?>
-            <?php includeHook($hooks, 'bottom'); ?>
           </div>
+          <?php
+          includeHook($hooks, 'body');
+          if ($settings->no_passwords == 0) {
+
+          ?>
+            <form name="login" id="login-form" class="form-signin" action="" method="post">
+              <?= tokenHere(); ?>
+              <div class="form-outline mb-4">
+                <label class="form-label" for="username"><?= lang("SIGNIN_UORE") ?></label>
+                <input type="username" id="username" name="username" class="form-control form-control-lg" required autocomplete="username" />
+
+              </div>
+
+              <div class="form-outline mb-4">
+                <label class="form-label" for="password"><?= lang("SIGNIN_PASS") ?></label>
+                <div class="input-group">
+                  <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                  <span class="input-group-addon input-group-text see-pw" id="togglePassword">
+                    <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                  </span>
+                </div>
+
+
+              </div>
+
+              <?php includeHook($hooks, 'form'); ?>
+              <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
+              <button class="submit form-control btn btn-primary rounded submit px-3" id="next_button" type="submit"><i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT", ""); ?></button>
+            </form>
+          <?php } //end no password logins 
+          ?>
+
+
+
+          <?php
+          if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
+            require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
+          } else {
+            require_once $abs_us_root . $us_url_root . "users/views/_social_logins.php";
+          }
+          includeHook($hooks, 'bottom');
+
+          if ($showBottom) { ?>
+            <div class="row p-3">
+              <?php if ($showForgot) { ?>
+                <div class="<?= $bottomClass ?> <?= $forgotClass ?>">
+                  <a class="" href='<?= $us_url_root ?>users/forgot_password.php' style="text-decoration:none;"><i class="fa fa-wrench"></i> <?= lang("SIGNIN_FORGOTPASS", ""); ?></a>
+                </div>
+              <?php }
+
+              if ($settings->registration == 1) { ?>
+                <div class="<?= $bottomClass ?> <?= $regClass ?>">
+                  <a class="" href='<?= $us_url_root ?>users/join.php' style="text-decoration:none;"><i class="fa fa-plus-square"></i> <?= lang("SIGNUP_TEXT", ""); ?></a>
+                </div>
+              <?php }
+              ?>
+
+            </div>
+
+          <?php } //end showBottom 
+          ?>
+
         </div>
       </div>
     </div>
@@ -175,25 +243,27 @@ if (empty($dest = sanitizedDest('dest'))) {
       $('#username').focus();
     }, 500);
 
-    const togglePassword = document.querySelector('#togglePassword');
-    const togglePasswordIcon = document.querySelector('#togglePasswordIcon');
-    const password = document.querySelector('#password');
+    <?php if ($settings->no_passwords == 0) { ?>
+      const togglePassword = document.querySelector('#togglePassword');
+      const togglePasswordIcon = document.querySelector('#togglePasswordIcon');
+      const password = document.querySelector('#password');
 
-    togglePassword.addEventListener('click', function(e) {
-      // toggle the type attribute
-      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-      password.setAttribute('type', type);
-      // toggle the eye slash icon
+      togglePassword.addEventListener('click', function(e) {
+        // toggle the type attribute
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        // toggle the eye slash icon
 
-      if (type == "password") {
-        togglePasswordIcon.classList.add('fa-eye');
-        togglePasswordIcon.classList.remove('fa-eye-slash');
-      } else {
-        togglePasswordIcon.classList.add('fa-eye-slash');
-        togglePasswordIcon.classList.remove('fa-eye');
-      }
+        if (type == "password") {
+          togglePasswordIcon.classList.add('fa-eye');
+          togglePasswordIcon.classList.remove('fa-eye-slash');
+        } else {
+          togglePasswordIcon.classList.add('fa-eye-slash');
+          togglePasswordIcon.classList.remove('fa-eye');
+        }
 
-    });
+      });
+    <?php } ?>
   });
 </script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
