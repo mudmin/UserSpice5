@@ -196,13 +196,18 @@ $lang = array_merge($lang, array(
     "JOIN_SUC"             => "Benvenuto a ",
     "JOIN_THANKS"         => "Grazie per esserti registrato",
     "JOIN_HAVE"         => "Avere almeno ",
+    "JOIN_LOWER"    => " lettera minuscola",
+    "JOIN_SYMBOL"        => " simbolo",
     "JOIN_CAP"             => " lettera maiuscola",
     "JOIN_TWICE"         => "Essere scritto correttamente due volte",
     "JOIN_CLOSED"         => "In questo momento la registrazione &egrave; disabilitata. Per favore, contattare l'amministratore del sito per qualsiasi informazione.",
     "JOIN_TC"             => "Termini e condizioni per l'utente per la registrazione",
     "JOIN_ACCEPTTC"     => "Accetto i Termini e le condizioni per l'utente",
     "JOIN_CHANGED"         => "I nostri termini sono cambiati",
-    "JOIN_ACCEPT"         => "Accetta i Termini e le condizioni per l'utente e continua"
+    "JOIN_ACCEPT"         => "Accetta i Termini e le condizioni per l'utente e continua",
+    "JOIN_SCORE" => "Punteggio:",
+    "JOIN_INVALID_PW" => "La tua password non è valida",
+
 ));
 
 //Sessions
@@ -279,6 +284,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+    "EML_SIGN_IN_WITH" => "Accedi con:",
+    "EML_FEATURE_DISABLED" => "Questa funzione è disabilitata",
+    "EML_PASSWORDLESS_SENT" => "Controlla la tua email per un link per accedere.",
+    "EML_PASSWORDLESS_SUBJECT" => "Verifica la tua email per accedere.",
+    "EML_PASSWORDLESS_BODY" => "Verifica il tuo indirizzo email cliccando sul link sottostante. Sarai automaticamente loggato.",
+
     "EML_CONF"         => "Confermare Email",
     "EML_VER"         => "Verifica la tua Email",
     "EML_CHK"         => "Richiesta ricevuta. Si prega di controllare la posta per la verifica. Assicurati di controllare la cartella Spam e Junk, poich&eacute; il link di verifica scade tra ",

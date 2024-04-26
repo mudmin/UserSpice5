@@ -27,7 +27,7 @@ if (!empty($_POST)) {
     $email = Input::get('email');
     $username = Input::get('username');
     $password = Input::get('password');
-    $vericode = randomstring(15);
+    $vericode = uniqid().randomstring(15);
 
     $form_valid = false; // assume the worst
 
@@ -91,7 +91,7 @@ if (!empty($_POST)) {
           'fname' => $fname,
           'lname' => $lname,
           'email' => $email,
-          'password' => password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
+          'password' => password_hash($password, PASSWORD_BCRYPT, ['cost' => 13]),
           'permissions' => 1,
           'join_date' => $join_date,
           'email_verified' => 1,

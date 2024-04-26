@@ -76,6 +76,7 @@ $lang = array_merge($lang, array(
 	"SIGNIN_AUDITTEXT"	=> "Logged In",
 	"SIGNIN_FORGOTPASS"	=> "Forgot Password",
 	"SIGNOUT_AUDITTEXT"	=> "Logged Out",
+
 ));
 
 // Account Page
@@ -196,6 +197,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Welcome To ",
 	"JOIN_THANKS"		=> "Thanks for registering!",
 	"JOIN_HAVE"			=> "Have at least ",
+	"JOIN_LOWER"		=> " lowercase letter",
+	"JOIN_SYMBOL"		=> " symbol",
 	"JOIN_CAP"			=> " capital letter",
 	"JOIN_TWICE"		=> "Be typed correctly twice",
 	"JOIN_CLOSED"		=> "Unfortunately registration is disabled at this time. Please contact the Site Administrator if you have any questions or concerns.",
@@ -203,6 +206,8 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "I Accept User Terms and Conditions",
 	"JOIN_CHANGED"	=> "Our Terms Have Changed",
 	"JOIN_ACCEPT" 	=> "Accept User Terms and Conditions and Continue",
+	"JOIN_SCORE"		=> "Score:",
+	"JOIN_INVALID_PW"		=> "Your password is invalid",
 ));
 
 //Sessions
@@ -279,6 +284,11 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Sign in with:",
+	"EML_FEATURE_DISABLED"        => "This feature is disabled",
+	"EML_PASSWORDLESS_SENT" => "Please check your email for a link to login.",
+	"EML_PASSWORDLESS_SUBJECT" => "Please verify your email to login.",
+	"EML_PASSWORDLESS_BODY" => "Please verify your email address by clicking the link below. You will be automatically logged in.",
 	"EML_CONF"			=> "Confirm Email",
 	"EML_VER"				=> "Verify Your Email",
 	"EML_CHK"				=> "Email request received. Please check your email to perform verification. Be sure to check your Spam and Junk folder as the verification link expires in ",

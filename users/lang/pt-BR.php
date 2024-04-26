@@ -196,6 +196,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Bem vindo a ",
 	"JOIN_THANKS"		=> "Obrigado por se registrar",
 	"JOIN_HAVE"			=> "Ter ao mínimo ",
+	"JOIN_LOWER"	=> " letra minúscula",
+	"JOIN_SYMBOL"		=> " símbolo",
 	"JOIN_CAP"			=> " letra maiúscula",
 	"JOIN_TWICE"		=> "Seja digitado corretamente duas vezes",
 	"JOIN_CLOSED"		=> "Infelizmente, o registro está desativado no momento. Por favor, entre em contato com o Administrador do Site se tiver alguma dúvida ou preocupação.",
@@ -203,6 +205,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Eu aceito os termos de registro e condições",
 	"JOIN_CHANGED"	=> "Nossos termos foram modificados",
 	"JOIN_ACCEPT" 	=> "Aceite os termos e condições e continue",
+	"JOIN_SCORE" => "Pontuação:",
+"JOIN_INVALID_PW" => "Sua senha é inválida",
+
 ));
 
 //Sessions
@@ -279,6 +284,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Entrar com:",
+	"EML_FEATURE_DISABLED" => "Esta função está desabilitada",
+	"EML_PASSWORDLESS_SENT" => "Por favor, verifique seu e-mail para um link de login.",
+	"EML_PASSWORDLESS_SUBJECT" => "Por favor, verifique seu e-mail para fazer login.",
+	"EML_PASSWORDLESS_BODY" => "Por favor, verifique seu endereço de e-mail clicando no link abaixo. Você será conectado automaticamente.",
+
 	"EML_CONF"			=> "Confirme o Email",
 	"EML_VER"				=> "Verifique Seu Email",
 	"EML_CHK"				=> "Solicitação de email recebida. Por favor, verifique seu e-mail para realizar a verificação. Certifique-se de verificar sua pasta Spam e Lixeira à medida que o link de verificação expira em",

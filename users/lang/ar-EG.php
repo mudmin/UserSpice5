@@ -193,6 +193,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> " مرحبا في ",
 	"JOIN_THANKS"	=> "شكراً لتسجيلك",
 	"JOIN_HAVE"		=> " يحتوي على الاقل",
+	"JOIN_LOWER"		=> "حروف صغيرة",
+	"JOIN_SYMBOL"		=> "رموز",
 	"JOIN_CAP"		=> " حروف كبيرة",
 	"JOIN_TWICE"	=> "متطابق",
 	"JOIN_CLOSED"	=> "للأسف التسجيل مغلق الان برجاء التواصل مع ادارة الموقع اذا كان لديك اي استفسار",
@@ -200,6 +202,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "اوافق على الشروط والاحكام",
 	"JOIN_CHANGED"	=> "تم تغيير شروطنا",
 	"JOIN_ACCEPT" 	=> "قبول الشروط والاحكام والمتابعة",
+	"JOIN_SCORE" => "النقاط:",
+	"JOIN_INVALID_PW" => "كلمة المرور غير صالحة",
+
 ));
 
 //Sessions
@@ -264,18 +269,25 @@ $lang = array_merge($lang, array(
 
 //Redirect Messages - These get a plus between each word
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "Sorry.Two+factor+is+not+enabled+at+this+time",
-	"REDIR_2FA_EN"				=> "2+Factor+Authentication+Enabled",
-	"REDIR_2FA_DIS"				=> "2+Factor+Authentication+Disabled",
-	"REDIR_2FA_VER"				=> "2+Factor+Authentication+Verified+and+Enabled",
-	"REDIR_SOM_TING_WONG" => "Something+went+wrong.+Please+try+again.",
-	"REDIR_MSG_NOEX"			=> "That+thread+does+not+belong+to+you+or+does+not+exist.",
-	"REDIR_UN_ONCE"				=> "Username+has+already+been+changed+once.",
-	"REDIR_EM_SUCC"				=> "Email+Updated+Successfully",
+	"REDIR_2FA" => "عذرًا، لم يتم تمكين التحقق المزدوج في الوقت الحالي.",
+	"REDIR_2FA_EN" => "تم تمكين المصادقة الثنائية.",
+	"REDIR_2FA_DIS" => "تم تعطيل المصادقة الثنائية.",
+	"REDIR_2FA_VER" => "تم التحقق وتمكين المصادقة الثنائية.",
+	"REDIR_SOM_TING_WONG" => "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+	"REDIR_MSG_NOEX" => "هذا الموضوع لا ينتمي إليك أو لا يوجد.",
+	"REDIR_UN_ONCE" => "تم تغيير اسم المستخدم مرة واحدة بالفعل.",
+	"REDIR_EM_SUCC" => "تم تحديث البريد الإلكتروني بنجاح.",
+
 ));
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "تسجيل الدخول باستخدام:",
+	"EML_FEATURE_DISABLED" => "تم تعطيل هذه الميزة",
+	"EML_PASSWORDLESS_SENT" => "يرجى التحقق من بريدك الإلكتروني للحصول على رابط لتسجيل الدخول.",
+	"EML_PASSWORDLESS_SUBJECT" => "يرجى التحقق من بريدك الإلكتروني لتسجيل الدخول.",
+	"EML_PASSWORDLESS_BODY" => "يرجى التحقق من عنوان بريدك الإلكتروني عن طريق النقر فوق الرابط أدناه. ستتم تسجيل الدخول تلقائيًا.",
+
 	"EML_CONF"			=> "تأكيد الايميل",
 	"EML_VER"				=> "التحقق من البريد الالكتروني",
 	"EML_CHK"				=> "تم تلقي طلبك. يرجى التحقق من بريدك الالكتروني لتأكيده. تأكد من التحقق من مجلد الرسائل غير المرغوب فيها",
@@ -370,10 +382,11 @@ $lang = array_merge($lang, array(
 	"DAT_NEXT"      => "اتالي",
 	"DAT_PREV"      => "السابق",
 	"DAT_NODATA"        => "لا توجد بيانات في الجدول",
-	"DAT_INFO"          => "Showing _START_ to _END_ of _TOTAL_ entries",
-	"DAT_ZERO"          => "Showing 0 to 0 of 0 entries",
-	"DAT_FILTERED"      => "(filtered from _MAX_ total entries)",
-	"DAT_MENU_LENG"     => "Show _MENU_ entries",
+	"DAT_INFO" => "عرض _START_ إلى _END_ من مجموع _TOTAL_ مُدخل",
+	"DAT_ZERO" => "عرض 0 إلى 0 من 0 مُدخل",
+	"DAT_FILTERED" => "(تمت تصفيةها من مجموع _MAX_ مُدخل)",
+	"DAT_MENU_LENG" => "عرض _MENU_ مُدخل",
+
 	"DAT_LOADING"       => "...جاري التحميل",
 	"DAT_PROCESS"       => "تتم المعالجة",
 	"DAT_NO_REC"        => "لا توجد سجلات مطابقة",

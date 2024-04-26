@@ -7,7 +7,10 @@ $tools = [
   ['Your Account', 'account.png', 'account.php'],
   ['Logout', 'logout.png', 'logout.php'],
 ];
-
+//an opportunity to override or add widget icons
+if(file_exists($abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php')){
+  include $abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php';
+}
 ?>
 
 <div class="card dash-card" data-id="<?=$widgetName?>" id="<?=$widgetName?>-card">

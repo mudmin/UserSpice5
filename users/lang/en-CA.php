@@ -195,6 +195,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "Tim Hortons presents",
 	"JOIN_THANKS"	=> "Thanks for registering!, eh?",
 	"JOIN_HAVE"		=> "Have at least , eh?",
+	"JOIN_LOWER"	=> " lowercase letter, eh?",
+	"JOIN_SYMBOL"		=> " special funny squiggly character, eh?",
 	"JOIN_CAP"		=> " capital letter, eh?",
 	"JOIN_TWICE"	=> "Be typed correctly twice, eh?",
 	"JOIN_CLOSED"	=> "Unfortunately registration is disabled at this time. Please contact the Site Administrator if you have any questions or concerns., eh?",
@@ -202,6 +204,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "I Absolootley Accept User Terms and Conditions,",
 	"JOIN_CHANGED"	=> "Our Terms Have Changed",
 	"JOIN_ACCEPT" 	=> "Oookey Dookie",
+	"JOIN_SCORE" => "Score, eh:",
+	"JOIN_INVALID_PW" => "Sorry, bud. Your password ain't quite right, eh?",
+
 ));
 
 //Sessions
@@ -278,6 +283,13 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+
+	"EML_SIGN_IN_WITH" => "Sign in with, eh:",
+	"EML_FEATURE_DISABLED" => "Sorry, this feature is disabled, eh",
+	"EML_PASSWORDLESS_SENT" => "Could you check your email for a link to login, eh?",
+	"EML_PASSWORDLESS_SUBJECT" => "Hey, could you verify your email to login, eh?",
+	"EML_PASSWORDLESS_BODY" => "Hey there, could you verify your email address by clicking the link below, eh? You'll be automatically logged in, bud.",
+
 	"EML_CONF"			=> "Confirm Email, eh?",
 	"EML_VER"				=> "Verify Your Email, eh?",
 	"EML_CHK"				=> "Email request received. Please check your email to perform verification. Be sure to check your Spam and Junk folder as the verification link expires in , eh?",

@@ -7,7 +7,7 @@ function parseMenuLabel($string) {
         // Replace "{{LOGGED_IN_USERNAME}}" with the appropriate value
         if (isset($user) && $user->isLoggedIn()) {
             $newString = echouser($user->data()->id, $settings->echouser, true);
-			
+
         } else {
             $newString = "";
         }
@@ -75,18 +75,18 @@ function prepareDropdownString($menuItem,$user_id){
 }
 
 function prepareItemString($menuItem,$user_id){
+  global $db;
+
 	$itemString='';
 	if($menuItem['label']=='{{hr}}') { $itemString = "<li class='divider'></li>"; }
 	elseif($menuItem['link']=='users/verify_resend.php' || $menuItem['link']=='usersc/verify_resend.php') {
-		$db = DB::getInstance();
-		$query = $db->query("SELECT * FROM email");
-		$results = $query->first();
+
+		$results = $db->query("SELECT * FROM email")->first();
 		$email_act=$results->email_act;
 		if($email_act==1) {
 			$itemString.='<li><a href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
 	}
 	elseif($menuItem['link']=='users/join.php' || $menuItem['link']=='usersc/join.php') {
-		$db = DB::getInstance();
 		$query = $db->query("SELECT * FROM settings");
 		$results = $query->first();
 		$registration=$results->registration;
@@ -200,11 +200,11 @@ if(!function_exists("migrateUSMainMenu")){
 	  if($newPerms == "" || $newPerms == "[]"){
 		  $newPerms = "[0]";
 	  }
-   
+
 	  $db->update("us_menu_items",$id,["permissions"=>$newPerms]);
 	  // dump("Perm Update " . $db->errorString());
 	}
- 
+
 
 
   $new = $db->query("SELECT * FROM us_menu_items WHERE menu = 1")->results();

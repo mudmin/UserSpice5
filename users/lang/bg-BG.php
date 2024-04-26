@@ -197,6 +197,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Добре дошли в ",
 	"JOIN_THANKS"		=> "Благодарим ви, че се регистрирахте!",
 	"JOIN_HAVE"			=> "Трябва да има поне ",
+	"JOIN_LOWER"		=>	" малка буква",
+	"JOIN_SYMBOL"		=> " символ",
 	"JOIN_CAP"			=> " главна буква",
 	"JOIN_TWICE"		=> "бъде написано правилно два пъти",
 	"JOIN_CLOSED"		=> "Регистрацията не е позволена. Свържете се с администратор..",
@@ -204,6 +206,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Приемам политиката за поверителност и споразуменията при регистрация",
 	"JOIN_CHANGED"	=> "Нашата политика е променена",
 	"JOIN_ACCEPT" 	=> "Приемам политиката за поверителност и споразуменията",
+	"JOIN_SCORE" => "Резултат:",
+	"JOIN_INVALID_PW" => "Невалидна парола",
+
 ));
 
 //Sessions
@@ -280,25 +285,32 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Вход с:",
+	"EML_FEATURE_DISABLED" => "Тази функция е деактивирана",
+	"EML_PASSWORDLESS_SENT" => "Моля, проверете имейла си за връзка за вход.",
+	"EML_PASSWORDLESS_SUBJECT" => "Моля, потвърдете вашия имейл, за да влезете.",
+	"EML_PASSWORDLESS_BODY" => "Моля, потвърдете вашия имейл, като кликнете върху връзката по-долу. Ще бъдете вписани автоматично.",
+
 	"EML_CONF"			=> "Потвърди И-мейл адрес",
 	"EML_VER"				=> "Потвърдете вашият И-мейл адрес",
 	"EML_CHK"				=> "Изпратен е И-мейл за активация. Моля проверете вашата електронна поща. Също проверете и папката СПАМ, линка за активация е валиден само ",
 	"EML_MAT"				=> "И-мейл адресите не съвпадат.",
 	"EML_HELLO"			=> "Здравейте от ",
-	"EML_HI"				=> "Hi ",
-	"EML_AD_HAS"		=> "An Administrator has reset your password.",
-	"EML_AC_HAS"		=> "An Administrator has created your account.",
-	"EML_REQ"				=> "You will be required to set your password using the link above.",
-	"EML_EXP"				=> "Please note, Password links expire in ",
-	"EML_VER_EXP"		=> "Please note, Verification links expire in ",
-	"EML_CLICK"			=> "Click here to login.",
-	"EML_REC"				=> "It is recommended to change your password upon logging in.",
-	"EML_MSG"				=> "You have a new message from",
-	"EML_REPLY"			=> "Click here to reply or view the thread",
-	"EML_WHY"				=> "You are receiving this email because a request was made to reset your password. If this was not you, you may disregard this email.",
-	"EML_HOW"				=> "If this was you, click the link below to continue with the password reset process.",
-	"EML_EML"				=> "A request to change your email was made from within your user account.",
-	"EML_VER_EML"		=> "Thanks for signing up.  Once you verify your email address you will be ready to login! Please click the link below to verify your email address.",
+	"EML_HI" => "Здравейте",
+	"EML_AD_HAS" => "Администраторът е нулирал вашата парола.",
+	"EML_AC_HAS" => "Администраторът е създал вашия акаунт.",
+	"EML_REQ" => "Ще трябва да зададете вашата парола, използвайки горепосочения линк.",
+	"EML_EXP" => "Моля, обърнете внимание, линковете за парола изтичат след",
+	"EML_VER_EXP" => "Моля, обърнете внимание, линковете за верификация изтичат след",
+	"EML_CLICK" => "Натиснете тук, за да влезете в системата.",
+	"EML_REC" => "Препоръчва се да промените паролата си след влизане в системата.",
+	"EML_MSG" => "Имате ново съобщение от",
+	"EML_REPLY" => "Натиснете тук, за да отговорите или да видите темата.",
+	"EML_WHY" => "Получавате този имейл, защото е направена заявка за нулиране на вашата парола. Ако това не сте вие, можете да пренебрегнете този имейл.",
+	"EML_HOW" => "Ако сте вие, натиснете линка по-долу, за да продължите с процеса за нулиране на паролата.",
+	"EML_EML" => "Беше направена заявка за промяна на вашия имейл от вашия потребителски акаунт.",
+	"EML_VER_EML" => "Благодарим ви за регистрацията. След като потвърдите вашия имейл адрес, ще можете да влезете в системата! Моля, натиснете линка по-долу, за да потвърдите вашия имейл адрес.",
+
 ));
 
 //Verification
@@ -368,21 +380,22 @@ $lang = array_merge($lang, array(
 //dataTables Added in 4.4.08
 //NOTE: do not change the words like _START_ between the two _ symbols!
 $lang = array_merge($lang, array(
-	"DAT_SEARCH"    => "Search",
-	"DAT_FIRST"     => "First",
-	"DAT_LAST"      => "Last",
-	"DAT_NEXT"      => "Next",
-	"DAT_PREV"      => "Previous",
-	"DAT_NODATA"        => "No data available in table",
-	"DAT_INFO"          => "Showing _START_ to _END_ of _TOTAL_ entries",
-	"DAT_ZERO"          => "Showing 0 to 0 of 0 entries",
-	"DAT_FILTERED"      => "(filtered from _MAX_ total entries)",
-	"DAT_MENU_LENG"     => "Show _MENU_ entries",
-	"DAT_LOADING"       => "Loading...",
-	"DAT_PROCESS"       => "Processing...",
-	"DAT_NO_REC"        => "No matching records found",
-	"DAT_ASC"           => "Activate to sort column ascending",
-	"DAT_DESC"          => "Activate to sort column descending",
+	"DAT_SEARCH" => "Търсене",
+	"DAT_FIRST" => "Първи",
+	"DAT_LAST" => "Последен",
+	"DAT_NEXT" => "Следващ",
+	"DAT_PREV" => "Предишен",
+	"DAT_NODATA" => "Няма налични данни в таблицата",
+	"DAT_INFO" => "Показване на _START_ до _END_ от общо _TOTAL_ записа",
+	"DAT_ZERO" => "Показване на 0 до 0 от 0 записа",
+	"DAT_FILTERED" => "(филтрирани от общо _MAX_ записа)",
+	"DAT_MENU_LENG" => "Покажи _MENU_ записи",
+	"DAT_LOADING" => "Зареждане...",
+	"DAT_PROCESS" => "Обработка...",
+	"DAT_NO_REC" => "Не бяха намерени съответстващи записи",
+	"DAT_ASC" => "Активирайте, за да сортирате колоната във възходящ ред",
+	"DAT_DESC" => "Активирайте, за да сортирате колоната в низходящ ред",
+
 ));
 
 

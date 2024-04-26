@@ -198,6 +198,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "시작 - ",
 	"JOIN_THANKS"	=> "제품을 등록해주셔서 감사합니다.",
 	"JOIN_HAVE"		=> "이상이어야 합니다 ", //papago
+	"JOIN_LOWER"	=> "영문 소문자",
+	"JOIN_SYMBOL"		=> "기호",
 	"JOIN_CAP"		=> " 영문 대문자",
 	"JOIN_TWICE"	=> "암호가 일치해야 합니다", //assuming these are passwords
 	"JOIN_CLOSED"	=> "등록이 비활성화됨. 질문이나 우려 사항이 있으면 사이트 관리자에게 문의하십시오.",
@@ -205,6 +207,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "사용 약관에 동의합니다",
 	"JOIN_CHANGED"	=> "약관이 변경되었습니다.",
 	"JOIN_ACCEPT" 	=> "사용자 이용약관에 동의하고 계속하기",
+	"JOIN_SCORE" => "점수:",
+	"JOIN_INVALID_PW" => "비밀번호가 유효하지 않습니다",
+
 ));
 
 //Sessions
@@ -281,6 +286,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "다음으로 로그인:",
+	"EML_FEATURE_DISABLED" => "이 기능은 비활성화되었습니다",
+	"EML_PASSWORDLESS_SENT" => "로그인 링크를 이메일에서 확인하세요.",
+	"EML_PASSWORDLESS_SUBJECT" => "로그인하려면 이메일을 확인하세요.",
+	"EML_PASSWORDLESS_BODY" => "아래 링크를 클릭하여 이메일 주소를 확인하세요. 자동으로 로그인됩니다.",
+
 	"EML_CONF"			=> "전자 메일 주소 확인",
 	"EML_VER"			=> "전자 메일 확인",
 	"EML_CHK"			=> "전자 메일 요청이 수신되었습니다. 확인을 수행하려면 전자 메일을 확인하십시오. 다음 날짜에 확인 링크가 만료되면 스팸 및 정크 폴더를 확인하십시오.", //impossible to translate correctly in this order?

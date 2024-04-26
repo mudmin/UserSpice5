@@ -45,9 +45,10 @@ if(!isset($hide_top_navigation) || $hide_top_navigation != true){
 }
 
 require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/container_open.php'; //custom template container
-
+if($currentPage != "login.php"){
 if(file_exists( $abs_us_root . $us_url_root . 'usersc/includes/system_messages_header.php' ) ){
   require_once $abs_us_root . $us_url_root . 'usersc/includes/system_messages_header.php';
 }else{
   require_once $abs_us_root . $us_url_root . 'users/includes/system_messages_header.php';
+}
 }

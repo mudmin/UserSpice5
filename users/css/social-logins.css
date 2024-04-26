@@ -1,0 +1,65 @@
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #747487;
+  }
+  
+  .separator::before,
+  .separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #747487;
+  }
+  
+  .separator:not(:empty)::before {
+    margin-right: .5em;
+  }
+  
+  .separator:not(:empty)::after {
+    margin-left: .5em;
+  }
+  
+  .userspice-social-logins-list {
+      display: flex;
+      justify-content: center;
+  }
+  
+  .userspice-social-logins-item {
+      display: inline-block;
+      width: 85px;
+      line-height: 25px;
+      margin-top: 20px;
+      padding: 0;
+      color: #747487;
+      text-align: center;
+      text-decoration: none !important;
+  }
+  
+  .userspice-social-logins-item:hover {
+      text-decoration: none;
+      color: #000000;
+  }
+  
+  .userspice-social-logins-icon:hover{
+     background-color:#D3D3D3;
+     color: #000000;
+  }
+  
+  .userspice-social-logins-icon {
+      width: 48px;
+      height: 48px;
+      padding: 13px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid #747487;
+      border-radius: 16px;
+      color: #000000;
+      display: inline-block;
+  }
+  
+  .userspice-social-logins-icon-sized * {
+      float: left;
+      width: 20px;
+      height: 20px;
+  }

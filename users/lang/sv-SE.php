@@ -198,6 +198,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Välkommen till ",
 	"JOIN_THANKS"		=> "Tack för registreringen!",
 	"JOIN_HAVE"			=> "Ha åtminstone ",
+	"JOIN_LOWER"	=> " gemener",
+	"JOIN_SYMBOL"		=> " symboler",
 	"JOIN_CAP"			=> " versaler",
 	"JOIN_TWICE"		=> "Inmatas korrekt två gånger",
 	"JOIN_CLOSED"		=> "Tyvärr är registreringen avvaktiverad för närvarande. Var vänlig kontakta administratören om du har frågor eller ärenden.",
@@ -205,6 +207,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Jag accepterar de allmänna villkoren",
 	"JOIN_CHANGED"	=> "Våra allmänna villkor har uppdaterats",
 	"JOIN_ACCEPT" 	=> "Acceptera allmänna villkor och fortsätt",
+	"JOIN_SCORE" => "Poäng:",
+	"JOIN_INVALID_PW" => "Ditt lösenord är ogiltigt",
+
 ));
 
 //Sessions
@@ -281,6 +286,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Logga in med:",
+	"EML_FEATURE_DISABLED" => "Denna funktion är inaktiverad",
+	"EML_PASSWORDLESS_SENT" => "Var vänlig kontrollera din e-post för en länk för att logga in.",
+	"EML_PASSWORDLESS_SUBJECT" => "Var vänlig verifiera din e-post för att logga in.",
+	"EML_PASSWORDLESS_BODY" => "Var vänlig verifiera din e-postadress genom att klicka på länken nedan. Du kommer att bli automatiskt inloggad.",
+
 	"EML_CONF"			=> "Bekräfta e-post",
 	"EML_VER"				=> "Verifiera din e-post",
 	"EML_CHK"				=> "E-post förfrågan mottagen. Vänligen kontrollera din e-post för att verifiera den. Kontrollera foldrar för skräppost då verifieringslänken går ut om ",

@@ -192,13 +192,18 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"		=> "Bun venit la ",
 	"JOIN_THANKS"	=> "Vă mulțumim pentru înregistrare!",
 	"JOIN_HAVE"		=> "Cel puțin ",
-	"JOIN_CAP"		=> "Majusculă",
+	"JOIN_LOWER"	=> " Literă mică",
+	"JOIN_SYMBOL"		=> " Simbol",
+	"JOIN_CAP"		=> " Majusculă",
 	"JOIN_TWICE"	=> "Tastat corect de două ori",
 	"JOIN_CLOSED"	=> "Din păcate, înregistrarea este dezactivată în acest moment. Contactați administratorul site-ului dacă aveți întrebări sau nelămuriri.",
 	"JOIN_TC"			=> "Înregistrare Termeni și condiții pentru utilizatori",
 	"JOIN_ACCEPTTC" => "Accept Termeni si conditii pentru utilizatori",
 	"JOIN_CHANGED"	=> "Termenii nostri s-au schimbat",
 	"JOIN_ACCEPT" 	=> "Acceptati Termenii si conditiile utilizatorului si continuati",
+	"JOIN_SCORE" => "Scor:",
+	"JOIN_INVALID_PW" => "Parola dvs. este invalidă",
+
 ));
 
 
@@ -276,6 +281,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Conectare cu:",
+	"EML_FEATURE_DISABLED" => "Această caracteristică este dezactivată",
+	"EML_PASSWORDLESS_SENT" => "Vă rugăm să verificați e-mailul pentru un link de autentificare.",
+	"EML_PASSWORDLESS_SUBJECT" => "Vă rugăm să verificați e-mailul pentru a vă conecta.",
+	"EML_PASSWORDLESS_BODY" => "Vă rugăm să verificați adresa dvs. de e-mail făcând clic pe linkul de mai jos. Veți fi autentificat automat.",
+
 	"EML_CONF"			=> "Confirmați adresa de e-mail",
 	"EML_VER"				=> "Verifica-ți email-ul",
 	"EML_CHK"				=> "Solicitare de e-mail primită. Verificați e-mailul pentru a efectua verificarea. Asigurați-vă că ați verificat fisierul Spam și Junk, deoarece link-ul de verificare expiră",
@@ -308,11 +319,12 @@ $lang = array_merge($lang, array(
 	"VER_OOPS" => "Oops ... ceva a mers prost, poate o legătură de resetare veche pe care ați făcut clic. Faceți clic mai jos pentru a încerca din nou.",
 	"VER_RESET" => "Parola ta a fost resetata!",
 
-	"VER_INS" => "<li>Enter your email address and click Reset</li> <li>Check your email and click the link that is sent to you.</li> <li>Follow the on screen instructions</li>",
+	"VER_INS" => "<li>Introduceți adresa dvs. de email și apăsați Resetare</li> <li>Verificați-vă emailul și apăsați pe linkul trimis către dvs.</li> <li>Urmați instrucțiunile de pe ecran</li>",
 
-	"VER_SENT" => " Your password reset link has been sent to your email address.   Click the link in the email to Reset your password. Be sure to check your spam folder if the email isn't in your inbox.  Reset links are only valid for ",
+	"VER_SENT" => " Linkul de resetare a parolei a fost trimis la adresa dvs. de email. Apăsați pe linkul din email pentru a vă reseta parola. Asigurați-vă că verificați folderul de spam dacă emailul nu se află în inbox-ul dvs. Linkurile de resetare sunt valabile doar pentru ",
 
-	"VER_PLEASE" => "va rugam sa va resetati parola",
+	"VER_PLEASE" => "vă rugăm să vă resetati parola",
+
 ));
 
 //User Settings

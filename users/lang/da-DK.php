@@ -196,6 +196,8 @@ $lang = array_merge($lang, array(
 	"JOIN_SUC"			=> "Velkommen til ",
 	"JOIN_THANKS"		=> "Tak for din registrering!",
 	"JOIN_HAVE"			=> "Har i det mindste ",
+	"JOIN_LOWER"		=> "Små bogstaver",
+	"JOIN_SYMBOL"		=> "Et symbol",
 	"JOIN_CAP"			=> "Store bogstaver",
 	"JOIN_TWICE"		=> "Skrives korrekt to gange",
 	"JOIN_CLOSED"		=> "Desværre er registrering ikke mulig på nuværrende tidpunkt. Kontakt venligst sidens administrator hvis du har nogle spørgsmål.",
@@ -203,6 +205,9 @@ $lang = array_merge($lang, array(
 	"JOIN_ACCEPTTC" => "Jeg accepterer brugervilkår og -betingelser",
 	"JOIN_CHANGED"	=> "Vores vilkår har ændret sig",
 	"JOIN_ACCEPT" 	=> "Accepter brugervilkår og -betingelser, og fortsæt",
+	"JOIN_SCORE" => "Point:",
+	"JOIN_INVALID_PW" => "Dit kodeord er ugyldigt",
+
 ));
 
 //Sessions
@@ -279,6 +284,12 @@ $lang = array_merge($lang, array(
 
 //Emails
 $lang = array_merge($lang, array(
+	"EML_SIGN_IN_WITH" => "Log ind med:",
+	"EML_FEATURE_DISABLED" => "Denne funktion er deaktiveret",
+	"EML_PASSWORDLESS_SENT" => "Tjek venligst din e-mail for et link til at logge ind.",
+	"EML_PASSWORDLESS_SUBJECT" => "Bekræft venligst din e-mail for at logge ind.",
+	"EML_PASSWORDLESS_BODY" => "Bekræft venligst din e-mail-adresse ved at klikke på linket nedenfor. Du vil blive logget ind automatisk.",
+
 	"EML_CONF"			=> "Bekræft Email",
 	"EML_VER"				=> "Bekræft din e-mail",
 	"EML_CHK"				=> "E-mail-anmodning modtaget. Tjek venligst din e-mail for at udføre verifikationen. Sørg for at tjekke mappen Spam og uønsket post, da bekræftelseslinket udløber om ",

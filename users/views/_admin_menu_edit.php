@@ -4,7 +4,14 @@ $db = DB::getInstance();
 $menuId = Input::get('menu_id');
 $itemId = Input::get('item_id') ? Input::get('item_id') : 0;
 $parentId = Input::get('parent_id');
+$firstPerm = "User";
 $perms = $db->query("SELECT * FROM permissions ORDER BY name")->results();
+foreach($perms as $p){
+  if($p->id == 1){
+    $firstPerm = $p->name;
+  }
+}
+
 $permNames = ["0" => "Public"];
 foreach ($perms as $p) {
   $permNames[$p->id] = $p->name;
@@ -197,10 +204,10 @@ if ($_POST) {
                   <label class="form-check-label" for="permission_<?= $perm->id ?>"><?= $perm->name ?></label>
                 </div>
               <?php endforeach; ?>
-              <br><small class="form-text text-muted">"Public" is for non logged in users. If you want all users to see a menu item, use the permission "User".</small>
+              <br><small class="form-text text-muted">"Public" is for non logged in users. If you want all users to see a menu item, use the permission "<?=$firstPerm?>".</small>
             </div>
 
-            <?php if(pluginActive("usertags",true)){ ?>
+            <?php if(pluginActive("usertags",true) && count($tags) > 0){ ?>
               <div class="form-group">
               <label for="permissions">Tags</label><br>
 

@@ -6,7 +6,9 @@ if (!in_array($user->data()->id, $master_account)) {
 //Errors Successes
 $errors = [];
 $successes = [];
+$integrated = ["userspice_core","usertags"];
 $dirs = glob($abs_us_root . $us_url_root . 'usersc/plugins/*', GLOB_ONLYDIR);
+
 $plugins = [];
 if (!is_writeable($abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php')) {
   usError("Warning. Your plugins.ini.php file is not writeable. This will cause problems installing plugins.");
@@ -30,13 +32,13 @@ if (!empty($_POST)) {
 
 
   $plugin = Input::get('plugin');
-
+  $friendlyPluginName = ucwords(str_replace("_", " ", $plugin));
   if (!empty($_POST['lock'])) {
     $action = Input::get('action');
     $file = $abs_us_root . $us_url_root . "usersc/plugins/" . $plugin . "/.noupdate";
     if ($action == "unlockme") {
       unlink($file);
-      usSuccess("$plugin unlocked");
+      usSuccess("$friendlyPluginName unlocked");
       Redirect::to('admin.php?view=plugins');
     }
 
@@ -44,7 +46,7 @@ if (!empty($_POST)) {
       $write = fopen($file, "w");
       fwrite($write, "");
       fclose($write);
-      usSuccess("$plugin has been locked");
+      usSuccess("$friendlyPluginName has been locked");
       Redirect::to('admin.php?view=plugins');
     }
   }
@@ -79,7 +81,7 @@ if (!empty($_POST)) {
 
       rmdir($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin);
     }
-    usSuccess("$plugin has been deleted");
+    usSuccess("$friendlyPluginName has been deleted");
     Redirect::to('admin.php?view=plugins');
   }
 
@@ -92,7 +94,7 @@ if (!empty($_POST)) {
 
       include $abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/uninstall.php';
     }
-    usSuccess("$plugin deactivated. You may click the trash can icon to delete the plugin");
+    usSuccess("$friendlyPluginName deactivated. You may click the trash can icon to delete the plugin");
 
     Redirect::to('admin.php?view=plugins&activation_code=' . uniqid() . $jump);
   }
@@ -115,7 +117,7 @@ if (!empty($_POST)) {
     }
     $pluginId = $db->query("SELECT id FROM us_plugins WHERE plugin = ?", [$plugin])->first();
     $db->update('us_plugins', $pluginId->id, ['last_check' => date("Y-m-d H:i:s")]);
-    usSuccess("$plugin has been activated");
+    usSuccess("$friendlyPluginName has been activated");
     Redirect::to('admin.php?view=plugins&activation_code=' . uniqid() . $jump);
   }
 }
@@ -152,7 +154,13 @@ $token = Token::generate();
             <?php resultBlock($errors, $successes); ?>
           </div>
         </div>
+
         <?php if ($pluginsC > 0) { ?>
+          <div class="row">
+          <div class="col-12">
+            <input type="text" id="pluginSearch" class="form-control" placeholder="Search for plugins..." autofocus>
+          </div>
+        </div>
           <table class="table table-striped">
             <thead>
               <tr>
@@ -165,6 +173,9 @@ $token = Token::generate();
             <tbody>
               <?php
               foreach ($plugins as $t) {
+                if (in_array($t, $integrated)) {
+                  continue;
+                }
                 if (!file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $t . '/info.xml')) { ?>
                   <tr>
                     <td colspan="4">
@@ -182,7 +193,7 @@ $token = Token::generate();
                 }
                 $buttonTitle = $xml->button != '' ? $xml->button : "Configure Plugin";
                 ?>
-                <tr id="ctrl-<?= $xml->name ?>">
+                <tr id="ctrl-<?= $xml->name ?>" data-plugin-name="<?= $xml->name ?>">
                   <td>
                     <div class="d-flex flex-row">
 
@@ -266,8 +277,32 @@ $token = Token::generate();
 
 <script>
   $(document).ready(function() {
-    $('.showTooltip').tooltip()
-  })
+  $('.showTooltip').tooltip();
+  <?php if ($pluginsC > 0) { ?>
+  // Autofocus on search box
+  $('#pluginSearch').focus();
+  var inactivityTime = function() {
+    var timer;
+    $(document).on('mousemove keypress', function() {
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        $('#pluginSearch').focus();
+      }, 5000);
+    });
+  };
+  inactivityTime();
+
+  // Live search filter
+  $('#pluginSearch').on('keyup', function() {
+    var value = $(this).val().toLowerCase();
+    $('table tbody tr').filter(function() {
+      // Using the "t" attribute to filter based on the plugin name
+      $(this).toggle($(this).attr('data-plugin-name').toLowerCase().indexOf(value) > -1)
+    });
+  });
+  <?php } ?>
+  });
+ 
 </script>
 <?php function pluginStatus($status)
 {

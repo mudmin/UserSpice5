@@ -51,14 +51,24 @@
     <?php include($abs_us_root.$us_url_root.'usersc/includes/admin_panel_buttons.php');?>
   </div>
 <?php } ?>
+
+
+
 <div class="row">
-  <div class="col-6 text-start">
+  <div class="col-12 col-md-4 text-start">
     <?php if(in_array($user->data()->id,$master_account)){ ?>
         You have a Master Account (<a href="https://userspice.com/master-account/">What's this?</a>)
     <?php } ?>
   </div>
-  <div class="col-6 text-end">
-    <a href="admin.php?view=spice&type=widget">Download More Widgets</a>
+  <div class="col-12 col-md-4 text-center">
+
+        <a href="<?=$us_url_root?>users/admin.php?view=prev_announcements">
+        View previous announcements
+        </a>
+
+  </div>
+  <div class="col-12 col-md-4 text-end">
+    <a href="<?=$us_url_root?>users/admin.php?view=spice&type=widget">Download More Widgets</a>
   </div>
 </div>
 

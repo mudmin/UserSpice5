@@ -11,8 +11,11 @@
     echo json_encode($msg);
     die;
   }
+$upd = Input::get('update');
+
+
 $dis = Input::get('dismissed');
-if(is_numeric($dis) && ($dis != 0)){
+if($upd == "false" && is_numeric($dis) && ($dis != 0)){
   $fields = array(
     'dismissed' =>$dis,
     'link'      =>Input::get('link'),
@@ -20,6 +23,13 @@ if(is_numeric($dis) && ($dis != 0)){
     'message'      =>Input::get('message'),
     'ignore'      =>Input::get('ignore'),
     'class'      =>Input::get('class'),
+   
   );
   $db->insert('us_announcements',$fields);
+}elseif(is_numeric($upd)){
+  $db->update('us_announcements',$upd,['dismissed_by'=>$user->data()->id]);
+
 }
+
+echo json_encode(['success'=>true]);
+die;

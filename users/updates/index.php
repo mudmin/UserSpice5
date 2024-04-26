@@ -37,10 +37,14 @@ if(!$db->error()) {
     }
   }
   ?>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <div id="page-wrapper">
     <div class="container">
       <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-12 text-center">
           <?php
           foreach($missing as $m) {
             $update = $m;
@@ -56,36 +60,41 @@ if(!$db->error()) {
           $count = count($successes);
           $eCount = count($errors);
           if($count == 1){?>
-            Finished applying <?=$count?> update (<?=$eCount?> errors).<br>
+
+            <h3 class="text-center mt-3 pt-3 mb-3">Finished applying <?=$count?> update (<?=$eCount?> error).</h3>
           <?php }else{ ?>
-            Finished applying <?=$count?> updates (<?=$eCount?> errors).<br>
+            <h3 class="text-center mt-3 pt-3 mb-3">Finished applying <?=$count?> updates (<?=$eCount?> errors).</h3>
           <?php }
           if($auto == 1){
             usSuccess("Update applied");
             Redirect::to($us_url_root."users/admin.php?view=updates&sysup=1");
           }
           if(isset($user) && $user->isLoggedIn()){ ?>
-            <a href="<?=$us_url_root?>users/admin.php">Return to the Admin Dashboard</a>
+            <h4 class="text-center"><a href="<?=$us_url_root?>users/admin.php">Return to the Admin Dashboard</a></h4>
           <?php }else{ ?>
-            <a href="<?=$us_url_root?>users/login.php">Click here to login!</a>
+            <h4 class="text-center"><a href="<?=$us_url_root?>users/login.php">Click here to login!</a></h4>
           <?php } ?>
         </div>
       </div>
       <div class="row">
         <br>
-        <hr>
-        <div class="col col-md-6">
-          <?php if($count>0) {?>
-              <h1>Success Messages</h1>
+        
+        <div class="col col-md-12">
+        <?php if($count > 0 || $eCount > 0){ ?>
+            <h4 class="text-center">Diagnostic Information for each Update</h4>
+          <?php } 
+          if($count>0) {?>
+              <h1 class="text-center">Success Messages</h1>
               <?php foreach($successes as $s) {?>
-                <?=$s?><br>
+                <p class="text-center"><?=$s?></p>
+                
               <?php } ?>
           <?php }
           if($eCount>0) {?>
-              <h1>Error Messages</h1>
-              <p>These can often be ignored...especially if they mention duplicate columns.  Feel free to check with us in Discord or on the UserSpice.com forums if you have any questions.</p>
+              <h1 class="text-center">Error Messages</h1>
+              <p class="text-center">These can often be ignored...especially if they mention duplicate columns.  Feel free to check with us in Discord or on the UserSpice.com forums if you have any questions.</p>
               <?php foreach($errors as $e) {?>
-                <?=$e?><br>
+                <p class="text-center"><?=$e?></p>
               <?php } ?>
           <?php } ?>
         </div>
@@ -97,5 +106,6 @@ if(!$db->error()) {
   $errorMsg=$db->errorString();
   logger(1,"System Updates","Failed to retrieve updates, Error: ".$errorMsg);
    ?>
-  Failed to retrieve updates, Error: <?=$errorMsg?>
+   <p class="text-center">Failed to retrieve updates, Error: <?=$errorMsg?></p>
+  
 <?php } ?>
