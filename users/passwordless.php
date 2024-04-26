@@ -65,7 +65,7 @@ if($method == "enter_email"){
       ];
       $encoded_email = rawurlencode($email);
       if(lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }"){
-        $subject = lang(["EML_PASSWORDLESS_SUBJECT"]);
+        $subject = lang("EML_PASSWORDLESS_SUBJECT");
       }else{
         $subject = "Please verify your email to login.";
       }
@@ -143,7 +143,7 @@ if($method == "enter_email"){
 if($method == "check_email"){
   $email = rawurldecode(Input::get('email'));
   if(array_key_exists("EML_PASSWORDLESS_SENT", $lang)){
-    $EML_PASSWORDLESS_SENT = lang(["EML_PASSWORDLESS_SENT"]);
+    $EML_PASSWORDLESS_SENT = lang("EML_PASSWORDLESS_SENT");
   }else{
     $EML_PASSWORDLESS_SENT = "Please check your email for a link to login.";
   }

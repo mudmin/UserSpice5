@@ -1,5 +1,5 @@
 <?php
-if (in_array($user->data()->id, $master_account)) {
+if (in_array($user->data()->id, $master_account) && hasPerm(2)) {
     $config_file = $abs_us_root . $us_url_root . "users/init.php";
 ?>
 

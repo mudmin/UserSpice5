@@ -23,7 +23,14 @@
               echo $ini;
               ?>
             </td>
-            <td class="text-end">        <span class=""><?php echo $phpver = phpversion();?></span>
+            <td class="text-end">
+            <?php 
+            //modal for phpinfo
+            if(in_array($user->data()->id,$master_account) && hasPerm(2) && file_exists($abs_us_root . $us_url_root . "users/views/_phpinfo.php")){?>
+              <a href="<?=$us_url_root?>users/admin.php?view=phpinfo" class="me-3 btn btn-outline-primary btn-sm">PHP Info</a>
+
+            <?php } ?>
+            <span class=""><?php echo $phpver = phpversion();?></span>
               <?php
               if(version_compare('7.4.0',$phpver) ==  1){
                 echo "<font color='red'>v7.4 or Greater Suggested</font>";
@@ -45,4 +52,6 @@
         </table>
 
       </div>
+      
     </div>
+

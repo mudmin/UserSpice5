@@ -6,7 +6,7 @@ if (!in_array($user->data()->id, $master_account)) {
 //Errors Successes
 $errors = [];
 $successes = [];
-$integrated = ["usertags"];
+$integrated = ["userspice_core","usertags"];
 $dirs = glob($abs_us_root . $us_url_root . 'usersc/plugins/*', GLOB_ONLYDIR);
 
 $plugins = [];

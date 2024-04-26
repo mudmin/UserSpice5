@@ -4,7 +4,7 @@ $tools = [
   ['Cron Manager', 'cron.png', 'cron'],
   ['IP Manager', 'ip.png', 'ip'],
   ['Page Manager', 'pages.png', 'pages'],
-  ['Permissions Manager', 'permissions.png', 'permissions'],
+  ['Permissions & Tags', 'permissions.png', 'permissions'],
   ['Plugin Manager', 'plugin.png', 'plugins'],
   ['Spice Shaker', 'spice.png', 'spice'],
   ['Security Logs', 'security.png', 'security_logs'],
@@ -13,6 +13,11 @@ $tools = [
   ['Updates', 'update.png', 'updates'],
   ['User Manager', 'user.png', 'users'],
 ];
+
+//an opportunity to override or add widget icons
+if(file_exists($abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php')){
+  include $abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php';
+}
 
 ?>
 

@@ -21,7 +21,7 @@ if($settings->email_login == 1 && currentPage() != "join.php"){
 if($loginOpts > 0) {
 ?>
 <link rel="stylesheet" href="<?=$us_url_root?>users/css/social-logins.css">
-<div class="mb-2">
+<div class="mb-2 mt-2">
 <div class="separator"><?= strpos(lang('EML_SIGN_IN_WITH'), "{") !== false ? 'Sign in with:' : lang('EML_SIGN_IN_WITH') ?></div>
 <div class="userspice-social-logins-list">
     <?php

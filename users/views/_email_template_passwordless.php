@@ -6,7 +6,7 @@ $query = $db->query("SELECT * FROM email");
 $results = $query->first();
 
 if(lang("EML_PASSWORDLESS_BODY") != "{ Missing Text }"){
-  $EML_PASSWORDLESS_BODY = lang(["EML_PASSWORDLESS_BODY"]);
+  $EML_PASSWORDLESS_BODY = lang("EML_PASSWORDLESS_BODY");
 }else{
   $EML_PASSWORDLESS_BODY = "Please verify your email address by clicking the link below. You will be automatically logged in.";
 }

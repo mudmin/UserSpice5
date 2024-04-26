@@ -1,12 +1,17 @@
 <?php
 $tools = [
   ['General Settings', 'general.png', '?view=general'],
-  ['Registration Settings', 'registration.png', '?view=reg'],
+  ['Reg & Password Settings', 'registration.png', '?view=reg'],
   ['Email Settings', 'email.png', '?view=email'],
   ['Classic Menu', 'navigation.png', '?view=nav'],
   ['UltraMenu', 'ultramenu.png', '?view=menus'],
   ['Dashboard Access', 'access.png', '?view=access'],
 ];
+
+//an opportunity to override or add widget icons
+if(file_exists($abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php')){
+  include $abs_us_root . $us_url_root . 'usersc/widgets/'.$widgetName.'/custom.php';
+}
 
 ?>
 

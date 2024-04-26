@@ -317,18 +317,21 @@ if (!function_exists('echoId')) {
 
 if (!function_exists('bin')) {
   function bin($number)
+ 
   {
+    global $lang;
     if ($number == 0) {
-      echo "<strong><span style='color:red'>No</span></strong>";
+      echo "<strong><span style='color:red'>".lang("GEN_NO")."</span></strong>";
     }
     if ($number == 1) {
-      echo "<strong><span style='color:green'>Yes</span></strong>";
+      echo "<strong><span style='color:green'>".lang("GEN_YES")."</span></strong>";
     }
     if ($number != 0 && $number != 1) {
-      echo "<strong><span style='color:blue'>Other</span></strong>";
+      echo "<strong><span style='color:blue'>-</span></strong>";
     }
   }
 }
+
 
 if (!function_exists('generateForm')) {
   function generateForm($table, $id, $skip = [])

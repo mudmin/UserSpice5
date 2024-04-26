@@ -93,7 +93,7 @@
         include $path;
         break;
       case 'phpinfo':
-        if(in_array($user->data()->id,$master_account)){
+        if(in_array($user->data()->id,$master_account) && hasPerm(2)){
         $path = usView('_phpinfo.php');
         include $path;
         }else{
