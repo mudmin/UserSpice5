@@ -5,40 +5,40 @@
 
 //Check if a user ID exists in the DB
 if (!function_exists('userIdExists')) {
-    function userIdExists($id)
-    {
-        $db = DB::getInstance();
-        $query = $db->query('SELECT * FROM users WHERE id = ?', [$id]);
-        $num_returns = $query->count();
-        if ($num_returns == 1) {
-            return true;
-        } else {
-            return false;
-        }
+  function userIdExists($id)
+  {
+    $db = DB::getInstance();
+    $query = $db->query('SELECT * FROM users WHERE id = ?', [$id]);
+    $num_returns = $query->count();
+    if ($num_returns == 1) {
+      return true;
+    } else {
+      return false;
     }
+  }
 }
 
 //Retrieve information for all users
 if (!function_exists('fetchAllUsers')) {
-    function fetchAllUsers($orderBy = null, $desc = false, $disabled = true)
-    {
-        global $db;
-        $q = 'SELECT * FROM users';
-        if (!$disabled) {
-            $q .= ' WHERE permissions=1';
-        }
-        if ($orderBy !== null) {
-            if ($desc === true) {
-                $q .= " ORDER BY $orderBy DESC";
-            } else {
-                $q .= " ORDER BY $orderBy";
-            }
-        }
-        $query = $db->query($q);
-        $results = $query->results();
-
-        return $results;
+  function fetchAllUsers($orderBy = null, $desc = false, $disabled = true)
+  {
+    global $db;
+    $q = 'SELECT * FROM users';
+    if (!$disabled) {
+      $q .= ' WHERE permissions=1';
     }
+    if ($orderBy !== null) {
+      if ($desc === true) {
+        $q .= " ORDER BY $orderBy DESC";
+      } else {
+        $q .= " ORDER BY $orderBy";
+      }
+    }
+    $query = $db->query($q);
+    $results = $query->results();
+
+    return $results;
+  }
 }
 
 //Retrieve complete user info by id ID
@@ -49,7 +49,7 @@ if (!function_exists('fetchUser')) {
     $query = $db->query("SELECT * FROM users WHERE id = ?", [$id]);
     if ($query->count() > 0) {
       return $query->first();
-    }else{
+    } else {
       return false;
     }
   }
@@ -61,195 +61,192 @@ if (!function_exists('fetchUserDetails')) {
   function fetchUserDetails($column = null, $term = null, $id = null)
   {
     global $db;
-    if($column == null || $column == ""){
+    if ($column == null || $column == "") {
       $column = "id";
     }
 
-    if($term == null || $term == ""){
+    if ($term == null || $term == "") {
       $term = $id;
     }
 
     $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$term]);
     if ($query->count() == 1) {
       return $query->first();
-    }else{
+    } else {
       return false;
     }
-
   }
 }
 
 //Delete a defined array of users
 if (!function_exists('deleteUsers')) {
-    function deleteUsers($users)
-    {
-        global $db, $abs_us_root, $us_url_root;
+  function deleteUsers($users)
+  {
+    global $db, $abs_us_root, $us_url_root;
 
-        $i = 0;
-        foreach ($users as $id) {
-            $query1 = $db->query('DELETE FROM users WHERE id = ?', [$id]);
-            $query2 = $db->query('DELETE FROM user_permission_matches WHERE user_id = ?', [$id]);
-            if (file_exists($abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php')) {
-                include $abs_us_root.$us_url_root.'usersc/scripts/after_user_deletion.php';
-            }
-            ++$i;
-        }
-
-        return $i;
+    $i = 0;
+    foreach ($users as $id) {
+      $query1 = $db->query('DELETE FROM users WHERE id = ?', [$id]);
+      $query2 = $db->query('DELETE FROM user_permission_matches WHERE user_id = ?', [$id]);
+      if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/after_user_deletion.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/scripts/after_user_deletion.php';
+      }
+      ++$i;
     }
+
+    return $i;
+  }
 }
 
 if (!function_exists('echouser')) {
-    function echouser($id, $echoType = null, $return = false)
-    {
+  function echouser($id, $echoType = null, $return = false)
+  {
 
-        global $db, $settings;
-        if($id == "" || $id == 0){
-          $string = "Guest";
-          if($return){
-            return $string;
-          }else{
-            echo $string;
-          }
-        }
-
-        $id = (int) $id;
-
-        if ($echoType !== null) {
-            $echoType = (int) $echoType;
-        } else {
-            $echoType = $settings->echouser;
-        }
-        $string = "Unknown";
-        if ($echoType == 0) {
-            $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-                $string = $results->fname.' '.$results->lname;
-
-            }
-        }elseif ($echoType == 1) {
-            $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-                $string = ucfirst($results->username);
-            }
-        }elseif ($echoType == 2) {
-            $query = $db->query('SELECT username,fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-                $string = ucfirst($results->username).' ('.$results->fname.' '.$results->lname.')';
-            }
-        }elseif ($echoType == 3) {
-            $query = $db->query('SELECT username,fname FROM users WHERE id = ? LIMIT 1', [$id]);
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-                $string =  ucfirst($results->username).' ('.$results->fname.')';
-            }
-        }elseif ($echoType == 4) {
-            $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-            $count = $query->count();
-            if ($count > 0) {
-                $results = $query->first();
-                $string = ucfirst($results->fname).' '.substr(ucfirst($results->lname), 0, 1);
-            }
-
-          }
-
-        if($return == true){
-          return $string;
-        }else{
-          echo $string;
-        }
+    global $db, $settings;
+    if ($id == "" || $id == 0) {
+      $string = "Guest";
+      if ($return) {
+        return $string;
+      } else {
+        echo $string;
+      }
     }
+
+    $id = (int) $id;
+
+    if ($echoType !== null) {
+      $echoType = (int) $echoType;
+    } else {
+      $echoType = $settings->echouser;
+    }
+    $string = "Unknown";
+    if ($echoType == 0) {
+      $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
+
+      $count = $query->count();
+      if ($count > 0) {
+        $results = $query->first();
+        $string = $results->fname . ' ' . $results->lname;
+      }
+    } elseif ($echoType == 1) {
+      $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
+      $count = $query->count();
+      if ($count > 0) {
+        $results = $query->first();
+        $string = ucfirst($results->username);
+      }
+    } elseif ($echoType == 2) {
+      $query = $db->query('SELECT username,fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
+      $count = $query->count();
+      if ($count > 0) {
+        $results = $query->first();
+        $string = ucfirst($results->username) . ' (' . $results->fname . ' ' . $results->lname . ')';
+      }
+    } elseif ($echoType == 3) {
+      $query = $db->query('SELECT username,fname FROM users WHERE id = ? LIMIT 1', [$id]);
+      $count = $query->count();
+      if ($count > 0) {
+        $results = $query->first();
+        $string =  ucfirst($results->username) . ' (' . $results->fname . ')';
+      }
+    } elseif ($echoType == 4) {
+      $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
+      $count = $query->count();
+      if ($count > 0) {
+        $results = $query->first();
+        $string = ucfirst($results->fname) . ' ' . substr(ucfirst($results->lname), 0, 1);
+      }
+    }
+
+    if ($return == true) {
+      return $string;
+    } else {
+      echo $string;
+    }
+  }
 }
 
 
 if (!function_exists('echousername')) {
-    function echousername($id)
-    {
-        global $db;
-        $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
-        $count = $query->count();
-        if ($count > 0) {
-            $results = $query->first();
+  function echousername($id)
+  {
+    global $db;
+    $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
+    $count = $query->count();
+    if ($count > 0) {
+      $results = $query->first();
 
-            return $results->username;
-        } else {
-            return 'Unknown';
-        }
+      return $results->username;
+    } else {
+      return 'Unknown';
     }
+  }
 }
 
 if (!function_exists('updateUser')) {
-    //Update User
-    function updateUser($column, $id, $value)
-    {
-        global $db, $user;
-        if(isset($user->data()->column)){ //check for a valid column
-        $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
-        return $result;
-        }else{
-          return false;
-        }
+  //Update User
+  function updateUser($column, $id, $value)
+  {
+    global $db, $user;
+    if (isset($user->data()->column)) { //check for a valid column
+      $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
+      return $result;
+    } else {
+      return false;
     }
+  }
 }
 
 if (!function_exists('fetchUserName')) {
-    //Fetchs CONCAT of Fname Lname
-    function fetchUserName($username = null, $token = null, $id = null)
-    {
-        global $db;
-        if ($username != null) {
-            $column = 'username';
-            $data = $username;
-        } elseif ($id != null) {
-            $column = 'id';
-            $data = $id;
-        }
-
-        $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = ? LIMIT 1",[$data]);
-        $count = $query->count();
-        if ($count > 0) {
-            $results = $query->first();
-
-            return $results->name;
-        } else {
-            return 'Unknown';
-        }
+  //Fetchs CONCAT of Fname Lname
+  function fetchUserName($username = null, $token = null, $id = null)
+  {
+    global $db;
+    if ($username != null) {
+      $column = 'username';
+      $data = $username;
+    } elseif ($id != null) {
+      $column = 'id';
+      $data = $id;
     }
+
+    $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = ? LIMIT 1", [$data]);
+    $count = $query->count();
+    if ($count > 0) {
+      $results = $query->first();
+
+      return $results->name;
+    } else {
+      return 'Unknown';
+    }
+  }
 }
 
 if (!function_exists('isAdmin')) {
-    function isAdmin()
-    {
-        if (hasPerm(2) || (isset($_SESSION['cloak_from']) && hasPerm(2, $_SESSION['cloak_from']))) {
-            return true;
-        } else {
-            return false;
-        }
+  function isAdmin()
+  {
+    if (hasPerm(2) || (isset($_SESSION['cloak_from']) && hasPerm(2, $_SESSION['cloak_from']))) {
+      return true;
+    } else {
+      return false;
     }
+  }
 }
 
 if (!function_exists('name_from_id')) {
-    function name_from_id($id)
-    {
-        global $db;
-        $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
-        $count = $query->count();
-        if ($count > 0) {
-            $results = $query->first();
+  function name_from_id($id)
+  {
+    global $db;
+    $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
+    $count = $query->count();
+    if ($count > 0) {
+      $results = $query->first();
 
-            return ucfirst($results->username);
-        } else {
-            return '-';
-        }
+      return ucfirst($results->username);
+    } else {
+      return '-';
     }
+  }
 }
 
 
@@ -258,17 +255,17 @@ if (!function_exists("hasTag")) {
   function hasTag($tag, $user_id = "")
   {
     global $db, $user;
- 
+
     if ($user_id == "") {
       if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
         $user_id = $user->data()->id;
       }
     }
- 
+
     if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
       return false;
     }
- 
+
     if (is_numeric($tag)) {
       $c = $db->query("SELECT * FROM plg_tags_matches WHERE tag_id = ? AND user_id = ?", [$tag, $user_id])->count();
       if ($c < 1) {
@@ -287,62 +284,64 @@ if (!function_exists("hasTag")) {
     return false;
   }
 }
- 
+
 //user must have at least one of the tags in the array
-if(!function_exists("hasOneTag")){
-  function hasOneTag($tags, $user_id = ""){
+if (!function_exists("hasOneTag")) {
+  function hasOneTag($tags, $user_id = "")
+  {
     global $db, $user;
     if ($user_id == "") {
       if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
         $user_id = $user->data()->id;
       }
     }
- 
+
     if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
       return false;
     }
- 
-    if(!is_array($tags)){
+
+    if (!is_array($tags)) {
       return false;
     }
- 
-    foreach($tags as $t){
-      if(hasTag($t, $user_id)){
+
+    foreach ($tags as $t) {
+      if (hasTag($t, $user_id)) {
         return true;
       }
     }
     return false;
   }
 }
- 
+
 //user must have all of the tags in the array
-if(!function_exists("hasAllTags")){
-  function hasAllTags($tags, $user_id = ""){
+if (!function_exists("hasAllTags")) {
+  function hasAllTags($tags, $user_id = "")
+  {
     global $db, $user;
     if ($user_id == "") {
       if ($user_id == "" && isset($user) && $user->isLoggedIn()) {
         $user_id = $user->data()->id;
       }
     }
- 
+
     if (!is_numeric($user_id) || $user_id < 0 || $user_id == "") {
       return false;
     }
- 
-    if(!is_array($tags)){
+
+    if (!is_array($tags)) {
       return false;
     }
- 
-    foreach($tags as $t){
-      if(!hasTag($t, $user_id)){
+
+    foreach ($tags as $t) {
+      if (!hasTag($t, $user_id)) {
         return false;
       }
     }
     return true;
   }
 }
- 
- 
+
+
 //returns an array of users with a given tag by tag name or id
 if (!function_exists("usersWithTag")) {
   function usersWithTag($tag)
@@ -365,139 +364,147 @@ if (!function_exists("usersWithTag")) {
     return $users;
   }
 }
- 
+
 
 if (!function_exists('socialLogin')) {
-    function socialLogin($email, $username, $idArray, $fields)
-    {
-        global $db, $settings, $abs_us_root, $us_url_root;
+  function socialLogin($email, $username, $idArray, $fields)
+  {
+    global $db, $settings, $abs_us_root, $us_url_root;
 
-        $idQuery = "";
-        foreach ($idArray as $key => $value) {
-            $idQuery .= " OR $key = ?";
-        }
-        // Handle no registration allowed, verify email already exists
-        if ($settings->registration == 0) {
-            $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
-            if ($findExistingUS->count() === 0) {
-                session_destroy();
-                Redirect::to($us_url_root . 'users/join.php');
-                die();
-            }
-        }
-
-        //Handle already existing UserSpice account with matching email
-        $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
-        if ($findExistingUS->count() > 0) {
-            $user = new User($findExistingUS->first()->id);
-            $date = date('Y-m-d H:i:s');
-            $db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $user->data()->id]);
-            $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
-            $db->insert('logs', ['logdate' => $date, 'user_id' => $user->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
-            $ip = ipCheck();
-            $q = $db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
-            $c = $q->count();
-            if ($c < 1) {
-                $db->insert('us_ip_list', [
-                    'user_id' => $user->data()->id,
-                    'ip' => $ip,
-                ]);
-            } else {
-                $f = $q->first();
-                $db->update('us_ip_list', $f->id, [
-                    'user_id' => $user->data()->id,
-                    'ip' => $ip,
-                ]);
-            }
-
-            $user->update($fields);
-
-            // Handle new user
-        } else {
-            $user = new User();
-
-            if (isset($_SESSION['us_lang'])) {
-                $newLang = $_SESSION['us_lang'];
-            } else {
-                $newLang = $settings->default_language;
-            }
-            $date = date("Y-m-d H:i:s");
-            $defaultFields = [
-                'username' => generateUsername($username, $fields['fname'] ?? "", $fields['lname'] ?? "", $fields['email'] ?? ""),
-                'email' => $email,
-                'password' => null,
-                'permissions' => 1,
-                'join_date' => date('Y-m-d H:i:s'),
-                'oauth_tos_accepted' => false,
-                'language' => $newLang,
-                'logins' => 1,
-                'join_date' => $date,
-                'last_login' => $date,
-                'email_verified' => 1,
-            ];
-
-            $fields = array_merge($defaultFields, $fields);
-
-            $activeCheck = $db->query('SELECT active FROM users');
-            if (!$activeCheck->error()) {
-                $fields['active'] = 1;
-            }
-
-            $theNewId = $user->create($fields);
-            $user->find($theNewId);
-
-            if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {
-                include $abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php';
-            }
-
-            logger($theNewId, 'User', 'Registration completed using Social Login.');
-        }
-        $user->login();
-        $_POST['redirect'] = $_SESSION['redirect'];
-        $redirect = Input::get('redirect');
-        $_POST['dest'] = $_SESSION['dest'];
-        $dest = sanitizedDest('dest');
-
-        $hooks = getMyHooks(['page' => 'loginSuccess']);
-        includeHook($hooks, 'body');
-
-        if (!empty($dest)) {
-            if (!empty($redirect) || $redirect !== '') {
-                Redirect::to($redirect);
-            } else {
-                Redirect::to($dest);
-            }
-        }
-        if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php ')) {
-            require_once $abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php ';
-        }
-        if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
-            require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
-        }
-
-        Redirect::to($settings->redirect_uri_after_login);
+    $idQuery = "";
+    foreach ($idArray as $key => $value) {
+      $idQuery .= " OR $key = ?";
     }
+    // Handle no registration allowed, verify email already exists
+    if ($settings->registration == 0) {
+      $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
+      if ($findExistingUS->count() === 0) {
+        session_destroy();
+        Redirect::to($us_url_root . 'users/join.php');
+        die();
+      }
+    }
+
+    //Handle already existing UserSpice account with matching email
+    $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
+    if ($findExistingUS->count() > 0) {
+      $user = new User($findExistingUS->first()->id);
+      $date = date('Y-m-d H:i:s');
+      $db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $user->data()->id]);
+      $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+      $db->insert('logs', ['logdate' => $date, 'user_id' => $user->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
+      $ip = ipCheck();
+      $q = $db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
+      $c = $q->count();
+      if ($c < 1) {
+        $db->insert('us_ip_list', [
+          'user_id' => $user->data()->id,
+          'ip' => $ip,
+        ]);
+      } else {
+        $f = $q->first();
+        $db->update('us_ip_list', $f->id, [
+          'user_id' => $user->data()->id,
+          'ip' => $ip,
+        ]);
+      }
+
+      $user->update($fields);
+
+      // Handle new user
+    } else {
+      $user = new User();
+
+      if (isset($_SESSION['us_lang'])) {
+        $newLang = $_SESSION['us_lang'];
+      } else {
+        $newLang = $settings->default_language;
+      }
+      $date = date("Y-m-d H:i:s");
+      $defaultFields = [
+        'username' => generateUsername($username, $fields['fname'] ?? "", $fields['lname'] ?? "", $fields['email'] ?? ""),
+        'email' => $email,
+        'password' => null,
+        'permissions' => 1,
+        'join_date' => date('Y-m-d H:i:s'),
+        'oauth_tos_accepted' => false,
+        'language' => $newLang,
+        'logins' => 1,
+        'join_date' => $date,
+        'last_login' => $date,
+        'email_verified' => 1,
+      ];
+
+      $fields = array_merge($defaultFields, $fields);
+
+      $activeCheck = $db->query('SELECT active FROM users');
+      if (!$activeCheck->error()) {
+        $fields['active'] = 1;
+      }
+
+      $theNewId = $user->create($fields);
+      $user->find($theNewId);
+
+      if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php';
+      }
+
+      logger($theNewId, 'User', 'Registration completed using Social Login.');
+    }
+    $user->login();
+    if (!isset($_SESSION['redirect'])) {
+      $_SESSION['redirect'] = null;
+    }
+
+    $_POST['redirect'] = $_SESSION['redirect'];
+    $redirect = Input::get('redirect');
+    if (!isset($_SESSION['dest'])) {
+      $_SESSION['dest'] = $settings->redirect_uri_after_login;
+    }
+    $_POST['dest'] = $_SESSION['dest'];
+    $dest = sanitizedDest('dest');
+
+    $hooks = getMyHooks(['page' => 'loginSuccess']);
+    includeHook($hooks, 'body');
+
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php')) {
+      require_once $abs_us_root . $us_url_root . 'usersc/includes/oauth_success_redirect.php';
+    }
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+      require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+    }
+
+    if (!empty($dest)) {
+      if (!empty($redirect) || $redirect !== '') {
+        Redirect::to($redirect);
+      } else {
+        Redirect::to($dest);
+      }
+    }
+
+    Redirect::to($settings->redirect_uri_after_login);
+  }
 }
 
 if (!function_exists('generateUsername')) {
-    function generateUsername($username, $first, $last, $email)
-    {
-        global $db, $settings;
-        if ($username !== null) {
-            $count = $db->query("SELECT * FROM users WHERE username = ?", [$username])->count();
-            if ($count == 0) {
-                return $username;
-            }
-        }
-
-        if ($settings->auto_assign_un == 1) {
-            $username = username_helper($first, $last, $email);
-            if (!$username) {
-                $username = null;
-            }
-        } else {
-            $username = $email;
-        }
+  function generateUsername($username, $first, $last, $email)
+  {
+    global $db, $settings;
+    if ($username !== null) {
+      $count = $db->query("SELECT * FROM users WHERE username = ?", [$username])->count();
+      if ($count == 0) {
         return $username;
+      }
     }
+
+    if ($settings->auto_assign_un == 1) {
+      $username = username_helper($first, $last, $email);
+      if (!$username) {
+        $username = null;
+      }
+    } else {
+      $username = $email;
+    }
+    return $username;
+  }
 }

@@ -332,7 +332,6 @@ if (!function_exists('bin')) {
   }
 }
 
-
 if (!function_exists('generateForm')) {
   function generateForm($table, $id, $skip = [])
   {
@@ -1346,6 +1345,7 @@ if (!function_exists("usMessage")) {
     sessionValMessages("", "", $msg);
   }
 }
+
 
 if (!function_exists('isUserLoggedIn')) {
   function isUserLoggedIn()

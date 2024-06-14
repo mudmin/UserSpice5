@@ -169,18 +169,22 @@ if (empty($dest = sanitizedDest('dest'))) {
           if ($settings->no_passwords == 0) {
 
           ?>
-            <form name="login" id="login-form" class="form-signin" action="" method="post">
+            <form name="login" id="login-form" class="form-signin" method="post">
               <?= tokenHere(); ?>
               <div class="form-outline mb-4">
                 <label class="form-label" for="username"><?= lang("SIGNIN_UORE") ?></label>
-                <input type="username" id="username" name="username" class="form-control form-control-lg" required autocomplete="username" />
+                <input type="text" id="username" name="username" class="form-control form-control-lg" 
+                value=""
+                required autocomplete="username">
 
               </div>
 
               <div class="form-outline mb-4">
                 <label class="form-label" for="password"><?= lang("SIGNIN_PASS") ?></label>
                 <div class="input-group">
-                  <input type="password" id="password" name="password" class="form-control form-control-lg" />
+                  <input type="password" id="password" name="password" class="form-control form-control-lg" 
+                  value=""
+                  >
                   <span class="input-group-addon input-group-text see-pw" id="togglePassword">
                     <i class="fa fa-eye" id="togglePasswordIcon"></i>
                   </span>

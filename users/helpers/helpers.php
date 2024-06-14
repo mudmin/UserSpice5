@@ -167,6 +167,7 @@ if (!function_exists('email')) {
     $mail = new PHPMailer();
     $mail->CharSet = 'UTF-8';
     $mail->SMTPDebug = $results->debug_level;               // Enable verbose debug output
+    $mail->XMailer = null;
     if ($results->isSMTP == 1) {
       $mail->isSMTP();
     }             // Set mailer to use SMTP

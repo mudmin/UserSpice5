@@ -39,12 +39,22 @@ $verify_success = FALSE;
 $errors = array();
 
 if (Input::exists('get')) {
+	dump($_GET);
 	if (is_numeric($user_id)) {
 		//this is a passwordless login
 		$ts = date("Y-m-d H:i:s");
 		$db->query("UPDATE us_email_logins set expired = 1 WHERE expired = 0 AND expires < ?", array($ts));
-		$searchQ = $db->query("SELECT * FROM us_email_logins WHERE user_id = ? AND vericode = ? AND expired = 0", array($user_id, $vericode));
+		$searchQ = $db->query("SELECT 
+			l.*, 
+			u.email_verified 
+			FROM us_email_logins l 
+			LEFT OUTER JOIN users u ON l.user_id = u.id
+			WHERE l.user_id = ? 
+			AND l.vericode = ? 
+			AND l.expired = 0"
+			, array($user_id, $vericode));
 		$searchC = $searchQ->count();
+	
 		if ($searchC < 1) {
 			$fields = [
 				'login_method' => 'passwordless',
@@ -55,14 +65,23 @@ if (Input::exists('get')) {
 			$eventhooks =  getMyHooks(['page' => 'loginFail']);
 			includeHook($eventhooks, 'body');
 			usError(lang("VER_FAIL"));
+			
 			Redirect::to($us_url_root . 'users/passwordless.php');
 		} else {
 			$search = $searchQ->first();
+		
 			$user = new User($user_id);
 			$user->login();
 			$hooks =  getMyHooks(['page' => 'loginSuccess']);
 			includeHook($hooks, 'body');
-			$db->update("us_email_logins",["user_id", "=", $search->id], ["expired" => 1]);
+			$fields = [
+				"success"=>1,
+				"login_ip"=>ipCheck(),
+				"login_date"=>date("Y-m-d H:i:s"),
+				"expired"=>1,
+			];
+			$db->update("us_email_logins",$search->id, $fields);
+		
 			$dest = sanitizedDest('dest');
 			# if user was attempting to get to a page before login, go there
 			$_SESSION['last_confirm'] = date("Y-m-d H:i:s");

@@ -29,28 +29,30 @@ if (!empty($_POST)) {
     includeHook($hooks, 'post');
     $db->update('users', $userdetails->id, ['modified' => date("Y-m-d")]);
 
-    if(!empty($_POST['addTag'])){
+    if (!empty($_POST['addTag'])) {
       $add = Input::get('addTag');
-    
-      foreach($add as $a){
-        $tagQ = $db->query("SELECT * FROM plg_tags WHERE id = ?",[$a]);
+
+      foreach ($add as $a) {
+        $tagQ = $db->query("SELECT * FROM plg_tags WHERE id = ?", [$a]);
         $tagC = $tagQ->count();
-        if($tagC < 1){  continue;  }
+        if ($tagC < 1) {
+          continue;
+        }
         $tag = $tagQ->first();
-        $db->query("DELETE FROM plg_tags_matches WHERE user_id = ? AND tag_id = ?",[$userdetails->id,$a]);
-        $db->insert("plg_tags_matches",[
-          'tag_id'=>$a,
-          'tag_name'=>$tag->tag,
-          'user_id'=>$userdetails->id,
+        $db->query("DELETE FROM plg_tags_matches WHERE user_id = ? AND tag_id = ?", [$userdetails->id, $a]);
+        $db->insert("plg_tags_matches", [
+          'tag_id' => $a,
+          'tag_name' => $tag->tag,
+          'user_id' => $userdetails->id,
         ]);
       }
       usSuccess("Tags Updated");
     }
-    
-    if(!empty($_POST['removeTag'])){
+
+    if (!empty($_POST['removeTag'])) {
       $remove = Input::get('removeTag');
-      foreach($remove as $r){
-        $db->query("DELETE FROM plg_tags_matches WHERE id = ?",[$r]);
+      foreach ($remove as $r) {
+        $db->query("DELETE FROM plg_tags_matches WHERE id = ?", [$r]);
       }
       usSuccess("Tags Removed");
     }
@@ -241,7 +243,7 @@ if (!empty($_POST)) {
       }
     }
     $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->reset_vericode_expiry minutes", strtotime(date('Y-m-d H:i:s'))));
-    $vericode = uniqid().randomstring(15);
+    $vericode = uniqid() . randomstring(15);
     $db->update('users', $userdetails->id, ['vericode' => $vericode, 'vericode_expiry' => $vericode_expiry]);
     if (isset($_POST['sendPwReset'])) {
       $params = [
@@ -668,38 +670,50 @@ includeHook($hooks, 'body'); ?>
     </div>
     <div class="col-12 col-sm-6">
       <div class="row">
-        <?php if($pw_settings->meter_active == 1){
+        <?php if ($pw_settings->meter_active == 1) {
           $secondCol = "col-6";
-        }else{
+        } else {
           $secondCol = "col-12";
         } ?>
-       
-        <div class="<?=$secondCol?>">
-        <div class="form-group">
-        <label>New Password</label>
-        <input class='form-control' type='password' autocomplete="off" name='pwx' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) { ?>disabled<?php } ?> />
-      </div>
 
-      <div class="form-group">
-        <label>Confirm Password</label>
-        <input class='form-control' type='password' autocomplete="off" name='confirm' <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) { ?>disabled<?php } ?> />
-      </div>
+        <div class="<?= $secondCol ?>">
+
+          <div class="form-group">
+            <label>New Password</label>
+            <input id="password" class="form-control" type="password" autocomplete="off" name="pwx" <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account)) ||
+                                                                                                      (!in_array($user->data()->id, $master_account) && $userdetails->protected == 1) &&
+                                                                                                      $userId != $user->data()->id
+                                                                                                    ) {
+                                                                                                      echo "disabled";
+                                                                                                    } ?> />
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input id="confirm" class="form-control col-12" type="password" autocomplete="off" name="confirm" <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account)) ||
+                                                                                                                (!in_array($user->data()->id, $master_account) && $userdetails->protected == 1) &&
+                                                                                                                $userId != $user->data()->id
+                                                                                                              ) {
+                                                                                                                echo "disabled";
+                                                                                                              } ?> />
+          </div>
+
+
         </div>
-        <?php if($pw_settings->meter_active == 1){ ?>
-        <div class="col-6">
-        <?php 
-              if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php')) {
-                include($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php');
-              } else {
-                include($abs_us_root . $us_url_root . 'users/includes/password_meter.php');
-              }
+        <?php if ($pw_settings->meter_active == 1) { ?>
+          <div class="col-6">
+            <?php
+            if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php')) {
+              include($abs_us_root . $us_url_root . 'usersc/includes/password_meter.php');
+            } else {
+              include($abs_us_root . $us_url_root . 'users/includes/password_meter.php');
+            }
             ?>
             <small class="text-muted">These rules are not enforced</small>
-        </div>
+          </div>
         <?php } ?>
       </div>
 
-    
+
       <div class="form-group">
         <label> Is allowed to cloak<a class="nounderline" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
         <select name="cloak_allowed" class="form-control">
