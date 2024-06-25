@@ -1,5 +1,5 @@
 <p align="center"><?php
-include("install/includes/install_settings.php");
+include("includes/install_settings.php");
 foreach ($files as $file) {
 	if (!unlink($file)) {
 		echo ("Error deleting $file<br>");

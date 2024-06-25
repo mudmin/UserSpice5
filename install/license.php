@@ -1,4 +1,4 @@
-<?php require_once("install/includes/header.php"); ?>
+<?php require_once("includes/header.php"); ?>
 
 <div class="container mt-5 mb-5">
 
@@ -630,4 +630,4 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.</p>
 
 </div>
-<?php require_once("install/includes/footer.php");
+<?php require_once("includes/footer.php");

@@ -1,51 +1,61 @@
-<?php require_once("install/includes/header.php");
-include "../users/includes/user_spice_ver.php";
- ?>
+<?php
 
-<div class="container-fluid">
-    <div class="row justify-content-center mt-4">
+require_once("includes/header.php");
+include "../users/includes/user_spice_ver.php";
+
+?>
+
+<div class="container">
+    <div class="row justify-content-center my-4">
         <div class="col-6">
             <div class="list-group list-group-horizontal-xl">
-                <a href="#" class="list-group-item list-group-item-action active">
+                <div class="list-group-item list-group-item-action active">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">Step 1</h5>
                     </div>
                     <p class="mb-1"><?= $step1 ?></p>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
+                </div>
+                <div class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">Step 2</h5>
                     </div>
                     <p class="mb-1"><?= $step2 ?></p>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
+                </div>
+                <div class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">Step 3</h5>
                     </div>
                     <p class="mb-1"><?= $step3 ?></p>
-                </a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-12 col-sm-10 offset-sm-1">
-          <h1>Welcome to <?= $app_name . " " . $user_spice_ver ?></h1>
-          <?php
-          define('REMOTE_VERSION', 'http://userspice.com/version/version.txt');
-          $remoteVersion=trim(file_get_contents(REMOTE_VERSION));
-          if(version_compare($remoteVersion, $user_spice_ver) ==  1){ ?>
-            <strong><font color="red">This is not the latest version.</font></strong>  The latest version is <strong><?=$remoteVersion?></strong>.  You are free to install this version, but you can also download the latest version at
-            <a href='https://www.userspice.com'>UserSpice.com</a><br><br>
-        <?php   }  ?>
-            <p>This program will walk you through the entire process of configuring <?= $app_name ?>. Before you
+    <?php
+    define('REMOTE_VERSION', 'http://userspice.com/version/version.txt');
+    $remoteVersion=trim(file_get_contents(REMOTE_VERSION));
+    if(version_compare($remoteVersion, $user_spice_ver) ==  1) { ?>
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            The latest version is <?=$remoteVersion?>. <a href="https://www.userspice.com" class="alert-link">Download</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php } ?>
+
+    <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+        <div class="container-fluid p-2">
+            <h1 class="display-5 fw-bold mb-4">Welcome to <?= $app_name . " " . $user_spice_ver ?></h1>
+            <p class="fs-4">This program will walk you through the entire process of configuring <?= $app_name ?>. Before you
                 proceed, you might want to make sure that you're ready to do the install.</p>
-            <p>If you have not already created a new <font color="red"><strong>database</strong></font>, please do so
+            <p class="fs-4">If you have not already created a new <font color="red"><strong>database</strong></font>, please do so
                 at this time. Make sure that you have the Host Name, Username, Password, and Database name handy, as you
                 will need them to complete the install. Note that if your database user has permission to create
                 databases on your server, the installer can create the database for you in the next step.</p>
+        </div>
+    </div>
 
-            <h3 class="mt-5">System Requirement Check</h3>
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mt-4">System Requirement Check</h3>
             <?php
             // Check to make sure php is version is good enough
             // Set your required PHP version in the install_settings file
@@ -53,8 +63,10 @@ include "../users/includes/user_spice_ver.php";
                 // php version isn't high enough
                 //The system is designed to do a full stop of you don't meet the minimum PHP version
                 ?>
-                <div class="alert alert-danger" role="alert">We're sorry, but your PHP version is out of date. Please update to PHP <?= $php_ver ?> or later to
-                    continue. <a href='http://php.net/' target='_blank'>PHP Website</a></div>
+                <div class="alert alert-danger" role="alert">
+                    We're sorry, but your PHP version is out of date. Please update to PHP <?= $php_ver ?> or later to
+                    continue.
+                </div>
                 <?php
             } else {
             ?>
@@ -62,7 +74,7 @@ include "../users/includes/user_spice_ver.php";
                 make sure your system meets all the rest of the requirements. If you see any red in the table below,
                 please correct those issues before installing.</p>
 
-            <table class="table table-striped">
+            <table class="table table-striped table-hover">
                 <thead class="thead-dark">
                 <tr>
                     <th width="50%">Requirement</th>
@@ -155,7 +167,7 @@ include "../users/includes/user_spice_ver.php";
                 <?= $app_name ?> Will most likely work regardless of the settings below, however these settings are
                 suggested.
             </p>
-            <table class="table table-striped" width="100%">
+            <table class="table table-striped table-hover" width="100%">
                 <thead class="thead-dark">
                 <tr>
                     <th width="50%">Setting</th>
@@ -290,4 +302,4 @@ include "../users/includes/user_spice_ver.php";
 
 </div>
 
-<?php require_once("install/includes/footer.php");
+<?php require_once("includes/footer.php");
