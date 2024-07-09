@@ -1303,7 +1303,7 @@ if (!function_exists('sessionValMessages')) {
         && $$key != []
         && $$key != null
       ) {
-        $_SESSION[Config::get('session/session_name') . $key][] = $$key;
+        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($$key);
       } elseif (
         isset($_SESSION[Config::get('session/session_name') . $key])
         && $_SESSION[Config::get('session/session_name') . $key] != ''
@@ -1312,10 +1312,10 @@ if (!function_exists('sessionValMessages')) {
       ) {
         $save = $_SESSION[Config::get('session/session_name') . $key];
         $_SESSION[Config::get('session/session_name') . $key] = [];
-        $_SESSION[Config::get('session/session_name') . $key][] = $save;
-        $_SESSION[Config::get('session/session_name') . $key][] = $$key;
+        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($save);
+        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($$key);
       } elseif ($$key != [] && $$key != null) {
-        $_SESSION[Config::get('session/session_name') . $key] = $$key;
+        $_SESSION[Config::get('session/session_name') . $key] = Input::sanitize($$key);
       }
     }
   }
@@ -1345,7 +1345,6 @@ if (!function_exists("usMessage")) {
     sessionValMessages("", "", $msg);
   }
 }
-
 
 if (!function_exists('isUserLoggedIn')) {
   function isUserLoggedIn()
@@ -1651,10 +1650,6 @@ function userSpicePasswordScore($password)
     if (
       strlen($password) < $pw_settings->min_length ||
       strlen($password) > $pw_settings->max_length ||
-      !$pw_settings->require_lowercase ||
-      !$pw_settings->require_uppercase ||
-      !$pw_settings->require_numbers ||
-      !$pw_settings->require_symbols ||
       !preg_match('/[a-z]/', $password) ||
       !preg_match('/[A-Z]/', $password) ||
       !preg_match('/[0-9]/', $password) ||
