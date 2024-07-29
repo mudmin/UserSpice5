@@ -39,8 +39,13 @@ if($table == ""){
 
   $whitelist = ['settings',"us_password_strength"];
   foreach($query as $q){
-    $whitelist[] = $q->table_name;
+    if(isset($q->table_name)){
+      $whitelist[] = $q->table_name;
+    }elseif(isset($q->TABLE_NAME)){
+      $whitelist[] = $q->TABLE_NAME;
+    }
   }
+
   if(!in_array($table,$whitelist)){
     $msg['success'] = "false";
     $msg['msg'] = $desc." Not Updated! Illegal table specified";

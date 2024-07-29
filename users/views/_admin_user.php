@@ -28,7 +28,11 @@ if (!empty($_POST)) {
   } else {
     includeHook($hooks, 'post');
     $db->update('users', $userdetails->id, ['modified' => date("Y-m-d")]);
-
+    $email_verified = Input::get('email_verified');
+    if ($email_verified == 1) {
+      $db->update('users', $userdetails->id, ['email_verified' => 1]);
+      usSuccess("Email Verified");
+    }
     if (!empty($_POST['addTag'])) {
       $add = Input::get('addTag');
 
@@ -544,7 +548,8 @@ includeHook($hooks, 'body'); ?>
 
           <input type="submit" name="cloak" id="cloak" class="btn <?= $cloakClass ?> col-12" value="Cloak Into User" <?= $disabled ?>>
         </form>
-      </div>
+
+     </div>
 
       <div class="col-12 col-sm-6 col-md-3 mt-2">
         <form class="" action="" method="post" onsubmit="return confirm('If you continue, the user will be forced to change their password on the next login.');">
@@ -574,6 +579,14 @@ includeHook($hooks, 'body'); ?>
       <div class="form-group" id="email-group">
         <label>Email:</label>
         <input class='form-control' type='search' name='email' value='<?= $userdetails->email; ?>' autocomplete="off" />
+
+      <?php if($userdetails->email_verified == 0){ ?>
+        <div class="alert alert-warning mt-2">
+          <strong>Warning!</strong> This user has not verified their email address.<br>
+          <input type="checkbox" name="email_verified" value="1"> Mark as verified
+        </div>
+      <?php 
+      } ?>
       </div>
 
       <div class="form-group" id="fname-group">

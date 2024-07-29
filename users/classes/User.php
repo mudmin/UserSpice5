@@ -101,6 +101,9 @@ class User
     {
         if (!$username && !$password && $this->exists()) {
             Session::put($this->_sessionName, $this->data()->id);
+            $date = date('Y-m-d H:i:s');
+			$this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
+			$_SESSION['last_confirm'] = date('Y-m-d H:i:s');
         } else {
             $user = $this->find($username);
             if ($user) {
@@ -153,13 +156,13 @@ class User
             Session::put($this->_sessionName, $this->data()->id);
         } else {
             $user = $this->find($email, 1);
-
+           
             if ($user) {
-                $strength = substr($this->data()->password, 3, 2);
+                $strength = substr($this->data()->password, 4, 2);
                 if(!is_numeric($strength)){
                     $strength = 999;
                 }
-
+       
                 if(password_verify($password, $this->data()->password)){
                     $success = true;
                 //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.

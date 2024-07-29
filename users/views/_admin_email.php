@@ -20,6 +20,13 @@ if (!empty($_POST)) {
     include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
   }
 
+  if (isset($_POST['verify_all'])) {
+    $db->query("UPDATE users SET email_verified = 1");
+    usSuccess('All users have been marked as verified.');
+    logger($user->data()->id, 'Email Settings', 'All users have been marked as verified.');
+    Redirect::to($us_url_root . 'users/admin.php?view=email');
+  }
+
   if ($results->smtp_server != $_POST['smtp_server']) {
     $smtp_server = Input::get('smtp_server');
     $fields = ['smtp_server' => $smtp_server];
@@ -321,3 +328,27 @@ if (!empty($_POST)) {
     </div>
   </div>
 </form>
+
+<?php 
+if($results->email_act == 0){
+  $check = $db->query("SELECT id FROM users WHERE email_verified = 0")->count();
+  $term = 'users';
+  if($check == 1){
+    $term = 'user';
+  }
+
+  if($check > 0){
+    ?>
+          <form action="" method="post"
+        onsubmit="return confirm('Are you sure you want to mark all users as verified? This cannot be undone.')"
+        >
+    <div class='alert alert-warning mt-3'>You have <?=$check?> unverified <?=$term?> but your system is not currently requiring users to verify their email.  Would you like to mark all users as verified?
+
+        <?=tokenHere();?>
+        <input type="hidden" name="verify_all" value="1">
+        <input type="submit" class="ms-5 btn btn-success" value="Mark All Users as Verified">
+      </form>
+    </div>
+    <?php 
+  }
+}

@@ -1265,6 +1265,7 @@ if (!function_exists('parseSessionMessages')) {
             //deal with compatibility of display_errors function
             if (is_array($s)) {
               foreach ($s as $str) {
+
                 $string .= '<li>' . $str . '</li>';
               }
             } elseif (count($_SESSION[$sn . $key]) > 1) {
@@ -1293,34 +1294,61 @@ if (!function_exists('parseSessionMessages')) {
 //Note that the session variables have these crazy names to prevent cross talk
 //on shared hosting environments
 if (!function_exists('sessionValMessages')) {
-  function sessionValMessages($valErr = [], $valSuc = [], $genMsg = [])
+  function sessionValMessages($valErr = [], $valSuc = [], $genMsg = []): void
   {
-    $keys = ['valErr', 'valSuc', 'genMsg'];
-    foreach ($keys as $key) {
-      if (
-        isset($_SESSION[Config::get('session/session_name') . $key])
-        && is_array($_SESSION[Config::get('session/session_name') . $key])
-        && $$key != []
-        && $$key != null
-      ) {
-        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($$key);
-      } elseif (
-        isset($_SESSION[Config::get('session/session_name') . $key])
-        && $_SESSION[Config::get('session/session_name') . $key] != ''
-        && $$key != []
-        && $$key != null
-      ) {
-        $save = $_SESSION[Config::get('session/session_name') . $key];
-        $_SESSION[Config::get('session/session_name') . $key] = [];
-        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($save);
-        $_SESSION[Config::get('session/session_name') . $key][] = Input::sanitize($$key);
-      } elseif ($$key != [] && $$key != null) {
-        $_SESSION[Config::get('session/session_name') . $key] = Input::sanitize($$key);
+      $keys = ['valErr', 'valSuc', 'genMsg'];
+      foreach ($keys as $key) {
+          $sessionKey = Config::get('session/session_name') . $key;
+          $value = $$key;
+
+          if (!empty($value)) {
+              $value = is_array($value) ? $value : [$value];
+              
+              foreach ($value as $item) {
+                  $sanitizedItem = sanitizeHTML($item);
+                  
+                  if (isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
+                      $_SESSION[$sessionKey][] = $sanitizedItem;
+                  } elseif (isset($_SESSION[$sessionKey]) && $_SESSION[$sessionKey] !== '') {
+                      $save = $_SESSION[$sessionKey];
+                      $_SESSION[$sessionKey] = [
+                          sanitizeHTML($save),
+                          $sanitizedItem
+                      ];
+                  } else {
+                      $_SESSION[$sessionKey] = $sanitizedItem;
+                  }
+              }
+          }
       }
-    }
   }
 }
 
+function sanitizeHTML($input) {
+  $allowed_tags = '<strong><em><p><br><ul><li><a>';
+  $allowed_attributes = ['href', 'title'];
+  
+  if (is_array($input)) {
+      return array_map('sanitizeHTML', $input);
+  }
+  
+  // Decode HTML entities first
+  $input = html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+  
+  // Remove all HTML tags except allowed ones
+  $output = strip_tags($input, $allowed_tags);
+  
+  // Remove all attributes except those in the whitelist
+  $output = preg_replace_callback('/<([^>]+)>/i', function($matches) use ($allowed_attributes) {
+      $tag = preg_replace('/\s+.*$/i', '', $matches[1]);
+      preg_match_all('/(\w+)\s*=\s*"[^"]*"/i', $matches[1], $attributes);
+      $filtered_attributes = array_intersect($attributes[1], $allowed_attributes);
+      $tag_content = $tag . ' ' . implode(' ', $filtered_attributes);
+      return "<$tag_content>";
+  }, $output);
+  
+  return $output;
+}
 
 //Alias for passing error messages. Can be a message or array of messsages.
 if (!function_exists("usError")) {
