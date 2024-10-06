@@ -4,6 +4,8 @@ $mode = Input::get('mode');
 $action = Input::get('action');
 $filters = [
   'debug' => 'View Only Debugging Logs',
+  'passwordless' => 'View Only Passwordless Logs',
+  'database_debug' => 'View Only Database Debugging Logs',
 ];
 
 if (in_array($user->data()->id, $master_account) && $action != '') {

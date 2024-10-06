@@ -239,7 +239,9 @@ $email_login = "This feature allows users to login with their email address inst
               </label>
             </span>
             <br>
-            <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="admin.php?view=email" style="color:blue;"> here</a>.</small>
+            <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="<?=$us_url_root?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
+            <small>Need to debug? See options in <code>usersc/scripts/passwordless_login_overrides.php</code></small><br>
+            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>.</small>
           </div>
 
 

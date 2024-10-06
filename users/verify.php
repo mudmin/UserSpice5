@@ -39,11 +39,22 @@ $verify_success = FALSE;
 $errors = array();
 
 if (Input::exists('get')) {
-	dump($_GET);
+
 	if (is_numeric($user_id)) {
 		//this is a passwordless login
-		$ts = date("Y-m-d H:i:s");
-		$db->query("UPDATE us_email_logins set expired = 1 WHERE expired = 0 AND expires < ?", array($ts));
+        $ts = date("Y-m-d H:i:s");
+        if(file_exists($abs_us_root . $us_url_root . 'usersc/scripts/passwordless_login_overrides.php')){
+            require_once $abs_us_root . $us_url_root . 'usersc/scripts/passwordless_login_overrides.php';
+        }
+        if(!isset($do_not_auto_expire) || $do_not_auto_expire != true){
+            $db->query("UPDATE us_email_logins set expired = 1 WHERE expired = 0 AND expires < ?", array($ts));
+        }
+        if(isset($passwordlessDebug) && $passwordlessDebug == true){
+            logger($user_id, "Passwordless Debug", "Login Attempt with vericode: $vericode");
+            // Log the user agent
+            $user_agent = Input::sanitize($_SERVER['HTTP_USER_AGENT']);
+            logger($user_id, "Passwordless Debug UA", $user_agent);
+        }
 		$searchQ = $db->query("SELECT 
 			l.*, 
 			u.email_verified 
@@ -51,10 +62,24 @@ if (Input::exists('get')) {
 			LEFT OUTER JOIN users u ON l.user_id = u.id
 			WHERE l.user_id = ? 
 			AND l.vericode = ? 
-			AND l.expired = 0"
+			"
 			, array($user_id, $vericode));
 		$searchC = $searchQ->count();
-	
+		if(isset($passwordlessDebug) && $passwordlessDebug == true){
+			logger($user_id, "Passwordless Debug", "Vericode Search Count: $searchC");
+		}
+		if($searchC > 0){
+			$search = $searchQ->first();
+			if($search->expired == 1){
+				if(isset($passwordlessDebug) && $passwordlessDebug == true){
+					logger($user_id, "Passwordless Debug", "Login Failed - Expired");
+				}
+				$eventhooks =  getMyHooks(['page' => 'loginFail']);
+				includeHook($eventhooks, 'body');
+				usError(lang("VER_FAIL"));
+				Redirect::to($us_url_root . 'users/passwordless.php');
+			}
+		}
 		if ($searchC < 1) {
 			$fields = [
 				'login_method' => 'passwordless',
@@ -62,13 +87,16 @@ if (Input::exists('get')) {
 				'ts' => $ts,
 			];
 			$db->insert('us_login_fails', $fields);
+			if(isset($passwordlessDebug) && $passwordlessDebug == true){
+				logger($user_id, "Passwordless Debug", "Login Failed");
+			}
 			$eventhooks =  getMyHooks(['page' => 'loginFail']);
 			includeHook($eventhooks, 'body');
 			usError(lang("VER_FAIL"));
 			
 			Redirect::to($us_url_root . 'users/passwordless.php');
 		} else {
-			$search = $searchQ->first();
+		
 		
 			$user = new User($user_id);
 			$user->login();
@@ -78,9 +106,15 @@ if (Input::exists('get')) {
 				"success"=>1,
 				"login_ip"=>ipCheck(),
 				"login_date"=>date("Y-m-d H:i:s"),
-				"expired"=>1,
+			
 			];
+			if(!isset($do_not_auto_expire) || $do_not_auto_expire != true){
+				$fields['expired'] = 1;
+			}
 			$db->update("us_email_logins",$search->id, $fields);
+			if(isset($passwordlessDebug) && $passwordlessDebug == true){
+				logger($user_id, "Passwordless Debug", "Login Success");
+			}
 		
 			$dest = sanitizedDest('dest');
 			# if user was attempting to get to a page before login, go there

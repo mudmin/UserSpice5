@@ -174,7 +174,10 @@ class User
                 
                 if ($success) {
                     if($strength < 13){
-                        $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);
+                        //deal with custom login forms that do not properly pass the password
+                        if($rawpassword != null && $rawpassword != ""){
+                            $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);
+                        }             
                     }
                     Session::put($this->_sessionName, $this->data()->id);
 

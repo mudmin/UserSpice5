@@ -894,31 +894,24 @@ if (!function_exists('username_helper')) {
 }
 
 if (!function_exists('oxfordList')) {
-  function oxfordList($data, $opts = [])
+  function oxfordList($data, $opts = ['final' => 'and'])
   {
-    $msg = '';
-    if (is_array($data)) {
-      if ($opts == []) {
-        echo implode(', ', $data);
-      } else {
-        $final = $opts['final'];
-        $c = count($data);
-        for ($i = 0; $i <= $c; ++$i) {
-          if (isset($data[$i])) {
-            if ($i == $c - 1) {
-              $msg .= ' ' . $final . ' ';
-            }
-
-            $msg .= $data[$i];
-            if ($i < $c - 1) {
-              $msg .= ',';
-            }
-          }
-        }
+      if (!is_array($data) || empty($data)) {
+          return '';
       }
-    }
-
-    return $msg;
+      $count = count($data);
+        if ($count === 1) {
+          return $data[0];
+      }
+  
+      $final = $opts['final'] ?? 'and';
+  
+      if ($count === 2) {
+          return $data[0] . ' ' . $final . ' ' . $data[1];
+      }
+  
+      $last = array_pop($data);
+      return implode(', ', $data) . ', ' . $final . ' ' . $last;
   }
 }
 
@@ -1425,7 +1418,7 @@ if (!function_exists('UserSpice_getLogs')) {
       // Most of my functions would use 1, but I can't assume that for all US installations
       $userId = 0;
     }
-
+ 
     // Current Accepted $opts:
     // - preset | String: "diag"
     // - limit | int (eg. 1000) | string (eg. "LIMIT 5000") | null
@@ -1449,10 +1442,26 @@ if (!function_exists('UserSpice_getLogs')) {
       }
       // Since we are not allowing user input into this, it is safe to pass without sanitizing it
       $query_where .= "logtype = 'Redirect Diag' OR logtype = 'Form Data'";
+    
+    }elseif($preset == 'passwordless'){
+      if (strpos(strtolower($query_where), 'where ') == false) {
+        $query_where = 'WHERE ';
+      }
+
+      $query_where .= " logtype = 'Passwordless Debug' OR logtype = 'Passwordless Debug UA' ";
+    
+    }elseif($preset == "database_debug"){
+      if (strpos(strtolower($query_where), 'where ') == false) {
+        $query_where = 'WHERE ';
+      }
+
+      $query_where .= " logtype = 'DATABASE_INSERT' OR logtype = 'DATABASE_UPDATE' ";
     }
+
     if ($query_where != '') {
     }
     $query = trim(str_replace('  ', ' ', "SELECT * FROM logs {$query_where} ORDER BY id DESC {$limit}"));
+
     $db->query($query);
     if (!$db->error()) {
       // Return the results
