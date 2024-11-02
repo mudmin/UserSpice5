@@ -31,6 +31,7 @@ $update_available = false;
         <div class="row">
           <div class="col-12 col-md-6">
             <h2>Checking for updates...</h2>
+
           </div>
           <div class="col-12 col-md-6 text-end">
             <form class="" action="" method="post">
@@ -47,14 +48,32 @@ $update_available = false;
 
 
           <?php
+          $error_tripped = false;
           if (!extension_loaded("curl")) {
-            usError("You must have the PHP CURL extension installed and loaded to use Spice Shaker");
+            $error_tripped = true;
+            usError("You must have the PHP CURL extension installed and loaded to use the update system.");
           }
 
           if (!extension_loaded("zip")) {
-            usError("You must have the PHP zip extension installed and loaded to use Spice Shaker");
+            $error_tripped = true;
+            usError("You must have the PHP zip extension installed and loaded to use the update system.");
           }
 
+          if (!ini_get('allow_url_fopen')) {
+            $error_tripped = true;
+            usError("The PHP setting 'allow_url_fopen' must be enabled to use the update system.");
+          }
+          if($error_tripped == true){
+            ?>
+
+            <div class="alert alert-danger" role="alert">We have detected a problem that may prevent you from automatically updating. If you cannot resolve the problem, you can still update at <a target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a>
+            <br>
+            Please download the updates and install them in order by unzipping them and overwriting existing files. 
+            
+          
+            </div>
+            <?php 
+          }
           if ($settings->bleeding_edge == 1) { ?>
             <div class="alert alert-warning" role="alert">You are on the <b>BLEEDING EDGE</b> update cycle (Thank You!). This means you will get updates a few days to a few weeks before everyone else. Although updates are tested before reaching this stage, there may be bugs. Please backup before updating and report bugs as you find them.</p>
             </div>

@@ -17,11 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-ini_set('max_execution_time', 1356);
-ini_set('memory_limit', '1024M');
+
 ?>
 <?php
+ini_set('allow_url_fopen', 1);
 require_once '../users/init.php';
+
 $view = Input::get('view');
 
 //note that the dashboard widget cards are in either users/modules/widgets.php or usersc/modules/widgets.php and are called from a view, which explains why they are not included in the list below. 
@@ -40,6 +41,7 @@ $modules = [
   "footer", //footer and plugin footers
   "dashboard_js", //ajax calls and general dashboard javascript
 ];
+
 foreach($modules as $m){
   if(file_exists($abs_us_root . $us_url_root . "usersc/modules/".$m.".php")){
     require_once $abs_us_root . $us_url_root . "usersc/modules/".$m.".php";
@@ -47,3 +49,4 @@ foreach($modules as $m){
     require_once $abs_us_root . $us_url_root . "users/modules/".$m.".php";
   }
 }
+
