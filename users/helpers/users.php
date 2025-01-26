@@ -188,7 +188,7 @@ if (!function_exists('updateUser')) {
   function updateUser($column, $id, $value)
   {
     global $db, $user;
-    if (isset($user->data()->column)) { //check for a valid column
+    if (isset($user->data()->$column)) { //check for a valid column
       $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
       return $result;
     } else {
@@ -198,7 +198,7 @@ if (!function_exists('updateUser')) {
 }
 
 if (!function_exists('fetchUserName')) {
-  //Fetchs CONCAT of Fname Lname
+  //Fetches CONCAT of Fname Lname
   function fetchUserName($username = null, $token = null, $id = null)
   {
     global $db;
@@ -400,12 +400,14 @@ if (!function_exists('socialLogin')) {
         $db->insert('us_ip_list', [
           'user_id' => $user->data()->id,
           'ip' => $ip,
+          'timestamp' => date('Y-m-d H:i:s'),
         ]);
       } else {
         $f = $q->first();
         $db->update('us_ip_list', $f->id, [
           'user_id' => $user->data()->id,
           'ip' => $ip,
+          'timestamp' => date('Y-m-d H:i:s'),
         ]);
       }
 

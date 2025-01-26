@@ -120,13 +120,18 @@ $count = $query->count();
 <?php if ($settings->cron_ip == 'off') { ?>
   <strong>Note:</strong>
   A cron job is an automated task which allows you to perform powerful tasks without your interaction. Before implementing cron jobs,
-  you want to do some thinking about security. In almost all circumstances, you do not want someone to be able to type <?= $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php' ?>
+  you want to do some thinking about security. In almost all circumstances, you do not want someone to be able to type <?php 
+  $scheme = isHTTPSConnection() ? 'https' : 'http';
+  echo $scheme . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php';
+  ?>
   and run a bunch of commands on your server.<br><br>
 
   The recommended way of implementing cron jobs is...<br>
-  Step 1: Go into your server and set your cron job to fire off to <?= $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php' ?> every few minutes.<br>
+  Step 1: Go into your server and set your cron job to fire off to <?php 
+  echo $scheme . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php';
+  ?> every few minutes.<br>
   Step 2: Go into <a href="admin.php?view=logs">the system logs</a> and see which ip address was rejected for trying to do a cron job.<br>
-  Step 3: Then go into <a href="admin.php?view=general">the admin dashboard"</a> and set that IP address in the 'Only allow cron jobs from the following IP' box.<br>
+  Step 3: Then go into <a href="admin.php?view=general">the admin dashboard</a> and set that IP address in the 'Only allow cron jobs from the following IP' box.<br>
   Step 4: Go back into your server and set your cron job for a more reasonable amount of time. Most server admins don't want you running cron jobs every few minutes. Every hour or even every day is more reasonable.
 <?php } ?>
 

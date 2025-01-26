@@ -39,6 +39,22 @@ $lang = array_merge($lang, array(
 	"THIS_CODE"			=> "ar-EG",
 	"MISSING_TEXT"	=> "Missing Text",
 ));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "دخل الكود اللي اتبعت على إيميلك",
+    "PASS_EMAIL_ONLY"     => "لو سمحت شوف إيميلك علشان لينك تسجيل الدخول",
+    "PASS_CODE_ONLY"      => "لو سمحت دخل الكود اللي اتبعت على إيميلك",
+    "PASS_BOTH"           => "لو سمحت شوف إيميلك علشان لينك تسجيل الدخول أو دخل الكود اللي اتبعت على إيميلك",
+    "PASS_VER_BUTTON"     => "تأكيد الكود",
+    "PASS_EMAIL_ONLY_MSG" => "لو سمحت أكد إيميلك بالضغط على اللينك اللي تحت",
+    "PASS_CODE_ONLY_MSG"  => "لو سمحت دخل الكود اللي تحت علشان تسجل دخول",
+    "PASS_BOTH_MSG"       => "لو سمحت أكد إيميلك بالضغط على اللينك اللي تحت أو دخل الكود اللي تحت علشان تسجل دخول",
+    "PASS_YOUR_CODE"      => "كود التأكيد بتاعك هو: ",
+    "PASS_CONFIRM_LOGIN"  => "تأكيد تسجيل الدخول",
+    "PASS_CONFIRM_CLICK"  => "اضغط لإكمال تسجيل الدخول",
+    "PASS_GENERIC_ERROR"  => "في حاجة غلط حصلت",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "الرئيسية",

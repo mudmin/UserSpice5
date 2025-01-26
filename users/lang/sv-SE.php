@@ -43,6 +43,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Text saknas",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Ange koden som skickats till din e-post",
+    "PASS_EMAIL_ONLY"     => "Vänligen kontrollera din e-post för en inloggningslänk",
+    "PASS_CODE_ONLY"      => "Vänligen ange koden som skickats till din e-post",
+    "PASS_BOTH"           => "Vänligen kontrollera din e-post för en inloggningslänk eller ange koden som skickats",
+    "PASS_VER_BUTTON"     => "Verifiera kod",
+    "PASS_EMAIL_ONLY_MSG" => "Vänligen verifiera din e-postadress genom att klicka på länken nedan",
+    "PASS_CODE_ONLY_MSG"  => "Vänligen ange koden nedan för att logga in",
+    "PASS_BOTH_MSG"       => "Vänligen verifiera din e-postadress genom att klicka på länken nedan eller ange koden för att logga in",
+    "PASS_YOUR_CODE"      => "Din verifieringskod är: ",
+    "PASS_CONFIRM_LOGIN"  => "Bekräfta inloggning",
+    "PASS_CONFIRM_CLICK"  => "Klicka för att slutföra inloggningen",
+    "PASS_GENERIC_ERROR"  => "Något gick fel",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Hem",
@@ -288,7 +303,7 @@ $lang = array_merge($lang, array(
 $lang = array_merge($lang, array(
 	"EML_SIGN_IN_WITH" => "Logga in med:",
 	"EML_FEATURE_DISABLED" => "Denna funktion är inaktiverad",
-	"EML_PASSWORDLESS_SENT" => "Var vänlig kontrollera din e-post för en länk för att logga in.",
+	"EML_PASSWORDLESS_SENT" => "Vänligen kontrollera din e-post för en login-länk.",
 	"EML_PASSWORDLESS_SUBJECT" => "Var vänlig verifiera din e-post för att logga in.",
 	"EML_PASSWORDLESS_BODY" => "Var vänlig verifiera din e-postadress genom att klicka på länken nedan. Du kommer att bli automatiskt inloggad.",
 

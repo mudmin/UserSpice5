@@ -45,6 +45,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Mangler tekst",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"    => "Skriv inn koden som ble sendt til e-posten din",
+    "PASS_EMAIL_ONLY"    => "Vennligst sjekk e-posten din for en innloggingslenke.",
+    "PASS_CODE_ONLY"     => "Vennligst skriv inn koden som ble sendt til e-posten din.",
+    "PASS_BOTH"          => "Vennligst sjekk e-posten din for en innloggingslenke eller skriv inn koden som ble sendt til e-posten din.",
+    "PASS_VER_BUTTON"    => "Bekreft kode",
+    "PASS_EMAIL_ONLY_MSG" => "Vennligst bekreft e-postadressen din ved å klikke på lenken nedenfor.",
+    "PASS_CODE_ONLY_MSG"  => "Vennligst skriv inn koden nedenfor for å logge inn.",
+    "PASS_BOTH_MSG"       => "Vennligst bekreft e-postadressen din ved å klikke på lenken nedenfor eller skriv inn koden nedenfor for å logge inn.",
+    "PASS_YOUR_CODE"      => "Din bekreftelseskode er: ",
+    "PASS_CONFIRM_LOGIN"  => "Bekreft innlogging",
+    "PASS_CONFIRM_CLICK"  => "Klikk for å fullføre innlogging",
+    "PASS_GENERIC_ERROR"  => "Noe gikk galt.",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Hjem",

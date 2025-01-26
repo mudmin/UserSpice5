@@ -9,7 +9,7 @@ foreach($socials as $social) {
     if (!pluginActive($social->plugin, true) || $settings->{$social->enabledsetting} == 0) $loginOpts--;
 }
 
-if($settings->email_login == 1 && currentPage() != "join.php"){
+if($settings->email_login > 0 && currentPage() != "join.php"){
     $loginOpts++;
     if(file_exists($abs_us_root . $us_url_root . 'usersc/images/login_icons/passwordless.png')){
         $emailImage = $us_url_root . 'usersc/images/login_icons/passwordlesss.png';
@@ -25,7 +25,7 @@ if($loginOpts > 0) {
 <div class="separator"><?= strpos(lang('EML_SIGN_IN_WITH'), "{") !== false ? 'Sign in with:' : lang('EML_SIGN_IN_WITH') ?></div>
 <div class="userspice-social-logins-list">
     <?php
-    if($settings->email_login == 1 && currentPage() != "join.php"){ ?>
+    if($settings->email_login > 0 && currentPage() != "join.php"){ ?>
         <a class="userspice-social-logins-item" href="<?=$us_url_root?>users/passwordless.php">
         <span class="userspice-social-parent">
         <span class="userspice-social-logins-icon">

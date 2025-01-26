@@ -37,6 +37,22 @@ $lang = array_merge($lang, array(
 	"THIS_CODE"			=> "ro-RO",
 	"MISSING_TEXT"	=> "Textul lipsa",
 ));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"    => "Introduceți codul trimis pe e-mail",
+    "PASS_EMAIL_ONLY"    => "Vă rugăm să verificați e-mailul pentru link-ul de autentificare.",
+    "PASS_CODE_ONLY"     => "Vă rugăm să introduceți codul trimis pe e-mail.",
+    "PASS_BOTH"          => "Vă rugăm să verificați e-mailul pentru link-ul de autentificare sau să introduceți codul trimis pe e-mail.",
+    "PASS_VER_BUTTON"    => "Verifică codul",
+    "PASS_EMAIL_ONLY_MSG" => "Vă rugăm să verificați adresa de e-mail făcând clic pe link-ul de mai jos.",
+    "PASS_CODE_ONLY_MSG"  => "Vă rugăm să introduceți codul de mai jos pentru autentificare.",
+    "PASS_BOTH_MSG"       => "Vă rugăm să verificați adresa de e-mail făcând clic pe link-ul de mai jos sau să introduceți codul de mai jos pentru autentificare.",
+    "PASS_YOUR_CODE"      => "Codul dumneavoastră de verificare este: ",
+    "PASS_CONFIRM_LOGIN"  => "Confirmă Autentificarea",
+    "PASS_CONFIRM_CLICK"  => "Click pentru Finalizarea Autentificării",
+    "PASS_GENERIC_ERROR"  => "A apărut o eroare.",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Acasa",

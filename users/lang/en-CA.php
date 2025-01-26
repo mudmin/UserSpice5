@@ -39,6 +39,22 @@ $lang = array_merge($lang, array(
 	"THIS_CODE"			=> "en-CA",
 	"MISSING_TEXT"	=> "Text is down the biffy",
 ));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Enter the code sent to your email, eh?",
+    "PASS_EMAIL_ONLY"     => "Better check your email for a login link, eh?",
+    "PASS_CODE_ONLY"      => "Just pop in that code we sent to your email, eh?",
+    "PASS_BOTH"           => "Take a look at your email for a login link or enter the code we sent, eh?",
+    "PASS_VER_BUTTON"     => "Verify code, eh?",
+    "PASS_EMAIL_ONLY_MSG" => "Give that link below a click to verify your email, eh?",
+    "PASS_CODE_ONLY_MSG"  => "Pop in that code below to login, eh?",
+    "PASS_BOTH_MSG"       => "Click that link below to verify your email or enter the code to login, eh?",
+    "PASS_YOUR_CODE"      => "Here's your verification code, eh?: ",
+    "PASS_CONFIRM_LOGIN"  => "Confirm Login, eh?",
+    "PASS_CONFIRM_CLICK"  => "Just click here to finish up, eh?",
+    "PASS_GENERIC_ERROR"  => "Oops, sorry about that! Something went wrong, eh?",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Home, eh?",

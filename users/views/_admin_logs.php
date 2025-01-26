@@ -45,10 +45,20 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
 </style>
 
 <div class="row">
-  <div class="col-12 col-sm-6">
+  <div class="col-12 col-sm-3">
     <h2 class="mb-3">System Logs</h2>
   </div>
   <?php if (in_array($user->data()->id, $master_account)) { ?>
+    <div class="col-12 col-sm-3">
+    File-based logs: 
+    <?php if(defined('USERSPICE_ACTIVE_LOGGING') && USERSPICE_ACTIVE_LOGGING == true) { ?>
+      <span class="badge badge-success">Enabled</span>
+      
+    <?php } else { ?>
+      <span class="badge badge-danger">Disabled</span>
+    <?php } ?>
+    <a href="<?= $us_url_root ?>users/logs" style="color:blue;">View Logs</a>
+    </div>
     <div class="col-12 col-sm-3">
       <select class="form-control" name="logs_actions" id="logs_actions">
         <option disabled selected value>Select an action...</option>
@@ -210,3 +220,14 @@ $logs = UserSpice_getLogs(['preset' => $mode]);
     });
   });
 </script>
+<style>
+  .badge {
+    font-size: .8rem;
+  }
+  .badge-success{
+    background-color: #28a745;
+  }
+  .badge-danger{
+    background-color: #dc3545;
+  }
+</style>

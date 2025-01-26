@@ -2,8 +2,8 @@
 /*
 Do not put any content above the opening PHP tag
 /**
-      Afrikaans Translation by John Dovey <boondock@criptext.com>
-      v 1.0: 8 January 2021
+      Afrikaans Translation by John Dovey <boondock@criptext.com> & Big G
+      v 2.0: 16 December 2024
       Any suggestions for improvements greately appreciated
 **/
 /*
@@ -39,6 +39,21 @@ $lang = array_merge($lang, array(
 	"THIS_LANGUAGE"	=> "Afrikaans",
 	"THIS_CODE"	=> "af-AF",
 	"MISSING_TEXT"	=> "Ontbrekende teks",
+));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Voer die kode in wat na jou e-pos gestuur is",
+    "PASS_EMAIL_ONLY"     => "Bevestig asseblief jou e-pos vir 'n skakel om aan te teken.",
+    "PASS_CODE_ONLY"      => "Voer asseblief die kode in wat na jou e-pos gestuur is.",
+    "PASS_BOTH"           => "Bevestig asseblief jou e-pos vir 'n skakel om aan te teken of voer die kode in wat na jou e-pos gestuur is.",
+    "PASS_VER_BUTTON"     => "Verifieer kode",
+    "PASS_EMAIL_ONLY_MSG" => "Verifieer asseblief jou e-posadres deur op die onderstaande skakel te klik.",
+    "PASS_CODE_ONLY_MSG"  => "Voer asseblief die onderstaande kode in om aan te teken.",
+    "PASS_BOTH_MSG"       => "Verifieer asseblief jou e-posadres deur op die onderstaande skakel te klik of voer die onderstaande kode in om aan te teken.",
+    "PASS_YOUR_CODE"      => "Jou verifiëringskode is: ",
+    "PASS_CONFIRM_LOGIN"  => "Bevestig Aanmelding",
+    "PASS_CONFIRM_CLICK"  => "Klik om aan tekening te Voltooi",
+    "PASS_GENERIC_ERROR"  => "Iets het verkeerd gegaan.",
 ));
 
 //Database Menus

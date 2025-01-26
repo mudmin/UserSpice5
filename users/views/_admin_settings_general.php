@@ -5,7 +5,7 @@ includeHook($hooks, 'pre');
 $verify_url = $db->query("SELECT verify_url FROM email")->first()->verify_url;
 $no_passwords = "This feature removes the ability for users to login with a username and password in favor of OAuth, Passkey, and Email login options. It is your responsibility to make sure you have these options configured and tested before enabling this option.";
 
-$email_login = "This feature allows users to login with their email address instead of their username and password. It is your responsibility to make sure you have the ability to send emails configured and tested before enabling this option. It requires the user to go into their email and click a magic link to sign in. While it is an extra step for the user, it removes your responsibility of storing passwords and the user's responsibility of remembering them.";
+$email_login = "This feature allows users to login with their email address instead of their username and password. It is your responsibility to make sure you have the ability to send emails configured and tested before enabling this option. It requires the user to go into their email and click a magic link to sign in. While it is an extra step for the user, it removes your responsibility of storing passwords and the user's responsibility of remembering them. ";
 ?>
 
 <!-- Site Settings -->
@@ -230,6 +230,7 @@ $email_login = "This feature allows users to login with their email address inst
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
                 <label class="switch switch-text switch-success">
+                
                   <input id="email_login" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Email Login" <?php if ($settings->email_login == 1) {
                                                                                                                                                 echo 'checked="true"';
                                                                                                                                               } ?>>
@@ -238,10 +239,25 @@ $email_login = "This feature allows users to login with their email address inst
               <span class="switch-handle"></span>
               </label>
             </span>
+            <select id="email_login" class="form-control ajxnum" data-desc="Email Login" name="email_login">
+              <option value="0" <?php if ($settings->email_login == 0) {
+                                  echo 'selected="selected"';
+                                } ?>>Disabled</option>
+              <option value="1" <?php if ($settings->email_login == 1) {
+                                  echo 'selected="selected"';
+                                } ?>>Through clicking a link in the email</option>
+              <option value="2" <?php if ($settings->email_login == 2) {
+                                  echo 'selected="selected"';
+                                } ?>>Through entering a 5 digit code</option>
+              <option value="3" <?php if ($settings->email_login == 3) {
+                                  echo 'selected="selected"';
+                                } ?>>Email or Code</option>
+   
+            </select>
             <br>
             <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="<?=$us_url_root?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
             <small>Need to debug? See options in <code>usersc/scripts/passwordless_login_overrides.php</code></small><br>
-            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>.</small>
+            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The 5 digit code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
           </div>
 
 
@@ -376,20 +392,20 @@ $email_login = "This feature allows users to login with their email address inst
           This gives you the opportunity to be part of our early release "Bleeding Edge" program.<br>
         </div>
         <div class="card-body">
-          <!-- Bleeding Edge -->
           <div class="form-group">
-            <label>Receive Bleeding Edge (Beta/Early Release) Updates <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="With this enabled, when you check updates, you will see them earlier than standard users. Not recommended for mission critical applications, but the beta testing is appreciated."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
-                <div class="form-check form-switch">
-                  <input id="bleeding_edge" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Bleeding Edge" <?php if ($settings->bleeding_edge == 1) {
-                                                                                                                                                    echo 'checked="true"';
-                                                                                                                                                  } ?>>
-                </div>
-                <span data-on="Yes" data-off="No" class="switch-label"></span>
-                <span class="switch-handle"></span>
-              </label>
-            </span>
+            <label>Update Track <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Choose your update channel. Production is recommended for mission critical applications. Bleeding Edge provides early access to updates. Experimental includes features in development."><i class="fa fa-question-circle offset-circle"></i></a></label>
+
+            <select id="bleeding_edge" class="form-control ajxnum" data-desc="Update Track" name="bleeding_edge">
+              <option <?php if ($settings->bleeding_edge == 0) {
+                        echo "selected='selected'";
+                      } ?> value="0">Production Updates (Stable)</option>
+              <option <?php if ($settings->bleeding_edge == 1) {
+                        echo "selected='selected'";
+                      } ?> value="1">Bleeding Edge (Beta/Early Release)</option>
+              <option <?php if ($settings->bleeding_edge == 2) {
+                        echo "selected='selected'";
+                      } ?> value="2">Experimental (In Development)</option>
+            </select>
           </div>
         </div>
       </div>

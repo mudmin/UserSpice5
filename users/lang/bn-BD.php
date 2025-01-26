@@ -50,6 +50,36 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Missing Text",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Zadejte kód zaslaný na váš e-mail",
+    "PASS_EMAIL_ONLY"     => "Zkontrolujte prosím svůj e-mail pro přihlašovací odkaz",
+    "PASS_CODE_ONLY"      => "Zadejte prosím kód zaslaný na váš e-mail",
+    "PASS_BOTH"           => "Zkontrolujte prosím svůj e-mail pro přihlašovací odkaz nebo zadejte kód zaslaný na váš e-mail",
+    "PASS_VER_BUTTON"     => "Ověřit kód",
+    "PASS_EMAIL_ONLY_MSG" => "Ověřte prosím svou e-mailovou adresu kliknutím na odkaz níže",
+    "PASS_CODE_ONLY_MSG"  => "Pro přihlášení zadejte kód níže",
+    "PASS_BOTH_MSG"       => "Ověřte prosím svou e-mailovou adresu kliknutím na odkaz níže nebo se přihlaste zadáním kódu níže",
+    "PASS_YOUR_CODE"      => "Váš ověřovací kód je: ",
+    "PASS_CONFIRM_LOGIN"  => "Potvrdit přihlášení",
+    "PASS_CONFIRM_CLICK"  => "Klikněte pro dokončení přihlášení",
+    "PASS_GENERIC_ERROR"  => "Něco se pokazilo",
+));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "আপনার ইমেইলে পাঠানো কোডটি লিখুন",
+    "PASS_EMAIL_ONLY"     => "লগইন লিংকের জন্য আপনার ইমেইল চেক করুন",
+    "PASS_CODE_ONLY"      => "আপনার ইমেইলে পাঠানো কোডটি লিখুন",
+    "PASS_BOTH"           => "লগইন লিংকের জন্য আপনার ইমেইল চেক করুন অথবা ইমেইলে পাঠানো কোডটি লিখুন",
+    "PASS_VER_BUTTON"     => "কোড যাচাই করুন",
+    "PASS_EMAIL_ONLY_MSG" => "নিচের লিংকে ক্লিক করে আপনার ইমেইল ঠিকানা যাচাই করুন",
+    "PASS_CODE_ONLY_MSG"  => "লগইন করতে নিচের কোডটি লিখুন",
+    "PASS_BOTH_MSG"       => "নিচের লিংকে ক্লিক করে আপনার ইমেইল ঠিকানা যাচাই করুন অথবা লগইন করতে নিচের কোডটি লিখুন",
+    "PASS_YOUR_CODE"      => "আপনার যাচাইকরণ কোড হলো: ",
+    "PASS_CONFIRM_LOGIN"  => "লগইন নিশ্চিত করুন",
+    "PASS_CONFIRM_CLICK"  => "লগইন সম্পন্ন করতে ক্লিক করুন",
+    "PASS_GENERIC_ERROR"  => "কিছু একটা ভুল হয়েছে",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "প্রধান পৃষ্ঠা",

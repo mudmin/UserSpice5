@@ -43,6 +43,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Chybějící Text",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Zadejte kód zaslaný na váš e-mail",
+    "PASS_EMAIL_ONLY"     => "Pro přihlášení klikněte na odkaz zaslaný na váš e-mail",
+    "PASS_CODE_ONLY"      => "Zadejte prosím kód zaslaný na váš e-mail",
+    "PASS_BOTH"           => "Pro přihlášení klikněte na odkaz zaslaný na váš e-mail nebo zadejte kód z e-mailu",
+    "PASS_VER_BUTTON"     => "Ověřit kód",
+    "PASS_EMAIL_ONLY_MSG" => "Ověřte prosím svou e-mailovou adresu kliknutím na odkaz níže",
+    "PASS_CODE_ONLY_MSG"  => "Pro přihlášení zadejte následující kód",
+    "PASS_BOTH_MSG"       => "Ověřte prosím svoji e-mailovou adresu kliknutím na následující odkaz, nebo se přihlaste zadáním kódu",
+    "PASS_YOUR_CODE"      => "Váš ověřovací kód je: ",
+    "PASS_CONFIRM_LOGIN"  => "Potvrdit přihlášení",
+    "PASS_CONFIRM_CLICK"  => "Klikněte pro dokončení přihlášení",
+    "PASS_GENERIC_ERROR"  => "Něco se pokazilo",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Domů",

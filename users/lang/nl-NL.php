@@ -41,6 +41,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT" => "Tekst niet aanwezig",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"    => "Voer de code in die naar uw e-mail is verzonden",
+    "PASS_EMAIL_ONLY"    => "Controleer uw e-mail voor een inloglink.",
+    "PASS_CODE_ONLY"     => "Voer de code in die naar uw e-mail is verzonden.",
+    "PASS_BOTH"          => "Controleer uw e-mail voor een inloglink of voer de code in die naar uw e-mail is verzonden.",
+    "PASS_VER_BUTTON"    => "Code verifiëren",
+    "PASS_EMAIL_ONLY_MSG" => "Verifieer uw e-mailadres door op onderstaande link te klikken.",
+    "PASS_CODE_ONLY_MSG"  => "Voer onderstaande code in om in te loggen.",
+    "PASS_BOTH_MSG"       => "Verifieer uw e-mailadres door op onderstaande link te klikken of voer onderstaande code in om in te loggen.",
+    "PASS_YOUR_CODE"      => "Uw verificatiecode is: ",
+    "PASS_CONFIRM_LOGIN"  => "Bevestig inloggen",
+    "PASS_CONFIRM_CLICK"  => "Klik om inloggen te voltooien",
+    "PASS_GENERIC_ERROR"  => "Er is iets misgegaan.",
+));
+
 // Databasemenu's
 $lang = array_merge($lang, array(
 	"MENU_HOME" => "Home",

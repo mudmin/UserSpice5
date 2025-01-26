@@ -54,6 +54,22 @@ $lang = array_merge($lang, array(
 	"MENU_LOGS_MGR"	=> "System Logs",
 	"MENU_LOGOUT"		=> "Logout",
 ));
+//passwordless
+// Signup
+$lang = array_merge($lang, array(
+	"PASS_ENTER_CODE"	=> "Enter the code sent to your email",
+	"PASS_EMAIL_ONLY"	=> "Please check your email for a link to login.",
+	"PASS_CODE_ONLY" 	=> "Please enter the code sent to your email.",
+	"PASS_BOTH"		=> "Please check your email for a link to login or enter the code sent to your email.",
+	"PASS_VER_BUTTON" => "Verify code",
+	"PASS_EMAIL_ONLY_MSG" =>"Please verify your email address by clicking the link below.",
+	"PASS_CODE_ONLY_MSG" => "Please enter the code below to login.",
+	"PASS_BOTH_MSG" => "Please verify your email address by clicking the link below or enter the code below to login.",
+	"PASS_YOUR_CODE" => "Your verification code is: ",
+	"PASS_CONFIRM_LOGIN" => "Confirm Login",
+	"PASS_CONFIRM_CLICK" => "Click to Complete Login",
+	"PASS_GENERIC_ERROR" => "Something went wrong.",
+));
 
 // Signup
 $lang = array_merge($lang, array(

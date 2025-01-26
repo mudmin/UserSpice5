@@ -39,6 +39,22 @@ $lang = array_merge($lang, array(
 	"THIS_CODE"			=> "de-DE",
 	"MISSING_TEXT"	=> "Missing Text",
 ));
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Geben Sie den an Ihre E-Mail gesendeten Code ein",
+    "PASS_EMAIL_ONLY"     => "Bitte prüfen Sie Ihre E-Mail für einen Anmeldelink",
+    "PASS_CODE_ONLY"      => "Bitte geben Sie den an Ihre E-Mail gesendeten Code ein",
+    "PASS_BOTH"           => "Bitte prüfen Sie Ihre E-Mail für einen Anmeldelink oder geben Sie den gesendeten Code ein",
+    "PASS_VER_BUTTON"     => "Code bestätigen",
+    "PASS_EMAIL_ONLY_MSG" => "Bitte bestätigen Sie Ihre E-Mail-Adresse durch Klicken auf den untenstehenden Link",
+    "PASS_CODE_ONLY_MSG"  => "Bitte geben Sie den untenstehenden Code ein, um sich anzumelden",
+    "PASS_BOTH_MSG"       => "Bitte bestätigen Sie Ihre E-Mail-Adresse durch Klicken auf den untenstehenden Link oder geben Sie den Code ein, um sich anzumelden",
+    "PASS_YOUR_CODE"      => "Ihr Bestätigungscode lautet: ",
+    "PASS_CONFIRM_LOGIN"  => "Anmeldung bestätigen",
+    "PASS_CONFIRM_CLICK"  => "Klicken Sie, um die Anmeldung abzuschließen",
+    "PASS_GENERIC_ERROR"  => "Etwas ist schiefgelaufen",
+));
+
 // Signup
 $lang = array_merge($lang, array(
 	"SIGNUP_TEXT"					=> "Registrieren",

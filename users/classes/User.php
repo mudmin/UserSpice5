@@ -132,12 +132,14 @@ class User
                         $this->_db->insert('us_ip_list', [
                             'user_id' => $this->data()->id,
                             'ip' => $ip,
+                            'timestamp' => date('Y-m-d H:i:s'),
                         ]);
                     } else {
                         $f = $q->first();
                         $this->_db->update('us_ip_list', $f->id, [
                             'user_id' => $this->data()->id,
                             'ip' => $ip,
+                            'timestamp' => date('Y-m-d H:i:s'),
                         ]);
                     }
 
@@ -205,12 +207,14 @@ class User
                         $this->_db->insert('us_ip_list', [
                             'user_id' => $this->data()->id,
                             'ip' => $ip,
+                            'timestamp' => date('Y-m-d H:i:s'),
                         ]);
                     } else {
                         $f = $q->first();
                         $this->_db->update('us_ip_list', $f->id, [
                             'user_id' => $this->data()->id,
                             'ip' => $ip,
+                            'timestamp' => date('Y-m-d H:i:s'),
                         ]);
                     }
 

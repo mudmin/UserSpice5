@@ -46,6 +46,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Hiányzó szöveg",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Írja be az e-mailben kapott kódot",
+    "PASS_EMAIL_ONLY"     => "Kérjük, ellenőrizze e-mailjeit a bejelentkezési linkért",
+    "PASS_CODE_ONLY"      => "Kérjük, írja be az e-mailben kapott kódot",
+    "PASS_BOTH"           => "Kérjük, ellenőrizze e-mailjeit a bejelentkezési linkért, vagy írja be az e-mailben kapott kódot",
+    "PASS_VER_BUTTON"     => "Kód ellenőrzése",
+    "PASS_EMAIL_ONLY_MSG" => "Kérjük, erősítse meg e-mail címét az alábbi linkre kattintva",
+    "PASS_CODE_ONLY_MSG"  => "Kérjük, írja be az alábbi kódot a bejelentkezéshez",
+    "PASS_BOTH_MSG"       => "Kérjük, erősítse meg e-mail címét az alábbi linkre kattintva, vagy írja be a kódot a bejelentkezéshez",
+    "PASS_YOUR_CODE"      => "Az Ön ellenőrző kódja: ",
+    "PASS_CONFIRM_LOGIN"  => "Bejelentkezés megerősítése",
+    "PASS_CONFIRM_CLICK"  => "Kattintson a bejelentkezés befejezéséhez",
+    "PASS_GENERIC_ERROR"  => "Valami hiba történt",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Kezdőlap",

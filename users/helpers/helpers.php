@@ -126,11 +126,13 @@ if (!function_exists('money')) {
 if (!function_exists('display_errors')) {
   function display_errors($errors = [])
   {
+    $display = [];
     foreach ($errors as $k => $v) {
       if (array_key_exists($errors[$k][1], $errors)) {
         unset($errors[$k][1]);
       }
     }
+
     sessionValMessages($errors);
   }
 }
@@ -177,7 +179,7 @@ if (!function_exists('email')) {
     $mail->Password = html_entity_decode($results->email_pass);    // SMTP password
     $mail->SMTPSecure = $results->transport;                 // Enable TLS encryption, `ssl` also accepted
     $mail->Port = $results->smtp_port;
-    if($results->authtype != ""){
+    if ($results->authtype != "") {
       $mail->AuthType = $results->authtype;
     }
 
@@ -386,3 +388,135 @@ if (!function_exists('safefilerewrite')) {
     }
   }
 }
+
+
+function getLangFilesStoragePath() {
+    global $abs_us_root, $us_url_root;
+    return $abs_us_root . $us_url_root . 'usersc/scripts/langFiles.json';
+}
+
+function spiceUpdateBegins() {
+    global $abs_us_root, $us_url_root, $settings, $user, $db, $config;
+
+    // Include external script if it exists
+    $beginsScript = $abs_us_root . $us_url_root . 'usersc/scripts/spice_update_begins.php';
+    if (file_exists($beginsScript)) {
+        include $beginsScript;
+    }
+    
+    // Proceed only if language purge is not disabled
+    if (!isset($no_language_purge) || !$no_language_purge) {
+        $langPath = $abs_us_root . $us_url_root . 'users/lang/*.php';
+        $langFiles = glob($langPath);
+        
+        // Define the storage path for language files list
+        $storagePath = getLangFilesStoragePath();
+        
+        // Convert the file paths to a JSON array
+        $langFilesJson = json_encode($langFiles, JSON_PRETTY_PRINT);
+        
+        // Attempt to write the JSON data to the storage file
+        if (file_put_contents($storagePath, $langFilesJson) === false) {
+            usError("Failed to write language files list to {$storagePath}. Language cleanup will not happen.");
+ 
+
+        } 
+    }
+}
+
+function spiceUpdateSuccess() {
+    global $abs_us_root, $us_url_root, $settings, $user, $db;
+    
+    // Include external script if it exists
+    $successScript = $abs_us_root . $us_url_root . 'usersc/scripts/spice_update_success.php';
+    if (file_exists($successScript)) {
+        include $successScript;
+    }
+    
+ 
+    if (!isset($no_language_purge) || !$no_language_purge) {
+    
+        $storagePath = getLangFilesStoragePath();
+        
+        // Check if the storage file exists
+        if (file_exists($storagePath)) {
+            // Read the JSON data from the storage file
+            $storedLangFilesJson = file_get_contents($storagePath);
+            if ($storedLangFilesJson === false) {
+                usError("Failed to read language files list from {$storagePath}. Skipping language cleanup.");
+  
+                return;
+            }
+            
+            // Decode the JSON data into an array
+            $storedLangFiles = json_decode($storedLangFilesJson, true);
+            if (!is_array($storedLangFiles)) {
+              usError("Invalid JSON format in {$storagePath}. Skipping language cleanup.");
+    
+                return;
+            }
+            
+            // Verify that there is at least one PHP file in the stored list
+            $hasPhpFiles = false;
+            foreach ($storedLangFiles as $file) {
+                if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'php') {
+                    $hasPhpFiles = true;
+                    break;
+                }
+            }
+            
+            if ($hasPhpFiles) {
+                $currentLangPath = $abs_us_root . $us_url_root . 'users/lang/*.php';
+                $currentLangFiles = glob($currentLangPath);
+                
+                foreach ($currentLangFiles as $file) {
+                    // If the current file was not in the stored list, attempt to delete it
+                    if (!in_array($file, $storedLangFiles)) {
+                        if (unlink($file)) {
+                            
+                        } 
+                        
+                    }
+                }
+            } else {
+              usError("No PHP language files found in the stored list. Skipping language cleanup.");
+            
+            }
+            
+            // Remove the storage file after processing
+            if (!unlink($storagePath)) {
+                usError("Failed to delete storage file: {$storagePath}");
+          
+  
+            } 
+
+        } else {
+            usError("Storage file {$storagePath} does not exist. Skipping language cleanup.");
+   
+        }
+    }
+}
+
+function spiceUpdateFail() {
+    global $abs_us_root, $us_url_root, $settings, $user, $db;
+    
+    // Include external script if it exists
+    $failScript = $abs_us_root . $us_url_root . 'usersc/scripts/spice_update_fail.php';
+    if (file_exists($failScript)) {
+        include $failScript;
+    }
+    
+    // Define the storage path for language files list
+    $storagePath = getLangFilesStoragePath();
+    
+    // Attempt to delete the storage file to clean up
+    if (file_exists($storagePath)) {
+        if (!unlink($storagePath)) {
+            usError("Failed to delete storage file after update failure: {$storagePath}");
+        } 
+    }
+    if(file_exists($abs_us_root . $us_url_root . "usupdate.zip")){
+      unlink($abs_us_root . $us_url_root . "usupdate.zip");
+    }
+}
+

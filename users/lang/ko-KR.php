@@ -56,6 +56,22 @@ $lang = array_merge($lang, array(
 	"MENU_LOGOUT"	=> "로그아웃",
 ));
 
+
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"    => "이메일로 전송된 코드를 입력하세요",
+    "PASS_EMAIL_ONLY"    => "로그인 링크를 이메일로 확인해 주세요.",
+    "PASS_CODE_ONLY"     => "이메일로 전송된 코드를 입력해 주세요.",
+    "PASS_BOTH"          => "로그인 링크를 이메일로 확인하거나 이메일로 전송된 코드를 입력해 주세요.",
+    "PASS_VER_BUTTON"    => "코드 확인",
+    "PASS_EMAIL_ONLY_MSG" => "아래 링크를 클릭하여 이메일 주소를 확인해 주세요.",
+    "PASS_CODE_ONLY_MSG"  => "로그인하려면 아래 코드를 입력하세요.",
+    "PASS_BOTH_MSG"       => "아래 링크를 클릭하여 이메일 주소를 확인하거나 아래 코드를 입력하여 로그인하세요.",
+    "PASS_YOUR_CODE"      => "귀하의 인증 코드는: ",
+    "PASS_CONFIRM_LOGIN"  => "로그인 확인",
+    "PASS_CONFIRM_CLICK"  => "클릭하여 로그인 완료",
+    "PASS_GENERIC_ERROR"  => "문제가 발생했습니다.",
+));
+
 // Signup
 $lang = array_merge($lang, array(
 	"SIGNUP_TEXT"			=> "계정 만들기",

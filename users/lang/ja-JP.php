@@ -42,6 +42,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"  => "テキストが見つかりません",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "メールで送信されたコードを入力してください",
+    "PASS_EMAIL_ONLY"     => "ログインリンクについてメールをご確認ください",
+    "PASS_CODE_ONLY"      => "メールで送信されたコードを入力してください",
+    "PASS_BOTH"           => "ログインリンクについてメールをご確認いただくか、送信されたコードを入力してください",
+    "PASS_VER_BUTTON"     => "コードを確認",
+    "PASS_EMAIL_ONLY_MSG" => "下記のリンクをクリックしてメールアドレスを確認してください",
+    "PASS_CODE_ONLY_MSG"  => "ログインするには下記のコードを入力してください",
+    "PASS_BOTH_MSG"       => "下記のリンクをクリックしてメールアドレスを確認するか、コードを入力してログインしてください",
+    "PASS_YOUR_CODE"      => "確認コード: ",
+    "PASS_CONFIRM_LOGIN"  => "ログインを確認",
+    "PASS_CONFIRM_CLICK"  => "クリックしてログインを完了",
+    "PASS_GENERIC_ERROR"  => "エラーが発生しました",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_MENU"      => "メニュー",

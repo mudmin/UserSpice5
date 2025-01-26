@@ -203,6 +203,8 @@ if (!function_exists('lang')) {
       } else {
         $missing = 'Missing Text';
       }
+      //This both allows the dev to figure out which key is missing and gives the end user a clue of what you are trying to say.
+      $missing = $missing . " - " . $key;
       //if nothing is found, let's check to see if the language is English.
       if (isset($lang['THIS_CODE']) && $lang['THIS_CODE'] != 'en-US') {
         $save = $lang['THIS_CODE'];
@@ -1702,4 +1704,144 @@ function userSpicePasswordScore($password)
   }
 
   return $score;
+}
+
+
+// Active logging
+// users/init.php set
+//define('USERSPICE_ACTIVE_LOGGING', true);
+//to turn on file based active logging
+
+
+//to prevent logging on a page
+//add this to the top of the page above init.php
+// define('USERSPICE_DO_NOT_LOG', true);
+// or add the page name to the array in usersc/includes/active_logging_custom.php
+
+//usersc/includes/active_logging_custom.php
+function userspiceActiveLog($currentPage, $user = null, $additionalData = []) {
+  global $abs_us_root, $us_url_root;
+  // Only proceed if active logging is enabled and page isn't excluded
+  if (!defined('USERSPICE_ACTIVE_LOGGING') || !USERSPICE_ACTIVE_LOGGING) {
+    return false;
+}
+
+  if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php')){
+  
+      include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';
+  }
+
+  if(!isset($do_not_log_files)){
+      $do_not_log_files = ["heartbeat.php", "fetchMessages.php"];
+  }
+
+  if(in_array($currentPage, $do_not_log_files)){
+      return false;
+  }
+
+  // Fields that should not be logged
+  if(!isset($do_not_log_fields)){
+      $do_not_log_fields = ["password", "password_confirm", "confirm"];
+  }
+  
+  // Check if this page should be excluded from logging
+  if (defined('USERSPICE_DO_NOT_LOG') && USERSPICE_DO_NOT_LOG) {
+      return false;
+  }
+
+
+
+  // Get full URL
+  $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+  $fullUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+  // Prepare log entry
+  $logEntry = [
+      'timestamp' => date('Y-m-d H:i:s'),
+      'ip' => $_SERVER['REMOTE_ADDR'],
+      'user_id' => ($user && isset($user->data()->id)) ? $user->data()->id : 0,
+      'page' => $currentPage,
+      'full_url' => $fullUrl,
+      'request_method' => $_SERVER['REQUEST_METHOD'],
+      'get_data' => [],
+      'post_data' => [],
+      'json_data' => [],
+      'additional_data' => $additionalData
+  ];
+
+  // Process GET data
+  foreach ($_GET as $k => $v) {
+      $logEntry['get_data'][$k] = Input::sanitize($v);
+  }
+
+  // Process POST data (excluding sensitive fields)
+  foreach ($_POST as $k => $v) {
+      if (!in_array($k, $do_not_log_fields)) {
+          $logEntry['post_data'][$k] = Input::sanitize($v);
+      }
+  }
+
+  // Process JSON input if content type is application/json
+  $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+  if (stripos($contentType, 'application/json') !== false) {
+      $json_data = json_decode(file_get_contents('php://input'), true);
+      if ($json_data) {
+          // Remove sensitive fields from JSON data
+          array_walk_recursive($json_data, function(&$value, $key) use ($do_not_log_fields) {
+              if (in_array($key, $do_not_log_fields)) {
+                  $value = '[REDACTED]';
+              }
+          });
+          $logEntry['json_data'] = $json_data;
+      }
+  }
+
+  // Add user agent
+  $logEntry['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+  // Convert to JSON and append to file
+  $jsonEntry = json_encode($logEntry) . "\n";
+  
+  // Append log entry to file
+  return file_put_contents($filename, $jsonEntry, FILE_APPEND | LOCK_EX);
+}
+
+function cleanupLogs($daysToKeep = 30) {
+	global $abs_us_root, $us_url_root;
+    $logDir = $abs_us_root . $us_url_root . 'users/logs';
+    $files = glob($logDir . '/*.log.php');
+    $cutoffDate = strtotime("-{$daysToKeep} days");
+
+    foreach ($files as $file) {
+        $dateFromFilename = substr(basename($file), 0, 8); // Extract YYYYMMDD
+        $fileDate = DateTime::createFromFormat('Ymd', $dateFromFilename);
+        
+        if ($fileDate && $fileDate->getTimestamp() < $cutoffDate) {
+            unlink($file);
+        }
+    }
+}
+
+function isHTTPSConnection() {
+  // Direct HTTPS check
+  if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+      return true;
+  }
+  
+  // Proxy headers check for HTTPS
+  if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+      return true;
+  }
+  
+  // Additional proxy SSL header check
+  if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') {
+      return true;
+  }
+  
+  // Port check for SSL
+  if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] === '443') {
+      return true;
+  }
+  
+  return false;
 }

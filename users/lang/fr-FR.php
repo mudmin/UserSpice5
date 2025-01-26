@@ -41,6 +41,21 @@ $lang = array_merge($lang, array(
 	"MISSING_TEXT"	=> "Texte manquant",
 ));
 
+$lang = array_merge($lang, array(
+    "PASS_ENTER_CODE"     => "Saisissez le code envoyé à votre e-mail",
+    "PASS_EMAIL_ONLY"     => "Veuillez vérifier votre e-mail pour le lien de connexion",
+    "PASS_CODE_ONLY"      => "Veuillez saisir le code envoyé à votre e-mail",
+    "PASS_BOTH"           => "Veuillez vérifier votre e-mail pour le lien de connexion ou saisir le code envoyé",
+    "PASS_VER_BUTTON"     => "Vérifier le code",
+    "PASS_EMAIL_ONLY_MSG" => "Veuillez vérifier votre adresse e-mail en cliquant sur le lien ci-dessous",
+    "PASS_CODE_ONLY_MSG"  => "Veuillez saisir le code ci-dessous pour vous connecter",
+    "PASS_BOTH_MSG"       => "Veuillez vérifier votre adresse e-mail en cliquant sur le lien ci-dessous ou saisir le code pour vous connecter",
+    "PASS_YOUR_CODE"      => "Votre code de vérification est : ",
+    "PASS_CONFIRM_LOGIN"  => "Confirmer la connexion",
+    "PASS_CONFIRM_CLICK"  => "Cliquez pour terminer la connexion",
+    "PASS_GENERIC_ERROR"  => "Une erreur s'est produite",
+));
+
 //Database Menus
 $lang = array_merge($lang, array(
 	"MENU_HOME"			=> "Accueil",
