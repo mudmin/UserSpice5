@@ -46,6 +46,7 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 
 	//display the reset form.
 	$email = Input::get('email');
+	$email = str_replace(" ","+",$email);
 	$vericode = Input::get('vericode');
 	$ruser = new User($email);
 	$eventhooks =  getMyHooks(['page' => 'forgotPasswordResponse']);
@@ -73,7 +74,7 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 		));
 
 		if ($pw_settings->meter_active == 1 && $pw_settings->enforce_rules == 1) {
-			$doubleCheckPassword = userSpicePasswordStrength($newPw);
+			$doubleCheckPassword = userSpicePasswordStrength(Input::get('password'));
 			if ($doubleCheckPassword['isValid'] == false) {
 				//inject error before processing
 				$validation->addError([lang("JOIN_INVALID_PW"), 'password']);
