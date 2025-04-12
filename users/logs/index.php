@@ -1,5 +1,6 @@
 <?php
 define('USERSPICE_DO_NOT_LOG', true);
+$menu_override = 2;
 require_once '../init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';

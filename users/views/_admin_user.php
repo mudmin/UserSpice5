@@ -39,8 +39,8 @@ if ($isProtectedProfile) {
     $canToggleProtection = true;
   }
 } else {
-  // If profile is not protected, master accounts have full access
-  $canEdit = $isMasterAccount || $isSameUser;
+  // If profile is not protected, anyone can edit except when non-master tries to edit a master account
+  $canEdit = $isMasterAccount || $isSameUser || (!in_array($userId, $master_account));
   $protectedStyle = '';
   $protectedMsg = '';
   $buttonClass = "";
@@ -498,7 +498,8 @@ $permissionData = fetchAllPermissions();
 
 $grav = fetchProfilePicture($userId);
 $useravatar = '<img src="' . $grav . '" class="img-responsive img-thumbnail" alt="">';
-if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account) || !in_array($user->data()->id, $master_account) && $userdetails->protected == 1) && $userId != $user->data()->id) {
+if ((!in_array($user->data()->id, $master_account) && (in_array($userId, $master_account) || $userdetails->protected == 1)) && 
+    $userId != $user->data()->id) {
   $protectedprof = 1;
 } else {
   $protectedprof = 0;

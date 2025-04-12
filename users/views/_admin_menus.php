@@ -57,6 +57,7 @@ $codeUsage = '<?php
               <th>Menu Type</th>
               <th>Z-Index</th>
               <th>Highlight Active Links</th>
+              <th>Theme</th>
               <th>Status</th>
               <th class="text-end">Actions</th>
             </tr>
@@ -82,6 +83,7 @@ $codeUsage = '<?php
                   </span>
                 </td>
                 <td><?= bin($menu->show_active) ?></td>
+                <td><?= ucfirst($menu->theme) ?></td>
                 <td><?= $menu->disabled ? 'Disabled' : 'Active' ?></td>
                 <td class="text-end">
                   <a class="btn btn-sm btn-outline-dark mr-1" href="admin.php?view=edit_menu&menu_id=<?= $menu->id ?>" title="edit"><i class="fa fa-pencil"></i></a>

@@ -161,7 +161,8 @@ if (!function_exists('email')) {
     'email' => 'from_email@aol.com',
     'name'  => 'Bob Smith',
     'cc'    => 'cc@example.com',
-    'bcc'   => 'bcc@example.com'
+    'bcc'   => 'bcc@example.com',
+    'replyTo' => 'reply_to@example.com'
   );
   */
     $results = $db->query('SELECT * FROM email')->first();
@@ -192,6 +193,10 @@ if (!function_exists('email')) {
       $mail->setFrom($opts['email'], $opts['name']);
     } else {
       $mail->setFrom($results->from_email, $results->from_name);
+    }
+
+    if (isset($opts['replyTo'])) {
+      $mail->addReplyTo($opts['replyTo']);
     }
 
     if (isset($opts['cc'])) {

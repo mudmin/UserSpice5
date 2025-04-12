@@ -206,9 +206,9 @@ foreach ($validation->errors() as $error) {
 
     <div class="row" style="margin-top:1vw;">
       <div class="col-6">
-        <?php if ($showAllUsers != 1) { ?>
+        <?php if ($showAllUsers != 1 && $settings->uman_search < 1) { ?>
           <a href="?view=users&showAllUsers=1" class="btn btn-outline-primary btn-sm nounderline"><i class="fa fa-eye"></i> Show All Users</a>
-        <?php } else { ?>
+        <?php } elseif($settings->uman_search < 1) { ?>
           <a href="?view=users" class="btn btn-outline-primary btn-sm nounderline"><i class="fa fa-eye-slash"></i> Hide Inactive Users</a>
         <?php } ?>
       </div>
@@ -223,8 +223,8 @@ foreach ($validation->errors() as $error) {
         <form class="" action="" method="post">
           <?=tokenHere();?>
           <div class="input-group">
-            <input type="text" name="searchTerm" value="" class="form-control" placeholder="Search for users to manage">
-            <input type="submit" name="search" value="Search" class="btn btn-outline-primary">
+            <input type="text" name="searchTerm" value="" class="form-control" placeholder="Search for users to manage. Enter % for all users">
+            <input type="submit" name="search" value="Search" class="btn btn-outline-primary" onclick="setTimeout(function() { $('#dt-search-0').val(''); }, 100);">
           </div>
 
           <small>Search by first name, last name, username, or email</small>
@@ -446,7 +446,11 @@ foreach ($validation->errors() as $error) {
         [25, 50, 100, -1],
         [25, 50, 100, "All"]
       ],
-      "aaSorting": []
+      "aaSorting": [],
+      "initComplete": function() {
+      // Clear the search box after DataTables has fully initialized
+      this.api().search('').draw();
+    }
     });
 
     $('.password_view_control').hover(function() {

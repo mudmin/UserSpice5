@@ -136,8 +136,11 @@ class Menu {
     if($level == 1) {
       $ulClass .= " " . $this->menu->type;
     }
+
     if($level == 1 && $this->menu->theme == 'dark') {
       $ulClass .= " dark";
+    }elseif($level == 1 && $this->menu->theme == 'custom') {
+      $ulClass .= " custom";
     }
 
     if($level == 1 && !empty($this->menu->nav_class)) {

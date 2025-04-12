@@ -41,49 +41,49 @@ if ($method == "verify_code") {
   $email = Input::get('email');
   $code = strtolower(Input::get('code'));
   $user_id = Input::get('user_id');
-  
-  if(!empty($code)) {
+
+  if (!empty($code)) {
     $searchQ = $db->query("SELECT * FROM us_email_logins 
       WHERE user_id = ? AND expired = 0 
       ORDER BY id DESC LIMIT 1", [$user_id]);
-    
-    if($searchQ->count() > 0) {
+
+    if ($searchQ->count() > 0) {
       $login = $searchQ->first();
-      
+
       // Check if code has expired
-      if(strtotime($login->expires) < time()) {
+      if (strtotime($login->expires) < time()) {
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
         usError("Verification code has expired. Please request a new one.");
-        Redirect::to($us_url_root.'users/passwordless.php');
+        Redirect::to($us_url_root . 'users/passwordless.php');
       }
-      
+
       // Check number of invalid attempts
       $invalid_attempts = $login->invalid_attempts ?? 0;
-      if($invalid_attempts >= 3) {
+      if ($invalid_attempts >= 3) {
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
         usError("Too many invalid attempts. Please request a new code.");
-        Redirect::to($us_url_root.'users/passwordless.php');
+        Redirect::to($us_url_root . 'users/passwordless.php');
       }
-      
+
       // Verify the code
-      if($code === $login->verification_code) {
+      if ($code === $login->verification_code) {
         $user = new User($user_id);
         $user->login();
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
-        
+
         $dest = sanitizedDest('dest');
         if (!empty($dest)) {
           $redirect = Input::get('redirect');
           if (!empty($redirect)) Redirect::to(html_entity_decode($redirect));
           else Redirect::to($dest);
         } else {
-          Redirect::to($us_url_root.'users/account.php');
+          Redirect::to($us_url_root . 'users/account.php');
         }
       } else {
         $invalid_attempts++;
         $db->update('us_email_logins', $login->id, ['invalid_attempts' => $invalid_attempts]);
-        usError("Invalid code. Attempts remaining: ".(3-$invalid_attempts));
-        Redirect::to($us_url_root.'users/passwordless.php?method=check_email&email='.urlencode($email).'&user_id='.$user_id);
+        usError("Invalid code. Attempts remaining: " . (3 - $invalid_attempts));
+        Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . urlencode($email) . '&user_id=' . $user_id);
       }
     }
   }
@@ -108,7 +108,7 @@ if ($method == "enter_email") {
       $user_id = $search->id;
       $vericode = uniqid() . randomstring(15);
       $check = $db->query("UPDATE us_email_logins set expired = 1 WHERE user_id = ?", array($user_id));
-      
+
       $fields = [
         'user_id' => $user_id,
         'vericode' => $vericode,
@@ -117,13 +117,13 @@ if ($method == "enter_email") {
       ];
 
       // Generate verification code for modes 2 and 3
-      if($settings->email_login == 2 || $settings->email_login == 3) {
-        $verification_code = substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 5);
+      if ($settings->email_login == 2 || $settings->email_login == 3) {
+        $verification_code = substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, $settings->pwl_length);
         $fields['verification_code'] = $verification_code;
       }
-      
+
       $db->insert('us_email_logins', $fields);
-      
+
       $options = [
         'fname' => $search->fname,
         'email' => rawurlencode($search->email),
@@ -133,7 +133,7 @@ if ($method == "enter_email") {
         'url' => "users/verify.php?vericode=" . $vericode . "&user_id=" . $user_id,
         'verification_code' => $verification_code ?? null
       ];
-      
+
       $encoded_email = rawurlencode($email);
       if (lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }") {
         $subject = lang("EML_PASSWORDLESS_SUBJECT");
@@ -212,37 +212,33 @@ if ($method == "check_email") {
     <div class="col-12 col-sm-8 offeset-sm-1 col-md-6 offset-md-3 mt-4">
       <div class="card">
         <div class="card-header">
-          <span class="fw-bold"><?=lang("EML_VER");?></span>
+          <span class="fw-bold"><?= lang("EML_VER"); ?></span>
         </div>
         <div class="card-body p-3">
           <h2 class="text-center">
             <?= $EML_PASSWORDLESS_SENT ?>
           </h2>
-          
-          <?php if($settings->email_login == 2 || $settings->email_login == 3) { ?>
-          <div class="mt-4">
-            <form action="" method="post">
-              <input type="hidden" name="method" value="verify_code">
-              <input type="hidden" name="email" value="<?=sanitize($email)?>">
-              <input type="hidden" name="user_id" value="<?=$user_id?>">
-              <?=tokenHere()?>
-              <div class="form-group">
-                <label><?=lang("PASS_ENTER_CODE");?></label>
-                <input type="text" name="code" class="form-control" 
-                       pattern="[a-z0-9]{5}" maxlength="5" required>
-    
-              </div>
-              <p class="text-center">
-              <button type="submit" class="btn btn-primary btn-block mt-3"><?=lang("PASS_VER_BUTTON");?></button>
-              </p>
-            </form>
-          </div>
+
+          <?php if ($settings->email_login == 2 || $settings->email_login == 3) { ?>
+            <div class="mt-4">
+              <form action="" method="post" class="text-center">
+                <input type="hidden" name="method" value="verify_code">
+                <input type="hidden" name="email" value="<?= sanitize($email) ?>">
+                <input type="hidden" name="user_id" value="<?= $user_id ?>">
+                <?= tokenHere() ?>
+                <div class="form-group">
+                  <label for="code" class="h5"><?= lang("PASS_ENTER_CODE"); ?></label>
+                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-z0-9]{5,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2)-1 ?>ch;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg mt-3"><?= lang("PASS_VER_BUTTON"); ?></button>
+              </form>
+            </div>
           <?php } ?>
         </div>
       </div>
     </div>
   </div>
-<?php 
+<?php
 }
 
 require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php';

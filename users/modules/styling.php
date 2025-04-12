@@ -2,26 +2,31 @@
   .grippy {
     cursor: grab;
   }
-
-  .dashboard-icon-label {
-    margin-top: .3rem;
-    font-size: .75rem;
-    line-height: .75rem;
-  }
-
   .font-info {
     color: var(--bs-link-color);
     padding-left: .25rem;
   }
 
-  .dash-icon {
+  .icon-link {
+    display: block;
+    text-align: center; 
+}
+
+.dash-icon {
     height: 2.8rem;
     max-width: 3.2rem;
-  }
+    margin: 0 auto; 
+}
 
-  .dashboard-icon-label {
-    line-height: 1rem;
-  }
+.dashboard-icon-label {
+    font-size: 0.75rem;
+    line-height: 0.75rem;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.3rem; 
+    padding: 0;
+}
 
   .collapseCard {
     cursor: pointer;

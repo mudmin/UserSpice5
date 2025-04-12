@@ -1,4 +1,5 @@
 <?php 
+$noMaintenanceRedirect = true; 
 require_once '../init.php'; 
 $resp = ['success'=>false, 'score'=>0];
 if(!isset($_POST['pw_settings'])){

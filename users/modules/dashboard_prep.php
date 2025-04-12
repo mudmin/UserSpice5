@@ -1,4 +1,7 @@
 <?php 
+$child_theme = "dashboard";
+$core_template = $settings->template;
+
 // change container_open_class so pages will be full-height.
 $settings->container_open_class = "container-fluid d-flex flex-column flex-grow-1";
 $settings->navigation_type = 1;
@@ -22,5 +25,5 @@ if (!securePage($_SERVER['PHP_SELF'])) {
 }
 $chartsLoaded = "true"; //widget signal not to reload js
 ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/user_spice_ver.php'; ?>

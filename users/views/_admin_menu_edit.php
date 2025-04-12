@@ -359,7 +359,7 @@ if ($_POST) {
             <div class="form-group">
               <label for="nav_class">Menu Class</label>
               <input id="nav_class" name="nav_class" class="form-control" value="<?= $menu->nav_class ?>" onchange="setDirty(true)" />
-              <div class="explain">Add custom class to the top level UL element. You can often use bg-primary to or bg-danger etc to use one of your template button colors as a menu background to make your menu feel more integrated.</div>
+              <div class="explain">Add custom class to the top level UL element. You can often use bg-primary to or bg-danger etc to use one of your template button colors as a menu background to make your menu feel more integrated. In v5.8.2+ the new custom option allows you to set your theme outside of the UltraMenu builder and works with our new customizable themes.</div>
             </div>
 
             <div class="form-group">
@@ -368,6 +368,7 @@ if ($_POST) {
                 <option value="">Choose Theme</option>
                 <option value="light" <?= $menu->theme == 'light' ? 'selected' : '' ?>>Light</option>
                 <option value="dark" <?= $menu->theme == 'dark' ? 'selected' : '' ?>>Dark</option>
+                <option value="custom" <?= $menu->theme == 'custom' ? 'selected' : '' ?>>Custom</option>
               </select>
             </div>
 

@@ -1,13 +1,18 @@
-<?php if (!in_array($user->data()->id, $master_account)) {
+<?php 
+if (!in_array($user->data()->id, $master_account)) {
   Redirect::to('admin.php');
 }
 $diag = Input::get('diag');
+if(!empty($_POST)){
+  if(!Token::check(Input::get('csrf'))){
+    include($abs_us_root.$us_url_root.'usersc/scripts/token_error.php');
+  }
+}
+
 if (empty($_POST)) {
   $_POST['type'] = "featured";
 }
-?>
 
-<?php
 if (
   trim($settings->spice_api ?? '') != ''
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/", trim($settings->spice_api))
@@ -163,6 +168,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
     <div class="row">
       <div class="col-12 col-sm-4">
         <form class="" action="" method="post">
+          <?=tokenHere();?>
           <div class="input-group">
             <input type="text" name="search" class="form-control" value="" placeholder="Search all addons" autocomplete="new-password">
             <input type="submit" name="goSearch" value="Search" required class="btn btn-primary">
@@ -171,6 +177,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
       </div>
       <div class="col-12 col-sm-4 mb-4">
         <form class="" action="" method="post">
+        <?=tokenHere();?>
           <div class="d-flex">
             <select class="form-control" name="type">
               <option value="featured" <?php if ($type == 'featured') { ?>selected="Selected" <?php } ?>>Browse Featured</option>

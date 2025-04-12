@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 25, 2024 at 11:33 AM
--- Server version: 10.4.25-MariaDB-log
--- PHP Version: 8.1.10
+-- Generation Time: Apr 12, 2025 at 12:56 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `newdb`
+-- Database: `584`
 --
 
 -- --------------------------------------------------------
@@ -34,7 +34,7 @@ CREATE TABLE `audit` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `ip` varchar(255) NOT NULL,
   `viewed` int(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -51,7 +51,7 @@ CREATE TABLE `crons` (
   `createdby` int(11) NOT NULL,
   `created` datetime DEFAULT NULL,
   `modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `crons`
@@ -71,7 +71,7 @@ CREATE TABLE `crons_logs` (
   `cron_id` int(11) NOT NULL,
   `datetime` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `user_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -96,7 +96,7 @@ CREATE TABLE `email` (
   `isHTML` varchar(5) NOT NULL DEFAULT 'true',
   `useSMTPauth` varchar(6) NOT NULL DEFAULT 'true',
   `authtype` varchar(50) DEFAULT 'CRAM-MD5'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `email`
@@ -115,7 +115,7 @@ CREATE TABLE `groups_menus` (
   `id` int(11) UNSIGNED NOT NULL,
   `group_id` int(11) UNSIGNED NOT NULL,
   `menu_id` int(11) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `groups_menus`
@@ -168,7 +168,7 @@ CREATE TABLE `keys` (
   `stripe_lp` varchar(255) NOT NULL,
   `recap_pub` varchar(100) NOT NULL,
   `recap_pri` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -184,7 +184,7 @@ CREATE TABLE `logs` (
   `lognote` mediumtext NOT NULL,
   `ip` varchar(75) DEFAULT NULL,
   `metadata` blob DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `logs`
@@ -222,7 +222,16 @@ INSERT INTO `logs` (`id`, `user_id`, `logdate`, `logtype`, `lognote`, `ip`, `met
 (29, 1, '2024-09-25 09:30:56', 'System Updates', 'Update 2024-04-01a successfully deployed.', '::1', NULL),
 (30, 1, '2024-09-25 09:30:56', 'System Updates', 'Update 2024-04-13a successfully deployed.', '::1', NULL),
 (31, 1, '2024-09-25 09:30:56', 'System Updates', 'Update 2024-06-24a successfully deployed.', '::1', NULL),
-(32, 1, '2024-09-25 09:31:58', 'login', 'User logged in.', '::1', NULL);
+(32, 1, '2024-09-25 09:31:58', 'login', 'User logged in.', '::1', NULL),
+(33, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2024-09-25a successfully deployed.', '::1', NULL),
+(34, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2024-11-22a successfully deployed.', '::1', NULL),
+(35, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2024-12-16a successfully deployed.', '::1', NULL),
+(36, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2024-12-21a successfully deployed.', '::1', NULL),
+(37, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2025-02-23a successfully deployed.', '::1', NULL),
+(38, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2025-03-02a successfully deployed.', '::1', NULL),
+(39, 1, '2025-04-12 10:51:28', 'System Updates', 'Update 2025-03-03a successfully deployed.', '::1', NULL),
+(40, 1, '2025-04-12 10:52:00', 'login', 'User logged in.', '::1', NULL),
+(41, 1, '2025-04-12 10:52:55', 'User', 'Updated password.', '::1', NULL);
 
 -- --------------------------------------------------------
 
@@ -240,7 +249,7 @@ CREATE TABLE `menus` (
   `label` varchar(255) NOT NULL,
   `link` varchar(255) NOT NULL,
   `icon_class` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `menus`
@@ -282,7 +291,7 @@ CREATE TABLE `messages` (
   `msg_thread` int(11) NOT NULL,
   `deleted` int(1) NOT NULL,
   `sent_on` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -301,7 +310,7 @@ CREATE TABLE `message_threads` (
   `archive_to` int(1) NOT NULL DEFAULT 0,
   `hidden_from` int(1) NOT NULL DEFAULT 0,
   `hidden_to` int(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -319,7 +328,7 @@ CREATE TABLE `notifications` (
   `date_read` datetime DEFAULT NULL,
   `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `class` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -334,7 +343,7 @@ CREATE TABLE `pages` (
   `private` int(11) NOT NULL DEFAULT 0,
   `re_auth` int(1) NOT NULL DEFAULT 0,
   `core` int(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pages`
@@ -370,7 +379,7 @@ CREATE TABLE `permissions` (
   `id` int(11) NOT NULL,
   `name` varchar(150) NOT NULL,
   `descrip` varchar(255) DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `permissions`
@@ -390,7 +399,7 @@ CREATE TABLE `permission_page_matches` (
   `id` int(11) NOT NULL,
   `permission_id` int(11) DEFAULT NULL,
   `page_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `permission_page_matches`
@@ -417,7 +426,7 @@ CREATE TABLE `plg_social_logins` (
   `image` varchar(255) NOT NULL,
   `link` varchar(255) NOT NULL,
   `built_in` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -429,7 +438,7 @@ CREATE TABLE `plg_tags` (
   `id` int(11) UNSIGNED NOT NULL,
   `tag` varchar(255) DEFAULT NULL,
   `descrip` varchar(255) DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -442,7 +451,7 @@ CREATE TABLE `plg_tags_matches` (
   `tag_id` int(11) UNSIGNED NOT NULL,
   `tag_name` varchar(255) DEFAULT NULL,
   `user_id` int(11) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -454,7 +463,7 @@ CREATE TABLE `profiles` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `bio` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `profiles`
@@ -543,15 +552,16 @@ CREATE TABLE `settings` (
   `widgets` text DEFAULT NULL,
   `uman_search` tinyint(1) DEFAULT 0,
   `no_passwords` tinyint(1) DEFAULT 0,
-  `email_login` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `email_login` tinyint(1) DEFAULT 0,
+  `pwl_length` int(3) DEFAULT 5
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `settings`
 --
 
-INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `site_name`, `language`, `site_offline`, `force_pr`, `glogin`, `fblogin`, `gid`, `gsecret`, `gredirect`, `ghome`, `fbid`, `fbsecret`, `fbcallback`, `graph_ver`, `finalredir`, `req_cap`, `req_num`, `min_pw`, `max_pw`, `min_un`, `max_un`, `messaging`, `snooping`, `echouser`, `wys`, `change_un`, `backup_dest`, `backup_source`, `backup_table`, `msg_notification`, `permission_restriction`, `auto_assign_un`, `page_permission_restriction`, `msg_blocked_users`, `msg_default_to`, `notifications`, `notif_daylimit`, `recap_public`, `recap_private`, `page_default_private`, `navigation_type`, `copyright`, `custom_settings`, `system_announcement`, `twofa`, `force_notif`, `cron_ip`, `registration`, `join_vericode_expiry`, `reset_vericode_expiry`, `admin_verify`, `admin_verify_timeout`, `session_manager`, `template`, `saas`, `redirect_uri_after_login`, `show_tos`, `default_language`, `allow_language`, `spice_api`, `announce`, `bleeding_edge`, `err_time`, `container_open_class`, `debug`, `widgets`, `uman_search`, `no_passwords`, `email_login`) VALUES
-(1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'bs5', NULL, NULL, 1, 'en-US', 0, NULL, '2024-09-25 05:31:58', 0, 15, 'container-fluid', 0, 'settings,misc,tools,plugins,snapshot,active_users,active-users', 0, 0, 0);
+INSERT INTO `settings` (`id`, `recaptcha`, `force_ssl`, `css_sample`, `site_name`, `language`, `site_offline`, `force_pr`, `glogin`, `fblogin`, `gid`, `gsecret`, `gredirect`, `ghome`, `fbid`, `fbsecret`, `fbcallback`, `graph_ver`, `finalredir`, `req_cap`, `req_num`, `min_pw`, `max_pw`, `min_un`, `max_un`, `messaging`, `snooping`, `echouser`, `wys`, `change_un`, `backup_dest`, `backup_source`, `backup_table`, `msg_notification`, `permission_restriction`, `auto_assign_un`, `page_permission_restriction`, `msg_blocked_users`, `msg_default_to`, `notifications`, `notif_daylimit`, `recap_public`, `recap_private`, `page_default_private`, `navigation_type`, `copyright`, `custom_settings`, `system_announcement`, `twofa`, `force_notif`, `cron_ip`, `registration`, `join_vericode_expiry`, `reset_vericode_expiry`, `admin_verify`, `admin_verify_timeout`, `session_manager`, `template`, `saas`, `redirect_uri_after_login`, `show_tos`, `default_language`, `allow_language`, `spice_api`, `announce`, `bleeding_edge`, `err_time`, `container_open_class`, `debug`, `widgets`, `uman_search`, `no_passwords`, `email_login`, `pwl_length`) VALUES
+(1, 0, 0, 0, 'UserSpice', 'en', 0, 0, 0, 0, '', '', '', '', '', '', '', '', '', 0, 0, 6, 150, 4, 30, 0, 1, 0, 1, 0, '/', 'everything', '', 0, 0, 0, 0, 0, 1, 0, 7, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe', 1, 1, 'UserSpice', 1, '', 0, 0, 'off', 1, 24, 15, 1, 120, 0, 'bs5', NULL, NULL, 1, 'en-US', 0, NULL, '2025-04-12 06:53:20', 0, 15, 'container-fluid', 0, 'settings,misc,tools,plugins,snapshot,active_users,active-users', 0, 0, 0, 5);
 
 -- --------------------------------------------------------
 
@@ -564,7 +574,7 @@ CREATE TABLE `updates` (
   `migration` varchar(15) NOT NULL,
   `applied_on` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `update_skipped` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `updates`
@@ -666,7 +676,14 @@ INSERT INTO `updates` (`id`, `migration`, `applied_on`, `update_skipped`) VALUES
 (107, '2024-03-22a', '2024-09-25 09:30:56', NULL),
 (108, '2024-04-01a', '2024-09-25 09:30:56', NULL),
 (109, '2024-04-13a', '2024-09-25 09:30:56', NULL),
-(110, '2024-06-24a', '2024-09-25 09:30:56', NULL);
+(110, '2024-06-24a', '2024-09-25 09:30:56', NULL),
+(111, '2024-09-25a', '2025-04-12 10:51:28', NULL),
+(112, '2024-11-22a', '2025-04-12 10:51:28', NULL),
+(113, '2024-12-16a', '2025-04-12 10:51:28', NULL),
+(114, '2024-12-21a', '2025-04-12 10:51:28', NULL),
+(115, '2025-02-23a', '2025-04-12 10:51:28', NULL),
+(116, '2025-03-02a', '2025-04-12 10:51:28', NULL),
+(117, '2025-03-03a', '2025-04-12 10:51:28', NULL);
 
 -- --------------------------------------------------------
 
@@ -690,8 +707,8 @@ CREATE TABLE `users` (
   `vericode_expiry` datetime DEFAULT NULL,
   `oauth_provider` text DEFAULT NULL,
   `oauth_uid` text DEFAULT NULL,
-  `gender` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `locale` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `gender` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `locale` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `gpluslink` text DEFAULT NULL,
   `account_owner` tinyint(4) NOT NULL DEFAULT 1,
   `account_id` int(11) NOT NULL DEFAULT 0,
@@ -712,14 +729,14 @@ CREATE TABLE `users` (
   `join_date` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
   `active` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `permissions`, `email`, `email_new`, `username`, `password`, `pin`, `fname`, `lname`, `language`, `email_verified`, `vericode`, `vericode_expiry`, `oauth_provider`, `oauth_uid`, `gender`, `locale`, `gpluslink`, `account_owner`, `account_id`, `account_mgr`, `fb_uid`, `picture`, `created`, `protected`, `msg_exempt`, `dev_user`, `msg_notification`, `cloak_allowed`, `oauth_tos_accepted`, `un_changed`, `force_pr`, `logins`, `last_login`, `join_date`, `modified`, `active`) VALUES
-(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$14$PgeyxJSwK77koaY2kGfqme2nHnUoiipj5NOS0oLBPMDjoknhMzGfG', NULL, 'The', 'Admin', 'en-US', 1, 'nlPsJDtyeqFWsS', '2022-11-25 05:32:17', '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', 1, 1, 0, 1, 1, NULL, 0, 1, 1, '2024-09-25 05:31:58', '2022-12-25 00:00:00', '2016-01-01 00:00:00', 1);
+(1, 1, 'userspicephp@userspice.com', NULL, 'admin', '$2y$13$6I49r3qsvY1LyL4jcmbNlOfEabSB/owbJbTAogxHtfR.UierML4TS', NULL, 'The', 'Admin', 'en-US', 1, 's2GiSN9THd7V0Lb', '2022-11-25 05:32:17', '', '', '', '', '', 1, 0, 0, '', '', '0000-00-00 00:00:00', 1, 1, 0, 1, 1, NULL, 0, 1, 0, '2025-04-12 06:52:00', '2022-12-25 00:00:00', '2025-04-12 00:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -733,7 +750,7 @@ CREATE TABLE `users_online` (
   `timestamp` varchar(15) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `session` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -746,7 +763,7 @@ CREATE TABLE `users_session` (
   `user_id` int(11) NOT NULL,
   `hash` varchar(255) NOT NULL,
   `uagent` mediumtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -758,7 +775,7 @@ CREATE TABLE `user_permission_matches` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `permission_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_permission_matches`
@@ -784,7 +801,7 @@ CREATE TABLE `us_announcements` (
   `class` varchar(50) DEFAULT NULL,
   `dismissed_by` int(11) DEFAULT 0,
   `update_announcement` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -800,8 +817,10 @@ CREATE TABLE `us_email_logins` (
   `login_ip` varchar(50) NOT NULL,
   `login_date` datetime NOT NULL,
   `expired` tinyint(1) DEFAULT 0,
-  `expires` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `expires` datetime DEFAULT NULL,
+  `verification_code` varchar(10) DEFAULT NULL,
+  `invalid_attempts` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -815,7 +834,7 @@ CREATE TABLE `us_fingerprints` (
   `Fingerprint` varchar(32) NOT NULL,
   `Fingerprint_Expiry` datetime NOT NULL,
   `Fingerprint_Added` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -829,7 +848,7 @@ CREATE TABLE `us_fingerprint_assets` (
   `IP_Address` varchar(255) NOT NULL,
   `User_Browser` varchar(255) NOT NULL,
   `User_OS` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -840,7 +859,7 @@ CREATE TABLE `us_fingerprint_assets` (
 CREATE TABLE `us_forms` (
   `id` int(11) NOT NULL,
   `form` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -853,7 +872,7 @@ CREATE TABLE `us_form_validation` (
   `value` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
   `params` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `us_form_validation`
@@ -885,7 +904,7 @@ CREATE TABLE `us_form_views` (
   `form_name` varchar(255) NOT NULL,
   `view_name` varchar(255) NOT NULL,
   `fields` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -897,8 +916,12 @@ CREATE TABLE `us_ip_blacklist` (
   `id` int(11) NOT NULL,
   `ip` varchar(50) NOT NULL,
   `last_user` int(11) NOT NULL DEFAULT 0,
-  `reason` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `reason` int(11) NOT NULL DEFAULT 0,
+  `expires` datetime DEFAULT NULL,
+  `descrip` varchar(255) DEFAULT NULL,
+  `added_by` int(11) DEFAULT NULL,
+  `added_on` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -911,14 +934,14 @@ CREATE TABLE `us_ip_list` (
   `ip` varchar(50) NOT NULL,
   `user_id` int(11) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `us_ip_list`
 --
 
 INSERT INTO `us_ip_list` (`id`, `ip`, `user_id`, `timestamp`) VALUES
-(2, '::1', 1, '2022-12-23 12:05:43');
+(2, '::1', 1, '2025-04-12 10:52:00');
 
 -- --------------------------------------------------------
 
@@ -928,8 +951,11 @@ INSERT INTO `us_ip_list` (`id`, `ip`, `user_id`, `timestamp`) VALUES
 
 CREATE TABLE `us_ip_whitelist` (
   `id` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `ip` varchar(50) NOT NULL,
+  `descrip` varchar(255) DEFAULT NULL,
+  `added_by` int(11) DEFAULT NULL,
+  `added_on` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -942,7 +968,7 @@ CREATE TABLE `us_login_fails` (
   `login_method` varchar(50) NOT NULL,
   `ip` varchar(50) NOT NULL,
   `ts` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -956,7 +982,7 @@ CREATE TABLE `us_management` (
   `view` varchar(255) NOT NULL,
   `feature` varchar(255) NOT NULL,
   `access` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `us_management`
@@ -992,7 +1018,7 @@ CREATE TABLE `us_menus` (
   `justify` varchar(10) DEFAULT 'right',
   `show_active` tinyint(1) DEFAULT 0,
   `screen_reader_mode` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `us_menus`
@@ -1023,7 +1049,7 @@ CREATE TABLE `us_menu_items` (
   `disabled` tinyint(1) DEFAULT 0,
   `permissions` varchar(1000) DEFAULT NULL,
   `tags` varchar(1000) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `us_menu_items`
@@ -1098,7 +1124,7 @@ CREATE TABLE `us_password_strength` (
   `greater_eight` int(11) NOT NULL DEFAULT 15,
   `greater_twelve` int(11) NOT NULL DEFAULT 28,
   `greater_sixteen` int(11) NOT NULL DEFAULT 40
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `us_password_strength`
@@ -1119,7 +1145,7 @@ CREATE TABLE `us_plugins` (
   `status` varchar(255) DEFAULT NULL,
   `updates` mediumtext DEFAULT NULL,
   `last_check` datetime DEFAULT '2020-01-01 00:00:00'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1134,7 +1160,7 @@ CREATE TABLE `us_plugin_hooks` (
   `position` varchar(255) NOT NULL,
   `hook` varchar(255) NOT NULL,
   `disabled` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `us_plugin_hooks`
@@ -1155,7 +1181,7 @@ CREATE TABLE `us_saas_levels` (
   `level` varchar(255) NOT NULL,
   `users` int(11) NOT NULL,
   `details` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1169,7 +1195,7 @@ CREATE TABLE `us_saas_orgs` (
   `owner` int(11) NOT NULL,
   `level` int(11) NOT NULL,
   `active` int(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1189,7 +1215,7 @@ CREATE TABLE `us_user_sessions` (
   `UserSessionLastPage` varchar(255) NOT NULL,
   `UserSessionEnded` tinyint(1) NOT NULL DEFAULT 0,
   `UserSessionEnded_Time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -1506,7 +1532,7 @@ ALTER TABLE `keys`
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `menus`
@@ -1584,7 +1610,7 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `updates`
 --
 ALTER TABLE `updates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
 
 --
 -- AUTO_INCREMENT for table `users`

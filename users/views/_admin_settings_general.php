@@ -221,6 +221,20 @@ $email_login = "This feature allows users to login with their email address inst
               </label>
             </span>
           </div>
+
+                    <!-- passwordless code length -->
+                    <div class="form-group">
+            <label>Passwordless Code Length<a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This is the number of chars the end user will have to enter to login"><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <select id="pwl_length" class="form-control ajxnum" data-desc="Passwordless Code Length" name="pwl_length">
+
+            <?php for($i = 4; $i <= 12; $i++){ ?>
+              <option value="<?=$i?>" <?php if ($settings->pwl_length == $i) {
+                                  echo 'selected="selected"';
+                                } ?>><?=$i?></option>
+            <?php } ?>
+   
+            </select>
+          </div>
                                                                                                                                    
           <!-- Enable Email Logins -->
           <div class="form-group">
@@ -248,7 +262,7 @@ $email_login = "This feature allows users to login with their email address inst
                                 } ?>>Through clicking a link in the email</option>
               <option value="2" <?php if ($settings->email_login == 2) {
                                   echo 'selected="selected"';
-                                } ?>>Through entering a 5 digit code</option>
+                                } ?>>Through entering a code they receive in email</option>
               <option value="3" <?php if ($settings->email_login == 3) {
                                   echo 'selected="selected"';
                                 } ?>>Email or Code</option>
@@ -257,7 +271,7 @@ $email_login = "This feature allows users to login with their email address inst
             <br>
             <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="<?=$us_url_root?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
             <small>Need to debug? See options in <code>usersc/scripts/passwordless_login_overrides.php</code></small><br>
-            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The 5 digit code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
+            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
           </div>
 
 

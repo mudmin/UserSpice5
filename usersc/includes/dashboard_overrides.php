@@ -2,7 +2,8 @@
 //if you would like your dashboard to use a different template, specify that template here.
 //it is strongly recommended that you ONLY use a bootstrap 5 or later menu that supports the advanced UserSpice menu system.
 
-$template_override = "bs5";
+$template_override = "customizer";
+$child_theme = "dashboard";
 if(!file_exists($abs_us_root . $us_url_root . 'usersc/templates/'.$template_override.'/assets/v2template.php') &&
   !file_exists($abs_us_root . $us_url_root . 'usersc/templates/'.$template_override.'/assets/v3template.php')
 ){
