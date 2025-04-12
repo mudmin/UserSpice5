@@ -1,6 +1,5 @@
 /* Generated Bootstrap 5 Customizations */
-/* Generated on: 2025-03-15 06:31:40 by The Admin */
-/* Child theme: dashboard */
+/* Generated on: 2025-04-12 19:04:01 by Dan Hoover */
 
 :root {
   /* Userspice */
@@ -14,8 +13,8 @@
   --bs-us-menu-custom-submenu-border: #2d5580;
 
   /* Colors_primary */
-  --bs-primary: #0d6efd;
-  --bs-primary-hover: #0b5ed7;
+  --bs-primary: #1f72ef;
+  --bs-primary-hover: #0544a3;
   --bs-primary-text-emphasis: #084298;
   --bs-primary-bg-subtle: #cfe2ff;
   --bs-primary-border-subtle: #b6d4fe;
@@ -42,17 +41,17 @@
   --bs-info-border-subtle: #b6effb;
 
   /* Colors_warning */
-  --bs-warning: #ffc107;
+  --bs-warning: #eebd2b;
   --bs-warning-hover: #ffca2c;
   --bs-warning-text-emphasis: #664d03;
   --bs-warning-bg-subtle: #fff3cd;
   --bs-warning-border-subtle: #ffecb5;
 
   /* Colors_danger */
-  --bs-danger: #dc3545;
+  --bs-danger: #ab0718;
   --bs-danger-hover: #bb2d3b;
   --bs-danger-text-emphasis: #842029;
-  --bs-danger-bg-subtle: #f8d7da;
+  --bs-danger-bg-subtle: #fbcbcf;
   --bs-danger-border-subtle: #f5c2c7;
 
   /* Colors_light_dark */
@@ -123,15 +122,12 @@
   --bs-navbar-dark-color: rgba(255, 255, 255, 0.55);
   --bs-navbar-dark-hover-color: rgba(255, 255, 255, 0.75);
 
-  /* Custom_css */
-  --bs-custom-css: ;
-
-  --bs-primary-rgb: 13, 110, 253;
+  --bs-primary-rgb: 31, 114, 239;
   --bs-secondary-rgb: 108, 117, 125;
   --bs-success-rgb: 25, 135, 84;
   --bs-info-rgb: 13, 202, 240;
-  --bs-warning-rgb: 255, 193, 7;
-  --bs-danger-rgb: 220, 53, 69;
+  --bs-warning-rgb: 238, 189, 43;
+  --bs-danger-rgb: 171, 7, 24;
   --bs-light-rgb: 248, 249, 250;
   --bs-dark-rgb: 33, 37, 41;
 }
@@ -860,4 +856,6 @@ h6, .h6 {
   background-color: var(--bs-dark) !important;
   color: #fff;
 }
+
+
 

@@ -14,7 +14,8 @@ $step2 = "Setup";
 $step3 = "Cleanup";
 
 //System Requirements
-$php_ver = "5.6.0";
+$php_min = "7.4.0";
+$php_ver = "8.1.0";
 
 //Cleanup Files
 $files = array (

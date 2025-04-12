@@ -65,6 +65,7 @@ if ($usingChildTheme) {
 
 if(isset($customizations['custom-css'])){
     $customCSS = $customizations['custom-css'];
+    unset($customizations['custom-css']);
 } else {
     $customCSS = '';
 }
@@ -134,6 +135,13 @@ foreach ($templateConfig as $category => $variables) {
     }
 }
 
+// Apply customizations over defaults
+foreach ($customizations as $varName => $value) {
+
+    // Handle both forms: with or without the --bs- prefix
+    $cleanVarName = str_replace('--bs-', '', $varName);
+    $allVariables[$cleanVarName] = $value;
+}
 
 
 // Add RGB variables for each theme color

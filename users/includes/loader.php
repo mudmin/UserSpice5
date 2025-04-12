@@ -148,11 +148,13 @@ if ($settings->force_ssl == 1 && !isHTTPSConnection()) {
 if(isset($_SESSION['us_lang'])){ $html_lang = substr($_SESSION['us_lang'],0,2);}else{$html_lang = 'en';}
 
 
-if($user->isLoggedIn() && $currentPage != 'user_settings.php' && $currentPage != 'logout.php' && $user->data()->force_pr == 1){
+$no_pr = ["user_settings.php","logout.php","pw_strength_check.php"];
+if($user->isLoggedIn() && !in_array($currentPage,$no_pr) && $user->data()->force_pr == 1){
 	$resetMsg = lang("VER_PLEASE");
 	usError($resetMsg);
 	Redirect::to($us_url_root.'users/user_settings.php');
 }
+
 
 $page=currentFile();
 $titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));

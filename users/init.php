@@ -1,7 +1,7 @@
 <?php
 require_once 'classes/class.autoloader.php';
-session_start();
 ini_set('session.cookie_httponly', 1);
+session_start();
 $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
 
 $self_path=explode("/", $_SERVER['PHP_SELF']);
