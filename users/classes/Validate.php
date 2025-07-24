@@ -400,18 +400,26 @@ class Validate
 
 	public function display_errors() {
 		$html = "<UL CLASS='bg-danger'>";
-
+	
 		foreach($this->_errors as $error) {
-			if (is_array($error))
-			$html    .= "<LI CLASS=''>{$error[0]}</LI>
-			<SCRIPT>jQuery('document').ready(function(){jQuery('#{$error[1]}').parent().closest('div').addClass('has-error');});</SCRIPT>";
-			else
-			$html .= "<LI CLASS=''>{$error}</LI>";
+			if (is_array($error)) {
+				// Sanitize both the error message and the element ID
+				// Although the error messages are set by the system, sanitizing them doesn' hurt.
+				$sanitizedErrorMessage = Input::sanitize($error[0]);
+				$sanitizedElementId = Input::sanitize($error[1]);
+				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>
+				<SCRIPT>jQuery('document').ready(function(){jQuery('#{$sanitizedElementId}').parent().closest('div').addClass('has-error');});</SCRIPT>";
+			} else {
+				// Sanitize the error message
+				$sanitizedErrorMessage = Input::sanitize($error);
+				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>";
+			}
 		}
-
+	
 		$html .= "</UL>";
 		return $html;
 	}
+	
 
 	public function rulesBroken(){
 		return $this->_rules_broken;

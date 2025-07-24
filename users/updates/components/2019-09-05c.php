@@ -6,7 +6,7 @@
 //Rewrote 2019-04-27 DH
 
 $countE=0;
-$settings = $db->query("SELECT * FROM settings")->first();
+
 $db->update('settings',1,['messaging'=>0]);
 $db->update('settings',1,['notifications'=>0]);
 $db->query("DELETE FROM menus WHERE link = 'users/admin.php?view=messages'");

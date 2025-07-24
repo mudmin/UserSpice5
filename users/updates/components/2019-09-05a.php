@@ -6,7 +6,7 @@
 //Rewrote 2019-04-27 DH
 
 $countE=0;
-$settings = $db->query("SELECT * FROM settings")->first();
+
 if($settings->template == 'default'){
   $db->update('settings',1,['template'=>'standard']);
   if(!$db->error()) {

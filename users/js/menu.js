@@ -87,7 +87,7 @@ function toggleDropdown(e) {
   }
 }
 
-// we only need this <?=$us_url_root?>users/account.php for the top menu, not sidebar or accordion
+// we only need this behaviour for the top menu, not sidebar or accordion
 const addOffClick = (e) => {
   const offClick = (evt) => {
     if (e.target !== evt.target) {

@@ -29,14 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 /* Translation assisted by Tekniskedirektorn */
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang, array(
 	"THIS_LANGUAGE"	=> "Svenska",
 	"THIS_CODE"			=> "sv-SE",
@@ -150,6 +150,150 @@ $lang = array_merge($lang, array(
 	"GEN_REQ"					=> "obligatoriskt",
 	"GEN_AND"					=> "och",
 	"GEN_SAME"				=> "måste vara likadant",
+));
+
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "Lösennyckel",
+    "GEN_ACTIONS"                         => "Åtgärder",
+    "GEN_BACK_TO_ACCT"                    => "Tillbaka till kontot",
+    "GEN_DB_ERROR"                        => "Ett databasfel uppstod. Vänligen försök igen.",
+    "GEN_IMPORTANT"                       => "Viktigt",
+    "GEN_NO_PERMISSIONS"                  => "Du har inte behörighet att komma åt den här sidan.",
+    "GEN_NO_PERMISSIONS_MSG"              => "Du har inte behörighet att komma åt den här sidan. Om du anser att detta är fel, vänligen kontakta webbplatsens administratör.",
+    "PASSKEYS_MANAGE_TITLE"               => "Hantera dina lösennycklar",
+    "PASSKEYS_LOGIN_TITLE"                => "Logga in med lösennyckel",
+    "PASSKEY_DELETE_SUCCESS"              => "Lösennyckeln har tagits bort.",
+    "PASSKEY_DELETE_FAIL_DB"              => "Det gick inte att ta bort lösennyckeln från databasen.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "Lösennyckeln hittades inte eller så saknar du behörighet att ta bort den.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "Anteckningen för lösennyckeln har uppdaterats.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "Det gick inte att uppdatera anteckningen för lösennyckeln.",
+    "PASSKEY_REGISTER_NEW"                => "Registrera ny lösennyckel",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "Du har nått maxgränsen på 10 lösennycklar.",
+    "PASSKEY_NOTE_TH"                     => "Anteckning för lösennyckel",
+    "PASSKEY_TIMES_USED_TH"               => "Antal användningar",
+    "PASSKEY_LAST_USED_TH"                => "Senast använd",
+    "PASSKEY_LAST_IP_TH"                  => "Senaste IP-adress",
+    "PASSKEY_EDIT_NOTE_BTN"               => "Redigera anteckning",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "Är du säker på att du vill ta bort denna lösennyckel?",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "Redigera anteckning för lösennyckel",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "Anteckning för lösennyckel",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "Spara ändringar",
+    "PASSKEY_NONE_REGISTERED"             => "Du har inga registrerade lösennycklar ännu.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "Du måste först registrera en lösennyckel från ett autentiserat konto innan du kan använda den här funktionen.",
+    "PASSKEY_STORING"                     => "Sparar lösennyckel...",
+    "PASSKEY_STORED_SUCCESS"              => "Lösennyckeln har sparats!",
+    "PASSKEY_INVALID_ACTION"              => "Ogiltig åtgärd: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "Ingen åtgärd angiven",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "Nätverksproblem upptäckt. Prova ett annat nätverk eller uppdatera sidan.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "Autentisering mellan enheter upptäckt. Se till att båda enheterna har internetåtkomst.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "Prova att öppna den här sidan direkt på din telefon istället.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "Kunde inte generera diagnostik: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "Nödvändiga inloggningsuppgifter för lagring saknas.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "Nödvändiga autentiseringsuppgifter saknas.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "Inget meddelande",
+    "PASSKEY_USER_NOT_FOUND"              => "Användaren hittades inte efter validering av lösennyckel.",
+    "PASSKEY_FATAL_ERROR"                 => "Allvarligt fel: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "Inloggningen lyckades.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "Förbereder registrering mellan enheter. Du kan behöva använda din telefon eller surfplatta.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "Använder enhetens lösennyckelregistrering...",
+    "PASSKEY_STARTING_REGISTRATION"       => "Påbörjar registrering av lösennyckel...",
+    "PASSKEY_REQUEST_OPTIONS"             => "Begär registreringsalternativ från servern...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "Följ anvisningarna för att skapa din lösennyckel. Du kan behöva använda en annan enhet.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "Följ anvisningarna för att skapa din lösennyckel...",
+    "PASSKEY_CREATION_FAILED"             => "Skapandet av lösennyckel misslyckades - inga inloggningsuppgifter returnerades.",
+    "PASSKEY_STORING_SERVER"              => "Sparar din lösennyckel...",
+    "PASSKEY_CREATED_SUCCESS"             => "Lösennyckeln har skapats!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "Förbereder autentisering mellan enheter. Se till att din telefon och dator har internetåtkomst.",
+    "PASSKEY_DEVICE_AUTH"                 => "Använder enhetens lösennyckelautentisering...",
+    "PASSKEY_STARTING_AUTH"               => "Påbörjar autentisering med lösennyckel...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "Skanna QR-koden med din telefon när den visas. Se till att båda enheterna har internetåtkomst.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "Välj \"Använd en telefon eller surfplatta\" när du uppmanas, och skanna sedan QR-koden.",
+    "PASSKEY_AUTHENTICATING"              => "Autentiserar med din lösennyckel...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "Autentiseringen lyckades! Omdirigerar...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "Registreringen tog för lång tid. För registrering mellan enheter: 1) Försök igen, 2) Se till att enheterna har internet, 3) Överväg att registrera direkt på din telefon.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "Registreringen tog för lång tid. Vänligen försök igen.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "Autentisering mellan enheter tog för lång tid. Felsökning: 1) Båda enheterna behöver internet, 2) Försök att skanna QR-koden snabbare, 3) Överväg att använda samma enhet, 4) Vissa nätverk blockerar autentisering mellan enheter.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "Autentiseringen tog för lång tid. Vänligen försök igen.",
+    "PASSKEY_NO_CREDENTIAL"               => "Inga inloggningsuppgifter mottagna. Försöker igen...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "Autentiseringen misslyckades - inga inloggningsuppgifter returnerades.",
+    "PASSKEY_ATTEMPT_RETRY"               => "misslyckades. Försöker igen... (%d försök kvar)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "Registrering mellan enheter misslyckades. Prova: 1) Se till att båda enheterna har internet, 2) Överväg att registrera direkt på din telefon, 3) Vissa företagsnätverk blockerar denna funktion.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "Registreringen avbröts eller så stöder enheten inte lösennycklar.",
+    "PASSKEY_NOT_SUPPORTED"               => "Lösennycklar stöds inte på denna kombination av enhet/webbläsare.",
+    "PASSKEY_SECURITY_ERROR"              => "Säkerhetsfel - detta indikerar vanligtvis en felmatchning av domän/ursprung.",
+    "PASSKEY_ALREADY_EXISTS"              => "En lösennyckel finns redan för detta konto på denna enhet. Prova att använda en annan enhet eller ta bort befintliga lösennycklar först.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "Autentisering mellan enheter misslyckades. Prova: 1) Se till att båda enheterna har stabilt internet, 2) Använd samma WiFi-nätverk om möjligt, 3) Prova att autentisera direkt på din telefon istället, 4) Vissa företagsnätverk blockerar denna funktion.",
+    "PASSKEY_AUTH_CANCELLED"              => "Autentiseringen avbröts eller så valdes ingen lösennyckel.",
+    "PASSKEY_NETWORK_ERROR"               => "Nätverksfel. För autentisering mellan enheter behöver båda enheterna internetåtkomst och kan behöva vara på samma nätverk.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "Autentiseringen misslyckades - inloggningsuppgifterna kändes inte igen.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "Tips för autentisering mellan enheter:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "Se till att både din dator och telefon har internetåtkomst",
+    "PASSKEY_GUIDANCE_WIFI"               => "Att vara på samma WiFi-nätverk kan hjälpa (men är inte alltid nödvändigt)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "När du uppmanas, välj \"Använd en telefon eller surfplatta\"",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "Skanna QR-koden snabbt när den visas",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "Om det misslyckas, prova att uppdatera och använda telefonens webbläsare direkt",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "Visa felsökningstips",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "Dölj felsökningstips",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "Kör diagnostik...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "Diagnostiken är klar. Kontrollera konsolen för detaljer.",
+    "PASSKEY_ISSUES_DETECTED"             => "Problem upptäckta:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "Miljön verkar vara lämplig för lösennycklar.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "Diagnostiken misslyckades:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "Lägg till en anteckning till din nya lösennyckel",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Base64-avkodningsfel:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "Ogiltig JSON-data mottagen:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "Ingen utmaning för lösennyckelregistrering hittades i sessionen. Vänligen försök registrera igen.",
+    "PASSKEY_USER_MISMATCH"               => "Användar-ID matchar inte. Vänligen försök registrera igen.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "Användar-ID i utmaningsalternativen matchar inte den aktuella användaren. Vänligen försök registrera igen.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "Registrering av lösennyckel misslyckades. Se till att din enhet och webbläsare stöder WebAuthn och försök igen. Fel:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "Ingen utmaning för lösennyckelverifiering hittades i sessionen. Vänligen försök logga in igen.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "Lösennyckelns inloggningsuppgifter hittades inte i databasen.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "Lösennyckelns inloggningsuppgifter tillhör inte den förväntade användaren.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "Validering av lösennyckel misslyckades. Vänligen försök igen eller kontakta support om problemet kvarstår. Fel:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "Användare för registrering hittades inte.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "Du måste vara inloggad för att utföra den här åtgärden.",
+    "PASSKEY_ACTION_MISSING"              => "Den nödvändiga parametern 'action' saknades i begäran.",
+    "PASSKEY_STORAGE_FAILED"              => "Det gick inte att spara lösennyckeln. Operationen misslyckades.",
+    "PASSKEY_LOGIN_FAILED"                => "Inloggning med lösennyckel misslyckades. Autentiseringen kunde inte verifieras.",
+    "PASSKEY_INVALID_METHOD"              => "Ogiltig anropsmetod:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "CSRF-tokenkontrollen misslyckades. Gå tillbaka och försök skicka formuläret igen.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "Möjligt problem: Du verkar vara på ett privat nätverk, vilket ibland kan störa kommunikationen mellan enheter.",
+    "PASSKEY_NETWORK_PROXY"               => "Möjligt problem: En proxy eller VPN upptäcktes. Detta kan störa kommunikationen mellan enheter.",
+    "PASSKEY_NETWORK_MOBILE"              => "Observera: Du verkar vara på ett mobilt nätverk. Se till att ha en stabil anslutning för operationer mellan enheter.",
+    "PASSKEY_NETWORK_CORPORATE"           => "Möjligt problem: En företagsbrandvägg kan vara aktiv, vilket kan påverka autentiseringen mellan enheter.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "Rekommendation: Du använder troligen en stationär dator. Förbered dig på att använda din telefon för att skanna en QR-kod.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "Rekommendation: För bästa resultat, se till att din dator och mobila enhet är på samma Wi-Fi-nätverk.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "Rekommendation: Var beredd på att skanna QR-koden snabbt, eftersom begäran kan ta för lång tid.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "Rekommendation: Se till att både din dator och din mobila enhet har en stabil internetanslutning.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "Rekommendation: För Unity WebViews, se till att sidan har tillräckligt med tid för att ladda och bearbeta begäran om lösennyckel.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "Rekommendation: Tidsgränser kan vara längre i Unity. Vänligen ha tålamod.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "Rekommendation: Eftersom du är på en mobil enhet bör du kunna registrera en lösennyckel direkt på den här enheten.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "Rekommendation: På Android kan du hantera dina lösennycklar i Google Lösenordshanteraren.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "Konfigurationsvarning: Relying Party ID är inställt på en IP-adress.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "Rekommendation: Ställ in Relying Party ID till ditt domännamn (t.ex. dinwebbplats.se) för bättre säkerhet och kompatibilitet.",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "Konfigurationsfel: HTTPS krävs för att lösennycklar ska fungera på en live-server. Din webbplats verkar vara på HTTP.",
+    "PASSKEY_VALIDATION_NETWORK"          => "Nätverksvarning", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "Rekommendation: Om du upplever problem, prova ett annat nätverk (t.ex. byt från företags-Wi-Fi till en mobil hotspot).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "Rekommendation: För åtgärder mellan enheter, se till att båda enheterna har en pålitlig internetanslutning.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "Rekommendation: Om åtgärder mellan enheter misslyckas, prova att besöka den här sidan direkt på din mobila enhet för att slutföra åtgärden.",
+    "PASSKEY_INFO_TITLE"                  => "Om lösennycklar",
+    "PASSKEY_INFO_DESC"                   => "Lösennycklar är ett säkert, lösenordsfritt sätt att logga in med hjälp av din enhets inbyggda säkerhetsfunktioner som fingeravtryck, ansiktsigenkänning или PIN. De är säkrare än lösenord, ger snabbare inloggning, fungerar över flera enheter när de synkroniseras med lösenordshanterare och är motståndskraftiga mot nätfiskeattacker. Lösennycklar fungerar på moderna smartphones, surfplattor, datorer och kan lagras i lösenordshanterare som 1Password, Bitwarden, iCloud-nyckelring eller Google Lösenordshanteraren.",
+    "PASSKEY_BACK_TO_LOGIN"               => "Tillbaka till inloggning",
 ));
 
 //validation class
@@ -268,35 +412,83 @@ $lang = array_merge($lang, array(
 	"MSG_SEND"			=> "Skicka meddelande",
 ));
 
-//2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"				=> "2-faktorsautentisering",
-	"2FA_CONF"	=> "Är du säker på att du vill avaktivera 2FA? Ditt konto kommer inte längre vara skyddat.",
-	"2FA_SCAN"	=> "Skanna denna QR-kod med din autentiseringsapp eller skriv in nyckeln",
-	"2FA_THEN"	=> "Skriv sedan in en av dina engångslösen här",
-	"2FA_FAIL"	=> "Problem med att verifiera 2FA. Vänligen kontrollera internetanslutning eller kontakta support.",
-	"2FA_CODE"	=> "2FA-kod",
-	"2FA_EXP"		=> "Utgånget 1 fingeravtryck",
-	"2FA_EXPD"	=> "Utgånget",
-	"2FA_EXPS"	=> "Går ut",
-	"2FA_ACTIVE" => "Aktiva sessioner",
-	"2FA_NOT_FN" => "Inget fingeravtryck hittades",
-	"2FA_FP"		=> "Fingeravtryck",
-	"2FA_NP"		=> "Login misslyckades  Tvåfaktors autentiseringskod fanns inte. Vänligen försök igen.",
-	"2FA_INV"		=> "Login misslyckades  Ogiltig tvåfaktors autentiseringskod. Vänligen försök igen.",
-	"2FA_FATAL"	=> "Allvarligt fel  Vänligen kontakta systemadministratör.",
+    "2FA"                                => "Tvåfaktorsautentisering",
+    "2FA_CONF"                           => "Är du säker på att du vill inaktivera tvåfaktorsautentisering? Ditt konto kommer inte längre att vara skyddat.",
+    "2FA_SCAN"                           => "Skanna denna QR-kod med din autentiseringsapp eller ange nyckeln",
+    "2FA_THEN"                           => "Ange sedan en av dina engångskoder här",
+    "2FA_FAIL"                           => "Ett problem uppstod vid verifiering av tvåfaktorsautentisering. Kontrollera internetanslutningen eller kontakta support.",
+    "2FA_CODE"                           => "2FA-kod",
+    "2FA_EXP"                            => "1 fingeravtryck har gått ut",
+    "2FA_EXPD"                           => "Utgånget",
+    "2FA_EXPS"                           => "Går ut",
+    "2FA_ACTIVE"                         => "Aktiva sessioner",
+    "2FA_NOT_FN"                         => "Inga fingeravtryck hittades",
+    "2FA_FP"                             => "Fingeravtryck",
+    "2FA_NP"                             => "Inloggning misslyckades - Tvåfaktorsautentiseringskod saknades. Vänligen försök igen.",
+    "2FA_INV"                            => "Inloggning misslyckades - Tvåfaktorsautentiseringskoden var ogiltig. Vänligen försök igen.",
+    "2FA_FATAL"                          => "Allvarligt fel - Vänligen kontakta systemadministratören. Vi kan inte generera en tvåfaktorsautentiseringskod för närvarande.",
+    "2FA_SECTION_TITLE"                  => "Tvåfaktorsautentisering (TOTP)",
+    "2FA_SK_ALT"                         => "Om du inte kan skanna QR-koden, ange den här hemliga nyckeln manuellt i din autentiseringsapp.",
+    "2FA_IS_ENABLED"                     => "Tvåfaktorsautentisering skyddar ditt konto.",
+    "2FA_NOT_ENABLED_INFO"               => "Tvåfaktorsautentisering är för närvarande inte aktiverat.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "Tvåfaktorsautentisering (TOTP) lägger till ett extra säkerhetslager till ditt konto genom att kräva en kod från en autentiseringsapp på din telefon utöver ditt lösenord.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "Ställ in tvåfaktorsautentisering",
+    "2FA_SECRET_KEY_LABEL"               => "Hemlig nyckel:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "Ange verifieringskod från appen",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "Tvåfaktorsautentisering aktiverad! Spara dina reservkoder",
+    "2FA_SUCCESS_ENABLED_INFO"           => "Nedan finns dina reservkoder. Förvara dem säkert - var och en kan bara användas en gång.",
+    "2FA_BACKUP_CODES_WARNING"           => "Behandla dessa koder som lösenord. Förvara dem säkert.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "Nya reservkoder har genererats. Spara dem säkert.",
+    "2FA_BACKUP_CODE_LABEL"              => "Reservkod",
+    "2FA_REGEN_CODES_BTN"                => "Generera nya reservkoder",
+    "2FA_INVALIDATE_WARNING"             => "Detta kommer att ogiltigförklara alla befintliga reservkoder. Är du säker?",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "Autentiseringskod",
+    "2FA_VERIFY_BTN"                     => "Verifiera och logga in",
+    "2FA_VERIFY_TITLE"                   => "Tvåfaktorsautentisering krävs",
+    "2FA_VERIFY_INFO"                    => "Ange den 6-siffriga koden från din autentiseringsapp.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "Aktivera tvåfaktorsautentisering",
+    "2FA_DISABLE_BTN"                    => "Inaktivera tvåfaktorsautentisering",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "Verifiera och aktivera",
+    "2FA_CANCEL_SETUP_BTN"               => "Avbryt inställning",
+    "2FA_DONE_BTN"                       => "Klar",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "Tvåfaktorsautentisering har inaktiverats.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "Reservkoderna har bekräftats.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "Inställningen har avbrutits.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "Ogiltig reservkod. Vänligen försök igen.",
+    "2FA_ERR_DISABLE_FAILED"             => "Det gick inte att inaktivera tvåfaktorsautentisering.",
+    "2FA_ERR_NO_SECRET"                  => "Kunde inte hämta autentiseringshemligheten. Vänligen försök igen.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Reservkoden verifierades men det gick inte att ogiltigförklara den. Vänligen kontakta support.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "Ingen autentiseringskod angavs.",
+    "RATE_LIMIT_LOGIN"                   => "För många misslyckade inloggningsförsök. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_TOTP"                    => "För många felaktiga autentiseringskoder. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_PASSKEY"                 => "För många autentiseringsförsök med lösennyckel. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "För många registreringsförsök av lösennyckel. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "För många begäranden om återställning av lösenord. Vänligen vänta innan du begär en ny återställning.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "För många försök att återställa lösenord. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_REGISTRATION"            => "För många registreringsförsök. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "För många begäranden om e-postverifiering. Vänligen vänta innan du begär en ny verifiering.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "För många begäranden om e-poständring. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "För många försök att ändra lösenord. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_GENERIC"                 => "För många försök. Vänligen vänta innan du försöker igen.",
 ));
 
-//Redirect Messages - These get a plus between each word
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "Tyvärr.Tvåfaktor+är+inte+aktiverat+för+närvarande",
-	"REDIR_2FA_EN"				=> "2-faktorsautentisering+aktiverad",
-	"REDIR_2FA_DIS"				=> "2-faktorsautentisering+inaktiverad",
-	"REDIR_2FA_VER"				=> "2-faktorsautentisering+verifierad+och+aktiverad",
-	"REDIR_SOM_TING_WONG" => "Något+gick+fel.+Vänligen+försök+igen.",
-	"REDIR_MSG_NOEX"			=> "Den+tråden+tillhör+inte+dig+eller+finns+inte.",
-	"REDIR_UN_ONCE"				=> "Användarnamn+har+redan+ändrats+en+gång.",
-	"REDIR_EM_SUCC"				=> "Uppdatering+av+E-post+lyckades.",
+	"REDIR_2FA"						=> "Tyvärr.Tvåfaktor är inte aktiverat för närvarande",
+	"REDIR_2FA_EN"				=> "2-faktorsautentisering aktiverad",
+	"REDIR_2FA_DIS"				=> "2-faktorsautentisering inaktiverad",
+	"REDIR_2FA_VER"				=> "2-faktorsautentisering verifierad och aktiverad",
+	"REDIR_SOMETHING_WRONG" => "Något gick fel. Vänligen försök igen.",
+	"REDIR_MSG_NOEX"			=> "Den tråden tillhör inte dig eller finns inte.",
+	"REDIR_UN_ONCE"				=> "Användarnamn har redan ändrats en gång.",
+	"REDIR_EM_SUCC"				=> "Uppdatering av E-post lyckades.",
 ));
 
 //Emails

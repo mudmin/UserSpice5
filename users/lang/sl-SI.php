@@ -28,12 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang,array(
 	"THIS_LANGUAGE"	=>"Slovenščina",
 	"THIS_CODE"		=>"sl-SI",
@@ -134,6 +134,150 @@ $lang = array_merge($lang,array(
 		"GEN_AND"		=> "in",
 		"GEN_SAME"		=> "mora biti enako",
 		));
+
+		//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "Pristopni ključ",
+    "GEN_ACTIONS"                         => "Dejanja",
+    "GEN_BACK_TO_ACCT"                    => "Nazaj na račun",
+    "GEN_DB_ERROR"                        => "Prišlo je do napake v podatkovni bazi. Poskusite znova.",
+    "GEN_IMPORTANT"                       => "Pomembno",
+    "GEN_NO_PERMISSIONS"                  => "Nimate dovoljenja za dostop do te strani.",
+    "GEN_NO_PERMISSIONS_MSG"              => "Nimate dovoljenja za dostop do te strani. Če menite, da gre za napako, se obrnite na skrbnika spletnega mesta.",
+    "PASSKEYS_MANAGE_TITLE"               => "Upravljanje vaših pristopnih ključev",
+    "PASSKEYS_LOGIN_TITLE"                => "Prijava s pristopnim ključem",
+    "PASSKEY_DELETE_SUCCESS"              => "Pristopni ključ uspešno izbrisan.",
+    "PASSKEY_DELETE_FAIL_DB"              => "Brisanje pristopnega ključa iz podatkovne baze ni uspelo.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "Pristopni ključ ni bil najden ali nimate dovoljenja za brisanje.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "Opomba pristopnega ključa uspešno posodobljena.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "Posodobitev opombe pristopnega ključa ni uspela.",
+    "PASSKEY_REGISTER_NEW"                => "Registriraj nov pristopni ključ",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "Dosegli ste največje število 10 pristopnih ključev.",
+    "PASSKEY_NOTE_TH"                     => "Opomba pristopnega ključa",
+    "PASSKEY_TIMES_USED_TH"               => "Število uporab",
+    "PASSKEY_LAST_USED_TH"                => "Zadnja uporaba",
+    "PASSKEY_LAST_IP_TH"                  => "Zadnji IP-naslov",
+    "PASSKEY_EDIT_NOTE_BTN"               => "Uredi opombo",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "Ali ste prepričani, da želite izbrisati ta pristopni ključ?",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "Uredi opombo pristopnega ključa",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "Opomba pristopnega ključa",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "Shrani spremembe",
+    "PASSKEY_NONE_REGISTERED"             => "Nimate še registriranih pristopnih ključev.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "Pred uporabo te funkcije morate najprej registrirati pristopni ključ iz overjenega računa.",
+    "PASSKEY_STORING"                     => "Shranjevanje pristopnega ključa...",
+    "PASSKEY_STORED_SUCCESS"              => "Pristopni ključ uspešno shranjen!",
+    "PASSKEY_INVALID_ACTION"              => "Neveljavno dejanje: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "Dejanje ni bilo določeno",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "Zaznana je težava z omrežjem. Poskusite z drugim omrežjem ali osvežite stran.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "Zaznana je avtentikacija med napravami. Prepričajte se, da imata obe napravi dostop do interneta.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "Poskusite to stran odpreti neposredno na svojem telefonu.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "Diagnostike ni bilo mogoče ustvariti: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "Manjkajo zahtevani podatki za shranjevanje poverilnic.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "Manjkajo zahtevani podatki za avtentikacijo.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "Ni sporočila",
+    "PASSKEY_USER_NOT_FOUND"              => "Uporabnik po preverjanju pristopnega ključa ni bil najden.",
+    "PASSKEY_FATAL_ERROR"                 => "Usodna napaka: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "Prijava uspešna.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "Priprava na registracijo med napravami. Morda boste morali uporabiti svoj telefon ali tablico.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "Uporaba registracije pristopnega ključa naprave...",
+    "PASSKEY_STARTING_REGISTRATION"       => "Začetek registracije pristopnega ključa...",
+    "PASSKEY_REQUEST_OPTIONS"             => "Zahtevanje možnosti registracije od strežnika...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "Sledite navodilom za ustvarjanje pristopnega ključa. Morda boste morali uporabiti drugo napravo.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "Sledite navodilom za ustvarjanje pristopnega ključa...",
+    "PASSKEY_CREATION_FAILED"             => "Ustvarjanje pristopnega ključa ni uspelo - poverilnica ni bila vrnjena.",
+    "PASSKEY_STORING_SERVER"              => "Shranjevanje vašega pristopnega ključa...",
+    "PASSKEY_CREATED_SUCCESS"             => "Pristopni ključ uspešno ustvarjen!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "Priprava na avtentikacijo med napravami. Prepričajte se, da imata vaš telefon in računalnik dostop do interneta.",
+    "PASSKEY_DEVICE_AUTH"                 => "Uporaba avtentikacije s pristopnim ključem naprave...",
+    "PASSKEY_STARTING_AUTH"               => "Začetek avtentikacije s pristopnim ključem...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "Skenirajte QR-kodo s telefonom, ko se prikaže. Prepričajte se, da imata obe napravi dostop do interneta.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "Ko boste pozvani, izberite \"Uporabi telefon ali tablico\", nato skenirajte QR-kodo.",
+    "PASSKEY_AUTHENTICATING"              => "Avtentikacija z vašim pristopnim ključem...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "Avtentikacija uspešna! Preusmerjanje...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "Registracija je potekla. Za registracijo med napravami: 1) Poskusite znova, 2) Prepričajte se, da imajo naprave dostop do interneta, 3) Razmislite o registraciji neposredno na telefonu.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "Registracija je potekla. Poskusite znova.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "Avtentikacija med napravami je potekla. Odpravljanje težav: 1) Obe napravi potrebujeta internet, 2) Poskusite hitreje skenirati QR-kodo, 3) Razmislite o uporabi iste naprave, 4) Nekatera omrežja blokirajo avtentikacijo med napravami.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "Avtentikacija je potekla. Poskusite znova.",
+    "PASSKEY_NO_CREDENTIAL"               => "Poverilnica ni bila prejeta. Poskušam znova...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "Avtentikacija ni uspela - poverilnica ni bila vrnjena.",
+    "PASSKEY_ATTEMPT_RETRY"               => "neuspešno. Poskušam znova... (preostalo %d poskusov)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "Registracija med napravami ni uspela. Poskusite: 1) Prepričajte se, da imata obe napravi internet, 2) Razmislite o registraciji neposredno na telefonu, 3) Nekatera poslovna omrežja blokirajo to funkcijo.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "Registracija je bila preklicana ali naprava ne podpira pristopnih ključev.",
+    "PASSKEY_NOT_SUPPORTED"               => "Pristopni ključi niso podprti na tej kombinaciji naprave/brskalnika.",
+    "PASSKEY_SECURITY_ERROR"              => "Varnostna napaka - to običajno kaže na neujemanje domene/izvora.",
+    "PASSKEY_ALREADY_EXISTS"              => "Pristopni ključ za ta račun na tej napravi že obstaja. Poskusite z drugo napravo ali najprej izbrišite obstoječe pristopne ključe.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "Avtentikacija med napravami ni uspela. Poskusite: 1) Prepričajte se, da imata obe napravi stabilen internet, 2) Če je mogoče, uporabite isto omrežje WiFi, 3) Poskusite se avtenticirati neposredno na telefonu, 4) Nekatera poslovna omrežja blokirajo to funkcijo.",
+    "PASSKEY_AUTH_CANCELLED"              => "Avtentikacija je bila preklicana ali pristopni ključ ni bil izbran.",
+    "PASSKEY_NETWORK_ERROR"               => "Napaka v omrežju. Za avtentikacijo med napravami potrebujeta obe napravi dostop do interneta in morda morata biti v istem omrežju.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "Avtentikacija ni uspela - poverilnica ni bila prepoznana.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "Nasveti za avtentikacijo med napravami:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "Prepričajte se, da imata vaš računalnik in telefon dostop do interneta",
+    "PASSKEY_GUIDANCE_WIFI"               => "Biti na istem omrežju WiFi lahko pomaga (vendar ni vedno potrebno)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "Ko boste pozvani, izberite \"Uporabi telefon ali tablico\"",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "Hitro skenirajte QR-kodo, ko se prikaže",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "Če ne uspe, poskusite osvežiti stran in uporabiti brskalnik neposredno na telefonu",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "Pokaži nasvete za odpravljanje težav",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "Skrij nasvete za odpravljanje težav",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "Izvajanje diagnostike...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "Diagnostika končana. Za podrobnosti preverite konzolo.",
+    "PASSKEY_ISSUES_DETECTED"             => "Zaznane težave:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "Okolje se zdi primerno za pristopne ključe.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "Diagnostika ni uspela:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "Dodajte opombo svojemu novemu pristopnemu ključu",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Napaka pri dekodiranju Base64:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "Prejeti neveljavni podatki JSON:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "V seji ni bil najden izziv za registracijo pristopnega ključa. Poskusite se registrirati znova.",
+    "PASSKEY_USER_MISMATCH"               => "Neujemanje ID-ja uporabnika. Poskusite se registrirati znova.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "ID uporabnika v možnostih izziva se ne ujema s trenutnim uporabnikom. Poskusite se registrirati znova.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "Registracija pristopnega ključa ni uspela. Prepričajte se, da vaša naprava in brskalnik podpirata WebAuthn, in poskusite znova. Napaka:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "V seji ni bil najden izziv za preverjanje pristopnega ključa. Poskusite se prijaviti znova.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "Poverilnica pristopnega ključa ni bila najdena v podatkovni bazi.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "Poverilnica pristopnega ključa ne pripada pričakovanemu uporabniku.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "Preverjanje pristopnega ključa ni uspelo. Poskusite znova ali se obrnite na podporo, če se težava ponavlja. Napaka:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "Uporabnik za registracijo ni bil najden.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "Za izvedbo tega dejanja morate biti prijavljeni.",
+    "PASSKEY_ACTION_MISSING"              => "Zahtevani parameter 'action' je manjkal v zahtevi.",
+    "PASSKEY_STORAGE_FAILED"              => "Shranjevanje pristopnega ključa ni uspelo. Operacija ni bila uspešna.",
+    "PASSKEY_LOGIN_FAILED"                => "Prijava s pristopnim ključem ni uspela. Avtentikacije ni bilo mogoče preveriti.",
+    "PASSKEY_INVALID_METHOD"              => "Neveljavna metoda zahteve:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "Preverjanje žetona CSRF ni uspelo. Pojdite nazaj in poskusite znova oddati obrazec.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "Možna težava: Zdi se, da ste v zasebnem omrežju, kar lahko včasih moti komunikacijo med napravami.",
+    "PASSKEY_NETWORK_PROXY"               => "Možna težava: Zaznan je bil proxy ali VPN. To lahko moti komunikacijo med napravami.",
+    "PASSKEY_NETWORK_MOBILE"              => "Opomba: Zdi se, da ste v mobilnem omrežju. Zagotovite stabilno povezavo za delovanje med napravami.",
+    "PASSKEY_NETWORK_CORPORATE"           => "Možna težava: Morda je aktiven požarni zid podjetja, kar bi lahko vplivalo na avtentikacijo med napravami.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "Priporočilo: Verjetno uporabljate namizni računalnik. Pripravite se na uporabo telefona za skeniranje QR-kode.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "Priporočilo: Za najboljše rezultate poskrbite, da sta vaš računalnik in mobilna naprava v istem omrežju Wi-Fi.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "Priporočilo: Bodite pripravljeni na hitro skeniranje QR-kode, saj lahko zahteva poteče.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "Priporočilo: Zagotovite, da imata vaš računalnik in mobilna naprava stabilno internetno povezavo.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "Priporočilo: Za Unity WebViews poskrbite, da ima stran dovolj časa za nalaganje in obdelavo zahteve za pristopni ključ.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "Priporočilo: Časovne omejitve so lahko v Unityju daljše. Prosimo za potrpežljivost.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "Priporočilo: Ker ste na mobilni napravi, bi morali imeti možnost registrirati pristopni ključ neposredno na tej napravi.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "Priporočilo: Na Androidu lahko svoje pristopne ključe upravljate v Google Upravitelju gesel.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "Opozorilo o konfiguraciji: ID odvisne strani (Relying Party ID) je nastavljen na IP-naslov.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "Priporočilo: Za boljšo varnost in združljivost nastavite ID odvisne strani na ime vaše domene (npr. vasastran.si).",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "Napaka pri konfiguraciji: Za delovanje pristopnih ključev na delujočem strežniku je potreben HTTPS. Zdi se, da je vaša stran na HTTP.",
+    "PASSKEY_VALIDATION_NETWORK"          => "Opozorilo o omrežju", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "Priporočilo: Če imate težave, poskusite z drugim omrežjem (npr. preklopite s poslovnega Wi-Fi na mobilno dostopno točko).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "Priporočilo: Za dejanja med napravami zagotovite, da imata obe napravi zanesljivo internetno povezavo.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "Priporočilo: Če dejanja med napravami ne uspejo, poskusite obiskati to stran neposredno na svoji mobilni napravi, da dokončate dejanje.",
+    "PASSKEY_INFO_TITLE"                  => "O pristopnih ključih",
+    "PASSKEY_INFO_DESC"                   => "Pristopni ključi so varen način prijave brez gesla, ki uporablja vgrajene varnostne funkcije vaše naprave, kot so prstni odtis, prepoznavanje obraza ali PIN. So varnejši od gesel, omogočajo hitrejšo prijavo, delujejo na več napravah, če so sinhronizirani z upravitelji gesel, in so odporni na napade z lažnim predstavljanjem. Pristopni ključi delujejo na sodobnih pametnih telefonih, tablicah, računalnikih in jih je mogoče shraniti v upravitelje gesel, kot so 1Password, Bitwarden, iCloud Keychain ali Google Upravitelj gesel.",
+    "PASSKEY_BACK_TO_LOGIN"               => "Nazaj na prijavo",
+));
 
 //validation class
 	$lang = array_merge($lang,array(
@@ -247,35 +391,84 @@ $lang = array_merge($lang,array(
 		"MSG_SEND"		=> "Pošlji sporočilo",
 		));
 
-	//2 Factor Authentication
-	$lang = array_merge($lang,array(
-		"2FA"			=> "2 faktorska avtentikacija",
-		"2FA_CONF"		=> "Ali ste prepričani, da želite onemogočiti 2FA? Vaš račun ne bo več zaščiten.",
-		"2FA_SCAN"		=> "Skenirajte to QR kodo z vašo aplikacijo za avtentikacijo ali vnesite ključ",
-		"2FA_THEN"		=> "Nato vnesite enega od vaših enkratnih gesel tukaj",
-		"2FA_FAIL"		=> "Pri preverjanju 2FA je prišlo do težave. Preverite internet ali se obrnite na podporo.",
-		"2FA_CODE"		=> "2FA koda",
-		"2FA_EXP"		=> "Potekel 1 prstni odtis",
-		"2FA_EXPD"		=> "Potekel",
-		"2FA_EXPS"		=> "Poteče",
-		"2FA_ACTIVE"	=> "Aktivne seje",
-		"2FA_NOT_FN"	=> "Prstnih odtisov ni bilo mogoče najti",
-		"2FA_FP"		=> "Prstni odtisi",
-		"2FA_NP"		=> "<strong>Prijava ni uspela</strong> Kode za dvofaktorsko avtentikacijo ni bilo. Poskusite znova.",
-		"2FA_INV"		=> "<strong>Prijava ni uspela</strong> Koda za dvofaktorsko avtentikacijo je bila neveljavna. Poskusite znova.",
-		"2FA_FATAL"		=> "<strong>Usodna napaka</strong> Obrnite se na sistemskega administratorja.",
-		));
+//Two Factor Authentication
+$lang = array_merge($lang, array(
+    "2FA"                                => "Dvofaktorska avtentikacija",
+    "2FA_CONF"                           => "Ali ste prepričani, da želite onemogočiti dvofaktorsko avtentikacijo? Vaš račun ne bo več zaščiten.",
+    "2FA_SCAN"                           => "Skenirajte to QR-kodo z vašo aplikacijo za avtentikacijo ali vnesite ključ",
+    "2FA_THEN"                           => "Nato tukaj vnesite eno od svojih enkratnih gesel",
+    "2FA_FAIL"                           => "Pri preverjanju dvofaktorske avtentikacije je prišlo do težave. Preverite internetno povezavo ali se obrnite na podporo.",
+    "2FA_CODE"                           => "2FA koda",
+    "2FA_EXP"                            => "1 prstni odtis je potekel",
+    "2FA_EXPD"                           => "Poteklo",
+    "2FA_EXPS"                           => "Poteče",
+    "2FA_ACTIVE"                         => "Aktivne seje",
+    "2FA_NOT_FN"                         => "Prstni odtisi niso bili najdeni",
+    "2FA_FP"                             => "Prstni odtisi",
+    "2FA_NP"                             => "Prijava ni uspela - koda za dvofaktorsko avtentikacijo ni bila prisotna. Poskusite znova.",
+    "2FA_INV"                            => "Prijava ni uspela - koda za dvofaktorsko avtentikacijo je bila neveljavna. Poskusite znova.",
+    "2FA_FATAL"                          => "Usodna napaka - obrnite se na sistemskega skrbnika. Trenutno ne moremo ustvariti kode za dvofaktorsko avtentikacijo.",
+    "2FA_SECTION_TITLE"                  => "Dvofaktorska avtentikacija (TOTP)",
+    "2FA_SK_ALT"                         => "Če ne morete skenirati QR-kode, ročno vnesite ta skrivni ključ v svojo aplikacijo za avtentikacijo.",
+    "2FA_IS_ENABLED"                     => "Dvofaktorska avtentikacija ščiti vaš račun.",
+    "2FA_NOT_ENABLED_INFO"               => "Dvofaktorska avtentikacija trenutno ni omogočena.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "Dvofaktorska avtentikacija (TOTP) doda dodatno raven varnosti vašemu računu, saj poleg gesla zahteva kodo iz aplikacije za avtentikacijo na vašem telefonu.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "Nastavitev dvofaktorske avtentikacije",
+    "2FA_SECRET_KEY_LABEL"               => "Skrivni ključ:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "Vnesite kodo za preverjanje iz aplikacije",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "Dvofaktorska avtentikacija omogočena! Shranite svoje varnostne kode",
+    "2FA_SUCCESS_ENABLED_INFO"           => "Spodaj so vaše varnostne kode. Shranite jih na varno - vsako je mogoče uporabiti samo enkrat.",
+    "2FA_BACKUP_CODES_WARNING"           => "Te kode obravnavajte kot gesla. Shranite jih na varno.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "Ustvarjene so nove varnostne kode. Shranite jih na varno.",
+    "2FA_BACKUP_CODE_LABEL"              => "Varnostna koda",
+    "2FA_REGEN_CODES_BTN"                => "Ponovno ustvari varnostne kode",
+    "2FA_INVALIDATE_WARNING"             => "To bo razveljavilo vse obstoječe varnostne kode. Ali ste prepričani?",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "Avtentikacijska koda",
+    "2FA_VERIFY_BTN"                     => "Preveri in se prijavi",
+    "2FA_VERIFY_TITLE"                   => "Potrebna je dvofaktorska avtentikacija",
+    "2FA_VERIFY_INFO"                    => "Vnesite 6-mestno kodo iz vaše aplikacije za avtentikacijo.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "Omogoči dvofaktorsko avtentikacijo",
+    "2FA_DISABLE_BTN"                    => "Onemogoči dvofaktorsko avtentikacijo",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "Preveri in aktiviraj",
+    "2FA_CANCEL_SETUP_BTN"               => "Prekliči nastavitev",
+    "2FA_DONE_BTN"                       => "Končano",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "Dvofaktorska avtentikacija je bila onemogočena.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "Varnostne kode potrjene.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "Nastavitev preklicana.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "Neveljavna varnostna koda. Poskusite znova.",
+    "2FA_ERR_DISABLE_FAILED"             => "Onemogočanje dvofaktorske avtentikacije ni uspelo.",
+    "2FA_ERR_NO_SECRET"                  => "Skrivnega ključa za avtentikacijo ni bilo mogoče pridobiti. Poskusite znova.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Varnostna koda je bila preverjena, vendar je razveljavitev spodletela. Obrnite se na podporo.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "Avtentikacijska koda ni bila vnesena.",
+    "RATE_LIMIT_LOGIN"                   => "Preveč neuspelih poskusov prijave. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_TOTP"                    => "Preveč napačnih avtentikacijskih kod. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_PASSKEY"                 => "Preveč poskusov avtentikacije s pristopnim ključem. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "Preveč poskusov registracije pristopnega ključa. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "Preveč zahtev za ponastavitev gesla. Počakajte, preden zahtevate novo ponastavitev.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "Preveč poskusov ponastavitve gesla. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_REGISTRATION"            => "Preveč poskusov registracije. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "Preveč zahtev za preverjanje e-pošte. Počakajte, preden zahtevate novo preverjanje.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "Preveč zahtev za spremembo e-pošte. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "Preveč poskusov spremembe gesla. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_GENERIC"                 => "Preveč poskusov. Počakajte, preden poskusite znova.",
+));
 
-	//Redirect Messages - These get a plus between each word
+	
 	$lang = array_merge($lang,array(
-		"REDIR_2FA"					=> "Oprostite.Dvofaktorska+avtentikacija+trenutno+ni+omogočena",
-		"REDIR_2FA_EN"				=> "Dvofaktorska+avtentikacija+omogočena",
-		"REDIR_2FA_DIS"				=> "Dvofaktorska+avtentikacija+onemogočena",
-		"REDIR_2FA_VER"				=> "Dvofaktorska+avtentikacija+preverjena+in+omogočena",
-		"REDIR_SOM_TING_WONG" 		=> "Nekaj+je+šlo+narobe.+Prosimo,+poskusite+znova.",
-		"REDIR_MSG_NOEX"			=> "Ta+vlaknica+vam+ne+pripada+ali+ne+obstaja.",
-		"REDIR_UN_ONCE"				=> "Uporabniško+ime+je+bilo+že+enkrat+spremenjeno.",
-		"REDIR_EM_SUCC"				=> "E-pošta+uspešno+posodobljena",
+		"REDIR_2FA"					=> "Oprostite.Dvofaktorska avtentikacija trenutno ni omogočena",
+		"REDIR_2FA_EN"				=> "Dvofaktorska avtentikacija omogočena",
+		"REDIR_2FA_DIS"				=> "Dvofaktorska avtentikacija onemogočena",
+		"REDIR_2FA_VER"				=> "Dvofaktorska avtentikacija preverjena in omogočena",
+		"REDIR_SOMETHING_WRONG" 		=> "Nekaj je šlo narobe. Prosimo, poskusite znova.",
+		"REDIR_MSG_NOEX"			=> "Ta vlaknica vam ne pripada ali ne obstaja.",
+		"REDIR_UN_ONCE"				=> "Uporabniško ime je bilo že enkrat spremenjeno.",
+		"REDIR_EM_SUCC"				=> "E-pošta uspešno posodobljena",
 		));
 
 	//Emails

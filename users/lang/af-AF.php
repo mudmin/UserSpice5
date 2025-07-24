@@ -4,7 +4,7 @@ Do not put any content above the opening PHP tag
 /**
       Afrikaans Translation by John Dovey <boondock@criptext.com> & Big G
       v 2.0: 16 December 2024
-      Any suggestions for improvements greately appreciated
+      Any suggestions for improvements are appreciated
 **/
 /*
 TO CREATE A NEW LANGUAGE, COPY THE en-us.php to your own localization code name.
@@ -29,12 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang, array(
 	"THIS_LANGUAGE"	=> "Afrikaans",
 	"THIS_CODE"	=> "af-AF",
@@ -148,6 +148,150 @@ $lang = array_merge($lang, array(
 	"GEN_REQ"		=> "vereis",
 	"GEN_AND"		=> "en",
 	"GEN_SAME"		=> "moet dieselfde wees",
+));
+
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "Toegangsleutel",
+    "GEN_ACTIONS"                         => "Aksies",
+    "GEN_BACK_TO_ACCT"                    => "Terug na Rekening",
+    "GEN_DB_ERROR"                        => "'n Databasisfout het voorgekom. Probeer asseblief weer.",
+    "GEN_IMPORTANT"                       => "Belangrik",
+    "GEN_NO_PERMISSIONS"                  => "Jy het nie toestemming om hierdie bladsy te sien nie.",
+    "GEN_NO_PERMISSIONS_MSG"              => "Jy het nie toestemming om hierdie bladsy te sien nie. As jy voel dit is 'n fout, kontak asseblief die webwerf-administrateur.",
+    "PASSKEYS_MANAGE_TITLE"               => "Bestuur Jou Toegangsleutels",
+    "PASSKEYS_LOGIN_TITLE"                => "Teken in met Toegangsleutel",
+    "PASSKEY_DELETE_SUCCESS"              => "Toegangsleutel suksesvol uitgevee.",
+    "PASSKEY_DELETE_FAIL_DB"              => "Kon nie toegangsleutel uit databasis verwyder nie.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "Toegangsleutel nie gevind of toestemming geweier.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "Toegangsleutel-nota suksesvol opgedateer.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "Kon nie toegangsleutel-nota opdateer nie.",
+    "PASSKEY_REGISTER_NEW"                => "Registreer Nuwe Toegangsleutel",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "Jy het die maksimum van 10 toegangsleutels bereik.",
+    "PASSKEY_NOTE_TH"                     => "Toegangsleutel Nota",
+    "PASSKEY_TIMES_USED_TH"               => "Kere Gebruik",
+    "PASSKEY_LAST_USED_TH"                => "Laas Gebruik",
+    "PASSKEY_LAST_IP_TH"                  => "Laaste IP",
+    "PASSKEY_EDIT_NOTE_BTN"               => "Wysig Nota",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "Is jy seker jy wil hierdie toegangsleutel uitvee?",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "Wysig Toegangsleutel Nota",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "Toegangsleutel Nota",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "Stoor Veranderinge",
+    "PASSKEY_NONE_REGISTERED"             => "Jy het nog geen toegangsleutels geregistreer nie.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "Jy moet eers 'n toegangsleutel vanaf 'n geauthentiseerde rekening registreer voordat jy hierdie funksie kan gebruik.",
+    "PASSKEY_STORING"                     => "Stoor tans toegangsleutel...",
+    "PASSKEY_STORED_SUCCESS"              => "Toegangsleutel suksesvol gestoor!",
+    "PASSKEY_INVALID_ACTION"              => "Ongeldige aksie: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "Geen aksie gespesifiseer nie",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "Netwerkprobleem bespeur. Probeer 'n ander netwerk of verfris die bladsy.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "Kruis-toestel stawing bespeur. Maak seker beide toestelle het internettoegang.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "Probeer eerder hierdie bladsy direk op jou foon oopmaak.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "Kon nie diagnostiek genereer nie: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "Vereiste geloofsbriefdata vir stoor ontbreek.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "Vereiste stawingdata ontbreek.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "Geen boodskap",
+    "PASSKEY_USER_NOT_FOUND"              => "Gebruiker nie gevind na toegangsleutel-validering nie.",
+    "PASSKEY_FATAL_ERROR"                 => "Fatale fout: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "Suksesvol ingeteken.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "Berei voor vir kruis-toestel registrasie. Jy mag dalk jou foon of tablet moet gebruik.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "Gebruik toestel se toegangsleutel-registrasie...",
+    "PASSKEY_STARTING_REGISTRATION"       => "Begin toegangsleutel-registrasie...",
+    "PASSKEY_REQUEST_OPTIONS"             => "Versoek registrasie-opsies van bediener...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "Volg die aanwysings om jou toegangsleutel te skep. Jy mag dalk 'n ander toestel moet gebruik.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "Volg die aanwysings om jou toegangsleutel te skep...",
+    "PASSKEY_CREATION_FAILED"             => "Toegangsleutel-skepping het misluk - geen geloofsbrief terug ontvang nie.",
+    "PASSKEY_STORING_SERVER"              => "Stoor tans jou toegangsleutel...",
+    "PASSKEY_CREATED_SUCCESS"             => "Toegangsleutel suksesvol geskep!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "Berei voor vir kruis-toestel stawing. Maak seker jou foon en rekenaar het internettoegang.",
+    "PASSKEY_DEVICE_AUTH"                 => "Gebruik toestel se toegangsleutel-stawing...",
+    "PASSKEY_STARTING_AUTH"               => "Begin toegangsleutel-stawing...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "Skandeer die QR-kode met jou foon wanneer dit verskyn. Maak seker beide toestelle het internettoegang.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "Kies \"Gebruik 'n foon of tablet\" wanneer gevra, en skandeer dan die QR-kode.",
+    "PASSKEY_AUTHENTICATING"              => "Besig om met jou toegangsleutel te staaf...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "Stawing suksesvol! Stuur aan...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "Registrasie het uitgetel. Vir kruis-toestel: 1) Probeer weer, 2) Verseker toestelle het internet, 3) Oorweeg om direk op jou foon te registreer.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "Registrasie het uitgetel. Probeer asseblief weer.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "Kruis-toestel stawing het uitgetel. Foutsporing: 1) Beide toestelle benodig internet, 2) Probeer die QR-kode vinniger skandeer, 3) Oorweeg om dieselfde toestel te gebruik, 4) Sommige netwerke blokkeer kruis-toestel stawing.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "Stawing het uitgetel. Probeer asseblief weer.",
+    "PASSKEY_NO_CREDENTIAL"               => "Geen geloofsbrief ontvang nie. Probeer weer...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "Stawing het misluk - geen geloofsbrief terug ontvang nie.",
+    "PASSKEY_ATTEMPT_RETRY"               => "het misluk. Probeer weer... (%d pogings oorblywend)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "Kruis-toestel registrasie het misluk. Probeer: 1) Verseker beide toestelle het internet, 2) Oorweeg om direk op jou foon te registreer, 3) Sommige korporatiewe netwerke blokkeer hierdie funksie.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "Registrasie is gekanselleer of die toestel ondersteun nie toegangsleutels nie.",
+    "PASSKEY_NOT_SUPPORTED"               => "Toegangsleutels word nie op hierdie toestel/blaaier-kombinasie ondersteun nie.",
+    "PASSKEY_SECURITY_ERROR"              => "Sekuriteitsfout - dit dui gewoonlik op 'n domein/oorsprong-wanverhouding.",
+    "PASSKEY_ALREADY_EXISTS"              => "'n Toegangsleutel bestaan reeds vir hierdie rekening op hierdie toestel. Probeer 'n ander toestel gebruik of vee eers bestaande toegangsleutels uit.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "Kruis-toestel stawing het misluk. Probeer: 1) Verseker beide toestelle het stabiele internet, 2) Gebruik dieselfde WiFi-netwerk indien moontlik, 3) Probeer eerder direk op jou foon staaf, 4) Sommige korporatiewe netwerke blokkeer hierdie funksie.",
+    "PASSKEY_AUTH_CANCELLED"              => "Stawing is gekanselleer of geen toegangsleutel is gekies nie.",
+    "PASSKEY_NETWORK_ERROR"               => "Netwerkfout. Vir kruis-toestel stawing benodig beide toestelle internettoegang en moet moontlik op dieselfde netwerk wees.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "Stawing het misluk - geloofsbrief nie herken nie.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "Wenke vir Kruis-Toestel Stawing:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "Maak seker beide jou rekenaar en foon het internettoegang",
+    "PASSKEY_GUIDANCE_WIFI"               => "Om op dieselfde WiFi-netwerk te wees kan help (maar is nie altyd nodig nie)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "Wanneer gevra, kies \"Gebruik 'n foon of tablet\"",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "Skandeer die QR-kode vinnig wanneer dit verskyn",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "As dit misluk, probeer verfris en gebruik jou foon se blaaier direk",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "Wys Foutsporingswenke",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "Versteek Foutsporingswenke",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "Voer tans diagnostiek uit...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "Diagnostiek voltooi. Gaan konsole na vir besonderhede.",
+    "PASSKEY_ISSUES_DETECTED"             => "Probleme bespeur:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "Omgewing blyk geskik te wees vir toegangsleutels.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "Diagnostiek het misluk:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "Voeg 'n Nota by Jou Nuwe Toegangsleutel",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Base64-dekoderingsfout:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "Ongeldige JSON-data ontvang:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "Geen toegangsleutel-registrasie-uitdaging in sessie gevind nie. Probeer asseblief weer registreer.",
+    "PASSKEY_USER_MISMATCH"               => "Gebruiker-ID stem nie ooreen nie. Probeer asseblief weer registreer.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "Gebruiker-ID in uitdaging-opsies stem nie ooreen met huidige gebruiker nie. Probeer asseblief weer registreer.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "Toegangsleutel-registrasie het misluk. Maak seker jou toestel en blaaier ondersteun WebAuthn en probeer weer. Fout:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "Geen toegangsleutel-stawing-uitdaging in sessie gevind nie. Probeer asseblief weer inteken.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "Toegangsleutel-geloofsbrief nie in die databasis gevind nie.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "Toegangsleutel-geloofsbrief behoort nie aan die verwagte gebruiker nie.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "Toegangsleutel-validering het misluk. Probeer asseblief weer of kontak ondersteuning as die probleem voortduur. Fout:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "Gebruiker nie gevind vir registrasie nie.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "Jy moet ingeteken wees om hierdie aksie uit te voer.",
+    "PASSKEY_ACTION_MISSING"              => "Die vereiste 'action'-parameter het in die versoek ontbreek.",
+    "PASSKEY_STORAGE_FAILED"              => "Kon nie die toegangsleutel stoor nie. Die operasie was onsuksesvol.",
+    "PASSKEY_LOGIN_FAILED"                => "Toegangsleutel-intekening het misluk. Die stawing kon nie geverifieer word nie.",
+    "PASSKEY_INVALID_METHOD"              => "Ongeldige versoekmetode:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "CSRF-token-kontrole het misluk. Gaan asseblief terug en probeer die vorm weer indien.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "Moontlike Probleem: Jy blyk op 'n private netwerk te wees, wat soms met kruis-toestel kommunikasie kan inmeng.",
+    "PASSKEY_NETWORK_PROXY"               => "Moontlike Probleem: 'n Proxy of VPN is bespeur. Dit mag inmeng met kruis-toestel kommunikasie.",
+    "PASSKEY_NETWORK_MOBILE"              => "Let Wel: Jy blyk op 'n mobiele netwerk te wees. Verseker 'n stabiele verbinding vir kruis-toestel operasies.",
+    "PASSKEY_NETWORK_CORPORATE"           => "Moontlike Probleem: 'n Korporatiewe brandmuur mag aktief wees, wat kruis-toestel stawing kan beïnvloed.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "Aanbeveling: Jy gebruik waarskynlik 'n rekenaar. Berei voor om jou foon te gebruik om 'n QR-kode te skandeer.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "Aanbeveling: Vir die beste resultate, maak seker jou rekenaar en mobiele toestel is op dieselfde Wi-Fi-netwerk.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "Aanbeveling: Wees voorbereid om die QR-kode vinnig te skandeer, aangesien die versoek kan uittel.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "Aanbeveling: Maak seker beide jou rekenaar en jou mobiele toestel het 'n stabiele internetverbinding.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "Aanbeveling: Vir Unity WebViews, maak seker die bladsy het genoeg tyd om te laai en die toegangsleutel-versoek te verwerk.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "Aanbeveling: Tydsverlope mag langer wees in Unity. Wees asseblief geduldig.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "Aanbeveling: Aangesien jy op 'n mobiele toestel is, behoort jy 'n toegangsleutel direk op hierdie toestel te kan registreer.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "Aanbeveling: Op Android kan jy jou toegangsleutels in die Google Wagwoordbestuurder bestuur.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "Konfigurasie Waarskuwing: Die Relying Party ID is gestel as 'n IP-adres.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "Aanbeveling: Stel die Relying Party ID na jou domeinnaam (bv. jouwebwerf.com) vir beter sekuriteit en versoenbaarheid.",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "Konfigurasie Fout: HTTPS is nodig vir toegangsleutels om op 'n lewendige bediener te werk. Jou werf blyk op HTTP te wees.",
+    "PASSKEY_VALIDATION_NETWORK"          => "Netwerk Waarskuwing", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "Aanbeveling: As jy probleme ondervind, probeer 'n ander netwerk (bv. skakel oor van korporatiewe Wi-Fi na 'n mobiele hotspot).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "Aanbeveling: Vir kruis-toestel aksies, maak seker beide toestelle het 'n betroubare internetverbinding.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "Aanbeveling: As kruis-toestel aksies misluk, probeer hierdie bladsy direk op jou mobiele toestel besoek om die aksie te voltooi.",
+    "PASSKEY_INFO_TITLE"                  => "Oor Toegangsleutels",
+    "PASSKEY_INFO_DESC"                   => "Toegangsleutels is 'n veilige, wagwoordvrye manier om aan te meld deur jou toestel se ingeboude sekuriteitskenmerke soos vingerafdruk, gesigsherkenning of PIN te gebruik. Hulle is veiliger as wagwoorde, bied vinniger aanmelding, werk oor verskeie toestelle wanneer dit met wagwoordbestuurders gesinkroniseer word, en is bestand teen uitvissing-aanvalle. Toegangsleutels werk op moderne slimfone, tablette, rekenaars, en kan in wagwoordbestuurders soos 1Password, Bitwarden, iCloud Sleutelhanger, of Google Wagwoordbestuurder gestoor word.",
+    "PASSKEY_BACK_TO_LOGIN"               => "Terug na Intekening",
 ));
 
 //validation class
@@ -266,35 +410,85 @@ $lang = array_merge($lang, array(
 ));
 
 //2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"				=> "2-faktor-verifikasie",
-	"2FA_CONF"	=> "Is u seker dat u 2FA wil deaktiveer? U rekening sal nie meer beskerm word nie.",
-	"2FA_SCAN"	=> "Skandeer hierdie QR-kode met u verifikasieprogram of voer die sleutel in",
-	"2FA_THEN"	=> "Voer dan een van u eenmalige sleutelwoorde hier in",
-	"2FA_FAIL"	=> "Kon nie 2FA verifieer nie. Gaan die internet na of kontak die ondersteuning.",
-	"2FA_CODE"	=> "2FA-kode",
-	"2FA_EXP"	=> "1 vingerafdruk verval",
-	"2FA_EXPD"	=> "Verstreken",
-	"2FA_EXPS"	=> "Verval",
-	"2FA_ACTIVE"	=> "Aktiewe sessies",
-	"2FA_NOT_FN"	=> "Geen vingerafdrukke gevind nie",
-	"2FA_FP"	=> "Vingerafdrukke",
-	"2FA_NP"	=> "Aanmelding het misluk   Twee faktor-outentiekode was nie beskikbaar nie. Probeer asseblief weer.",
-	"2FA_INV"	=> " Aanmelding het misluk   Auth-kode met twee faktore was ongeldig. Probeer asseblief weer.",
-	"2FA_FATAL"	=> " fatale fout   Kontak asseblief die stelselbeheerder.",
+    "2FA"                                => "Twee-Faktor-Verifikasie",
+    "2FA_CONF"                           => "Is jy seker jy wil 2FA deaktiveer? Jou rekening sal nie meer beskerm wees nie.",
+    "2FA_SCAN"                           => "Skandeer hierdie QR-kode met jou verifikasie-toepassing of voer die sleutel in",
+    "2FA_THEN"                           => "Voer dan een van jou eenmalige wagkodes hier in",
+    "2FA_FAIL"                           => "Daar was 'n probleem met die verifiëring van 2FA. Gaan asseblief jou internet na of kontak ondersteuning.",
+    "2FA_CODE"                           => "2FA-kode",
+    "2FA_EXP"                            => "1 vingerafdruk het verval",
+    "2FA_EXPD"                           => "Verval",
+    "2FA_EXPS"                           => "Verval op",
+    "2FA_ACTIVE"                         => "Aktiewe Sessies",
+    "2FA_NOT_FN"                         => "Geen vingerafdrukke gevind nie",
+    "2FA_FP"                             => "Vingerafdrukke",
+    "2FA_NP"                             => "Intekening Misluk - Twee-faktor-stawingskode was nie teenwoordig nie. Probeer asseblief weer.",
+    "2FA_INV"                            => "Intekening Misluk - Twee-faktor-stawingskode was ongeldig. Probeer asseblief weer.",
+    "2FA_FATAL"                          => "Fatale Fout - Kontak asseblief die Stelseladministrateur. Ons kan nie op die oomblik 'n Twee-faktor-stawingskode genereer nie.",
+    "2FA_SECTION_TITLE"                  => "Twee-Faktor-Verifikasie (TOTP)",
+    "2FA_SK_ALT"                         => "As jy nie die QR-kode kan skandeer nie, voer hierdie geheime sleutel handmatig in jou verifikasie-toepassing in.",
+    "2FA_IS_ENABLED"                     => "Twee-faktor-verifikasie beskerm jou rekening.",
+    "2FA_NOT_ENABLED_INFO"               => "Twee-faktor-verifikasie is tans nie geaktiveer nie.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "Twee-faktor-verifikasie (TOTP) voeg 'n ekstra laag sekuriteit by jou rekening deur 'n kode van 'n verifikasie-toepassing op jou foon te vereis, bykomend tot jou wagwoord.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "Stel Twee-Faktor-Verifikasie op",
+    "2FA_SECRET_KEY_LABEL"               => "Geheime Sleutel:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "Voer Verifikasiekode vanaf Toepassing in",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "Twee-Faktor-Verifikasie Geaktiveer! Stoor Jou Rugsteunkodes",
+    "2FA_SUCCESS_ENABLED_INFO"           => "Hieronder is jou rugsteunkodes. Bêre hulle veilig - elkeen kan slegs een keer gebruik word.",
+    "2FA_BACKUP_CODES_WARNING"           => "Hanteer hierdie kodes soos wagwoorde. Bêre hulle veilig.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "Nuwe rugsteunkodes gegenereer. Bêre hulle veilig.",
+    "2FA_BACKUP_CODE_LABEL"              => "Rugsteunkode",
+    "2FA_REGEN_CODES_BTN"                => "Hergenereer Rugsteunkodes",
+    "2FA_INVALIDATE_WARNING"             => "Dit sal alle bestaande rugsteunkodes ongeldig maak. Is jy seker?",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "Stawingskode",
+    "2FA_VERIFY_BTN"                     => "Verifieer & Teken In",
+    "2FA_VERIFY_TITLE"                   => "Twee-Faktor-Verifikasie Vereis",
+    "2FA_VERIFY_INFO"                    => "Voer die 6-syfer kode van jou verifikasie-toepassing in.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "Aktiveer Twee-Faktor-Verifikasie",
+    "2FA_DISABLE_BTN"                    => "Deaktiveer Twee-Faktor-Verifikasie",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "Verifieer & Aktiveer",
+    "2FA_CANCEL_SETUP_BTN"               => "Kanselleer Opstelling",
+    "2FA_DONE_BTN"                       => "Klaar",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "Twee-faktor-verifikasie is gedeaktiveer.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "Rugsteunkodes erken.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "Opstelling gekanselleer.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "Ongeldige rugsteunkode. Probeer asseblief weer.",
+    "2FA_ERR_DISABLE_FAILED"             => "Kon nie twee-faktor-verifikasie deaktiveer nie.",
+    "2FA_ERR_NO_SECRET"                  => "Kon nie stawinggeheim herwin nie. Probeer asseblief weer.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Rugsteunkode geverifieer, maar kon dit nie ongeldig maak nie. Kontak asseblief ondersteuning.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "Geen stawingskode verskaf nie.",
+    "RATE_LIMIT_LOGIN"                   => "Te veel mislukte intekenpogings. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_TOTP"                    => "Te veel verkeerde stawingskodes. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_PASSKEY"                 => "Te veel pogings tot toegangsleutel-stawing. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "Te veel pogings tot toegangsleutel-registrasie. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "Te veel wagwoord-terugstelversoeke. Wag asseblief voor jy nog een aanvra.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "Te veel wagwoord-terugstelpogings. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_REGISTRATION"            => "Te veel registrasiepogings. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "Te veel e-pos-verifikasieversoeke. Wag asseblief voor jy nog een aanvra.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "Te veel e-pos-veranderingsversoeke. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "Te veel wagwoord-veranderingspogings. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_GENERIC"                 => "Te veel pogings. Wag asseblief voor jy weer probeer.",
 ));
 
-//Redirect Messages - These get a plus between each word
+
 // It seems pointless to me to translate these. Feel free to contribute, Voel Vry!
 $lang = array_merge($lang, array(
-	"REDIR_2FA"             => "Jammer. Twee+factor+is+nou+nie+geaktiveer+nie.",
-	"REDIR_2FA_EN"          => "2+Factor+Verifikasie+Geaktiveer",
-	"REDIR_2FA_DIS"         => "2+Factor+Verifikasie+Gedeaktiveer",
-	"REDIR_2FA_VER"         => "2+Factor+Verifikasie+Geverifieer+en+Geaktiveer",
-	"REDIR_SOM_TING_WONG"   => "Iets+het+verkeerd+geloop.+Probeer+asseblief+weer.",
-	"REDIR_MSG_NOEX"        => "Daardie+draad+behoort+niet+aan+jou+nie+of+bestaan+nie.",
-	"REDIR_UN_ONCE"         => "Gebruikersnaam+is+reeds+een+keer+verander.",
-	"REDIR_EM_SUCC"         => "E-pos+Suksesvol+Opgedateer",
+	"REDIR_2FA"             => "Jammer. Twee factor is nou nie geaktiveer nie.",
+	"REDIR_2FA_EN"          => "2 Factor Verifikasie Geaktiveer",
+	"REDIR_2FA_DIS"         => "2 Factor Verifikasie Gedeaktiveer",
+	"REDIR_2FA_VER"         => "2 Factor Verifikasie Geverifieer en Geaktiveer",
+	"REDIR_SOMETHING_WRONG"   => "Iets het verkeerd geloop. Probeer asseblief weer.",
+	"REDIR_MSG_NOEX"        => "Daardie draad behoort niet aan jou nie of bestaan nie.",
+	"REDIR_UN_ONCE"         => "Gebruikersnaam is reeds een keer verander.",
+	"REDIR_EM_SUCC"         => "E-pos Suksesvol Opgedateer",
 
 ));
 

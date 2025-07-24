@@ -2,8 +2,11 @@
 $v2ToolsWidgetLoaded = true;
 $tools = [
   ['Bug Report', 'bug.png', 'bugs','','Find a bug in UserSpice? Let us know by reporting it from your own dashboard.'],
+  ['Classic Menu', 'navigation.png', 'nav', '', 'If you still use the classic menu, you can manage it here.'],
   ['Cron Manager', 'cron.png', 'cron', '', 'This is a place to manage your recurring cron jobs.'],
   ['IP Manager', 'ip.png', 'ip', '', 'Manage IP Blacklisting and Whitelisting'],
+  ['OAuth Client', 'oauth_client.png', 'oauth_client', '', 'Connect to other UserSpice installs.'],
+  ['OAuth Server', 'oauth.png', 'oauth', '', 'Manage OAuth clients and settings.'],
   ['Page Manager', 'pages.png', 'pages', '', 'Decide which permissions are required to view each page.'],
   ['Permissions & Tags', 'permissions.png', 'permissions', '', 'Manage the permissions and tags that you can assign to users.'],
   ['Plugin Manager', 'plugin.png', 'plugins', '', 'Activate, deactivate, and configure plugins.'],

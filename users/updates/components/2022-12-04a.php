@@ -7,7 +7,7 @@ $fields = [
   // ['_admin_plugins.php','plugins','Manage Plugins'],
   ['_admin_logs.php','logs','System Logs'],
   // ['_admin_settings_general.php','general','General Settings'],
-  // ['_admin_settings_register.php','reg','Registration Settings'],
+  // ['_admin_settings_register.php','reg','Reg & Password Settings'],
 ];
 
 foreach($fields as $f){

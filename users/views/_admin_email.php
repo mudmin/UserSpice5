@@ -309,9 +309,9 @@ if (!empty($_POST)) {
           </label>
             <small class="form-text text-muted">
               Put http://yourdomain.com/ with the final / below: <br>
-              Example: <?= $example_root?>
+              Example: <span id="most-likely-url" class="fw-bold"><?= $example_root?></span> <button id="set-most-likely-url" class="btn tiny-button btn-outline-primary">Use This</button>
             </small>
-            <input size='50' class='form-control' type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
+            <input size='50' class='form-control' id="verify-url" type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
           </div>
           <div class="form-group">
             <label for="email_act">Require User to Verify Their Email</label>
@@ -352,3 +352,18 @@ if($results->email_act == 0){
     <?php 
   }
 }
+?>
+<script>
+  document.getElementById('set-most-likely-url').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('verify-url').value = document.getElementById('most-likely-url').innerText;
+  });
+</script>
+<style>
+  .tiny-button {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+</style>

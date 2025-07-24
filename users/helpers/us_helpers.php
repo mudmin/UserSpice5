@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MISSING';
 if (!function_exists('ipCheck')) {
-  function ipCheck()
-  {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-    return $ip;
+  function ipCheck(): string {
+    // Treat true CLI & PHPDBG as "no remote addr"
+    if (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') {
+      return '127.0.0.1';
+    }
+    return $_SERVER['REMOTE_ADDR'] ?? '';
   }
 }
 
@@ -1107,8 +1109,12 @@ if (!function_exists('includeHook')) {
           if (isset($usplugins[$plugin]) && $usplugins[$plugin] == 1) { //only include this file if plugin is installed and active.
             include $abs_us_root . $us_url_root . 'usersc/plugins/' . $h;
           }
-        } else {
-          //automatically disable hook ...eventually
+          //does the link include the string "oauth", manually include it
+        } elseif(strpos($h, 'oauth') !== false && file_exists($abs_us_root . $us_url_root . $h)) {
+          include $abs_us_root . $us_url_root . $h;
+        
+        }else{
+          
         }
       }
     }

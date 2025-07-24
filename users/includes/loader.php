@@ -64,6 +64,19 @@ include $abs_us_root.$us_url_root.'users/lang/'.$_SESSION['us_lang'].".php";
 
 //check for a custom page
 $currentPage = currentPage();
+
+// TOTP enforcement
+if ($user->isLoggedIn() && isset($settings->totp) && $settings->totp > 0) {
+    require_once $abs_us_root . $us_url_root . 'users/includes/totp_enforcement.php';
+    handleTotpEnforcement($user, $settings, $currentPage);
+}
+
+// This acts as the "OAuth jail" similar to TOTP jail
+if ($user->isLoggedIn() && isset($settings->oauth_server) && $settings->oauth_server > 0) {
+    require_once $abs_us_root . $us_url_root . 'users/includes/oauth_enforcement.php';
+    handleOAuthEnforcement($user, $settings, $currentPage);
+}
+
 if($settings->debug > 0){
 	if($settings->debug == 2 || ($settings->debug == 1 && isUserLoggedIn() && $user->data()->id == 1)){
 

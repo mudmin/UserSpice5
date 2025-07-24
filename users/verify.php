@@ -140,7 +140,7 @@ if (Input::exists('get')) {
             $db->update("us_email_logins", $search->id, $fields);
 
             if (isset($passwordlessDebug) && $passwordlessDebug == true) {
-                logger($user_id, "Passwordless Debug", "Login Success");
+                // logger($user_id, "Passwordless Debug", "Login Success");
             }
 
             $dest = sanitizedDest('dest');
@@ -149,7 +149,7 @@ if (Input::exists('get')) {
             if ($search->email_verified == 0) {
                 $db->update("users", $user_id, ["email_verified" => 1]);
             }
-
+            setLoginMethod("email");
             if (!empty($dest)) {
                 $redirect = Input::get('redirect');
                 if (!empty($redirect) || $redirect !== '') {
@@ -263,7 +263,7 @@ if (Input::exists('get')) {
                 }
                 $verify_success = TRUE;
                 logger($verify->data()->id, "User", "Verification completed via vericode.");
-                $msg = str_replace("+", " ", lang("REDIR_EM_SUCC"));
+                $msg = lang("REDIR_EM_SUCC");
                 $eventhooks = getMyHooks(['page' => 'verifySuccess']);
                 includeHook($eventhooks, 'body');
             }

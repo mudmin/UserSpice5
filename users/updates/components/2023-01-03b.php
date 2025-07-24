@@ -1,6 +1,9 @@
 <?php
 
 $countE = 0;
+if(file_exists($abs_us_root . $us_url_root . "usersc/includes/dashboard_overrides.php")){
+    
+
 require $abs_us_root . $us_url_root. "usersc/includes/dashboard_overrides.php";
 
 if(!isset($dashboard_sidebar_menu)){
@@ -12,5 +15,5 @@ if(!isset($dashboard_sidebar_menu)){
     fwrite($file, $txt);
     fclose($file);
 }
-
+}
 include($abs_us_root . $us_url_root . "users/updates/components/_complete.php");

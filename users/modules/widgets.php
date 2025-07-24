@@ -7,6 +7,7 @@
   </div>
 <div class="row" id="widgetList">
   <?php
+
   $ordered = explode(",",$settings->widgets);
   // dnd($ordered);
   $widgets = glob($abs_us_root.$us_url_root.'usersc/widgets/*' , GLOB_ONLYDIR);

@@ -91,7 +91,7 @@ if (!empty($_POST)) {
       ]);
       if ($validation->passed()) {
         if (($settings->change_un == 2) && ($user->data()->un_changed == 1)) {
-          $msg = str_replace("+", " ", lang("REDIR_UN_ONCE"));
+          $msg = lang("REDIR_UN_ONCE");
           usError($msg);
           Redirect::to($us_url_root . 'users/user_settings.php');
         }

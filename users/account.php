@@ -22,6 +22,7 @@ require_once '../users/init.php';
 if (!securePage($_SERVER['PHP_SELF'])) {
   die();
 }
+
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 $hooks = getMyHooks();
 if ($hooks['bottom'] == []) {
@@ -55,7 +56,7 @@ $raw = date_parse($user->data()->join_date);
 $signupdate = $raw['month'] . '/' . $raw['year'];
 if ($hooks['bottom'] == []) { //no plugin hooks present
   $resize = [
-    'cardClass' => 'col-md-6 offset-md-3',
+    'cardClass' => 'col-md-4 offset-md-4',
     'nameSize' => 'style="font-size:3em;"',
     'sinceSize' => 'style="font-size:2.25em;"',
   ];
@@ -79,6 +80,12 @@ if ($hooks['bottom'] == []) { //no plugin hooks present
             <span class="idd">@<?= $user->data()->username ?></span>
           </p>
           <p><a href="<?= $us_url_root ?>users/user_settings.php" class="btn btn-primary btn-block mt-3"><?= lang('ACCT_EDIT'); ?></a></p>
+          <?php if($settings->passkeys > 0){ ?>
+            <p><a href="<?= $us_url_root ?>users/passkeys.php" class="btn btn-primary btn-block mt-3"><?= lang('PASSKEYS_MANAGE_TITLE'); ?></a></p>
+          <?php } ?>
+          <?php if(isset($settings->totp) && $settings->totp > 0){ ?>
+             <p><a href="<?= $us_url_root ?>users/totp_management.php" class="btn btn-primary btn-block mt-3"><?= lang('ACCT_2FA'); ?></a></p>
+          <?php } ?>
 
           <?php if (isset($_SESSION['cloak_to'])) { ?>
             <p>

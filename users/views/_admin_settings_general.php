@@ -6,6 +6,119 @@ $verify_url = $db->query("SELECT verify_url FROM email")->first()->verify_url;
 $no_passwords = "This feature removes the ability for users to login with a username and password in favor of OAuth, Passkey, and Email login options. It is your responsibility to make sure you have these options configured and tested before enabling this option.";
 
 $email_login = "This feature allows users to login with their email address instead of their username and password. It is your responsibility to make sure you have the ability to send emails configured and tested before enabling this option. It requires the user to go into their email and click a magic link to sign in. While it is an extra step for the user, it removes your responsibility of storing passwords and the user's responsibility of remembering them. ";
+
+$phpver = phpversion();
+$min_passkey_version = '8.2.0';
+$pkDisabledReason = '';
+$your_host = fetchExpectedRPID();
+$pkDisabled = false;
+$totpDisabled = false;
+
+
+//php version will override
+if (version_compare($min_passkey_version, $phpver) == 1) {
+  $pkDisabled = true;
+  $totpDisabled = true;
+  $pkVersionReason = 'phpver';
+  $pkDisabledReason = "Requires PHP {$min_passkey_version}+";
+  $totpDisabledReason = "Requires PHP {$min_passkey_version}+";
+  if ($settings->passkeys > 0) {
+    $db->update('settings', 1, ['passkeys' => 0]);
+    usError("Passkeys are not supported on PHP versions below {$min_passkey_version}. Please upgrade your PHP version to use this feature. It has been disabled.");
+    $settings->passkeys = 0;
+  }
+  if ($settings->totp > 0) {
+    $db->update('settings', 1, ['totp' => 0]);
+    usError("TOTP is not supported on PHP versions below {$min_passkey_version}. Please upgrade your PHP version to use this feature. It has been disabled.");
+    $settings->totp = 0;
+  }
+}elseif(!defined('PASSKEY_RP_ID')){
+  $pkDisabled = true;
+  $pkVersionReason = 'rpid';
+  $pkDisabledReason = "PASSKEY_RP_ID not defined";
+  $rpidWarning = "<div class='alert alert-warning'>You have not defined the constant <code>define('PASSKEY_RP_ID', $your_host);</code> in your <code>users/init.php</code> file. This is required for Passkeys to work properly. We have some very important information about this in your <a href='?view=security' target='_blank'>Security Dashboard</a>. We can also help you set this up automatically over there.</div>";
+}
+
+// TOTP Encryption Validation
+$totpKeyFile = $abs_us_root . $us_url_root . 'usersc/includes/totp_key.php';
+$totpEncryptionValid = false;
+$totpDisabledReason = '';
+$totpKeyWarning = '';
+
+// Check if we already disabled TOTP due to PHP version
+if (!$totpDisabled) {
+    // Check if encryption functions are available
+    if (!function_exists('totp_is_crypto_available')) {
+        require_once $abs_us_root . $us_url_root . 'users/includes/encryption.php';
+    }
+    
+    if (!totp_is_crypto_available()) {
+        $totpDisabled = true;
+        $totpDisabledReason = "No crypto backend available (need sodium or OpenSSL with AES-256-GCM)";
+        
+        // Auto-disable if it was somehow enabled
+        if ($settings->totp > 0) {
+            $db->update('settings', 1, ['totp' => 0]);
+            usError("TOTP has been disabled because no suitable encryption backend is available. Please ensure sodium extension or OpenSSL with AES-256-GCM support is installed.");
+            $settings->totp = 0;
+        }
+    } else {
+        // Check if key file exists
+        if (!file_exists($totpKeyFile)) {
+            $totpKeyWarning = "<div class='alert alert-warning'>
+                <strong>TOTP Key Missing:</strong> The encryption key file <code>usersc/includes/totp_key.php</code> does not exist. 
+                It will be automatically generated when TOTP is first enabled, but you may want to generate it now for testing. 
+                Make sure your <code>usersc/includes/</code> directory is writable.
+            </div>";
+        } else {
+            // Key file exists, check if it's valid
+            try {
+                // Load the key file
+                require_once $totpKeyFile;
+                
+                if (!defined('TOTP_ENC_KEY')) {
+                    $totpKeyWarning = "<div class='alert alert-danger'>
+                        <strong>Invalid TOTP Key File:</strong> The key file exists but TOTP_ENC_KEY is not defined. 
+                        You may need to delete <code>usersc/includes/totp_key.php</code> and let it regenerate.
+                    </div>";
+                } else {
+                    // Check if the crypto engine is still valid
+                    $currentEngine = totp_get_active_crypto_engine();
+                    $storedEngine = defined('TOTP_CRYPTO_ENGINE') ? TOTP_CRYPTO_ENGINE : 'unknown';
+                    
+                    if (defined('TOTP_FORCE_CRYPTO_ENGINE')) {
+                        $forcedEngine = TOTP_FORCE_CRYPTO_ENGINE;
+                        if ($currentEngine !== $forcedEngine) {
+                            $totpKeyWarning = "<div class='alert alert-warning'>
+                                <strong>TOTP Engine Override:</strong> You have forced crypto engine to '<strong>$forcedEngine</strong>' 
+                                but the available engine is '<strong>$currentEngine</strong>'. This may cause encryption/decryption failures.
+                            </div>";
+                        }
+                    } elseif ($currentEngine !== $storedEngine && $storedEngine !== 'unknown') {
+                        $totpKeyWarning = "<div class='alert alert-info'>
+                            <strong>TOTP Engine Changed:</strong> Your key file was created with '<strong>$storedEngine</strong>' 
+                            but the current engine is '<strong>$currentEngine</strong>'. Existing secrets will be automatically 
+                            re-encrypted when accessed.
+                        </div>";
+                    }
+                    
+                    $totpEncryptionValid = true;
+                }
+            } catch (Exception $e) {
+                $totpKeyWarning = "<div class='alert alert-danger'>
+                    <strong>TOTP Key Error:</strong> Error loading key file: " . htmlspecialchars($e->getMessage()) . "
+                </div>";
+            }
+        }
+        
+        // Final check - if TOTP is enabled but we don't have valid encryption
+        if ($settings->totp > 0 && !$totpEncryptionValid && empty($totpKeyWarning)) {
+            $totpDisabled = true;
+            $totpDisabledReason = "Encryption validation failed";
+        }
+    }
+}
+
 ?>
 
 <!-- Site Settings -->
@@ -206,6 +319,78 @@ $email_login = "This feature allows users to login with their email address inst
           <h3>User Settings</h3>
         </div>
         <div class="card-body">
+          <!-- Passkeys -->
+          <div class="form-group">
+            <label>Enable Passkeys <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <span class="float-end offset-switch">
+              <?php if ($pkDisabled && isset($pkDisabledReason)) { ?>
+                <span class="text-danger fw-bold"><small><?= $pkDisabledReason ?></small></span>
+              <?php } else { ?>
+                <div class="form-check form-switch">
+
+                  <label class="switch switch-text switch-success">
+                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) {
+                                                                                                                    } ?>>
+                </div>
+                <span data-on="Yes" data-off="No" class="switch-label"></span>
+                <span class="switch-handle"></span>
+                </label>
+              <?php } ?>
+            </span>
+            <?php if($pkDisabled && isset($rpidWarning)) {
+              echo $rpidWarning;
+            } ?>
+          </div>
+
+<!-- TOTP -->
+          <div class="form-group">
+            <label>Enable TOTP (Two-Factor Authentication) 
+            <?php  
+
+            if ($totpEncryptionValid) {
+                $currentEngine = totp_get_active_crypto_engine();
+                echo "<span class='text-success mt-2'><small><i class='fa fa-check-circle'></i> Encryption ready (using: $currentEngine)</small></span>";
+            }else{
+                echo "<span class='text-danger mt-2'><small><i class='fa fa-exclamation-triangle'></i> Encryption not ready. See <a href='{$us_url_root}users/admin.php?view=security' target='_blank'>security dashboard</a>.</small></span>";
+            }
+            ?>
+            <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Allows users to enable Time-based One-Time Password (TOTP) two-factor authentication for their accounts. This does not force it, but makes the option available on their user settings page."><i class="fa fa-question-circle offset-circle"></i></a>
+          </label>
+
+            <?php if ($totpDisabled) { ?>
+              <span class="float-end">
+                <span class="text-danger fw-bold"><small><?= $totpDisabledReason ?></small></span>
+              </span>
+            <?php } else { ?>
+              <select id="totp" class="form-control ajxnum" data-desc="Enable TOTP" name="totp">
+                <option <?php if (!isset($settings->totp) || $settings->totp == 0) {
+                          echo "selected='selected'";
+                        } ?> value="0">Disabled</option>
+                <option <?php if (isset($settings->totp) && $settings->totp == 1) {
+                          echo "selected='selected'";
+                        } ?> value="1">Optional</option>
+                <option <?php if (isset($settings->totp) && $settings->totp == 2) {
+                          echo "selected='selected'";
+                        } ?> value="2">Required</option>
+              </select>
+            <?php } ?>
+
+            <?php 
+            // Show TOTP key/encryption warnings
+            if (!empty($totpKeyWarning)) {
+                echo $totpKeyWarning;
+              
+            }
+            
+            // Show site name warning
+            if ($settings->site_name == "UserSpice") { ?>
+              <div class="text-primary mt-2"><small><b>Note:</b> TOTP uses your Site Name, which is currently set to <span class="fw-bold">UserSpice</span>. You may want to consider changing that to make your site easier to find in the authenticator app.</small></div>
+            <?php } 
+            
+
+            ?>
+          </div>
+
           <!-- Remove Password Logins -->
           <div class="form-group">
             <label>Remove Password Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
@@ -222,29 +407,29 @@ $email_login = "This feature allows users to login with their email address inst
             </span>
           </div>
 
-                    <!-- passwordless code length -->
-                    <div class="form-group">
+          <!-- passwordless code length -->
+          <div class="form-group">
             <label>Passwordless Code Length<a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This is the number of chars the end user will have to enter to login"><i class="fa fa-question-circle offset-circle"></i></a></label>
             <select id="pwl_length" class="form-control ajxnum" data-desc="Passwordless Code Length" name="pwl_length">
 
-            <?php for($i = 4; $i <= 12; $i++){ ?>
-              <option value="<?=$i?>" <?php if ($settings->pwl_length == $i) {
-                                  echo 'selected="selected"';
-                                } ?>><?=$i?></option>
-            <?php } ?>
-   
+              <?php for ($i = 4; $i <= 12; $i++) { ?>
+                <option value="<?= $i ?>" <?php if ($settings->pwl_length == $i) {
+                                            echo 'selected="selected"';
+                                          } ?>><?= $i ?></option>
+              <?php } ?>
+
             </select>
           </div>
-                                                                                                                                   
+
           <!-- Enable Email Logins -->
           <div class="form-group">
             <label>Allow Passwordless Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $email_login ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
 
-  
+
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
                 <label class="switch switch-text switch-success">
-                
+
                   <input id="email_login" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Email Login" <?php if ($settings->email_login == 1) {
                                                                                                                                                 echo 'checked="true"';
                                                                                                                                               } ?>>
@@ -266,12 +451,12 @@ $email_login = "This feature allows users to login with their email address inst
               <option value="3" <?php if ($settings->email_login == 3) {
                                   echo 'selected="selected"';
                                 } ?>>Email or Code</option>
-   
+
             </select>
             <br>
-            <small>All links will point to <span style="color:red;"><?=$verify_url?></span>. If that is not correct, change it <a href="<?=$us_url_root?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
+            <small>All links will point to <span style="color:red;"><?= $verify_url ?></span>. If that is not correct, change it <a href="<?= $us_url_root ?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
             <small>Need to debug? See options in <code>usersc/scripts/passwordless_login_overrides.php</code></small><br>
-            <small>View passwordless debug logs <a href="<?=$us_url_root?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
+            <small>View passwordless debug logs <a href="<?= $us_url_root ?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
           </div>
 
 
@@ -317,6 +502,21 @@ $email_login = "This feature allows users to login with their email address inst
                                 } ?>>4. FName First Initial of LName</option>
             </select>
           </div>
+
+                    <div class="form-group">
+            <label>Enable OAuth Server <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This UserSpice install can act as a centralized OAuth server for other applications.  These can be UserSpice, WordPress or dozens of other applications and languages. Default: Off."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <span class="float-end offset-switch">
+              <div class="form-check form-switch">
+                <label class="switch switch-text switch-success">
+                  <input id="oauth_server" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="OAuth Server" <?php if ($settings->oauth_server == 1) {
+                                                                                                                                                            echo 'checked="true"';
+                                                                                                                                                          } ?>>
+              </div>
+              <span data-on="Yes" data-off="No" class="switch-label"></span>
+              <span class="switch-handle"></span>
+              </label>
+            </span>
+          </div>
         </div>
       </div>
 
@@ -327,7 +527,7 @@ $email_login = "This feature allows users to login with their email address inst
           Track down hard to find problems on your site. This causes MANY more things to be written to your logs and should only be used for short periods of time.<br>
         </div>
         <div class="card-body">
-          <!-- Bleeding Edge -->
+
           <div class="form-group">
             <label>Enable Debug Mode <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">

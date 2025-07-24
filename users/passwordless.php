@@ -42,6 +42,13 @@ if ($method == "verify_code") {
   $code = strtolower(Input::get('code'));
   $user_id = Input::get('user_id');
 
+  // Check rate limit for login attempts
+  if (!checkRateLimit('login_attempt', $user_id, $email)) {
+      usError(getRateLimitErrorMessage('login_attempt'));
+      Redirect::to($us_url_root . 'users/passwordless.php');
+      exit;
+  }
+
   if (!empty($code)) {
     $searchQ = $db->query("SELECT * FROM us_email_logins 
       WHERE user_id = ? AND expired = 0 
@@ -53,6 +60,14 @@ if ($method == "verify_code") {
       // Check if code has expired
       if (strtotime($login->expires) < time()) {
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
+        
+        // Record failed login attempt (expired)
+        handleAuthFailure('login_attempt', $user_id, $email, [], [
+            'method' => 'passwordless_code',
+            'failure_reason' => 'expired_code',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         usError("Verification code has expired. Please request a new one.");
         Redirect::to($us_url_root . 'users/passwordless.php');
       }
@@ -61,12 +76,27 @@ if ($method == "verify_code") {
       $invalid_attempts = $login->invalid_attempts ?? 0;
       if ($invalid_attempts >= 3) {
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
+        
+        // Record failed login attempt (too many attempts)
+        handleAuthFailure('login_attempt', $user_id, $email, [], [
+            'method' => 'passwordless_code',
+            'failure_reason' => 'too_many_invalid_attempts',
+            'invalid_attempts' => $invalid_attempts,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         usError("Too many invalid attempts. Please request a new code.");
         Redirect::to($us_url_root . 'users/passwordless.php');
       }
 
       // Verify the code
       if ($code === $login->verification_code) {
+        // Record successful login
+        handleAuthSuccess('login_attempt', $user_id, $email, [], [
+            'method' => 'passwordless_code',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         $user = new User($user_id);
         $user->login();
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
@@ -82,9 +112,25 @@ if ($method == "verify_code") {
       } else {
         $invalid_attempts++;
         $db->update('us_email_logins', $login->id, ['invalid_attempts' => $invalid_attempts]);
+        
+        // Record failed login attempt (invalid code)
+        handleAuthFailure('login_attempt', $user_id, $email, [], [
+            'method' => 'passwordless_code',
+            'failure_reason' => 'invalid_code',
+            'invalid_attempts' => $invalid_attempts,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         usError("Invalid code. Attempts remaining: " . (3 - $invalid_attempts));
         Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . urlencode($email) . '&user_id=' . $user_id);
       }
+    } else {
+      // Record failed login attempt (no valid login record found)
+      handleAuthFailure('login_attempt', $user_id, $email, [], [
+          'method' => 'passwordless_code',
+          'failure_reason' => 'no_login_record',
+          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+      ]);
     }
   }
 }
@@ -92,12 +138,28 @@ if ($method == "verify_code") {
 if ($method == "enter_email") {
   if (!empty($_POST['email'])) {
     $email = Input::get('email');
+    
+    // Check rate limit for password reset requests (using email as identifier)
+    if (!checkRateLimit('password_reset_request', null, $email)) {
+        usError(getRateLimitErrorMessage('password_reset_request'));
+        Redirect::to($us_url_root . 'users/passwordless.php');
+        exit;
+    }
+    
     $searchQ = $db->query("SELECT * FROM users WHERE email = ?", array($email));
     $searchC = $searchQ->count();
     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/passwordless_login_overrides.php')) {
       require_once $abs_us_root . $us_url_root . 'usersc/scripts/passwordless_login_overrides.php';
     }
     if ($searchC < 1) {
+      // Record failed passwordless request (user not found)
+      handleAuthFailure('password_reset_request', null, $email, [], [
+          'method' => 'passwordless_request',
+          'failure_reason' => 'user_not_found',
+          'email_attempted' => $email,
+          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+      ]);
+      
       if (isset($showEmailNotFound) && $showEmailNotFound == true) {
         usError(lang("ERR_EM_DB"));
         Redirect::to($us_url_root . 'users/passwordless.php');
@@ -150,8 +212,22 @@ if ($method == "enter_email") {
       $email_sent = email($email, $subject, $body);
 
       if ($email_sent) {
+        // Record successful passwordless request
+        handleAuthSuccess('password_reset_request', $user_id, $email, [], [
+            'method' => 'passwordless_request',
+            'email_sent' => true,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . $encoded_email . '&user_id=' . $user_id);
       } else {
+        // Record failed passwordless request (email send failed)
+        handleAuthFailure('password_reset_request', $user_id, $email, [], [
+            'method' => 'passwordless_request',
+            'failure_reason' => 'email_send_failed',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ]);
+        
         usError(lang("PASS_GENERIC_ERROR"));
       }
     }

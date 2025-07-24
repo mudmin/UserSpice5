@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 $lang = array();
@@ -135,6 +135,151 @@ $lang = array_merge($lang, array(
 	"GEN_SAME"				=> "muss gleich sein",
 ));
 
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "Passkey",
+    "GEN_ACTIONS"                         => "Aktionen",
+    "GEN_BACK_TO_ACCT"                    => "Zurück zum Konto",
+    "GEN_DB_ERROR"                        => "Ein Datenbankfehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "GEN_IMPORTANT"                       => "Wichtig",
+    "GEN_NO_PERMISSIONS"                  => "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
+    "GEN_NO_PERMISSIONS_MSG"              => "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Wenn Sie glauben, dass dies ein Fehler ist, kontaktieren Sie bitte den Seitenadministrator.",
+    "PASSKEYS_MANAGE_TITLE"               => "Ihre Passkeys verwalten",
+    "PASSKEYS_LOGIN_TITLE"                => "Anmeldung mit Passkey",
+    "PASSKEY_DELETE_SUCCESS"              => "Passkey erfolgreich gelöscht.",
+    "PASSKEY_DELETE_FAIL_DB"              => "Fehler beim Löschen des Passkeys aus der Datenbank.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "Passkey nicht gefunden oder Berechtigung verweigert.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "Passkey-Notiz erfolgreich aktualisiert.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "Fehler beim Aktualisieren der Passkey-Notiz.",
+    "PASSKEY_REGISTER_NEW"                => "Neuen Passkey registrieren",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "Sie haben das Maximum von 10 Passkeys erreicht.",
+    "PASSKEY_NOTE_TH"                     => "Passkey-Notiz",
+    "PASSKEY_TIMES_USED_TH"               => "Anzahl der Verwendungen",
+    "PASSKEY_LAST_USED_TH"                => "Zuletzt verwendet",
+    "PASSKEY_LAST_IP_TH"                  => "Letzte IP",
+    "PASSKEY_EDIT_NOTE_BTN"               => "Notiz bearbeiten",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "Sind Sie sicher, dass Sie diesen Passkey löschen möchten?",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "Passkey-Notiz bearbeiten",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "Passkey-Notiz",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "Änderungen speichern",
+    "PASSKEY_NONE_REGISTERED"             => "Sie haben noch keine Passkeys registriert.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "Sie müssen zuerst einen Passkey von einem authentifizierten Konto registrieren, bevor Sie diese Funktion nutzen können.",
+    "PASSKEY_STORING"                     => "Passkey wird gespeichert...",
+    "PASSKEY_STORED_SUCCESS"              => "Passkey erfolgreich gespeichert!",
+    "PASSKEY_INVALID_ACTION"              => "Ungültige Aktion: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "Keine Aktion angegeben",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "Netzwerkproblem erkannt. Versuchen Sie ein anderes Netzwerk oder aktualisieren Sie die Seite.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "Geräteübergreifende Authentifizierung erkannt. Stellen Sie sicher, dass beide Geräte Internetzugang haben.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "Versuchen Sie stattdessen, diese Seite direkt auf Ihrem Smartphone zu öffnen.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "Diagnose konnte nicht erstellt werden: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "Fehlende erforderliche Anmeldedaten für die Speicherung.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "Fehlende erforderliche Authentifizierungsdaten.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "Keine Nachricht",
+    "PASSKEY_USER_NOT_FOUND"              => "Benutzer nach Passkey-Validierung nicht gefunden.",
+    "PASSKEY_FATAL_ERROR"                 => "Fataler Fehler: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "Anmeldung erfolgreich.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "Vorbereitung für die geräteübergreifende Registrierung. Möglicherweise müssen Sie Ihr Smartphone oder Tablet verwenden.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "Geräte-Passkey-Registrierung wird verwendet...",
+    "PASSKEY_STARTING_REGISTRATION"       => "Passkey-Registrierung wird gestartet...",
+    "PASSKEY_REQUEST_OPTIONS"             => "Registrierungsoptionen vom Server werden angefordert...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "Folgen Sie den Anweisungen, um Ihren Passkey zu erstellen. Möglicherweise müssen Sie ein anderes Gerät verwenden.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "Folgen Sie den Anweisungen, um Ihren Passkey zu erstellen...",
+    "PASSKEY_CREATION_FAILED"             => "Erstellung des Passkeys fehlgeschlagen - keine Anmeldedaten zurückgegeben.",
+    "PASSKEY_STORING_SERVER"              => "Ihr Passkey wird gespeichert...",
+    "PASSKEY_CREATED_SUCCESS"             => "Passkey erfolgreich erstellt!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "Vorbereitung für die geräteübergreifende Authentifizierung. Stellen Sie sicher, dass Ihr Smartphone und Ihr Computer Internetzugang haben.",
+    "PASSKEY_DEVICE_AUTH"                 => "Geräte-Passkey-Authentifizierung wird verwendet...",
+    "PASSKEY_STARTING_AUTH"               => "Passkey-Authentifizierung wird gestartet...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "Scannen Sie den QR-Code mit Ihrem Smartphone, wenn er erscheint. Stellen Sie sicher, dass beide Geräte Internetzugang haben.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "Wählen Sie \"Ein Smartphone oder Tablet verwenden\", wenn Sie dazu aufgefordert werden, und scannen Sie dann den QR-Code.",
+    "PASSKEY_AUTHENTICATING"              => "Authentifizierung mit Ihrem Passkey...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "Authentifizierung erfolgreich! Weiterleitung...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "Zeitüberschreitung bei der Registrierung. Für geräteübergreifend: 1) Erneut versuchen, 2) Sicherstellen, dass die Geräte Internet haben, 3) Erwägen Sie die Registrierung direkt auf Ihrem Smartphone.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "Zeitüberschreitung bei der Registrierung. Bitte versuchen Sie es erneut.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "Zeitüberschreitung bei der geräteübergreifenden Authentifizierung. Fehlerbehebung: 1) Beide Geräte benötigen Internet, 2) Versuchen Sie, den QR-Code schneller zu scannen, 3) Erwägen Sie die Verwendung desselben Geräts, 4) Einige Netzwerke blockieren die geräteübergreifende Authentifizierung.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "Zeitüberschreitung bei der Authentifizierung. Bitte versuchen Sie es erneut.",
+    "PASSKEY_NO_CREDENTIAL"               => "Keine Anmeldedaten erhalten. Erneuter Versuch...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "Authentifizierung fehlgeschlagen - keine Anmeldedaten zurückgegeben.",
+    "PASSKEY_ATTEMPT_RETRY"               => "fehlgeschlagen. Erneuter Versuch... (%d Versuche verbleibend)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "Geräteübergreifende Registrierung fehlgeschlagen. Versuchen Sie: 1) Sicherstellen, dass beide Geräte Internet haben, 2) Erwägen Sie die Registrierung direkt auf Ihrem Smartphone, 3) Einige Unternehmensnetzwerke blockieren diese Funktion.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "Registrierung wurde abgebrochen oder das Gerät unterstützt keine Passkeys.",
+    "PASSKEY_NOT_SUPPORTED"               => "Passkeys werden auf dieser Geräte-/Browser-Kombination nicht unterstützt.",
+    "PASSKEY_SECURITY_ERROR"              => "Sicherheitsfehler - dies deutet normalerweise auf eine Nichtübereinstimmung von Domain/Ursprung hin.",
+    "PASSKEY_ALREADY_EXISTS"              => "Ein Passkey für dieses Konto auf diesem Gerät existiert bereits. Versuchen Sie, ein anderes Gerät zu verwenden oder löschen Sie zuerst vorhandene Passkeys.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "Geräteübergreifende Authentifizierung fehlgeschlagen. Versuchen Sie: 1) Sicherstellen, dass beide Geräte eine stabile Internetverbindung haben, 2) Wenn möglich, dasselbe WLAN-Netzwerk verwenden, 3) Versuchen Sie stattdessen, sich direkt auf Ihrem Smartphone zu authentifizieren, 4) Einige Unternehmensnetzwerke blockieren diese Funktion.",
+    "PASSKEY_AUTH_CANCELLED"              => "Authentifizierung wurde abgebrochen oder es wurde kein Passkey ausgewählt.",
+    "PASSKEY_NETWORK_ERROR"               => "Netzwerkfehler. Für die geräteübergreifende Authentifizierung benötigen beide Geräte Internetzugang und müssen möglicherweise im selben Netzwerk sein.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "Authentifizierung fehlgeschlagen - Anmeldedaten nicht erkannt.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "Tipps zur geräteübergreifenden Authentifizierung:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "Stellen Sie sicher, dass sowohl Ihr Computer als auch Ihr Smartphone Internetzugang haben",
+    "PASSKEY_GUIDANCE_WIFI"               => "Im selben WLAN-Netzwerk zu sein kann helfen (ist aber nicht immer erforderlich)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "Wenn Sie dazu aufgefordert werden, wählen Sie \"Ein Smartphone oder Tablet verwenden\"",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "Scannen Sie den QR-Code schnell, wenn er erscheint",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "Wenn es fehlschlägt, versuchen Sie, die Seite zu aktualisieren und direkt den Browser Ihres Smartphones zu verwenden",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "Tipps zur Fehlerbehebung anzeigen",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "Tipps zur Fehlerbehebung ausblenden",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "Diagnose wird ausgeführt...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "Diagnose abgeschlossen. Überprüfen Sie die Konsole für Details.",
+    "PASSKEY_ISSUES_DETECTED"             => "Probleme erkannt:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "Die Umgebung scheint für Passkeys geeignet zu sein.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "Diagnose fehlgeschlagen:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "Fügen Sie Ihrem neuen Passkey eine Notiz hinzu",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Base64-Dekodierungsfehler:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "Ungültige JSON-Daten empfangen:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "Keine Passkey-Registrierungs-Challenge in der Sitzung gefunden. Bitte versuchen Sie die Registrierung erneut.",
+    "PASSKEY_USER_MISMATCH"               => "Benutzer-ID-Nichtübereinstimmung. Bitte versuchen Sie die Registrierung erneut.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "Benutzer-ID in den Challenge-Optionen stimmt nicht mit dem aktuellen Benutzer überein. Bitte versuchen Sie die Registrierung erneut.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "Passkey-Registrierung fehlgeschlagen. Bitte stellen Sie sicher, dass Ihr Gerät und Browser WebAuthn unterstützen, und versuchen Sie es erneut. Fehler:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "Keine Passkey-Bestätigungs-Challenge in der Sitzung gefunden. Bitte versuchen Sie die Anmeldung erneut.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "Passkey-Anmeldedaten nicht in der Datenbank gefunden.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "Passkey-Anmeldedaten gehören nicht zum erwarteten Benutzer.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "Passkey-Validierung fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht. Fehler:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "Benutzer für die Registrierung nicht gefunden.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "Sie müssen angemeldet sein, um diese Aktion durchzuführen.",
+    "PASSKEY_ACTION_MISSING"              => "Der erforderliche 'action'-Parameter fehlte in der Anfrage.",
+    "PASSKEY_STORAGE_FAILED"              => "Speichern des Passkeys fehlgeschlagen. Die Operation war nicht erfolgreich.",
+    "PASSKEY_LOGIN_FAILED"                => "Passkey-Anmeldung fehlgeschlagen. Die Authentifizierung konnte nicht überprüft werden.",
+    "PASSKEY_INVALID_METHOD"              => "Ungültige Anfragemethode:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "CSRF-Token-Überprüfung fehlgeschlagen. Bitte gehen Sie zurück und versuchen Sie, das Formular erneut abzusenden.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "Mögliches Problem: Sie scheinen sich in einem privaten Netzwerk zu befinden, was manchmal die geräteübergreifende Kommunikation stören kann.",
+    "PASSKEY_NETWORK_PROXY"               => "Mögliches Problem: Ein Proxy oder VPN wurde erkannt. Dies kann die geräteübergreifende Kommunikation stören.",
+    "PASSKEY_NETWORK_MOBILE"              => "Hinweis: Sie scheinen sich in einem Mobilfunknetz zu befinden. Stellen Sie eine stabile Verbindung für geräteübergreifende Operationen sicher.",
+    "PASSKEY_NETWORK_CORPORATE"           => "Mögliches Problem: Eine Unternehmens-Firewall könnte aktiv sein, was die geräteübergreifende Authentifizierung beeinträchtigen könnte.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "Empfehlung: Sie verwenden wahrscheinlich einen Desktop. Bereiten Sie sich darauf vor, Ihr Smartphone zum Scannen eines QR-Codes zu verwenden.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "Empfehlung: Für beste Ergebnisse stellen Sie sicher, dass Ihr Computer und Ihr Mobilgerät im selben WLAN-Netzwerk sind.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "Empfehlung: Seien Sie bereit, den QR-Code schnell zu scannen, da die Anfrage eine Zeitüberschreitung haben könnte.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "Empfehlung: Stellen Sie sicher, dass sowohl Ihr Computer als auch Ihr Mobilgerät eine stabile Internetverbindung haben.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "Empfehlung: Für Unity WebViews stellen Sie sicher, dass die Seite genügend Zeit hat, um die Passkey-Anfrage zu laden und zu verarbeiten.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "Empfehlung: Zeitüberschreitungen können in Unity länger sein. Bitte haben Sie Geduld.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "Empfehlung: Da Sie auf einem Mobilgerät sind, sollten Sie in der Lage sein, einen Passkey direkt auf diesem Gerät zu registrieren.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "Empfehlung: Unter Android können Sie Ihre Passkeys im Google Passwortmanager verwalten.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "Konfigurationswarnung: Die Relying Party ID ist auf eine IP-Adresse eingestellt.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "Empfehlung: Setzen Sie die Relying Party ID auf Ihren Domainnamen (z.B. ihrewebseite.de) für bessere Sicherheit und Kompatibilität.",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "Konfigurationsfehler: HTTPS ist für die Funktion von Passkeys auf einem Live-Server erforderlich. Ihre Seite scheint auf HTTP zu laufen.",
+    "PASSKEY_VALIDATION_NETWORK"          => "Netzwerkwarnung", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "Empfehlung: Wenn Sie Probleme haben, versuchen Sie ein anderes Netzwerk (z.B. wechseln Sie von Unternehmens-WLAN zu einem mobilen Hotspot).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "Empfehlung: Für geräteübergreifende Aktionen stellen Sie sicher, dass beide Geräte eine zuverlässige Internetverbindung haben.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "Empfehlung: Wenn geräteübergreifende Aktionen fehlschlagen, versuchen Sie, diese Seite direkt auf Ihrem Mobilgerät aufzurufen, um die Aktion abzuschließen.",
+    "PASSKEY_INFO_TITLE"                  => "Über Passkeys",
+    "PASSKEY_INFO_DESC"                   => "Passkeys sind eine sichere, passwortfreie Methode zur Anmeldung, die die integrierten Sicherheitsfunktionen Ihres Geräts wie Fingerabdruck, Gesichtserkennung oder PIN nutzt. Sie sind sicherer als Passwörter, ermöglichen eine schnellere Anmeldung, funktionieren geräteübergreifend, wenn sie mit Passwortmanagern synchronisiert werden, und sind resistent gegen Phishing-Angriffe. Passkeys funktionieren auf modernen Smartphones, Tablets, Computern und können in Passwortmanagern wie 1Password, Bitwarden, iCloud-Schlüsselbund oder Google Passwortmanager gespeichert werden.",
+    "PASSKEY_BACK_TO_LOGIN"               => "Zurück zur Anmeldung",
+));
+
+
 //validation class
 $lang = array_merge($lang, array(
 	"VAL_SAME"				=> "muss gleich sein",
@@ -238,7 +383,7 @@ $lang = array_merge($lang, array(
 	"MSG_UNKN"			=> "Unbekannter Empfänger",
 	"MSG_NOTIF"			=> "email-Benachrichtigungen",
 	"MSG_BLANK"			=> "Nachricht kann nicht leer sein",
-	"MSG_MODAL"			=> "Hier klicken oder Alt + R drucken, um eine schnelle Antwort zu schreiben, oder Umschalttaste + R um ein erweitertes Fenster zu öffnen!",
+	"MSG_MODAL"			=> "Hier klicken oder Alt + R drucken, um eine schnelle Antwort zu schreiben, oder Umschalttaste   R um ein erweitertes Fenster zu öffnen!",
 	"MSG_ARCHIVE_SUCCESSFUL"        => "%m1% Threads wurden erfolgreich archiviert",
 	"MSG_UNARCHIVE_SUCCESSFUL"      => "%m1% Threads wurden erfolgreich dearchiviert",
 	"MSG_DELETE_SUCCESSFUL"         => "%m1% Threads wurden erfolgreich gelöscht",
@@ -252,35 +397,84 @@ $lang = array_merge($lang, array(
 
 ));
 
-//2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"				=> "2Faktor-Authentisierung",
-	"2FA_CONF"	=> "Wollen Sie wirklich 2FA deaktivieren? Ihr Konto wird dadurch nicht mehr geschützt.",
-	"2FA_SCAN"	=> "QR-Code bitte mit Ihrer Authentisierung-App scannen, oder Schlüssel eingeben",
-	"2FA_THEN"	=> "Dann geben Sie einen Ihrer einmaligen Passkeys hier ein",
-	"2FA_FAIL"	=> "Problem bei Verifizierung von 2FA. Bitte Ihre Internetverbindung Prüfen, oder Support kontaktieren .",
-	"2FA_CODE"	=> "2FA-Code",
-	"2FA_EXP"		=> "1 Fingerabdruck ist abgelaufen",
-	"2FA_EXPD"	=> "Abgelaufen",
-	"2FA_FP"		=> "Fingerabdruck",
-	"2FA_NP"		=> "Anmeldung fehlgeschlagen  2Faktor-Authentisierungscode fehlt. Bitte erneut versuchen.",
-	"2FA_INV"		=> "Anmeldung fehlgeschlagen  2Faktor-Authentisierungscode ist nicht gültig. Bitte erneut versuchen.",
-	"2FA_FATAL"	=> "Unbehebbarer+Fehler  Systemadministrator bitte kontaktieren.",
-	"2FA_EXPS"	=> "läuft ab",
-	"2FA_ACTIVE" => "Aktive Sitzungen",
-	"2FA_NOT_FN" => "Keine Fingerabdrücke gefunden",
+    "2FA"                                => "Zwei-Faktor-Authentifizierung",
+    "2FA_CONF"                           => "Sind Sie sicher, dass Sie die 2FA deaktivieren möchten? Ihr Konto wird dann nicht mehr geschützt sein.",
+    "2FA_SCAN"                           => "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App oder geben Sie den Schlüssel ein",
+    "2FA_THEN"                           => "Geben Sie dann hier einen Ihrer Einmal-Passcodes ein",
+    "2FA_FAIL"                           => "Bei der Überprüfung der 2FA ist ein Problem aufgetreten. Bitte überprüfen Sie das Internet oder kontaktieren Sie den Support.",
+    "2FA_CODE"                           => "2FA-Code",
+    "2FA_EXP"                            => "1 Fingerabdruck abgelaufen",
+    "2FA_EXPD"                           => "Abgelaufen",
+    "2FA_EXPS"                           => "Läuft ab",
+    "2FA_ACTIVE"                         => "Aktive Sitzungen",
+    "2FA_NOT_FN"                         => "Keine Fingerabdrücke gefunden",
+    "2FA_FP"                             => "Fingerabdrücke",
+    "2FA_NP"                             => "Anmeldung fehlgeschlagen - Der Zwei-Faktor-Authentifizierungscode war nicht vorhanden. Bitte versuchen Sie es erneut.",
+    "2FA_INV"                            => "Anmeldung fehlgeschlagen - Der Zwei-Faktor-Authentifizierungscode war ungültig. Bitte versuchen Sie es erneut.",
+    "2FA_FATAL"                          => "Fataler Fehler - Bitte kontaktieren Sie den Systemadministrator. Wir können derzeit keinen Zwei-Faktor-Authentifizierungscode generieren.",
+    "2FA_SECTION_TITLE"                  => "Zwei-Faktor-Authentifizierung (TOTP)",
+    "2FA_SK_ALT"                         => "Wenn Sie den QR-Code nicht scannen können, geben Sie diesen geheimen Schlüssel manuell in Ihre Authenticator-App ein.",
+    "2FA_IS_ENABLED"                     => "Die Zwei-Faktor-Authentifizierung schützt Ihr Konto.",
+    "2FA_NOT_ENABLED_INFO"               => "Die Zwei-Faktor-Authentifizierung ist derzeit nicht aktiviert.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "Die Zwei-Faktor-Authentifizierung (TOTP) fügt Ihrem Konto eine zusätzliche Sicherheitsebene hinzu, indem zusätzlich zu Ihrem Passwort ein Code von einer Authenticator-App auf Ihrem Telefon erforderlich ist.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "Zwei-Faktor-Authentifizierung einrichten",
+    "2FA_SECRET_KEY_LABEL"               => "Geheimer Schlüssel:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "Bestätigungscode aus der App eingeben",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "Zwei-Faktor-Authentifizierung aktiviert! Speichern Sie Ihre Backup-Codes",
+    "2FA_SUCCESS_ENABLED_INFO"           => "Unten finden Sie Ihre Backup-Codes. Bewahren Sie sie sicher auf - jeder kann nur einmal verwendet werden.",
+    "2FA_BACKUP_CODES_WARNING"           => "Behandeln Sie diese Codes wie Passwörter. Bewahren Sie sie sicher auf.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "Neue Backup-Codes generiert. Bewahren Sie sie sicher auf.",
+    "2FA_BACKUP_CODE_LABEL"              => "Backup-Code",
+    "2FA_REGEN_CODES_BTN"                => "Backup-Codes neu generieren",
+    "2FA_INVALIDATE_WARNING"             => "Dies macht alle vorhandenen Backup-Codes ungültig. Sind Sie sicher?",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "Authentifizierungscode",
+    "2FA_VERIFY_BTN"                     => "Bestätigen & Anmelden",
+    "2FA_VERIFY_TITLE"                   => "Zwei-Faktor-Authentifizierung erforderlich",
+    "2FA_VERIFY_INFO"                    => "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "Zwei-Faktor-Authentifizierung aktivieren",
+    "2FA_DISABLE_BTN"                    => "Zwei-Faktor-Authentifizierung deaktivieren",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "Bestätigen & Aktivieren",
+    "2FA_CANCEL_SETUP_BTN"               => "Einrichtung abbrechen",
+    "2FA_DONE_BTN"                       => "Fertig",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "Die Zwei-Faktor-Authentifizierung wurde deaktiviert.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "Backup-Codes bestätigt.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "Einrichtung abgebrochen.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "Ungültiger Backup-Code. Bitte versuchen Sie es erneut.",
+    "2FA_ERR_DISABLE_FAILED"             => "Fehler beim Deaktivieren der Zwei-Faktor-Authentifizierung.",
+    "2FA_ERR_NO_SECRET"                  => "Authentifizierungsgeheimnis konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Backup-Code verifiziert, aber Fehler beim Ungültigmachen. Bitte kontaktieren Sie den Support.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "Kein Authentifizierungscode angegeben.",
+    "RATE_LIMIT_LOGIN"                   => "Zu viele fehlgeschlagene Anmeldeversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_TOTP"                    => "Zu viele falsche Authentifizierungscodes. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_PASSKEY"                 => "Zu viele Passkey-Authentifizierungsversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "Zu viele Passkey-Registrierungsversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "Zu viele Anfragen zur Passwortwiederherstellung. Bitte warten Sie, bevor Sie eine weitere anfordern.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "Zu viele Versuche zur Passwortwiederherstellung. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_REGISTRATION"            => "Zu viele Registrierungsversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "Zu viele Anfragen zur E-Mail-Verifizierung. Bitte warten Sie, bevor Sie eine weitere anfordern.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "Zu viele Anfragen zur E-Mail-Änderung. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "Zu viele Versuche zur Passwortänderung. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_GENERIC"                 => "Zu viele Versuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
 ));
 
-//Redirect Messages - These get a plus between each word
+
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "Entschuldigung.2Faktor-Authentisierung+ist+für+diesen+Benutzer+deaktiviert",
-	"REDIR_2FA_EN"				=> "2Faktor-Authentisierung+wurde+aktiviert",
-	"REDIR_2FA_DIS"				=> "2Faktor-Authentisierung+wurde+deaktiviert",
-	"REDIR_2FA_VER"				=> "2Faktor-Authentisierung+wurde+verifiziert+und+aktiviert",
-	"REDIR_SOM_TING_WONG" => "Irgendetwas ist schief gelaufen. Bitte noch einmal probieren.",
-	"REDIR_MSG_NOEX"			=> "Der+Thread+existiert+nicht+oder+Zugriff+verweigert.",
-	"REDIR_UN_ONCE"				=> "Benutzername+kann+nur+einmal+aktualisiert+werden",
-	"REDIR_EM_SUCC"				=> "Emailadresse+erfolgreich+aktualisiert",
+	"REDIR_2FA"						=> "Entschuldigung.2Faktor-Authentisierung ist für diesen Benutzer deaktiviert",
+	"REDIR_2FA_EN"				=> "2Faktor-Authentisierung wurde aktiviert",
+	"REDIR_2FA_DIS"				=> "2Faktor-Authentisierung wurde deaktiviert",
+	"REDIR_2FA_VER"				=> "2Faktor-Authentisierung wurde verifiziert und aktiviert",
+	"REDIR_SOMETHING_WRONG" => "Irgendetwas ist schief gelaufen. Bitte noch einmal probieren.",
+	"REDIR_MSG_NOEX"			=> "Der Thread existiert nicht oder Zugriff verweigert.",
+	"REDIR_UN_ONCE"				=> "Benutzername kann nur einmal aktualisiert werden",
+	"REDIR_EM_SUCC"				=> "Emailadresse erfolgreich aktualisiert",
 ));
 
 //Emails

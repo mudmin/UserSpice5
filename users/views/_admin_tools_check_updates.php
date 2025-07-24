@@ -14,18 +14,21 @@ if (isset($_POST['change_track'])) {
   Redirect::to($us_url_root . 'users/admin.php?view=updates');
 }
 
-if ($settings->bleeding_edge == 1) {
-  $value = "0";
-  $label = "Stable";
-  $class = "btn-success";
-} elseif ($settings->bleeding_edge == 2) {
-  $value = "0";
-  $label = "Stable";
-  $class = "btn-danger";
-} else {
-  $value = "1";
-  $label = "Bleeding Edge";
-  $class = "btn-warning";
+if (isset($_POST['save_api_key'])) {
+  //token check
+  if (!Token::check(Input::get('csrf'))) {
+    include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
+  }
+  $api_key = trim(Input::get('spice_api'));
+
+  $db->update('settings', 1, ['spice_api' => $api_key]);
+
+  if ($api_key != '') {
+    usSuccess("Your API key has been saved successfully");
+  } else {
+    usSuccess("Your API key has been cleared");
+  }
+  Redirect::to($us_url_root . 'users/admin.php?view=updates');
 }
 
 $update_available = false;
@@ -40,10 +43,15 @@ $update_available = false;
 
           </div>
           <div class="col-12 col-md-6 text-end">
-            <form class="" action="" method="post">
+            <form class="d-flex align-items-center justify-content-end" action="" method="post">
               <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
-              <input type="hidden" name="change_track" value="<?= $value; ?>">
-              <input type="submit" class="btn <?= $class ?> mt-1" value="Change Update Track to <?= $label; ?>">
+              <label for="update_track" class="form-label me-2 mb-0">Update Track:</label>
+              <select name="change_track" id="update_track" class="form-select me-2" style="width: auto;">
+                <option value="0" <?= ($settings->bleeding_edge == 0) ? 'selected' : '' ?>>Stable</option>
+                <option value="1" <?= ($settings->bleeding_edge == 1) ? 'selected' : '' ?>>Bleeding Edge</option>
+                <option value="2" <?= ($settings->bleeding_edge == 2) ? 'selected' : '' ?>>Experimental (Developer)</option>
+              </select>
+              <input type="submit" class="btn btn-primary" value="Go">
             </form>
           </div>
 
@@ -82,7 +90,7 @@ $update_available = false;
           }
 
           if ($settings->bleeding_edge == 2) { ?>
-            <div class="alert alert-danger" role="alert">You are on the <b>EXPERIMENTAL</b> update cycle. These updates are untested and may contain serious bugs. This track is for developers and testers only. Please backup frequently and report all bugs.</div>
+            <div class="alert alert-danger" role="alert">You are on the <b>EXPERIMENTAL (Developer)</b> update cycle. These updates are untested and may contain serious bugs. This track is for developers and testers only. Please backup frequently and report all bugs.</div>
           <?php } elseif ($settings->bleeding_edge == 1) { ?>
             <div class="alert alert-warning" role="alert">You are on the <b>BLEEDING EDGE</b> update cycle (Thank You!). This means you will get updates a few days to a few weeks before everyone else. Although updates are tested before reaching this stage, there may be bugs. Please backup before updating and report bugs as you find them.</div>
           <?php } else { ?>
@@ -348,9 +356,37 @@ $update_available = false;
           </form>
         </div>
         <br>
-      <?php } elseif ($settings->spice_api == '') {
-        echo "<h4 align='center'>You cannot download automatic updates because you have not entered your free API key in the dashboard</h4><br>";
-      } ?>
+      <?php } elseif ($settings->spice_api == '') { ?>
+        <div class="card mt-3">
+          <div class="card-header">
+            <h4>API Key Required</h4>
+          </div>
+          <div class="card-body">
+            <p class="text-center mb-3">You cannot download automatic updates because you have not entered your free API key.</p>
+            <p class="text-center mb-3">
+              <strong>Get your free API key at:</strong> 
+              <a class="text-primary" target="_blank" href="https://api.userspice.com/" target="_blank">https://api.userspice.com/</a>
+            </p>
+            <form action="" method="post" class="row g-3 justify-content-center">
+              <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
+              <div class="col-md-6">
+                <label for="spice_api" class="form-label">Enter your UserSpice API Key:</label>
+                <input type="text" class="form-control" id="spice_api" name="spice_api" 
+                       value="<?= hed($settings->spice_api ?? '') ?>" 
+                       placeholder="Enter your API key here">
+              </div>
+              <div class="col-12 text-center">
+                <input type="submit" name="save_api_key" value="Save API Key" class="btn btn-success">
+                <?php if (!empty($settings->spice_api)) { ?>
+                  <input type="submit" name="save_api_key" value="Clear API Key" class="btn btn-outline-danger ms-2" 
+                         onclick="document.getElementById('spice_api').value = '';">
+                <?php } ?>
+                <p class="text-muted">If you do not want to use the API system, updates are always available for free at <a class="text-primary" target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a></p>
+              </div>
+            </form>
+          </div>
+        </div>
+      <?php } ?>
       <br><br>
       </div>
     </div>
@@ -358,8 +394,10 @@ $update_available = false;
 </div>
 <div class="row">
   <div class="col-12 text-center">
-    Any messages below this are from ACTIVE plugins that are checking to make sure they have the latest database updates.
-    <?php $plugins = $db->query('SELECT * FROM us_plugins WHERE last_check < ? AND status = ?', [date('Y-m-d H:i:s', strtotime('-3 hours')), 'active'])->results();
+    
+    <?php 
+
+    $plugins = $db->query('SELECT * FROM us_plugins WHERE last_check < ? AND status = ?', [date('Y-m-d H:i:s', strtotime('-3 hours')), 'active'])->results();
     foreach ($plugins as $p) {
       echo "<br>Checking $p->plugin ";
       if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $p->plugin . '/migrate.php')) {

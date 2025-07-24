@@ -21,27 +21,42 @@ class Redirect {
 
 //This method no longer checks to see if a link is valid before redirecting
 //to prevent conflicts with deep folder structures
-  public static function to($location = null, $args=''){
+public static function to($location = null, $args=''){
     global $us_url_root,$settings,$user;
     if ($location) {
 
       if($settings != "" && $settings->debug > 0){
         if($settings->debug == 2 || ($settings->debug == 1 && isset($user) && $user->isLoggedIn() && $user->data()->id == 1)){
-          $cp = currentPage();
-          $line = debug_backtrace();
-          $line = $line[0]["line"];
+          
+          // Get full backtrace for better debugging
+          $backtrace = debug_backtrace();
+          $caller = $backtrace[0];
+          
+          // Try to find the actual calling function/method
+          $realCaller = '';
+          if (isset($backtrace[1])) {
+            if (isset($backtrace[1]['class'])) {
+              $realCaller = $backtrace[1]['class'] . '::' . $backtrace[1]['function'] . '() ';
+            } elseif (isset($backtrace[1]['function'])) {
+              $realCaller = $backtrace[1]['function'] . '() ';
+            }
+          }
+          
+          $fullPath = $caller['file'];
+          $line = $caller['line'];
+          
           if(!isset($user) || !$user->isLoggedIn()){
             $loggingUserId = 0;
           }else{
             $loggingUserId = $user->data()->id;
           }
+          
           $loc = Input::sanitize($location);
-          logger($loggingUserId,"Redirect Diag","From $cp on line $line to $loc");
+          logger($loggingUserId,"Redirect Diag","From {$realCaller}{$fullPath} on line {$line} to {$loc}");
         }
-        }
+      }
 
-
-      if ($args) $location .= $args; // allows 'login.php?err=Error+Message' or the like
+      if ($args) $location .= $args;
       if (!headers_sent()){
         header('Location: '.$location);
         exit();
@@ -54,7 +69,7 @@ class Redirect {
         echo '</noscript>'; exit;
       }
     }
-  }
+}
 
 //This is the old Redirect::to method that attempts to see if a link is valid before redirecting
   public static function safe($location = null, $args=''){

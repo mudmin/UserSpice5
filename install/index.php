@@ -975,7 +975,8 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 <?php endif; ?>
                             </div>
                         <?php elseif (!empty($_POST) && isset($needCreateDb) && $needCreateDb) : ?>
-                            <form action="index.php?step=2" method="post">
+                            <form action="" method="post">
+                                <input type="hidden" name="step" value="2">
                                 <input type="hidden" name="test" value="1">
                                 <input type="hidden" name="dbh" value="<?php echo htmlspecialchars($dbh); ?>">
                                 <input type="hidden" name="dbu" value="<?php echo htmlspecialchars($dbu); ?>">
@@ -1006,7 +1007,8 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 Database connection successful and tables imported! You can now finalize your installation.
                             </div>
 
-                            <form action="index.php?step=2" method="post">
+                            <form action="" method="post">
+                                <input type="hidden" name="step" value="2">
                                 <input type="hidden" name="dbh" value="<?php echo htmlspecialchars($dbh); ?>">
                                 <input type="hidden" name="dbu" value="<?php echo htmlspecialchars($dbu); ?>">
                                 <input type="hidden" name="dbp" value="<?php echo htmlspecialchars($dbp); ?>">
@@ -1105,8 +1107,9 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                     <?php endif; ?>
 
                     <?php if (!$isPost || ($isPost && !$go && !$needCreateDb)) : ?>
-                        <form action="index.php?step=2" method="post" id="dbForm" novalidate>
+                        <form action="" method="post" id="dbForm" novalidate>
                             <div class="form-group">
+                                <input type="hidden" name="step" value="2">
                                 <label for="timezone">Region/Timezone (required)</label>
                                 <select required class="form-control" id="timezone" name="timezone">
                                     <option value="" disabled selected>--Select Timezone--</option>
@@ -1253,7 +1256,8 @@ if ($step == 3 && isset($_POST['cleanup'])) {
 
                     <p>If you have any problems, you can edit the init.php directly or reinstall the app.</p>
 
-                    <form action="index.php?step=3" method="post">
+                    <form action="" method="post">
+                        <input type="hidden" name="step" value="3">
                         <button type="submit" name="cleanup" class="btn btn-danger btn-lg mt-3">Cleanup Install Files</button>
                     </form>
                 </div>

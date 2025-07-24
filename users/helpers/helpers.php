@@ -35,11 +35,14 @@ foreach ($usplugins as $k => $v) {
 }
 
 require_once $abs_us_root . $us_url_root . 'users/helpers/us_helpers.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/encryption.php';
+require_once $abs_us_root . $us_url_root . 'users/helpers/rate_limit_helpers.php';
 require_once $abs_us_root . $us_url_root . 'users/helpers/class.treeManager.php';
 require_once $abs_us_root . $us_url_root . 'users/helpers/menus.php';
 require_once $abs_us_root . $us_url_root . 'users/helpers/permissions.php';
 require_once $abs_us_root . $us_url_root . 'users/helpers/users.php';
 require_once $abs_us_root . $us_url_root . 'users/helpers/dbmenu.php';
+
 
 //deprecated functions and classes can go here and will autoload until you delete them.
 foreach (glob($abs_us_root . $us_url_root . 'usersc/includes/deprecated/*.php') as $filename) {
@@ -525,3 +528,10 @@ function spiceUpdateFail() {
     }
 }
 
+function fetchExpectedRPID(){
+  $your_host = $_SERVER['HTTP_HOST'];
+if ($your_host !== 'localhost' && strpos($your_host, ':') !== false) {
+    $your_host = explode(':', $your_host)[0];
+}
+return $your_host;
+}

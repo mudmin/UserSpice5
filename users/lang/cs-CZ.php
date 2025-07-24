@@ -29,14 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 //TODO contact UserSpice and ask them if they want Czech language
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang, array(
 	"THIS_LANGUAGE"	=> "Čeština",
 	"THIS_CODE"			=> "cs-CZ",
@@ -152,6 +152,149 @@ $lang = array_merge($lang, array(
 	"GEN_REQ"					=> "vyžadováno",
 	"GEN_AND"					=> "a",
 	"GEN_SAME"				=> "musí se shodovat",
+));
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "Přístupový klíč",
+    "GEN_ACTIONS"                         => "Akce",
+    "GEN_BACK_TO_ACCT"                    => "Zpět na účet",
+    "GEN_DB_ERROR"                        => "Došlo k chybě databáze. Zkuste to prosím znovu.",
+    "GEN_IMPORTANT"                       => "Důležité",
+    "GEN_NO_PERMISSIONS"                  => "Nemáte oprávnění k přístupu na tuto stránku.",
+    "GEN_NO_PERMISSIONS_MSG"              => "Nemáte oprávnění k přístupu na tuto stránku. Pokud si myslíte, že se jedná o chybu, kontaktujte prosím správce webu.",
+    "PASSKEYS_MANAGE_TITLE"               => "Správa vašich přístupových klíčů",
+    "PASSKEYS_LOGIN_TITLE"                => "Přihlášení pomocí přístupového klíče",
+    "PASSKEY_DELETE_SUCCESS"              => "Přístupový klíč byl úspěšně smazán.",
+    "PASSKEY_DELETE_FAIL_DB"              => "Nepodařilo se smazat přístupový klíč z databáze.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "Přístupový klíč nebyl nalezen nebo nemáte oprávnění jej smazat.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "Poznámka k přístupovému klíči byla úspěšně aktualizována.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "Nepodařilo se aktualizovat poznámku k přístupovému klíči.",
+    "PASSKEY_REGISTER_NEW"                => "Registrovat nový přístupový klíč",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "Dosáhli jste maximálního počtu 10 přístupových klíčů.",
+    "PASSKEY_NOTE_TH"                     => "Poznámka k přístupovému klíči",
+    "PASSKEY_TIMES_USED_TH"               => "Počet použití",
+    "PASSKEY_LAST_USED_TH"                => "Naposledy použito",
+    "PASSKEY_LAST_IP_TH"                  => "Poslední IP adresa",
+    "PASSKEY_EDIT_NOTE_BTN"               => "Upravit poznámku",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "Opravdu chcete smazat tento přístupový klíč?",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "Upravit poznámku k přístupovému klíči",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "Poznámka k přístupovému klíči",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "Uložit změny",
+    "PASSKEY_NONE_REGISTERED"             => "Zatím nemáte zaregistrované žádné přístupové klíče.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "Než budete moci použít tuto funkci, musíte nejprve zaregistrovat přístupový klíč z ověřeného účtu.",
+    "PASSKEY_STORING"                     => "Ukládání přístupového klíče...",
+    "PASSKEY_STORED_SUCCESS"              => "Přístupový klíč byl úspěšně uložen!",
+    "PASSKEY_INVALID_ACTION"              => "Neplatná akce: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "Nebyla zadána žádná akce",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "Byl zjištěn problém se sítí. Zkuste jinou síť nebo obnovte stránku.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "Bylo zjištěno ověření mezi zařízeními. Ujistěte se, že obě zařízení mají přístup k internetu.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "Zkuste místo toho otevřít tuto stránku přímo ve svém telefonu.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "Nepodařilo se vygenerovat diagnostiku: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "Chybí požadované přihlašovací údaje pro uložení.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "Chybí požadované ověřovací údaje.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "Žádná zpráva",
+    "PASSKEY_USER_NOT_FOUND"              => "Uživatel po ověření přístupového klíče nebyl nalezen.",
+    "PASSKEY_FATAL_ERROR"                 => "Fatální chyba: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "Přihlášení proběhlo úspěšně.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "Příprava na registraci mezi zařízeními. Možná budete muset použít svůj telefon nebo tablet.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "Používání registrace přístupového klíče zařízení...",
+    "PASSKEY_STARTING_REGISTRATION"       => "Zahajování registrace přístupového klíče...",
+    "PASSKEY_REQUEST_OPTIONS"             => "Žádost o možnosti registrace ze serveru...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "Postupujte podle pokynů a vytvořte si přístupový klíč. Možná budete muset použít jiné zařízení.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "Postupujte podle pokynů a vytvořte si přístupový klíč...",
+    "PASSKEY_CREATION_FAILED"             => "Vytvoření přístupového klíče se nezdařilo - nebyly vráceny žádné přihlašovací údaje.",
+    "PASSKEY_STORING_SERVER"              => "Ukládání vašeho přístupového klíče...",
+    "PASSKEY_CREATED_SUCCESS"             => "Přístupový klíč byl úspěšně vytvořen!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "Příprava na ověření mezi zařízeními. Ujistěte se, že váš telefon i počítač mají přístup k internetu.",
+    "PASSKEY_DEVICE_AUTH"                 => "Používání ověření přístupovým klíčem zařízení...",
+    "PASSKEY_STARTING_AUTH"               => "Zahajování ověření přístupovým klíčem...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "Až se objeví QR kód, naskenujte jej telefonem. Ujistěte se, že obě zařízení mají přístup k internetu.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "Na výzvu vyberte „Použít telefon nebo tablet“ a poté naskenujte QR kód.",
+    "PASSKEY_AUTHENTICATING"              => "Ověřování pomocí vašeho přístupového klíče...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "Ověření proběhlo úspěšně! Přesměrovávání...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "Časový limit registrace vypršel. Pro registraci mezi zařízeními: 1) Zkuste to znovu, 2) Ujistěte se, že zařízení mají internet, 3) Zvažte registraci přímo v telefonu.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "Časový limit registrace vypršel. Zkuste to prosím znovu.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "Časový limit ověření mezi zařízeními vypršel. Řešení problémů: 1) Obě zařízení potřebují internet, 2) Zkuste QR kód naskenovat rychleji, 3) Zvažte použití stejného zařízení, 4) Některé sítě blokují ověření mezi zařízeními.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "Časový limit ověření vypršel. Zkuste to prosím znovu.",
+    "PASSKEY_NO_CREDENTIAL"               => "Nebyly přijaty žádné přihlašovací údaje. Opakuji pokus...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "Ověření se nezdařilo - nebyly vráceny žádné přihlašovací údaje.",
+    "PASSKEY_ATTEMPT_RETRY"               => "se nezdařilo. Opakuji pokus... (zbývá %d pokusů)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "Registrace mezi zařízeními se nezdařila. Zkuste: 1) Ujistit se, že obě zařízení mají internet, 2) Zvážit registraci přímo v telefonu, 3) Některé firemní sítě tuto funkci blokují.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "Registrace byla zrušena nebo zařízení nepodporuje přístupové klíče.",
+    "PASSKEY_NOT_SUPPORTED"               => "Přístupové klíče nejsou na této kombinaci zařízení/prohlížeče podporovány.",
+    "PASSKEY_SECURITY_ERROR"              => "Bezpečnostní chyba - obvykle to značí neshodu domény/původu.",
+    "PASSKEY_ALREADY_EXISTS"              => "Na tomto zařízení již existuje přístupový klíč pro tento účet. Zkuste jiné zařízení nebo nejprve smažte stávající přístupové klíče.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "Ověření mezi zařízeními se nezdařilo. Zkuste: 1) Ujistit se, že obě zařízení mají stabilní internet, 2) Pokud je to možné, použít stejnou Wi-Fi síť, 3) Zkusit ověření přímo v telefonu, 4) Některé firemní sítě tuto funkci blokují.",
+    "PASSKEY_AUTH_CANCELLED"              => "Ověření bylo zrušeno nebo nebyl vybrán žádný přístupový klíč.",
+    "PASSKEY_NETWORK_ERROR"               => "Chyba sítě. Pro ověření mezi zařízeními potřebují obě zařízení přístup k internetu a mohou být vyžadována ve stejné síti.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "Ověření se nezdařilo - přihlašovací údaje nebyly rozpoznány.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "Tipy pro ověření mezi zařízeními:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "Ujistěte se, že váš počítač i telefon mají přístup k internetu",
+    "PASSKEY_GUIDANCE_WIFI"               => "Být na stejné Wi-Fi síti může pomoci (ale není to vždy nutné)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "Na výzvu vyberte „Použít telefon nebo tablet“",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "Až se objeví QR kód, rychle jej naskenujte",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "Pokud se to nepodaří, zkuste obnovit stránku a použít přímo prohlížeč telefonu",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "Zobrazit tipy pro odstraňování potíží",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "Skrýt tipy pro odstraňování potíží",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "Spouštění diagnostiky...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "Diagnostika dokončena. Podrobnosti naleznete v konzoli.",
+    "PASSKEY_ISSUES_DETECTED"             => "Zjištěné problémy:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "Prostředí se zdá být vhodné pro přístupové klíče.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "Diagnostika se nezdařila:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "Přidat poznámku k novému přístupovému klíči",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Chyba při dekódování Base64:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "Byla přijata neplatná data JSON:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "V relaci nebyla nalezena žádná výzva k registraci přístupového klíče. Zkuste se prosím zaregistrovat znovu.",
+    "PASSKEY_USER_MISMATCH"               => "Neshoda ID uživatele. Zkuste se prosím zaregistrovat znovu.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "ID uživatele v možnostech výzvy neodpovídá aktuálnímu uživateli. Zkuste se prosím zaregistrovat znovu.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "Registrace přístupového klíče se nezdařila. Ujistěte se prosím, že vaše zařízení a prohlížeč podporují WebAuthn, a zkuste to znovu. Chyba:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "V relaci nebyla nalezena žádná výzva k ověření přístupového klíče. Zkuste se prosím přihlásit znovu.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "Přihlašovací údaje přístupového klíče nebyly nalezeny v databázi.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "Přihlašovací údaje přístupového klíče nepatří očekávanému uživateli.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "Ověření přístupového klíče se nezdařilo. Zkuste to prosím znovu, nebo pokud problém přetrvává, kontaktujte podporu. Chyba:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "Uživatel pro registraci nebyl nalezen.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "K provedení této akce musíte být přihlášeni.",
+    "PASSKEY_ACTION_MISSING"              => "Požadovaný parametr 'action' v požadavku chyběl.",
+    "PASSKEY_STORAGE_FAILED"              => "Uložení přístupového klíče se nezdařilo. Operace byla neúspěšná.",
+    "PASSKEY_LOGIN_FAILED"                => "Přihlášení pomocí přístupového klíče se nezdařilo. Ověření nebylo možné ověřit.",
+    "PASSKEY_INVALID_METHOD"              => "Neplatná metoda požadavku:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "Kontrola CSRF tokenu selhala. Vraťte se prosím zpět a zkuste formulář odeslat znovu.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "Možný problém: Zdá se, že jste v soukromé síti, což může někdy rušit komunikaci mezi zařízeními.",
+    "PASSKEY_NETWORK_PROXY"               => "Možný problém: Byl zjištěn proxy server nebo VPN. To může rušit komunikaci mezi zařízeními.",
+    "PASSKEY_NETWORK_MOBILE"              => "Poznámka: Zdá se, že jste v mobilní síti. Zajistěte stabilní připojení pro operace mezi zařízeními.",
+    "PASSKEY_NETWORK_CORPORATE"           => "Možný problém: Může být aktivní firemní firewall, což by mohlo ovlivnit ověření mezi zařízeními.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "Doporučení: Pravděpodobně používáte stolní počítač. Připravte se na použití telefonu k naskenování QR kódu.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "Doporučení: Pro nejlepší výsledky se ujistěte, že váš počítač a mobilní zařízení jsou ve stejné Wi-Fi síti.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "Doporučení: Buďte připraveni rychle naskenovat QR kód, protože požadavek může vypršet.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "Doporučení: Ujistěte se, že váš počítač i mobilní zařízení mají stabilní připojení k internetu.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "Doporučení: U Unity WebViews se ujistěte, že stránka má dostatek času na načtení a zpracování požadavku na přístupový klíč.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "Doporučení: V Unity mohou být časové limity delší. Buďte prosím trpěliví.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "Doporučení: Jelikož jste na mobilním zařízení, měli byste být schopni zaregistrovat přístupový klíč přímo na tomto zařízení.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "Doporučení: Na Androidu můžete své přístupové klíče spravovat ve Správci hesel Google.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "Upozornění na konfiguraci: ID spoléhající se strany (Relying Party ID) je nastaveno na IP adresu.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "Doporučení: Pro lepší bezpečnost a kompatibilitu nastavte ID spoléhající se strany na název vaší domény (např. vasestranka.cz).",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "Chyba konfigurace: Pro fungování přístupových klíčů na živém serveru je vyžadován HTTPS. Zdá se, že vaše stránka běží na HTTP.",
+    "PASSKEY_VALIDATION_NETWORK"          => "Upozornění sítě", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "Doporučení: Pokud narazíte na problémy, zkuste jinou síť (např. přejděte z firemní Wi-Fi na mobilní hotspot).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "Doporučení: Pro akce mezi zařízeními se ujistěte, že obě zařízení mají spolehlivé připojení k internetu.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "Doporučení: Pokud akce mezi zařízeními selžou, zkuste navštívit tuto stránku přímo na svém mobilním zařízení a dokončit akci.",
+    "PASSKEY_INFO_TITLE"                  => "O přístupových klíčích",
+    "PASSKEY_INFO_DESC"                   => "Přístupové klíče jsou bezpečný způsob přihlašování bez hesla, který využívá vestavěné bezpečnostní funkce vašeho zařízení, jako je otisk prstu, rozpoznávání obličeje nebo PIN. Jsou bezpečnější než hesla, poskytují rychlejší přihlášení, fungují napříč zařízeními, pokud jsou synchronizovány se správci hesel, a jsou odolné proti phishingovým útokům. Přístupové klíče fungují na moderních smartphonech, tabletech, počítačích a lze je ukládat do správců hesel, jako jsou 1Password, Bitwarden, Klíčenka na iCloudu nebo Správce hesel Google.",
+    "PASSKEY_BACK_TO_LOGIN"               => "Zpět na přihlášení",
 ));
 
 //validation class
@@ -270,35 +413,84 @@ $lang = array_merge($lang, array(
 	"MSG_SEND"			=> "Odeslat zprávu",
 ));
 
-//2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"				=> "Dvoufaktorová autentizace",
-	"2FA_CONF"	=> "Jste si jisti, že chcete vypnout 2FA? Váš účet tak nebude chráněn.",
-	"2FA_SCAN"	=> "Naskenujte tento QR kód Vaší autentizační aplikací nebo zadejte klíč",
-	"2FA_THEN"	=> "Poté zadejte jeden z Vašich jednorázových klíčů zde",
-	"2FA_FAIL"	=> "Nastal problém během 2FA ověřování. Zkontrolujte své připojení (check Internet?) nebo kontaktujte podporu.", //TODO kontext
-	"2FA_CODE"	=> "2FA Kód",
-	"2FA_EXP"		=> "Vypršela platnost 1 fingerprintu", //TODO překlad fingerprint?
-	"2FA_EXPD"	=> "Platnost vypršela",
-	"2FA_EXPS"	=> "Platnost vyprší",
-	"2FA_ACTIVE" => "Aktivní relace",
-	"2FA_NOT_FN" => "Žádné fingerprinty nebyly nalezeny",
-	"2FA_FP"		=> "Fingerprinty",
-	"2FA_NP"		=> "Přihlášení selhalo  Dvoufaktorový autentizační kód nebyl zadán. Prosím, zkuste znovu.",
-	"2FA_INV"		=> "Přihlášení selhalo  Dvoufaktorový autentizační kód nebyl správný. Prosím, zkuste znovu.",
-	"2FA_FATAL"	=> "Fatální error  Prosím, kontaktujte systémového administrátora.",
+    "2FA"                                => "Dvoufaktorové ověření",
+    "2FA_CONF"                           => "Opravdu chcete vypnout dvoufaktorové ověření? Váš účet již nebude chráněn.",
+    "2FA_SCAN"                           => "Naskenujte tento QR kód vaší ověřovací aplikací nebo zadejte klíč",
+    "2FA_THEN"                           => "Poté sem zadejte jeden ze svých jednorázových kódů",
+    "2FA_FAIL"                           => "Při ověřování dvoufaktorového ověření došlo k problému. Zkontrolujte prosím internet nebo kontaktujte podporu.",
+    "2FA_CODE"                           => "2FA kód",
+    "2FA_EXP"                            => "Platnost 1 otisku prstu vypršela",
+    "2FA_EXPD"                           => "Vypršelo",
+    "2FA_EXPS"                           => "Vyprší",
+    "2FA_ACTIVE"                         => "Aktivní relace",
+    "2FA_NOT_FN"                         => "Nebyly nalezeny žádné otisky prstů",
+    "2FA_FP"                             => "Otisky prstů",
+    "2FA_NP"                             => "Přihlášení se nezdařilo - kód dvoufaktorového ověření chyběl. Zkuste to prosím znovu.",
+    "2FA_INV"                            => "Přihlášení se nezdařilo - kód dvoufaktorového ověření byl neplatný. Zkuste to prosím znovu.",
+    "2FA_FATAL"                          => "Fatální chyba - kontaktujte prosím systémového administrátora. V tuto chvíli nemůžeme vygenerovat kód dvoufaktorového ověření.",
+    "2FA_SECTION_TITLE"                  => "Dvoufaktorové ověření (TOTP)",
+    "2FA_SK_ALT"                         => "Pokud nemůžete naskenovat QR kód, zadejte tento tajný klíč do své ověřovací aplikace ručně.",
+    "2FA_IS_ENABLED"                     => "Dvoufaktorové ověření chrání váš účet.",
+    "2FA_NOT_ENABLED_INFO"               => "Dvoufaktorové ověření není v současné době povoleno.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "Dvoufaktorové ověření (TOTP) přidává vašemu účtu další vrstvu zabezpečení tím, že kromě hesla vyžaduje kód z ověřovací aplikace ve vašem telefonu.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "Nastavení dvoufaktorového ověření",
+    "2FA_SECRET_KEY_LABEL"               => "Tajný klíč:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "Zadejte ověřovací kód z aplikace",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "Dvoufaktorové ověření povoleno! Uložte si záložní kódy",
+    "2FA_SUCCESS_ENABLED_INFO"           => "Níže jsou vaše záložní kódy. Uložte je na bezpečné místo - každý lze použít pouze jednou.",
+    "2FA_BACKUP_CODES_WARNING"           => "S těmito kódy zacházejte jako s hesly. Uložte je na bezpečné místo.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "Byly vygenerovány nové záložní kódy. Uložte je na bezpečné místo.",
+    "2FA_BACKUP_CODE_LABEL"              => "Záložní kód",
+    "2FA_REGEN_CODES_BTN"                => "Znovu vygenerovat záložní kódy",
+    "2FA_INVALIDATE_WARNING"             => "Tímto zneplatníte všechny stávající záložní kódy. Jste si jisti?",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "Ověřovací kód",
+    "2FA_VERIFY_BTN"                     => "Ověřit a přihlásit se",
+    "2FA_VERIFY_TITLE"                   => "Je vyžadováno dvoufaktorové ověření",
+    "2FA_VERIFY_INFO"                    => "Zadejte 6místný kód z vaší ověřovací aplikace.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "Povolit dvoufaktorové ověření",
+    "2FA_DISABLE_BTN"                    => "Vypnout dvoufaktorové ověření",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "Ověřit a aktivovat",
+    "2FA_CANCEL_SETUP_BTN"               => "Zrušit nastavení",
+    "2FA_DONE_BTN"                       => "Hotovo",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "Dvoufaktorové ověření bylo vypnuto.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "Záložní kódy byly potvrzeny.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "Nastavení bylo zrušeno.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "Neplatný záložní kód. Zkuste to prosím znovu.",
+    "2FA_ERR_DISABLE_FAILED"             => "Nepodařilo se vypnout dvoufaktorové ověření.",
+    "2FA_ERR_NO_SECRET"                  => "Nepodařilo se získat ověřovací tajemství. Zkuste to prosím znovu.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Záložní kód byl ověřen, ale nepodařilo se jej zneplatnit. Kontaktujte prosím podporu.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "Nebyl poskytnut žádný ověřovací kód.",
+    "RATE_LIMIT_LOGIN"                   => "Příliš mnoho neúspěšných pokusů o přihlášení. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_TOTP"                    => "Příliš mnoho nesprávných ověřovacích kódů. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_PASSKEY"                 => "Příliš mnoho pokusů o ověření přístupovým klíčem. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "Příliš mnoho pokusů o registraci přístupového klíče. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "Příliš mnoho žádostí o resetování hesla. Počkejte prosím, než požádáte o další reset.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "Příliš mnoho pokusů o resetování hesla. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_REGISTRATION"            => "Příliš mnoho pokusů o registraci. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "Příliš mnoho žádostí o ověření e-mailu. Počkejte prosím, než požádáte o další ověření.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "Příliš mnoho žádostí o změnu e-mailu. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "Příliš mnoho pokusů o změnu hesla. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_GENERIC"                 => "Příliš mnoho pokusů. Počkejte prosím, než to zkusíte znovu.",
 ));
 
-//Redirect Messages - These get a plus between each word
+
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "Omlouváme+se.Dvoufaktorová+autentizace+není+nyní+dostupná.",
-	"REDIR_2FA_EN"				=> "Dvoufaktorová+autentizace+povolena",
-	"REDIR_2FA_DIS"				=> "Dvoufaktorová+autentizace+zakázána",
-	"REDIR_2FA_VER"				=> "Dvoufaktorová+autentizace+ověřena+a+povolena",
-	"REDIR_SOM_TING_WONG" => "Něco+se+nepodařilo.+Prosím,+zkuste+to+znovu.",
-	"REDIR_MSG_NOEX"			=> "Toto+vlákno+neexistuje+nebo+Vám+nepatří.",
-	"REDIR_UN_ONCE"				=> "Uživatelské+jméno+již+bylo+jednou+změněno.",
-	"REDIR_EM_SUCC"				=> "Email+úspěšně+zaktualizován",
+	"REDIR_2FA"						=> "Omlouváme se.Dvoufaktorová autentizace není nyní dostupná.",
+	"REDIR_2FA_EN"				=> "Dvoufaktorová autentizace povolena",
+	"REDIR_2FA_DIS"				=> "Dvoufaktorová autentizace zakázána",
+	"REDIR_2FA_VER"				=> "Dvoufaktorová autentizace ověřena a povolena",
+	"REDIR_SOMETHING_WRONG" => "Něco se nepodařilo. Prosím, zkuste to znovu.",
+	"REDIR_MSG_NOEX"			=> "Toto vlákno neexistuje nebo Vám nepatří.",
+	"REDIR_UN_ONCE"				=> "Uživatelské jméno již bylo jednou změněno.",
+	"REDIR_EM_SUCC"				=> "Email úspěšně zaktualizován",
 ));
 
 //Emails

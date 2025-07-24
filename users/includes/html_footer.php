@@ -17,9 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-if(file_exists($abs_us_root.$us_url_root.'usersc/includes/footer.php')){
-  require_once $abs_us_root.$us_url_root.'usersc/includes/footer.php';
-}
+require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/footer.php';
 
 //Plugin hooks
 foreach($usplugins as $k=>$v){
@@ -30,7 +28,9 @@ foreach($usplugins as $k=>$v){
   }
 }
 
-require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/footer.php';
+if(file_exists($abs_us_root.$us_url_root.'usersc/includes/footer.php')){
+  require_once $abs_us_root.$us_url_root.'usersc/includes/footer.php';
+}
 
 ?>
 <script type="text/javascript">
@@ -49,5 +49,3 @@ var tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.
 
 </script>
 
-  </body>
-</html>

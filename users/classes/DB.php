@@ -274,6 +274,9 @@ class DB
 
 	public function delete($table, $where)
 	{
+		if (is_int($where)) {
+			return $this->deleteById($table, $where);
+		}
 		return empty($where) ? false : $this->action('DELETE', $table, $where);
 	}
 
@@ -476,5 +479,154 @@ class DB
 		}
 
 		return $trace;
+	}
+
+	/**
+	 * Check if a column exists in a table
+	 * @param string $table The table name
+	 * @param string $column The column name
+	 * @return bool True if column exists, false otherwise
+	 */
+	public function columnExists($table, $column)
+	{
+		try {
+			$sql = "SHOW COLUMNS FROM `{$table}` LIKE ?";
+			$result = $this->query($sql, [$column]);
+			return $result->count() > 0;
+		} catch (Exception $e) {
+			// Table doesn't exist or other error
+			return false;
+		}
+	}
+
+
+	/**
+	 * Check if an index exists on a table
+	 * @param string $table The table name
+	 * @param string $indexName The index name
+	 * @return bool True if index exists, false otherwise
+	 */
+	public function indexExists($table, $indexName)
+	{
+		try {
+			$sql = "SHOW INDEX FROM `{$table}` WHERE Key_name = ?";
+			$result = $this->query($sql, [$indexName]);
+			return $result->count() > 0;
+		} catch (Exception $e) {
+			// Table doesn't exist or other error
+			return false;
+		}
+	}
+
+	/**
+	 * Check if a table exists in the database
+	 * @param string $table The table name
+	 * @return bool True if table exists, false otherwise
+	 */
+	public function tableExists($table)
+	{
+		try {
+			$sql = "SHOW TABLES LIKE ?";
+			$result = $this->query($sql, [$table]);
+			return $result->count() > 0;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Get detailed information about a column
+	 * @param string $table The table name
+	 * @param string $column The column name
+	 * @return array|null Column information array or null if not found
+	 */
+	public function getColumnInfo($table, $column)
+	{
+		try {
+			$sql = "SHOW COLUMNS FROM `{$table}` LIKE ?";
+			$result = $this->query($sql, [$column]);
+
+			if ($result->count() > 0) {
+				$columnData = $result->first(true);
+				return [
+					'field' => $columnData['Field'],
+					'type' => $columnData['Type'],
+					'null' => $columnData['Null'] === 'YES',
+					'key' => $columnData['Key'],
+					'default' => $columnData['Default'],
+					'extra' => $columnData['Extra']
+				];
+			}
+			return null;
+		} catch (Exception $e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Safely add a column to a table with error handling and logging
+	 * @param string $table The table name
+	 * @param string $column The column name
+	 * @param string $definition The column definition (e.g., "VARCHAR(255) DEFAULT NULL")
+	 * @return bool True if successful, false otherwise
+	 */
+	public function addColumn($table, $column, $definition)
+	{
+		try {
+			// Check if column already exists
+			if ($this->columnExists($table, $column)) {
+				logger(1, "Database Schema", "Column {$column} already exists in table {$table}");
+				return true;
+			}
+
+			$sql = "ALTER TABLE `{$table}` ADD COLUMN `{$column}` {$definition}";
+			$result = $this->query($sql);
+
+			if (!$result->error()) {
+				logger(1, "Database Schema", "Successfully added column {$column} to table {$table}");
+				return true;
+			} else {
+				$errorMsg = $this->errorString() ?: "Unknown error adding column {$column} to table {$table}";
+				logger(1, "Database Schema", "Failed to add column {$column} to table {$table}: " . $errorMsg);
+				return false;
+			}
+		} catch (Exception $e) {
+			logger(1, "Database Schema", "Exception adding column {$column} to table {$table}: " . $e->getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Safely modify/rename a column with error handling and logging
+	 * @param string $table The table name
+	 * @param string $oldColumn The current column name
+	 * @param string $newColumn The new column name
+	 * @param string $definition The new column definition
+	 * @return bool True if successful, false otherwise
+	 */
+	public function modifyColumn($table, $oldColumn, $newColumn, $definition)
+	{
+		try {
+			// Check if old column exists
+			if (!$this->columnExists($table, $oldColumn)) {
+				logger(1, "Database Schema", "Column {$oldColumn} does not exist in table {$table}");
+				return false;
+			}
+
+			$sql = "ALTER TABLE `{$table}` CHANGE `{$oldColumn}` `{$newColumn}` {$definition}";
+			$result = $this->query($sql);
+
+			if (!$result->error()) {
+				logger(1, "Database Schema", "Successfully modified column {$oldColumn} to {$newColumn} in table {$table}");
+				return true;
+			} else {
+				$errorMsg = $this->errorString() ?: "Unknown error modifying column {$oldColumn} in table {$table}";
+				logger(1, "Database Schema", "Failed to modify column {$oldColumn} in table {$table}: " . $errorMsg);
+				return false;
+			}
+		} catch (Exception $e) {
+			logger(1, "Database Schema", "Exception modifying column {$oldColumn} in table {$table}: " . $e->getMessage());
+			return false;
+		}
 	}
 }

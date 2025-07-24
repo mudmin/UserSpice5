@@ -29,13 +29,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang, array(
 	"THIS_LANGUAGE" => "日本語",
 	"THIS_CODE"     => "ja-JP",
@@ -152,6 +152,150 @@ $lang = array_merge($lang, array(
 	"GEN_SAME"          => "同じでなければなりません",
 ));
 
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "パスキー",
+    "GEN_ACTIONS"                         => "操作",
+    "GEN_BACK_TO_ACCT"                    => "アカウントに戻る",
+    "GEN_DB_ERROR"                        => "データベースエラーが発生しました。もう一度お試しください。",
+    "GEN_IMPORTANT"                       => "重要",
+    "GEN_NO_PERMISSIONS"                  => "このページにアクセスする権限がありません。",
+    "GEN_NO_PERMISSIONS_MSG"              => "このページにアクセスする権限がありません。これがエラーだと思われる場合は、サイト管理者にご連絡ください。",
+    "PASSKEYS_MANAGE_TITLE"               => "パスキーの管理",
+    "PASSKEYS_LOGIN_TITLE"                => "パスキーでログイン",
+    "PASSKEY_DELETE_SUCCESS"              => "パスキーを正常に削除しました。",
+    "PASSKEY_DELETE_FAIL_DB"              => "データベースからのパスキーの削除に失敗しました。",
+    "PASSKEY_DELETE_NOT_FOUND"            => "パスキーが見つからないか、権限が拒否されました。",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "パスキーのメモを正常に更新しました。",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "パスキーのメモの更新に失敗しました。",
+    "PASSKEY_REGISTER_NEW"                => "新しいパスキーを登録",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "パスキーの最大数（10個）に達しました。",
+    "PASSKEY_NOTE_TH"                     => "パスキーのメモ",
+    "PASSKEY_TIMES_USED_TH"               => "使用回数",
+    "PASSKEY_LAST_USED_TH"                => "最終使用日時",
+    "PASSKEY_LAST_IP_TH"                  => "最終IPアドレス",
+    "PASSKEY_EDIT_NOTE_BTN"               => "メモを編集",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "このパスキーを本当に削除しますか？",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "パスキーのメモを編集",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "パスキーのメモ",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "変更を保存",
+    "PASSKEY_NONE_REGISTERED"             => "まだ登録されているパスキーはありません。",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "この機能を使用する前に、認証済みのアカウントからパスキーを登録する必要があります。",
+    "PASSKEY_STORING"                     => "パスキーを保存中...",
+    "PASSKEY_STORED_SUCCESS"              => "パスキーが正常に保存されました！",
+    "PASSKEY_INVALID_ACTION"              => "無効な操作です: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "操作が指定されていません",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "ネットワークの問題が検出されました。別のネットワークを試すか、ページを更新してください。",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "クロスデバイス認証が検出されました。両方のデバイスがインターネットに接続されていることを確認してください。",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "代わりに、このページを直接スマートフォンで開いてみてください。",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "診断情報を生成できませんでした: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "保存に必要な認証情報がありません。",
+    "PASSKEY_MISSING_AUTH_DATA"           => "認証に必要なデータがありません。",
+    "PASSKEY_LOG_NO_MESSAGE"              => "メッセージなし",
+    "PASSKEY_USER_NOT_FOUND"              => "パスキーの検証後、ユーザーが見つかりませんでした。",
+    "PASSKEY_FATAL_ERROR"                 => "致命的なエラー: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "ログインに成功しました。",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "クロスデバイス登録の準備をしています。スマートフォンやタブレットを使用する必要がある場合があります。",
+    "PASSKEY_DEVICE_REGISTRATION"         => "デバイスのパスキー登録を使用しています...",
+    "PASSKEY_STARTING_REGISTRATION"       => "パスキー登録を開始しています...",
+    "PASSKEY_REQUEST_OPTIONS"             => "サーバーから登録オプションを要求しています...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "画面の指示に従ってパスキーを作成してください。別のデバイスを使用する必要がある場合があります。",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "画面の指示に従ってパスキーを作成してください...",
+    "PASSKEY_CREATION_FAILED"             => "パスキーの作成に失敗しました - 認証情報が返されませんでした。",
+    "PASSKEY_STORING_SERVER"              => "パスキーを保存しています...",
+    "PASSKEY_CREATED_SUCCESS"             => "パスキーが正常に作成されました！",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "クロスデバイス認証の準備をしています。スマートフォンとコンピュータの両方がインターネットに接続されていることを確認してください。",
+    "PASSKEY_DEVICE_AUTH"                 => "デバイスのパスキー認証を使用しています...",
+    "PASSKEY_STARTING_AUTH"               => "パスキー認証を開始しています...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "QRコードが表示されたら、スマートフォンでスキャンしてください。両方のデバイスがインターネットに接続されていることを確認してください。",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "プロンプトが表示されたら「スマートフォンまたはタブレットを使用する」を選択し、QRコードをスキャンしてください。",
+    "PASSKEY_AUTHENTICATING"              => "パスキーで認証中...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "認証に成功しました！リダイレクトしています...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "登録がタイムアウトしました。クロスデバイスの場合: 1) 再試行する, 2) デバイスがインターネットに接続されているか確認する, 3) スマートフォンで直接登録することを検討する。",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "登録がタイムアウトしました。もう一度お試しください。",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "クロスデバイス認証がタイムアウトしました。トラブルシューティング: 1) 両方のデバイスにインターネットが必要, 2) QRコードをより速くスキャンする, 3) 同じデバイスを使用することを検討する, 4) 一部のネットワークはクロスデバイス認証をブロックします。",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "認証がタイムアウトしました。もう一度お試しください。",
+    "PASSKEY_NO_CREDENTIAL"               => "認証情報が受信されませんでした。再試行中...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "認証に失敗しました - 認証情報が返されませんでした。",
+    "PASSKEY_ATTEMPT_RETRY"               => "に失敗しました。再試行中... (残り%d回)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "クロスデバイス登録に失敗しました。試すこと: 1) 両方のデバイスがインターネットに接続されているか確認する, 2) スマートフォンで直接登録することを検討する, 3) 一部の企業ネットワークはこの機能をブロックします。",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "登録がキャンセルされたか、デバイスがパスキーをサポートしていません。",
+    "PASSKEY_NOT_SUPPORTED"               => "このデバイス/ブラウザの組み合わせではパスキーはサポートされていません。",
+    "PASSKEY_SECURITY_ERROR"              => "セキュリティエラー - これは通常、ドメイン/オリジンの不一致を示します。",
+    "PASSKEY_ALREADY_EXISTS"              => "このアカウントには、このデバイスに既にパスキーが存在します。別のデバイスを使用するか、既存のパスキーを先に削除してください。",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "クロスデバイス認証に失敗しました。試すこと: 1) 両方のデバイスが安定したインターネットに接続されているか確認する, 2) 可能であれば同じWiFiネットワークを使用する, 3) 代わりにスマートフォンで直接認証する, 4) 一部の企業ネットワークはこの機能をブロックします。",
+    "PASSKEY_AUTH_CANCELLED"              => "認証がキャンセルされたか、パスキーが選択されませんでした。",
+    "PASSKEY_NETWORK_ERROR"               => "ネットワークエラー。クロスデバイス認証の場合、両方のデバイスにインターネット接続が必要であり、同じネットワーク上にある必要がある場合があります。",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "認証に失敗しました - 認証情報が認識されませんでした。",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "クロスデバイス認証のヒント:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "コンピュータとスマートフォンの両方にインターネット接続があることを確認してください",
+    "PASSKEY_GUIDANCE_WIFI"               => "同じWiFiネットワーク上にいると役立つ場合があります（必須ではありません）",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "プロンプトが表示されたら、「スマートフォンまたはタブレットを使用する」を選択してください",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "QRコードが表示されたら、素早くスキャンしてください",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "失敗した場合は、ページを更新してスマートフォンのブラウザを直接使用してみてください",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "トラブルシューティングのヒントを表示",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "トラブルシューティングのヒントを非表示",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "診断を実行中...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "診断が完了しました。詳細はコンソールを確認してください。",
+    "PASSKEY_ISSUES_DETECTED"             => "問題が検出されました:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "環境はパスキーに適しているようです。",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "診断に失敗しました:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "新しいパスキーにメモを追加",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "Base64デコードエラー:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "無効なJSONデータを受信しました:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "セッションにパスキー登録チャレンジが見つかりません。もう一度登録をお試しください。",
+    "PASSKEY_USER_MISMATCH"               => "ユーザーIDが一致しません。もう一度登録をお試しください。",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "チャレンジオプションのユーザーIDが現在のユーザーと一致しません。もう一度登録をお試しください。",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "パスキー登録に失敗しました。お使いのデバイスとブラウザがWebAuthnをサポートしていることを確認し、もう一度お試しください。エラー:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "セッションにパスキー認証チャレンジが見つかりません。もう一度ログインをお試しください。",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "パスキーの認証情報がデータベースに見つかりません。",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "パスキーの認証情報が期待されるユーザーのものではありません。",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "パスキーの検証に失敗しました。もう一度お試しいただくか、問題が解決しない場合はサポートにお問い合わせください。エラー:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "登録するユーザーが見つかりません。",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "この操作を実行するにはログインする必要があります。",
+    "PASSKEY_ACTION_MISSING"              => "リクエストに必要な 'action' パラメータがありませんでした。",
+    "PASSKEY_STORAGE_FAILED"              => "パスキーの保存に失敗しました。操作は成功しませんでした。",
+    "PASSKEY_LOGIN_FAILED"                => "パスキーでのログインに失敗しました。認証を確認できませんでした。",
+    "PASSKEY_INVALID_METHOD"              => "無効なリクエストメソッド:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "CSRFトークンのチェックに失敗しました。戻ってフォームを再送信してください。",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "潜在的な問題: プライベートネットワーク上にいるようです。これがクロスデバイス通信に干渉することがあります。",
+    "PASSKEY_NETWORK_PROXY"               => "潜在的な問題: プロキシまたはVPNが検出されました。これがクロスデバイス通信に干渉する可能性があります。",
+    "PASSKEY_NETWORK_MOBILE"              => "注意: モバイルネットワーク上にいるようです。クロスデバイス操作のために安定した接続を確保してください。",
+    "PASSKEY_NETWORK_CORPORATE"           => "潜在的な問題: 企業のファイアウォールが有効になっている可能性があり、クロスデバイス認証に影響を与える可能性があります。",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "推奨事項: デスクトップを使用している可能性が高いです。QRコードをスキャンするためにスマートフォンを使用する準備をしてください。",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "推奨事項: 最良の結果を得るために、コンピュータとモバイルデバイスが同じWi-Fiネットワーク上にあることを確認してください。",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "推奨事項: リクエストがタイムアウトする可能性があるため、QRコードを素早くスキャンする準備をしてください。",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "推奨事項: コンピュータとモバイルデバイスの両方が安定したインターネット接続を持っていることを確認してください。",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "推奨事項: Unity WebViewの場合、ページがパスキーリクエストを読み込んで処理するのに十分な時間があることを確認してください。",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "推奨事項: Unityではタイムアウトが長くなる可能性があります。しばらくお待ちください。",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "推奨事項: モバイルデバイス上にいるため、このデバイスに直接パスキーを登録できるはずです。",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "推奨事項: Androidでは、Googleパスワードマネージャーでパスキーを管理できます。",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "設定警告: Relying Party IDがIPアドレスに設定されています。",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "推奨事項: セキュリティと互換性を向上させるために、Relying Party IDをドメイン名（例: yourwebsite.com）に設定してください。",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "設定エラー: ライブサーバーでパスキーが機能するにはHTTPSが必要です。あなたのサイトはHTTP上のようです。",
+    "PASSKEY_VALIDATION_NETWORK"          => "ネットワーク警告", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "推奨事項: 問題が発生した場合は、別のネットワークを試してください（例: 企業のWi-Fiからモバイルホットスポットに切り替える）。",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "推奨事項: クロスデバイス操作の場合、両方のデバイスが信頼性の高いインターネット接続を持っていることを確認してください。",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "推奨事項: クロスデバイス操作が失敗した場合は、このページをモバイルデバイスで直接開いて操作を完了してみてください。",
+    "PASSKEY_INFO_TITLE"                  => "パスキーについて",
+    "PASSKEY_INFO_DESC"                   => "パスキーは、指紋、顔認証、PINなど、お使いのデバイスに組み込まれたセキュリティ機能を使用してサインインする、安全でパスワード不要の方法です。パスワードよりも安全で、サインインが速く、パスワードマネージャーと同期するとデバイス間で機能し、フィッシング攻撃にも耐性があります。パスキーは、最新のスマートフォン、タブレット、コンピュータで動作し、1Password、Bitwarden、iCloudキーチェーン、Googleパスワードマネージャーなどのパスワードマネージャーに保存できます。",
+    "PASSKEY_BACK_TO_LOGIN"               => "ログインに戻る",
+));
+
 //validation class
 $lang = array_merge($lang, array(
 	"VAL_SAME"           => "同じでなければなりません",
@@ -255,7 +399,7 @@ $lang = array_merge($lang, array(
 	"MSG_UNKN"              => "不明な受信者",
 	"MSG_NOTIF"             => "メッセージのメール通知",
 	"MSG_BLANK"             => "メッセージが空白であってはいけません",
-	"MSG_MODAL"             => "ここをクリックするか、Alt + Rを押してこのボックスに焦点を当てるか、Shift + Rを押して展開された返信ペインを開きます！",
+	"MSG_MODAL"             => "ここをクリックするか、Alt + Rを押してこのボックスに焦点を当てるか、 Shift + Rを押して展開された返信ペインを開きます！",
 	"MSG_ARCHIVE_SUCCESSFUL" => "スレッド %m1% が正常にアーカイブされました",
 	"MSG_UNARCHIVE_SUCCESSFUL"   => "スレッド %m1% が正常にアーカイブ解除されました",
 	"MSG_DELETE_SUCCESSFUL"      => "スレッド %m1% が正常に削除されました",
@@ -268,32 +412,81 @@ $lang = array_merge($lang, array(
 	"MSG_SEND"              => "メッセージを送信",
 ));
 
-//2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"           => "2要素認証",
-	"2FA_CONF"      => "本当に2要素認証を無効にしますか？アカウントはこれ以上保護されません。",
-	"2FA_SCAN"      => "このQRコードを認証アプリでスキャンするか、キーを入力してください",
-	"2FA_THEN"      => "その後、ここにワンタイムパスキーのいずれかを入力してください",
-	"2FA_FAIL"      => "2要素認証の検証中に問題が発生しました。インターネットを確認するか、サポートにお問い合わせください。",
-	"2FA_CODE"      => "2要素認証コード",
-	"2FA_EXP"       => "期限切れ 1 指紋",
-	"2FA_EXPD"      => "期限切れ",
-	"2FA_EXPS"      => "有効期限",
-	"2FA_ACTIVE"    => "アクティブセッション",
-	"2FA_NOT_FN"    => "指紋が見つかりません",
-	"2FA_FP"        => "指紋",
-	"2FA_NP"        => "<strong>ログインに失敗しました</strong> 2要素認証コードが存在しませんでした。もう一度試してください。",
-	"2FA_INV"       => "<strong>ログインに失敗しました</strong> 2要素認証コードが無効でした。もう一度試してください。",
-	"2FA_FATAL"     => "<strong>致命的なエラー</strong> システム管理者に連絡してください。",
+    "2FA"                                => "二要素認証",
+    "2FA_CONF"                           => "二要素認証を無効にしてもよろしいですか？あなたのアカウントは保護されなくなります。",
+    "2FA_SCAN"                           => "認証アプリでこのQRコードをスキャンするか、キーを入力してください",
+    "2FA_THEN"                           => "次に、ワンタイムパスコードのいずれかをここに入力してください",
+    "2FA_FAIL"                           => "二要素認証の確認中に問題が発生しました。インターネット接続を確認するか、サポートにお問い合わせください。",
+    "2FA_CODE"                           => "二要素認証コード",
+    "2FA_EXP"                            => "1つの指紋の有効期限が切れました",
+    "2FA_EXPD"                           => "有効期限切れ",
+    "2FA_EXPS"                           => "有効期限",
+    "2FA_ACTIVE"                         => "アクティブなセッション",
+    "2FA_NOT_FN"                         => "指紋が見つかりません",
+    "2FA_FP"                             => "指紋",
+    "2FA_NP"                             => "ログインに失敗しました - 二要素認証コードがありませんでした。もう一度お試しください。",
+    "2FA_INV"                            => "ログインに失敗しました - 二要素認証コードが無効でした。もう一度お試しください。",
+    "2FA_FATAL"                          => "致命的なエラー - システム管理者にお問い合わせください。現在、二要素認証コードを生成できません。",
+    "2FA_SECTION_TITLE"                  => "二要素認証 (TOTP)",
+    "2FA_SK_ALT"                         => "QRコードをスキャンできない場合は、このシークレットキーを認証アプリに手動で入力してください。",
+    "2FA_IS_ENABLED"                     => "二要素認証があなたのアカウントを保護しています。",
+    "2FA_NOT_ENABLED_INFO"               => "現在、二要素認証は有効になっていません。",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "二要素認証（TOTP）は、パスワードに加えて、お使いのスマートフォンの認証アプリからのコードを要求することで、アカウントにさらなるセキュリティ層を追加します。",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "二要素認証を設定",
+    "2FA_SETUP_SECRET_KEY_LABEL"         => "シークレットキー:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "アプリからの確認コードを入力",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "二要素認証が有効になりました！バックアップコードを保存してください",
+    "2FA_SUCCESS_ENABLED_INFO"           => "以下はあなたのバックアップコードです。安全な場所に保管してください - 各コードは一度しか使用できません。",
+    "2FA_BACKUP_CODES_WARNING"           => "これらのコードはパスワードのように扱ってください。安全な場所に保管してください。",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "新しいバックアップコードが生成されました。安全な場所に保存してください。",
+    "2FA_BACKUP_CODE_LABEL"              => "バックアップコード",
+    "2FA_REGEN_CODES_BTN"                => "バックアップコードを再生成",
+    "2FA_INVALIDATE_WARNING"             => "これにより、既存のすべてのバックアップコードが無効になります。よろしいですか？",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "認証コード",
+    "2FA_VERIFY_BTN"                     => "確認してサインイン",
+    "2FA_VERIFY_TITLE"                   => "二要素認証が必要です",
+    "2FA_VERIFY_INFO"                    => "認証アプリからの6桁のコードを入力してください。",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "二要素認証を有効にする",
+    "2FA_DISABLE_BTN"                    => "二要素認証を無効にする",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "確認して有効化",
+    "2FA_CANCEL_SETUP_BTN"               => "設定をキャンセル",
+    "2FA_DONE_BTN"                       => "完了",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "二要素認証が無効になりました。",
+    "2FA_SUCCESS_BACKUP_ACK"             => "バックアップコードが確認されました。",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "設定がキャンセルされました。",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "無効なバックアップコードです。もう一度お試しください。",
+    "2FA_ERR_DISABLE_FAILED"             => "二要素認証の無効化に失敗しました。",
+    "2FA_ERR_NO_SECRET"                  => "認証シークレットを取得できませんでした。もう一度お試しください。",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "バックアップコードは検証されましたが、無効化に失敗しました。サポートにお問い合わせください。",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "認証コードが提供されていません。",
+    "RATE_LIMIT_LOGIN"                   => "ログイン試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_TOTP"                    => "不正な認証コードの試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_PASSKEY"                 => "パスキー認証の試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_PASSKEY_STORE"           => "パスキー登録の試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_PASSWORD_RESET"          => "パスワードリセット要求が多すぎます。別のリセットを要求する前にしばらくお待ちください。",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "パスワードリセットの試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_REGISTRATION"            => "登録試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "メール確認要求が多すぎます。別の確認を要求する前にしばらくお待ちください。",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "メール変更要求が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "パスワード変更の試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "RATE_LIMIT_GENERIC"                 => "試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
 ));
 
-//Redirect Messages - These get a plus between each word
+
 $lang = array_merge($lang, array(
 	"REDIR_2FA"             => "申し訳ありません。現在2要素認証は有効ではありません。",
 	"REDIR_2FA_EN"          => "2要素認証が有効です",
 	"REDIR_2FA_DIS"         => "2要素認証が無効です",
 	"REDIR_2FA_VER"         => "2要素認証が確認され、有効です",
-	"REDIR_SOM_TING_WONG"   => "何かがうまくいかなかったようです。もう一度お試しください。",
+	"REDIR_SOMETHING_WRONG"   => "何かがうまくいかなかったようです。もう一度お試しください。",
 	"REDIR_MSG_NOEX"        => "そのスレッドはあなたのものでないか存在しません。",
 	"REDIR_UN_ONCE"         => "ユーザー名は既に1回変更されています。",
 	"REDIR_EM_SUCC"         => "メールが正常に更新されました",

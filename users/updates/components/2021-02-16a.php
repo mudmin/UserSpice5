@@ -7,7 +7,7 @@
 
 $countE=0;
 
-$settings = $db->query("SELECT * FROM settings")->first();
+
 if($settings->max_pw = 30){
   $db->update('settings',$settings->id,['max_pw'=>150]);
 }

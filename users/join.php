@@ -62,11 +62,18 @@ if (Input::exists()) {
         include $abs_us_root.$us_url_root.'usersc/scripts/token_error.php';
     }
 
+    // Check rate limit for registration attempts before processing
+    if (!checkRateLimit('registration_attempt')) {
+        $errors[] = getRateLimitErrorMessage('registration_attempt');
+        usError(getRateLimitErrorMessage('registration_attempt'));
+        Redirect::to(currentPage());
+        exit;
+    }
+
     $fname = Input::get('fname');
     $lname = Input::get('lname');
     $email = Input::get('email');
     $username = Input::get('username');
-
 
     $validation = new Validate();
         if (pluginActive('userInfo', true)) {
@@ -177,6 +184,13 @@ if (Input::exists()) {
 
                 $theNewId = $user->create($fields);
 
+                // Record successful registration
+                handleAuthSuccess('registration_attempt', $theNewId, $email, [], [
+                    'username' => $username,
+                    'email' => $email,
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                ]);
+
                 includeHook($hooks, 'post');
                 if ($act == 1 || $settings->no_passwords == 1) {
                     //Verify email address settings
@@ -187,6 +201,14 @@ if (Input::exists()) {
                     
                 }
             } catch (Exception $e) {
+                // Record failed registration attempt
+                handleAuthFailure('registration_attempt', null, $email, [], [
+                    'username_attempted' => $username,
+                    'email_attempted' => $email,
+                    'error' => $e->getMessage(),
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                ]);
+                
                 if ($eventhooks = getMyHooks(['page' => 'joinFail'])) {
                     includeHook($eventhooks, 'body');
                 }
@@ -216,6 +238,14 @@ if (Input::exists()) {
             }
 
     }else{
+      // Record failed registration attempt
+      handleAuthFailure('registration_attempt', null, $email, [], [
+          'username_attempted' => $username ?? '',
+          'email_attempted' => $email ?? '',
+          'validation_errors' => $validation->_errors,
+          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+      ]);
+      
       foreach($validation->_errors as $e){
         usError($e);
 

@@ -29,12 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-%m1% - Dymamic markers which are replaced at run time by the relevant index.
+%m1% - Dynamic markers which are replaced at run time by the relevant index.
 */
 
 $lang = array();
 //important strings
-//You defiitely want to customize these for your language
+//You definitely want to customize these for your language
 $lang = array_merge($lang, array(
 	"THIS_LANGUAGE"	=> "ARABIC",
 	"THIS_CODE"			=> "ar-SA",
@@ -150,6 +150,152 @@ $lang = array_merge($lang, array(
 	"GEN_AND"					=> "و",
 	"GEN_SAME"				=> "يجب ان يتطابقا",
 ));
+
+//added during passkey/totp update
+$lang = array_merge($lang, array(
+    "GEN_PASSKEY"                         => "مفتاح المرور",
+    "GEN_ACTIONS"                         => "الإجراءات",
+    "GEN_BACK_TO_ACCT"                    => "العودة إلى الحساب",
+    "GEN_DB_ERROR"                        => "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.",
+    "GEN_IMPORTANT"                       => "هام",
+    "GEN_NO_PERMISSIONS"                  => "ليس لديك الصلاحية للوصول إلى هذه الصفحة.",
+    "GEN_NO_PERMISSIONS_MSG"              => "ليس لديك الصلاحية للوصول إلى هذه الصفحة. إذا كنت تعتقد أن هذا خطأ، يرجى الاتصال بمسؤول الموقع.",
+    "PASSKEYS_MANAGE_TITLE"               => "إدارة مفاتيح المرور الخاصة بك",
+    "PASSKEYS_LOGIN_TITLE"                => "تسجيل الدخول باستخدام مفتاح المرور",
+    "PASSKEY_DELETE_SUCCESS"              => "تم حذف مفتاح المرور بنجاح.",
+    "PASSKEY_DELETE_FAIL_DB"              => "فشل حذف مفتاح المرور من قاعدة البيانات.",
+    "PASSKEY_DELETE_NOT_FOUND"            => "مفتاح المرور غير موجود أو تم رفض الإذن.",
+    "PASSKEY_NOTE_UPDATE_SUCCESS"         => "تم تحديث ملاحظة مفتاح المرور بنجاح.",
+    "PASSKEY_NOTE_UPDATE_FAIL"            => "فشل تحديث ملاحظة مفتاح المرور.",
+    "PASSKEY_REGISTER_NEW"                => "تسجيل مفتاح مرور جديد",
+    "PASSKEY_ERR_LIMIT_REACHED"           => "لقد وصلت إلى الحد الأقصى وهو 10 مفاتيح مرور.",
+    "PASSKEY_NOTE_TH"                     => "ملاحظة مفتاح المرور",
+    "PASSKEY_TIMES_USED_TH"               => "عدد مرات الاستخدام",
+    "PASSKEY_LAST_USED_TH"                => "آخر استخدام",
+    "PASSKEY_LAST_IP_TH"                  => "آخر IP",
+    "PASSKEY_EDIT_NOTE_BTN"               => "تعديل الملاحظة",
+    "PASSKEY_CONFIRM_DELETE_JS"           => "هل أنت متأكد من رغبتك في حذف مفتاح المرور هذا؟",
+    "PASSKEY_EDIT_MODAL_TITLE"            => "تعديل ملاحظة مفتاح المرور",
+    "PASSKEY_EDIT_MODAL_LABEL"            => "ملاحظة مفتاح المرور",
+    "PASSKEY_SAVE_CHANGES_BTN"            => "حفظ التغييرات",
+    "PASSKEY_NONE_REGISTERED"             => "ليس لديك أي مفاتيح مرور مسجلة حتى الآن.",
+    "PASSKEY_MUST_REGISTER_FIRST"         => "يجب عليك أولاً تسجيل مفتاح مرور من حساب موثق قبل استخدام هذه الميزة.",
+    "PASSKEY_STORING"                     => "جاري تخزين مفتاح المرور...",
+    "PASSKEY_STORED_SUCCESS"              => "تم تخزين مفتاح المرور بنجاح!",
+    "PASSKEY_INVALID_ACTION"              => "إجراء غير صالح: ",
+    "PASSKEY_NO_ACTION_SPECIFIED"         => "لم يتم تحديد أي إجراء",
+    "PASSKEY_ERR_NETWORK_SUGGESTION"      => "تم اكتشاف مشكلة في الشبكة. جرب شبكة مختلفة أو قم بتحديث الصفحة.",
+    "PASSKEY_ERR_CROSS_DEVICE_SUGGESTION" => "تم اكتشاف مصادقة عبر الأجهزة. تأكد من أن كلا الجهازين لديهما اتصال بالإنترنت.",
+    "PASSKEY_ERR_CROSS_DEVICE_ALTERNATIVE" => "حاول فتح هذه الصفحة مباشرة على هاتفك بدلاً من ذلك.",
+    "PASSKEY_ERR_DIAGNOSTIC_FAILED"       => "لا يمكن إنشاء التشخيصات: ",
+    "PASSKEY_MISSING_CREDENTIAL_DATA"     => "بيانات الاعتماد المطلوبة للتخزين مفقودة.",
+    "PASSKEY_MISSING_AUTH_DATA"           => "بيانات المصادقة المطلوبة مفقودة.",
+    "PASSKEY_LOG_NO_MESSAGE"              => "لا توجد رسالة",
+    "PASSKEY_USER_NOT_FOUND"              => "لم يتم العثور على المستخدم بعد التحقق من صحة مفتاح المرور.",
+    "PASSKEY_FATAL_ERROR"                 => "خطأ فادح: ",
+    "PASSKEY_LOGIN_SUCCESS"               => "تم تسجيل الدخول بنجاح.",
+    // JavaScript status messages (passkeys.php)
+    "PASSKEY_CROSS_DEVICE_PREP"           => "جاري التحضير للتسجيل عبر الأجهزة. قد تحتاج إلى استخدام هاتفك أو جهازك اللوحي.",
+    "PASSKEY_DEVICE_REGISTRATION"         => "جاري استخدام تسجيل مفتاح المرور الخاص بالجهاز...",
+    "PASSKEY_STARTING_REGISTRATION"       => "جاري بدء تسجيل مفتاح المرور...",
+    "PASSKEY_REQUEST_OPTIONS"             => "جاري طلب خيارات التسجيل من الخادم...",
+    "PASSKEY_FOLLOW_PROMPTS"              => "اتبع التعليمات لإنشاء مفتاح المرور الخاص بك. قد تحتاج إلى استخدام جهاز آخر.",
+    "PASSKEY_FOLLOW_PROMPTS_SIMPLE"       => "اتبع التعليمات لإنشاء مفتاح المرور الخاص بك...",
+    "PASSKEY_CREATION_FAILED"             => "فشل إنشاء مفتاح المرور - لم يتم إرجاع أي بيانات اعتماد.",
+    "PASSKEY_STORING_SERVER"              => "جاري تخزين مفتاح المرور الخاص بك...",
+    "PASSKEY_CREATED_SUCCESS"             => "تم إنشاء مفتاح المرور بنجاح!",
+    "PASSKEY_CROSS_DEVICE_AUTH_PREP"      => "جاري التحضير للمصادقة عبر الأجهزة. تأكد من أن هاتفك وجهاز الكمبيوتر الخاص بك لديهما اتصال بالإنترنت.",
+    "PASSKEY_DEVICE_AUTH"                 => "جاري استخدام مصادقة مفتاح المرور الخاص بالجهاز...",
+    "PASSKEY_STARTING_AUTH"               => "جاري بدء مصادقة مفتاح المرور...",
+    "PASSKEY_QR_CODE_INSTRUCTION"         => "امسح رمز QR بهاتفك عندما يظهر. تأكد من أن كلا الجهازين لديهما اتصال بالإنترنت.",
+    "PASSKEY_PHONE_TABLET_INSTRUCTION"    => "اختر \"استخدام هاتف أو جهاز لوحي\" عند الطلب، ثم امسح رمز QR.",
+    "PASSKEY_AUTHENTICATING"              => "جاري المصادقة باستخدام مفتاح المرور الخاص بك...",
+    "PASSKEY_SUCCESS_REDIRECTING"         => "نجحت المصادقة! جاري إعادة التوجيه...",
+    // Timeout messages
+    "PASSKEY_TIMEOUT_CROSS_DEVICE"        => "انتهت مهلة التسجيل. للتسجيل عبر الأجهزة: 1) حاول مرة أخرى، 2) تأكد من أن الأجهزة لديها اتصال بالإنترنت، 3) فكر في التسجيل مباشرة على هاتفك.",
+    "PASSKEY_TIMEOUT_SIMPLE"              => "انتهت مهلة التسجيل. يرجى المحاولة مرة أخرى.",
+    "PASSKEY_AUTH_TIMEOUT_CROSS_DEVICE"   => "انتهت مهلة المصادقة عبر الأجهزة. استكشاف الأخطاء: 1) كلا الجهازين بحاجة إلى إنترنت، 2) حاول مسح رمز QR بسرعة أكبر، 3) فكر في استخدام نفس الجهاز، 4) بعض الشبكات تمنع المصادقة عبر الأجهزة.",
+    "PASSKEY_AUTH_TIMEOUT_SIMPLE"         => "انتهت مهلة المصادقة. يرجى المحاولة مرة أخرى.",
+    "PASSKEY_NO_CREDENTIAL"               => "لم يتم استلام أي بيانات اعتماد. جاري إعادة المحاولة...",
+    "PASSKEY_AUTH_FAILED_NO_CREDENTIAL"   => "فشلت المصادقة - لم يتم إرجاع أي بيانات اعتماد.",
+    "PASSKEY_ATTEMPT_RETRY"               => "فشل. جاري إعادة المحاولة... (%d محاولات متبقية)",
+    // Error messages
+    "PASSKEY_CROSS_DEVICE_FAILED"         => "فشل التسجيل عبر الأجهزة. جرب: 1) تأكد من أن كلا الجهازين لديهما اتصال بالإنترنت، 2) فكر في التسجيل مباشرة على هاتفك، 3) بعض شبكات الشركات تمنع هذه الميزة.",
+    "PASSKEY_REGISTRATION_CANCELLED"      => "تم إلغاء التسجيل أو أن الجهاز لا يدعم مفاتيح المرور.",
+    "PASSKEY_NOT_SUPPORTED"               => "مفاتيح المرور غير مدعومة على هذا الجهاز/المتصفح.",
+    "PASSKEY_SECURITY_ERROR"              => "خطأ أمني - يشير هذا عادةً إلى عدم تطابق النطاق/الأصل.",
+    "PASSKEY_ALREADY_EXISTS"              => "يوجد مفتاح مرور بالفعل لهذا الحساب على هذا الجهاز. جرب استخدام جهاز مختلف أو احذف مفاتيح المرور الحالية أولاً.",
+    "PASSKEY_CROSS_DEVICE_AUTH_FAILED"    => "فشلت المصادقة عبر الأجهزة. جرب: 1) تأكد من أن كلا الجهازين لديهما إنترنت مستقر، 2) استخدم نفس شبكة الواي فاي إن أمكن، 3) جرب المصادقة مباشرة على هاتفك بدلاً من ذلك، 4) بعض شبكات الشركات تمنع هذه الميزة.",
+    "PASSKEY_AUTH_CANCELLED"              => "تم إلغاء المصادقة أو لم يتم تحديد أي مفتاح مرور.",
+    "PASSKEY_NETWORK_ERROR"               => "خطأ في الشبكة. للمصادقة عبر الأجهزة، يحتاج كلا الجهازين إلى اتصال بالإنترنت وقد يحتاجان إلى أن يكونا على نفس الشبكة.",
+    "PASSKEY_CREDENTIAL_NOT_FOUND"        => "فشلت المصادقة - لم يتم التعرف على بيانات الاعتماد.",
+    // Cross-device guidance
+    "PASSKEY_CROSS_DEVICE_GUIDANCE_TITLE" => "نصائح للمصادقة عبر الأجهزة:",
+    "PASSKEY_GUIDANCE_INTERNET"           => "تأكد من أن جهاز الكمبيوتر وهاتفك لديهما اتصال بالإنترنت",
+    "PASSKEY_GUIDANCE_WIFI"               => "التواجد على نفس شبكة الواي فاي يمكن أن يساعد (ولكن ليس مطلوبًا دائمًا)",
+    "PASSKEY_GUIDANCE_SELECT_DEVICE"      => "عندما يُطلب منك، حدد \"استخدام هاتف أو جهاز لوحي\"",
+    "PASSKEY_GUIDANCE_SCAN_QUICKLY"       => "امسح رمز QR بسرعة عندما يظهر",
+    "PASSKEY_GUIDANCE_TRY_DIRECT"         => "إذا فشل ذلك، جرب تحديث الصفحة واستخدام متصفح هاتفك مباشرة",
+    // Troubleshooting
+    "PASSKEY_SHOW_TROUBLESHOOTING"        => "إظهار نصائح استكشاف الأخطاء وإصلاحها",
+    "PASSKEY_HIDE_TROUBLESHOOTING"        => "إخفاء نصائح استكشاف الأخطاء وإصلاحها",
+    "PASSKEY_DIAGNOSTICS_RUNNING"         => "جاري تشغيل التشخيصات...",
+    "PASSKEY_DIAGNOSTICS_COMPLETE"        => "اكتملت التشخيصات. تحقق من الكونسول للحصول على التفاصيل.",
+    "PASSKEY_ISSUES_DETECTED"             => "تم اكتشاف مشاكل:",
+    "PASSKEY_ENVIRONMENT_SUITABLE"        => "البيئة تبدو مناسبة لمفاتيح المرور.",
+    "PASSKEY_DIAGNOSTICS_FAILED"          => "فشلت التشخيصات:",
+    // Modal
+    "PASSKEY_ADD_NOTE_NEW"                => "أضف ملاحظة إلى مفتاح المرور الجديد الخاص بك",
+    // Technical errors
+    "PASSKEY_BASE64_ERROR"                => "خطأ في فك تشفير Base64:",
+    // Server-side errors (passkey_parser.php)
+    "PASSKEY_INVALID_JSON"                => "تم استلام بيانات JSON غير صالحة:",
+    // Session/validation errors (PasskeyHandler.php)
+    "PASSKEY_NO_CHALLENGE_SESSION"        => "لم يتم العثور على تحدي تسجيل مفتاح مرور في الجلسة. يرجى محاولة التسجيل مرة أخرى.",
+    "PASSKEY_USER_MISMATCH"               => "عدم تطابق معرّف المستخدم. يرجى محاولة التسجيل مرة أخرى.",
+    "PASSKEY_CHALLENGE_USER_MISMATCH"     => "معرّف المستخدم في خيارات التحدي لا يتطابق مع المستخدم الحالي. يرجى محاولة التسجيل مرة أخرى.",
+    "PASSKEY_REGISTRATION_FAILED_ERROR"   => "فشل تسجيل مفتاح المرور. يرجى التأكد من أن جهازك ومتصفحك يدعمان WebAuthn وحاول مرة أخرى. الخطأ:",
+    "PASSKEY_NO_AUTH_CHALLENGE_SESSION"   => "لم يتم العثور على تحدي تأكيد مفتاح المرور في الجلسة. يرجى محاولة تسجيل الدخول مرة أخرى.",
+    "PASSKEY_CREDENTIAL_NOT_IN_DB"        => "بيانات اعتماد مفتاح المرور غير موجودة في قاعدة البيانات.",
+    "PASSKEY_CREDENTIAL_WRONG_USER"       => "بيانات اعتماد مفتاح المرور لا تنتمي إلى المستخدم المتوقع.",
+    "PASSKEY_VALIDATION_FAILED_ERROR"     => "فشل التحقق من صحة مفتاح المرور. يرجى المحاولة مرة أخرى أو الاتصال بالدعم إذا استمرت المشكلة. الخطأ:",
+    "PASSKEY_USER_NOT_FOUND_REGISTRATION" => "لم يتم العثور على المستخدم للتسجيل.",
+    // --- Used in passkey_parser.php ---
+    "PASSKEY_LOGIN_REQUIRED"              => "يجب أن تكون مسجلاً للدخول لتنفيذ هذا الإجراء.",
+    "PASSKEY_ACTION_MISSING"              => "المعلمة المطلوبة 'action' كانت مفقودة من الطلب.",
+    "PASSKEY_STORAGE_FAILED"              => "فشل تخزين مفتاح المرور. العملية لم تنجح.",
+    "PASSKEY_LOGIN_FAILED"                => "فشل تسجيل الدخول بمفتاح المرور. تعذرت المصادقة.",
+    "PASSKEY_INVALID_METHOD"              => "طريقة طلب غير صالحة:", // The script appends the method name after this key
+    // --- Used in passkeys.php ---
+    "CSRF_ERROR"                          => "فشل التحقق من رمز CSRF. يرجى العودة ومحاولة إرسال النموذج مرة أخرى.",
+    // Network analysis from analyzeNetworkConditions()
+    "PASSKEY_NETWORK_PRIVATE"             => "مشكلة محتملة: يبدو أنك على شبكة خاصة، والتي يمكن أن تتداخل أحيانًا مع الاتصال عبر الأجهزة.",
+    "PASSKEY_NETWORK_PROXY"               => "مشكلة محتملة: تم اكتشاف وكيل (بروكسي) أو VPN. قد يتداخل هذا مع الاتصال عبر الأجهزة.",
+    "PASSKEY_NETWORK_MOBILE"              => "ملاحظة: يبدو أنك على شبكة جوال. تأكد من وجود اتصال مستقر للعمليات عبر الأجهزة.",
+    "PASSKEY_NETWORK_CORPORATE"           => "مشكلة محتملة: قد يكون جدار حماية الشركة نشطًا، مما قد يؤثر على المصادقة عبر الأجهزة.",
+    // Recommendations from getCrossDeviceRecommendations()
+    "PASSKEY_RECOMMENDATION_CROSS_DEVICE" => "توصية: من المحتمل أنك تستخدم جهاز كمبيوتر مكتبي. استعد لاستخدام هاتفك لمسح رمز QR.",
+    "PASSKEY_RECOMMENDATION_SAME_NETWORK" => "توصية: للحصول على أفضل النتائج، تأكد من أن جهاز الكمبيوتر وجهازك المحمول على نفس شبكة الواي فاي.",
+    "PASSKEY_RECOMMENDATION_QR_QUICK"     => "توصية: كن مستعدًا لمسح رمز QR بسرعة، حيث قد ينتهي وقت الطلب.",
+    "PASSKEY_RECOMMENDATION_INTERNET"     => "توصية: تأكد من أن جهاز الكمبيوتر وجهازك المحمول لديهما اتصال إنترنت مستقر.",
+    "PASSKEY_RECOMMENDATION_UNITY_WEBVIEW" => "توصية: بالنسبة لـ Unity WebViews، تأكد من أن الصفحة لديها وقت كافٍ لتحميل ومعالجة طلب مفتاح المرور.",
+    "PASSKEY_RECOMMENDATION_UNITY_TIMEOUT" => "توصية: قد تكون فترات المهلة أطول في Unity. يرجى التحلي بالصبر.",
+    "PASSKEY_RECOMMENDATION_MOBILE_LOCAL" => "توصية: نظرًا لأنك على جهاز محمول، يجب أن تكون قادرًا على تسجيل مفتاح مرور مباشرة على هذا الجهاز.",
+    "PASSKEY_RECOMMENDATION_GOOGLE_MANAGER" => "توصية: على أندرويد، يمكنك إدارة مفاتيح المرور الخاصة بك في مدير كلمات مرور جوجل.",
+    // Validation from validateCrossDeviceEnvironment()
+    "PASSKEY_VALIDATION_RP_IP"            => "تحذير التكوين: تم تعيين معرّف الطرف الموثوق (Relying Party ID) إلى عنوان IP.",
+    "PASSKEY_VALIDATION_RP_DOMAIN"        => "توصية: قم بتعيين معرّف الطرف الموثوق إلى اسم النطاق الخاص بك (على سبيل المثال, yourwebsite.com) لتحسين الأمان والتوافق.",
+    "PASSKEY_VALIDATION_HTTPS_REQUIRED"   => "خطأ في التكوين: مطلوب HTTPS لكي تعمل مفاتيح المرور على خادم مباشر. يبدو أن موقعك على HTTP.",
+    "PASSKEY_VALIDATION_NETWORK"          => "تحذير الشبكة", // Generic prefix for network issues
+    "PASSKEY_VALIDATION_TRY_DIFFERENT_NETWORK" => "توصية: إذا واجهت مشاكل، جرب شبكة مختلفة (على سبيل المثال، قم بالتبديل من شبكة الواي فاي الخاصة بالشركة إلى نقطة اتصال محمولة).",
+    "PASSKEY_VALIDATION_CROSS_DEVICE_INTERNET" => "توصية: للإجراءات عبر الأجهزة، تأكد من أن كلا الجهازين لديهما اتصال إنترنت موثوق.",
+    "PASSKEY_VALIDATION_MOBILE_FALLBACK"  => "توصية: إذا فشلت الإجراءات عبر الأجهزة، جرب زيارة هذه الصفحة مباشرة على جهازك المحمول لإكمال الإجراء.",
+    "PASSKEY_INFO_TITLE"                  => "حول مفاتيح المرور",
+    "PASSKEY_INFO_DESC"                   => "مفاتيح المرور هي طريقة آمنة وخالية من كلمات المرور لتسجيل الدخول باستخدام ميزات الأمان المدمجة في جهازك مثل بصمة الإصبع أو التعرف على الوجه أو رمز PIN. إنها أكثر أمانًا من كلمات المرور، وتوفر تسجيل دخول أسرع، وتعمل عبر الأجهزة عند مزامنتها مع مديري كلمات المرور، ومقاومة لهجمات التصيد الاحتيالي. تعمل مفاتيح المرور على الهواتف الذكية والأجهزة اللوحية وأجهزة الكمبيوتر الحديثة، ويمكن تخزينها في مديري كلمات المرور مثل 1Password أو Bitwarden أو iCloud Keychain أو Google Password Manager.",
+    "PASSKEY_BACK_TO_LOGIN"               => "العودة إلى صفحة تسجيل الدخول",
+));
+
+
 //validation class
 $lang = array_merge($lang, array(
 	"VAL_SAME"				=> "يجب ان يتطابقا",
@@ -253,7 +399,7 @@ $lang = array_merge($lang, array(
 	"MSG_UNKN"			=> "مستلم مجهول",
 	"MSG_NOTIF"			=> "اشعارات البريد الالكتروني",
 	"MSG_BLANK"			=> "الرسالة لا يمكن ان تكون فارغة",
-	"MSG_MODAL"			=> "لفتح جزء الرد الموسع Shift + R للتركيز على هذا المربع أو اضغط على او اضغط على  Alt + R انقر هنا أو اضغط على",
+	"MSG_MODAL"			=> "لفتح جزء الرد الموسع Shift + R للتركيز على هذا المربع أو اضغط على او اضغط على Alt + R انقر هنا أو اضغط على",
 	"MSG_ARCHIVE_SUCCESSFUL"        => "محادثة %m1% تم ارشفة",
 	"MSG_UNARCHIVE_SUCCESSFUL"      => "محادثة %m1% تم الغاء ارشفة",
 	"MSG_DELETE_SUCCESSFUL"         => "محادثة %m1% تم حذف",
@@ -266,34 +412,83 @@ $lang = array_merge($lang, array(
 	"MSG_SEND"			=> "ارسال رسالة",
 ));
 //2 Factor Authentication
+//Two Factor Authentication
 $lang = array_merge($lang, array(
-	"2FA"				=> "التحقق بخطوتين",
-	"2FA_CONF"	=> "هل انت متأكد من تعطيل خاصية التحقق بخطوتين؟ حسابك سيتعرض للخطر",
-	"2FA_SCAN"	=> "التالي بواسطة تطبيقك الموثوق او استخدم المفتاح QR افحص كود الـ",
-	"2FA_THEN"	=> "بعدها اكتب احد كلمات (لمرة واحدة) الرور هنا",
-	"2FA_FAIL"	=> "حدث خطأ اثناء تفعيل خاصية التحقق بخطوتين برجاء التأكد من اتصال الانترنت او التواصل مع الدعم الفني",
-	"2FA_CODE"	=> "2FA كود التحقق بخطوتين",
-	"2FA_EXP"		=> "انتهت صلاحية بصمة واحدة",
-	"2FA_EXPD"	=> "منتهي الصلاحية",
-	"2FA_EXPS"	=> "تنتهي",
-	"2FA_ACTIVE" => "الجلسات المفعلة",
-	"2FA_NOT_FN" => "لم يتم العثور على البصمات",
-	"2FA_FP"		=> "البصمات",
-	"2FA_NP"		=> "فشل تسجيل الدخول  لم يتم تقديم رمز المصادقة,برجاء المحاولة مرة اخرى",
-	"2FA_INV"		=> "فشل تسجيل الدخول  رمز المصادقة غير صحيح,برجاء المحاولة مرة اخرى",
-	"2FA_FATAL"	=> "!خطأ فادح  برجاء التواصل مع ادارة الموقع",
+    "2FA"                                => "المصادقة الثنائية",
+    "2FA_CONF"                           => "هل أنت متأكد من رغبتك في تعطيل المصادقة الثنائية؟ لن يكون حسابك محميًا بعد الآن.",
+    "2FA_SCAN"                           => "امسح رمز QR هذا باستخدام تطبيق المصادقة الخاص بك أو أدخل المفتاح",
+    "2FA_THEN"                           => "ثم أدخل أحد رموز المرور لمرة واحدة هنا",
+    "2FA_FAIL"                           => "حدثت مشكلة في التحقق من المصادقة الثنائية. يرجى التحقق من الإنترنت أو الاتصال بالدعم.",
+    "2FA_CODE"                           => "رمز المصادقة الثنائية",
+    "2FA_EXP"                            => "انتهت صلاحية بصمة إصبع واحدة",
+    "2FA_EXPD"                           => "منتهية الصلاحية",
+    "2FA_EXPS"                           => "تنتهي الصلاحية",
+    "2FA_ACTIVE"                         => "الجلسات النشطة",
+    "2FA_NOT_FN"                         => "لم يتم العثور على بصمات أصابع",
+    "2FA_FP"                             => "بصمات الأصابع",
+    "2FA_NP"                             => "فشل تسجيل الدخول - رمز المصادقة الثنائية لم يكن موجودًا. يرجى المحاولة مرة أخرى.",
+    "2FA_INV"                            => "فشل تسجيل الدخول - رمز المصادقة الثنائية كان غير صالح. يرجى المحاولة مرة أخرى.",
+    "2FA_FATAL"                          => "خطأ فادح - يرجى الاتصال بمسؤول النظام. لا يمكننا إنشاء رمز مصادقة ثنائية في هذا الوقت.",
+    "2FA_SECTION_TITLE"                  => "المصادقة الثنائية (TOTP)",
+    "2FA_SK_ALT"                         => "إذا لم تتمكن من مسح رمز QR، فأدخل هذا المفتاح السري يدويًا في تطبيق المصادقة الخاص بك.",
+    "2FA_IS_ENABLED"                     => "المصادقة الثنائية تحمي حسابك.",
+    "2FA_NOT_ENABLED_INFO"               => "المصادقة الثنائية غير مفعلة حاليًا.",
+    "2FA_NOT_ENABLED_EXPLAIN"            => "المصادقة الثنائية (TOTP) تضيف طبقة إضافية من الأمان إلى حسابك من خلال طلب رمز من تطبيق المصادقة على هاتفك بالإضافة إلى كلمة المرور الخاصة بك.",
+    // Setup Process
+    "2FA_SETUP_TITLE"                    => "إعداد المصادقة الثنائية",
+    "2FA_SECRET_KEY_LABEL"               => "المفتاح السري:",
+    "2FA_SETUP_VERIFY_CODE_LABEL"        => "أدخل رمز التحقق من التطبيق",
+    // Backup Codes
+    "2FA_SUCCESS_ENABLED_TITLE"          => "تم تفعيل المصادقة الثنائية! احفظ رموزك الاحتياطية",
+    "2FA_SUCCESS_ENABLED_INFO"           => "فيما يلي رموزك الاحتياطية. قم بتخزينها بشكل آمن - يمكن استخدام كل منها مرة واحدة فقط.",
+    "2FA_BACKUP_CODES_WARNING"           => "تعامل مع هذه الرموز مثل كلمات المرور. قم بتخزينها بشكل آمن.",
+    "2FA_SUCCESS_BACKUP_REGENERATED"     => "تم إنشاء رموز احتياطية جديدة. احفظها بشكل آمن.",
+    "2FA_BACKUP_CODE_LABEL"              => "الرمز الاحتياطي",
+    "2FA_REGEN_CODES_BTN"                => "إعادة إنشاء الرموز الاحتياطية",
+    "2FA_INVALIDATE_WARNING"             => "سيؤدي هذا إلى إبطال جميع الرموز الاحتياطية الحالية. هل أنت متأكد؟",
+    // Authentication
+    "2FA_CODE_LABEL"                     => "رمز المصادقة",
+    "2FA_VERIFY_BTN"                     => "تحقق وسجل الدخول",
+    "2FA_VERIFY_TITLE"                   => "المصادقة الثنائية مطلوبة",
+    "2FA_VERIFY_INFO"                    => "أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة الخاص بك.",
+    // Actions & Buttons
+    "2FA_ENABLE_BTN"                     => "تفعيل المصادقة الثنائية",
+    "2FA_DISABLE_BTN"                    => "تعطيل المصادقة الثنائية",
+    "2FA_VERIFY_ACTIVATE_BTN"            => "تحقق وفعّل",
+    "2FA_CANCEL_SETUP_BTN"               => "إلغاء الإعداد",
+    "2FA_DONE_BTN"                       => "تم",
+    // Success Messages
+    "REDIR_2FA_DIS"                      => "تم تعطيل المصادقة الثنائية.",
+    "2FA_SUCCESS_BACKUP_ACK"             => "تم الإقرار بالرموز الاحتياطية.",
+    "2FA_SUCCESS_SETUP_CANCELLED"        => "تم إلغاء الإعداد.",
+    // Error Messages
+    "2FA_ERR_INVALID_BACKUP"             => "رمز احتياطي غير صالح. يرجى المحاولة مرة أخرى.",
+    "2FA_ERR_DISABLE_FAILED"             => "فشل تعطيل المصادقة الثنائية.",
+    "2FA_ERR_NO_SECRET"                  => "تعذر استرداد سر المصادقة. يرجى المحاولة مرة أخرى.",
+    "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "تم التحقق من الرمز الاحتياطي ولكن فشل إبطاله. يرجى الاتصال بالدعم.",
+    "2FA_ERR_NO_CODE_PROVIDED"           => "لم يتم تقديم رمز مصادقة.",
+    "RATE_LIMIT_LOGIN"                   => "عدد كبير جدًا من محاولات تسجيل الدخول الفاشلة. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_TOTP"                    => "عدد كبير جدًا من رموز المصادقة غير الصحيحة. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_PASSKEY"                 => "عدد كبير جدًا من محاولات المصادقة بمفتاح المرور. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_PASSKEY_STORE"           => "عدد كبير جدًا من محاولات تسجيل مفتاح المرور. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_PASSWORD_RESET"          => "عدد كبير جدًا من طلبات إعادة تعيين كلمة المرور. يرجى الانتظار قبل طلب إعادة تعيين أخرى.",
+    "RATE_LIMIT_PASSWORD_RESET_SUBMIT"   => "عدد كبير جدًا من محاولات إعادة تعيين كلمة المرور. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_REGISTRATION"            => "عدد كبير جدًا من محاولات التسجيل. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_EMAIL_VERIFICATION"      => "عدد كبير جدًا من طلبات التحقق من البريد الإلكتروني. يرجى الانتظار قبل طلب تحقق آخر.",
+    "RATE_LIMIT_EMAIL_CHANGE"            => "عدد كبير جدًا من طلبات تغيير البريد الإلكتروني. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_PASSWORD_CHANGE"         => "عدد كبير جدًا من محاولات تغيير كلمة المرور. يرجى الانتظار قبل المحاولة مرة أخرى.",
+    "RATE_LIMIT_GENERIC"                 => "عدد كبير جدًا من المحاولات. يرجى الانتظار قبل المحاولة مرة أخرى.",
 ));
 
-//Redirect Messages - These get a plus between each word
 $lang = array_merge($lang, array(
-	"REDIR_2FA"						=> "عذرا+التحقق+بخطوتين+غير+متاح+حاليا",
-	"REDIR_2FA_EN"				=> "التحقق+بخطوتين+متاح",
-	"REDIR_2FA_DIS"				=> "التحقق+بخطوتين+معطل",
-	"REDIR_2FA_VER"				=> "2 + عامل + مصادقة + تم التحقق + و + تمكين",
-	"REDIR_SOM_TING_WONG" => "حدث+خطأ+ما.+يرجى+المحاولة+مرة+أخرى.",
-	"REDIR_MSG_NOEX" => "هذا+الموضوع+لا+ينتمي+لك+أو+لا+يوجد.",
-	"REDIR_UN_ONCE" => "تم+تغيير+اسم+المستخدم+مرة+واحدة+بالفعل.",
-	"REDIR_EM_SUCC" => "تم+تحديث+البريد+الإلكتروني+بنجاح",
+	"REDIR_2FA"						=> "عذرا التحقق بخطوتين غير متاح حاليا",
+	"REDIR_2FA_EN"				=> "التحقق بخطوتين متاح",
+	"REDIR_2FA_DIS"				=> "التحقق بخطوتين معطل",
+	"REDIR_2FA_VER"				=> "2   عامل   مصادقة   تم التحقق   و   تمكين",
+	"REDIR_SOMETHING_WRONG" => "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+	"REDIR_MSG_NOEX" => "هذا الموضوع لا ينتمي لك أو لا يوجد.",
+	"REDIR_UN_ONCE" => "تم تغيير اسم المستخدم مرة واحدة بالفعل.",
+	"REDIR_EM_SUCC" => "تم تحديث البريد الإلكتروني بنجاح",
 
 ));
 
