@@ -2,9 +2,10 @@
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 //if totp active and php >= 8.2.0
-if($settings->totp == 1 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
+if($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
     require_once $abs_us_root . $us_url_root . 'users/auth/TOTPHandler.php';
 }else{
+    $settings->totp = 0; // Disable TOTP if not supported
     $currentSessionName = $config['session']['session_name'];
 }
 
@@ -18,7 +19,7 @@ $userEmail = $user->data()->email; // Get user's email for QR code
 // Instantiate TOTPHandler if TOTP is enabled in site settings
 $totpHandler = null;
 $totpEnabledGlobally = false;
-if (isset($settings->totp) && $settings->totp == 1) {
+if (isset($settings->totp) && $settings->totp > 0) {
     $totpEnabledGlobally = true;
 
     $siteName = isset($settings->site_name) ? $settings->site_name : 'UserSpice';

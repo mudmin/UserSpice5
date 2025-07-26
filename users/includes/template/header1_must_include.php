@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <!DOCTYPE html>
 <html lang="<?=$html_lang ?>">
 <head>
-	<link rel="shortcut icon" href="/favicon.ico">
+	<!-- moved favicon to usersc/includes/head_tags.php -->
 	<?php
 	if(file_exists($abs_us_root.$us_url_root.'usersc/includes/head_tags.php')){
 		require_once $abs_us_root.$us_url_root.'usersc/includes/head_tags.php';

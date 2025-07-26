@@ -1,5 +1,5 @@
 <?php
-if ($countE == 0) {
+if (!isset($countE) || isset($countE) && $countE == 0) {
     $db->insert('updates', ['migration' => $update]);
     if (!$db->error()) {
         if ($db->count() > 0) {

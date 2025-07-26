@@ -164,25 +164,27 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
                                 $password_hash = password_hash('password', PASSWORD_BCRYPT, ['cost' => 14]);
                             }
 
-                            // Update the admin user (assuming user id 1 is the admin)
+                            $jd = date('Y-m-d H:i:s');
                             $update_query = "UPDATE users SET 
                                 username = ?, 
                                 email = ?, 
-                                password = ?, 
+                                `password` = ?, 
                                 fname = ?, 
                                 lname = ?,
+                                join_date = ?,
                                 force_pr = 0 
                                 WHERE id = 1";
 
                             $stmt = mysqli_prepare($link, $update_query);
                             mysqli_stmt_bind_param(
                                 $stmt,
-                                "sssss",
+                                "ssssss", // one for each bound variable
                                 $admin_username,
                                 $admin_email,
                                 $password_hash,
                                 $admin_fname,
-                                $admin_lname
+                                $admin_lname,
+                                $jd
                             );
 
                             mysqli_stmt_execute($stmt);

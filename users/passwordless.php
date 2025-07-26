@@ -250,7 +250,7 @@ if ($method == "enter_email") {
                 <input type="email" id="email" name="email" class="form-control form-control-lg" required autocomplete="email" />
               </div>
               <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
-              <button class="submit form-control btn btn-primary rounded submit px-3" id="next_button" type="submit">
+              <button class="submit col-12 btn btn-primary rounded submit px-3" id="next_button" type="submit">
                 <i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT", ""); ?>
               </button>
             </form>

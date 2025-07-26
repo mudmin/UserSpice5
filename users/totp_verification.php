@@ -23,9 +23,10 @@ if (!isset($settings->totp) || $settings->totp == 0) {
     exit;
 }
 //if totp active and php >= 8.2.0
-if($settings->totp == 1 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
+if($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
     require_once $abs_us_root . $us_url_root . 'users/auth/TOTPHandler.php';
 }else{
+    $settings->totp = 0; // Disable TOTP if not supported
     $currentSessionName = $config['session']['session_name'];
 }
 

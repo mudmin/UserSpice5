@@ -29,9 +29,10 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 //if totp active and php >= 8.2.0
-if($settings->totp == 1 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
+if($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
     require_once $abs_us_root . $us_url_root . 'users/auth/TOTPHandler.php';
 }else{
+    $settings->totp = 0; // Disable TOTP if not supported
     $currentSessionName = $config['session']['session_name'];
 }
 
@@ -78,7 +79,7 @@ if (Input::get('err') != '') {
 // Initialize TOTP handler
 $totpHandler = null;
 $totpEnabled = false;
-if (isset($settings->totp) && ($settings->totp == 1 || $settings->totp == 2)) {
+if (isset($settings->totp) && ($settings->totp > 1)) {
   
         $siteName = isset($settings->site_name) ? $settings->site_name : 'UserSpice';
         $totpHandler = new TOTPHandler($db, $siteName);
@@ -509,7 +510,7 @@ if (empty($dest = sanitizedDest('dest'))) {
 
                             <?php includeHook($hooks, 'form'); ?>
                             <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
-                            <button class="submit form-control btn btn-primary rounded submit px-3" id="next_button" type="submit">
+                            <button class="submit col-12 btn btn-primary rounded submit px-3" id="next_button" type="submit">
                                 <i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT") ?>
                             </button>
                         </form>
@@ -550,7 +551,7 @@ if (empty($dest = sanitizedDest('dest'))) {
         </div>
     </div>
 </div>
-
+</div>
 <script>
     $(document).ready(function() {
         $("#loginModal").modal({
