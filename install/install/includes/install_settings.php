@@ -1,7 +1,7 @@
 <?php
 //Your Application Details
 $app_name = "UserSpice";
-$app_ver = "4.4"; //Feel free to leave this as an empty string.
+
 
 //The name of your configuration file
 $config_file = "../users/init.php";
@@ -15,7 +15,7 @@ $step3 = "Cleanup";
 
 //System Requirements
 $php_min = "7.4.0";
-$php_ver = "8.1.0";
+$php_ver = "8.2.0";
 
 //Cleanup Files
 $files = array (

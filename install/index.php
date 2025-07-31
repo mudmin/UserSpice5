@@ -1,25 +1,8 @@
 <?php
 
 // Include the installer settings
-if (file_exists('install/includes/install_settings.php')) {
-    include_once 'install/includes/install_settings.php';
-} else {
-    // Default settings if install_settings.php is not found
-    $app_name = "UserSpice";
-    $app_ver = "5.0";
-    $config_file = "../users/init.php";
-    $sqlfile = "install/includes/sql.sql";
-    $step1 = "Welcome";
-    $step2 = "Setup";
-    $step3 = "Cleanup";
-    $php_min = "7.2.0";
-    $files = array(
-        "index.php",
-        "step2.php",
-        "step3.php",
-    );
-    $redirect = "../index.php";
-}
+include_once 'install/includes/install_settings.php';
+
 
 require_once '../users/includes/user_spice_ver.php';
 

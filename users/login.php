@@ -126,7 +126,7 @@ if (!empty($_POST)) {
                         if ($totpHandler->verifyBackupCode($tempUserId, $totpCode)) {
                             if ($totpHandler->invalidateBackupCode($tempUserId, $totpCode)) {
                                 $verified = true;
-                                logger($tempUserId, "Login", "TOTP login successful using backup code.");
+                                // logger($tempUserId, "Login", "TOTP login successful using backup code.");
                             } else {
                                 $errors[] = lang("2FA_ERR_BACKUP_INVALIDATE_FAIL");
                             }
@@ -137,7 +137,7 @@ if (!empty($_POST)) {
                         $userSecret = $totpHandler->getUserSecret($tempUserId);
                         if ($userSecret && $totpHandler->verifyCode($userSecret, $totpCode)) {
                             $verified = true;
-                            logger($tempUserId, "Login", "TOTP login successful using authenticator app.");
+                            // logger($tempUserId, "Login", "TOTP login successful using authenticator app.");
                         } else {
                             $errors[] = lang("2FA_ERR_INVALID_CODE");
                         }
@@ -179,7 +179,7 @@ if (!empty($_POST)) {
                             unset($_SESSION[$currentSessionName . '_totp_remember_me']);
                             unset($_SESSION[$currentSessionName . '_totp_final_dest']);
                             unset($_SESSION[$currentSessionName . '_totp_input_redirect']);
-                            logger(1,"cls","case 1");
+                            // logger(1,"cls","case 1");
                             if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                             }
@@ -207,7 +207,7 @@ if (!empty($_POST)) {
                             'method' => $useBackup ? 'backup_code' : 'authenticator_app',
                             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
                         ]);
-                        logger($tempUserId, "VerifyTOTP", "TOTP verification failed for user ID: $tempUserId");
+                        // logger($tempUserId, "VerifyTOTP", "TOTP verification failed for user ID: $tempUserId");
                         // Keep the TOTP form displayed for retry
                     }
                 }
@@ -267,6 +267,8 @@ if (!empty($_POST)) {
                                         'method' => 'inline_totp',
                                         'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
                                     ]);
+
+                                    $user = $tempUser; // Set user object for further processing
                                     
                                     // TOTP verified, complete login immediately
                                     $hooks = getMyHooks(['page' => 'loginSuccess']);
@@ -274,8 +276,9 @@ if (!empty($_POST)) {
                                     $dest = sanitizedDest('dest');
                                     $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
                                     $_SESSION[$currentSessionName . '_totp_verified'] = true;
-                                    logger($tempUser->data()->id, "Login", "Successful login with inline TOTP verification.");
-                                    logger(1,"cls","case 2");
+                                    // logger($tempUser->data()->id, "Login", "Successful login with inline TOTP verification.");
+                                   
+                                    // logger(1,"cls","case 2");
                                     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                         require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                                     }
@@ -312,7 +315,7 @@ if (!empty($_POST)) {
                                 $_SESSION[$currentSessionName . '_totp_final_dest'] = $dest;
                                 $_SESSION[$currentSessionName . '_totp_input_redirect'] = Input::get('redirect');
 
-                                logger($tempUser->data()->id, "Login", "Valid credentials provided. Awaiting TOTP verification.");
+                                // logger($tempUser->data()->id, "Login", "Valid credentials provided. Awaiting TOTP verification.");
 
                                 // Set state for current page to show TOTP form
                                 $awaitingTOTP = true;
@@ -326,14 +329,16 @@ if (!empty($_POST)) {
                                 'method' => 'standard_login',
                                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
                             ]);
-                            
+                            $user = $tempUser; // Set user object for further processing
+
                             // No TOTP required - complete normal login
                             $hooks = getMyHooks(['page' => 'loginSuccess']);
                            
                             includeHook($hooks, 'body');
                             $dest = sanitizedDest('dest');
                             $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
-                            logger(1,"cls","case 3");
+                            // logger(1,"cls","case 3");
+                   
                             if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                             }
@@ -356,7 +361,7 @@ if (!empty($_POST)) {
                         
                         $eventhooks = getMyHooks(['page' => 'loginFail']);
                         includeHook($eventhooks, 'body');
-                        logger("0", "Login Fail", "A failed login on login.php");
+                        // logger("0", "Login Fail", "A failed login on login.php");
                         $msg = lang("SIGNIN_FAIL");
                         $msg2 = lang("SIGNIN_PLEASE_CHK");
                         $errors[] = '<strong>' . $msg . '</strong>' . $msg2;
