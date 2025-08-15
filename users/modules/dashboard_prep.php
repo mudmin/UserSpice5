@@ -2,6 +2,8 @@
 $child_theme = "dashboard";
 $core_template = $settings->template;
 
+// save the original container_open_class so we can edit in general settings
+$og_container_open_class = $settings->container_open_class;
 // change container_open_class so pages will be full-height.
 $settings->container_open_class = "container-fluid d-flex flex-column flex-grow-1";
 $settings->navigation_type = 1;

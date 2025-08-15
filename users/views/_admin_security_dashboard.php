@@ -988,6 +988,17 @@ if ($settings->debug > 0) {
                     ];
                 }
 
+                if($user_spice_ver == "5.9.3" || $user_spice_ver == "5.9.4") {
+                    $alerts[] = [
+                        'level' => 'success',
+                        'icon' => 'fas fa-exclamation-triangle',
+                        'title' => 'New Rate Limiting Dashboard',
+                        'message' => 'Check out the new Rate Limiting Dashboard for better control over your site\'s security. <a href="' . $us_url_root . 'users/admin.php?view=rate_limits">Learn more</a>'
+                    ];
+                }
+
+
+
                 if (empty($alerts)) : ?>
                     <div class="text-center text-muted p-3">
                         <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
@@ -1180,13 +1191,13 @@ if ($settings->debug > 0) {
                 <?php else : ?>
                     <div class="alert alert-success p-2">
                         <strong><i class="fas fa-check-circle me-1"></i>Rate Limits Customized</strong><br>
-                        <p class="mb-0">Your rate limits appear to be customized from the insecure defaults. Review them periodically to ensure they meet your site's specific security needs.</p>
+                        <p class="mb-0">Your rate limits appear to be customized from the insecure defaults. <a href="<?= $us_url_root ?>users/admin.php?view=rate_limits">Review them periodically</a> to ensure they meet your site's specific security needs.</p>
                     </div>
                 <?php endif; ?>
             </div>
             <div class="card-footer">
-                <a href="<?= $us_url_root ?>users/admin.php?view=security_logs" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-list me-1"></i>View Security Logs
+                <a href="<?= $us_url_root ?>users/admin.php?view=rate_limits" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-list me-1"></i>Manage Rate Limits
                 </a>
             </div>
         </div>

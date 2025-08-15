@@ -3,7 +3,7 @@
 UserSpice 5 - TOTP Verification Page
 Standalone TOTP verification for users who have TOTP set up but haven't verified this session
 */
-
+$noMaintenanceRedirect = true; 
 require_once 'init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 

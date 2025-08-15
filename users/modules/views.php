@@ -132,6 +132,10 @@ switch ($view) {
       echo '</div>'; // what is this for?
     }
     break;
+   case 'rate_limits':
+    $path = usView('_admin_rate_limits.php');
+    include $path;
+    break;
   case 'reg':
     $path = usView('_admin_settings_register.php');
     include $path;

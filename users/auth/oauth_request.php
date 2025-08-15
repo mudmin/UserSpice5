@@ -1,4 +1,5 @@
 <?php
+$noMaintenanceRedirect = true; 
 require_once '../../users/init.php';
 
 // Check if OAuth is enabled

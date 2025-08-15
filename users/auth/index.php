@@ -140,13 +140,13 @@ $custom_login_path = $abs_us_root . $us_url_root . 'usersc/login.php';
 $use_custom_login = false;
 
 if (file_exists($custom_login_path)) {
-    // Check if the custom login file contains 'get_included_files()' to determine if it supports oauth
+    // Check if the custom login file contains 'USERSPICE_LOGIN_CALLED to determine if it supports oauth
     $login_content = file_get_contents($custom_login_path);
-    if (strpos($login_content, 'get_included_files()') !== false) {
+    if (strpos($login_content, 'USERSPICE_LOGIN_CALLED') !== false) {
         $use_custom_login = true;
     }
 }
-
+define('USERSPICE_LOGIN_CALLED', true);
 if ($use_custom_login) {
     require_once $custom_login_path;
 } else {

@@ -7,7 +7,7 @@ $filters = [
   'passwordless' => 'View Only Passwordless Logs',
   'database_debug' => 'View Only Database Debugging Logs',
 ];
-
+$token = Token::generate(); 
 if (in_array($user->data()->id, $master_account) && $action != '') {
   $query = '';
   switch ($action) {
@@ -87,9 +87,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   <?php } ?>
 </div>
 
-<?php
-$logs = UserSpice_getLogs(['preset' => $mode]);
-?>
+
 <div class="card">
   <div class="card-body">
     <table id="logstable" class='table table-hover table-striped table-list-search display'>
@@ -103,44 +101,10 @@ $logs = UserSpice_getLogs(['preset' => $mode]);
         <th></th>
       </thead>
       <tbody>
-        <?php foreach ($logs as $l) { ?>
-          <tr>
-            <td>
-              <span class="hideMe"><?= sprintf('%11d', Input::sanitize($l->id)) ?></span>
-              <?php echo Input::sanitize($l->id); ?>
-            </td>
-            <td><?php echo Input::sanitize($l->ip); ?></td>
-            <td><?php echouser(Input::sanitize($l->user_id)); ?> (<?php echo Input::sanitize($l->user_id); ?>)</td>
-            <td><?php echo Input::sanitize($l->logdate); ?></td>
-            <td><?php echo Input::sanitize($l->logtype); ?></td>
-            <td>
-              <div class="input-group">
-                <?php
-                if (strlen($l->lognote) > 80) { ?>
-                  <textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly><?php echo Input::sanitize($l->lognote); ?></textarea>
-                <?php
-                } else {
-                  echo Input::sanitize($l->lognote);
-                }
-                ?>
-              </div>
-            </td>
-            <td>
-              <?php if ($l->metadata !== null) { ?>
-                <i class="fa fa-fw fa-sticky-note pull-right" onclick="generateMetadataModal(<?php echo $l->id; ?>)"
-                title="View Metadata"
-                data-html="true"
-                data-toggle="tooltip"
-                data-bs-toggle="tooltip"></i>
-              <?php } ?>
-            </td>
-          </tr>
-        <?php } ?>
-      </tbody>
+        </tbody>
     </table>
   </div>
 </div>
-
 <div class="modal" id="logMetadata" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -208,17 +172,31 @@ $logs = UserSpice_getLogs(['preset' => $mode]);
     });
   }
 
-  $(document).ready(function() {
+ $(document).ready(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const modeFilter = urlParams.get('mode') || '';
+
     $('#logstable').DataTable({
-      "pageLength": 25,
-      "stateSave": true,
-      "aLengthMenu": [
-        [25, 50, 100, -1],
-        [25, 50, 100, 250, 500]
-      ],
-      "aaSorting": []
+      pageLength: 25,
+      stateSave: true,
+      aLengthMenu: [ [25, 50, 100, -1], [25, 50, 100, "All"] ],
+      aaSorting: [],
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "<?= $us_url_root ?>users/parsers/ssp_logs.php",
+        type: "GET",
+        data: {
+          token: "<?= $token ?>",
+          mode: modeFilter
+        }
+      },
+      // Disable sorting on the last two columns
+      columnDefs: [
+        { "targets": [5, 6], "orderable": false }
+      ]
     });
-  });
+    });
 </script>
 <style>
   .badge {

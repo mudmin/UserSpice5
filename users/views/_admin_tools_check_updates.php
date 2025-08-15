@@ -40,7 +40,6 @@ $update_available = false;
         <div class="row">
           <div class="col-12 col-md-6">
             <h2>Checking for updates...</h2>
-
           </div>
           <div class="col-12 col-md-6 text-end">
             <form class="d-flex align-items-center justify-content-end" action="" method="post">
@@ -54,13 +53,10 @@ $update_available = false;
               <input type="submit" class="btn btn-primary" value="Go">
             </form>
           </div>
-
         </div>
       </div>
       <div class="card-body container text-center">
         <div class="row">
-
-
           <?php
           $error_tripped = false;
           if (!extension_loaded("curl")) {
@@ -79,12 +75,9 @@ $update_available = false;
           }
           if ($error_tripped == true) {
           ?>
-
             <div class="alert alert-danger" role="alert">We have detected a problem that may prevent you from automatically updating. If you cannot resolve the problem, you can still update at <a target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a>
               <br>
               Please download the updates and install them in order by unzipping them and overwriting existing files.
-
-
             </div>
           <?php
           }
@@ -97,7 +90,6 @@ $update_available = false;
             <div class="alert alert-success" role="alert">You are on the <b>STABLE</b> update cycle. While we can't promise that any code is error free, the Bleeding Edge update cycle community has helped to test this update before it was released to the public.</div>
           <?php }
           ?>
-
         </div>
       </div>
 
@@ -126,7 +118,6 @@ $update_available = false;
               $canary = false;
             }
             $remoteVersion = preg_replace('/[^\\d.]+/', '', $remoteVersion);
-            // $remoteVersion = "5.8.0";
             if (version_compare($remoteVersion, $user_spice_ver) == 1) {
               $update_available = true;
               $class = "text-bg-danger";
@@ -144,7 +135,6 @@ $update_available = false;
                 There is a problem with the UserSpice update system.<br>
                 Please visit UserSpice.com for further information.<br><br> Please visit our discord at
                 https://discord.gg/6XZ7mEWnzZ to confirm what you read on the site.<br>
-
               <?php } else { ?>
                 <h5>Latest Version</h5>
                 <h4><?= $remoteVersion ?></h4>
@@ -183,12 +173,10 @@ $update_available = false;
             'sysver' => $user_spice_ver,
             'call' => 'sysup',
           ];
-          if($settings->bleeding_edge == 2){
+          if ($settings->bleeding_edge == 2) {
             $data['dev'] = "true";
           }
           $payload = json_encode($data);
-
-
 
           //attach encoded JSON string to the POST fields
           curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -211,7 +199,6 @@ $update_available = false;
           // Get the HTTP response code
           $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-
           if (isset($offline_development) && $offline_development == true) {
             dump("HTTP Response Code: " . $httpCode);
             rewind($verbose);
@@ -224,7 +211,6 @@ $update_available = false;
           curl_close($ch);
 
           $result = json_decode($result);
-
 
           if (isset($result->next_ver) && $result->next_ver != '') {
             // Convert versions to comparable format and check if current version is newer
@@ -252,7 +238,11 @@ $update_available = false;
               spiceUpdateBegins();
               $failRan = false;
               if (file_exists($abs_us_root . $us_url_root . 'usupdate.zip')) {
-                unlink($abs_us_root . $us_url_root . 'usupdate.zip');
+                if (!unlink($abs_us_root . $us_url_root . 'usupdate.zip')) {
+                  logger($user->data()->id, "$result->next_ver", "Failed to delete existing zip file");
+                  echo "Error: Could not delete existing zip file. Please check permissions.";
+                  die;
+                }
               }
               $zipFile = $abs_us_root . $us_url_root . 'usupdate.zip';
               echo 'Creating zip file...';
@@ -261,7 +251,6 @@ $update_available = false;
               $zip_resource = fopen($zipFile, 'w');
               $url = 'https://github.com/mudmin/releases/raw/master/updates/' . $result->next_file;
               $hash = $result->hash;
-
 
               $ch_start = curl_init();
               echo 'attempting download...';
@@ -280,50 +269,178 @@ $update_available = false;
               if (!$page) {
                 echo 'Error :- ' . curl_error($ch_start);
                 logger($user->data()->id, "$result->next_ver", 'Curl error' . curl_error($ch_start));
+                die;
               }
               curl_close($ch_start);
 
               $zip = new ZipArchive();
-
-              if ($zip->open($zipFile) !== true) {
-
+              $openResult = $zip->open($zipFile);
+              if ($openResult !== true) {
+                $errorMessage = match ($openResult) {
+                  ZipArchive::ER_EXISTS => 'Zip file already exists.',
+                  ZipArchive::ER_INCONS => 'Zip file is inconsistent or corrupted.',
+                  ZipArchive::ER_MEMORY => 'Memory allocation failure.',
+                  ZipArchive::ER_NOENT => 'Zip file does not exist.',
+                  ZipArchive::ER_NOZIP => 'Not a valid zip file.',
+                  ZipArchive::ER_OPEN => 'Failed to open zip file.',
+                  default => 'Unknown zip error (Code: ' . $openResult . ').',
+                };
+                logger($user->data()->id, "$result->next_ver", "Zip open failed: $errorMessage");
+                echo "Error: $errorMessage Please try downloading manually from <a href='https://userspice.com/updates'>UserSpice.com</a>";
+                $zip->close();
                 if (file_exists($zipFile)) {
-                  $zip->close();
-                  unlink($zipFile);
+                  if (!unlink($zipFile)) {
+                    logger($user->data()->id, "$result->next_ver", "Failed to delete zip file after open error");
+                    echo "Error: Could not delete zip file after failure. Please check permissions.";
+                  }
                 }
-                echo 'Error :- Unable to open the Zip File';
-                logger($user->data()->id, "$result->next_ver", 'Unable to open the Zip File');
                 if (!$failRan) {
                   spiceUpdateFail();
                   $failRan = true;
                 }
+                die;
               }
               echo '<br>Opening zip file and checking hash.';
               logger($user->data()->id, "$result->next_ver", 'Opening zip file and checking hash');
               $newCrc = base64_encode(hash_file('sha256', $zip->filename));
               if ($newCrc == $hash) {
-
                 echo '<br>Hash matches';
                 logger($user->data()->id, "$result->next_ver", 'Hash Matches');
-                $zip->extractTo($extractPath);
-                echo '...extracting zip file';
-                logger($user->data()->id, "$result->next_ver", 'Extracting zip file');
-                $zip->close();
-                echo "<br><strong><span style='color:blue'>$result->message</span></strong>";
 
-                if (file_exists($zipFile)) {
+                // Check subdirectory permissions
+                function is_path_writable($path, &$non_writable = [], $max_examples = 10)
+                {
+                  if (count($non_writable) >= $max_examples) {
+                    return false;
+                  }
 
-                  unlink($zipFile);
+                  if (!is_writable($path)) {
+                    $non_writable[] = $path;
+                    return false;
+                  }
+
+                  if (is_dir($path)) {
+                    // We don't want to scan .git folders
+                    if (basename($path) == '.git') {
+                      return true;
+                    }
+                    $files = scandir($path);
+                    foreach ($files as $file) {
+                      if ($file !== '.' && $file !== '..') {
+                        $full_path = rtrim($path, '/') . '/' . $file;
+                        if (!is_path_writable($full_path, $non_writable, $max_examples)) {
+                          if (count($non_writable) >= $max_examples) {
+                            return false;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  return true;
                 }
-                spiceUpdateSuccess();
-                logger($user->data()->id, "$result->next_ver", $result->message);
-                logger($user->data()->id, "$result->next_ver", 'Running migration script(s)');
 
-                Redirect::to($us_url_root . 'users/updates/index.php?auto=1');
+                $non_writable_paths = [];
+                $paths_to_check = [
+                  rtrim($extractPath, '/') . '/users',
+                  rtrim($extractPath, '/') . '/usersc'
+                ];
+
+                foreach ($paths_to_check as $path) {
+                  if (file_exists($path) && is_dir($path)) {
+                    is_path_writable($path, $non_writable_paths);
+                  }
+                }
+
+                if (!empty($non_writable_paths)) {
+                  logger($user->data()->id, "$result->next_ver", "Required paths not fully writable: " . implode(', ', $non_writable_paths));
+                  echo '<br><span style="color:red;">Error: Some directories or files in the `users` and/or `usersc` folders are not writable. Please check permissions.</span>';
+                  if (!empty($non_writable_paths)) {
+                    echo '<br>The following paths are not writable:<ul>';
+                    foreach ($non_writable_paths as $path) {
+                      echo "<li>$path</li>";
+                    }
+                    echo '</ul>';
+                  }
+                  echo '<br>Please ensure these paths are writable (e.g., using `chmod -R 755` on the users/ and usersc/ directories) and try again.';
+                  $zip->close();
+                  if (file_exists($zipFile)) {
+                    if (!unlink($zipFile)) {
+                      logger($user->data()->id, "$result->next_ver", "Failed to delete zip file after permission error");
+                      echo "Error: Could not delete zip file after failure. Please check permissions.";
+                    }
+                  }
+                  if (!$failRan) {
+                    spiceUpdateFail();
+                    $failRan = true;
+                  }
+                  die;
+                }
+
+                // Test the extraction
+                echo '...attempting to extract zip file';
+                logger($user->data()->id, "$result->next_ver", 'Attempting to extract zip file');
+
+                if (@$zip->extractTo($extractPath)) {
+                  echo '...extraction successful';
+                  logger($user->data()->id, "$result->next_ver", 'Zip file extracted successfully');
+                  $zip->close();
+
+                  echo "<br><strong><span style='color:blue'>$result->message</span></strong>";
+
+                  if (file_exists($zipFile)) {
+                    if (!unlink($zipFile)) {
+                      logger($user->data()->id, "$result->next_ver", "Failed to delete zip file after extraction");
+                      echo "Error: Could not delete zip file after extraction. Please check permissions.";
+                    } else {
+                      logger($user->data()->id, "$result->next_ver", "Zip file deleted successfully");
+                    }
+                  }
+
+                  spiceUpdateSuccess();
+                  logger($user->data()->id, "$result->next_ver", $result->message);
+                  logger($user->data()->id, "$result->next_ver", 'Running migration script(s)');
+
+                  Redirect::to($us_url_root . 'users/updates/index.php?auto=1');
+                } else {
+                  // Extraction failed
+                  echo '<br><span style="color:red;">Error: Failed to extract zip file</span>';
+                  logger($user->data()->id, "$result->next_ver", 'Failed to extract zip file');
+
+                  $zip->close();
+
+                  if (file_exists($zipFile)) {
+                    if (!unlink($zipFile)) {
+                      logger($user->data()->id, "$result->next_ver", "Failed to delete zip file after extraction failure");
+                      echo "Error: Could not delete zip file after failure. Please check permissions.";
+                    }
+                  }
+
+                  if (!$failRan) {
+                    spiceUpdateFail();
+                    $failRan = true;
+                  }
+
+                  echo "<br>The zip file could not be extracted. This could be due to file permission issues or corrupted archive. Please try downloading and installing manually from <a href='https://userspice.com/updates' target='_blank'>https://userspice.com/updates</a>";
+
+                  echo '<br><br><a href="' . $us_url_root . 'users/admin.php?view=updates" class="btn btn-primary">Return to Updates</a>';
+                  die;
+                }
+
+                echo '<br>Deleting zip file';
+                logger($user->data()->id, "$result->next_ver", 'Deleting zip file');
+                if (file_exists($zipFile)) {
+                  if (!unlink($zipFile)) {
+                    logger($user->data()->id, "$result->next_ver", "Failed to delete zip file");
+                    echo "Error: Could not delete zip file. Please check permissions.";
+                  }
+                }
               } else {
                 if (file_exists($zipFile)) {
                   $zip->close();
-                  @unlink($zipFile);
+                  if (!unlink($zipFile)) {
+                    logger($user->data()->id, "$result->next_ver", "Failed to delete zip file after hash mismatch");
+                    echo "Error: Could not delete zip file after failure. Please check permissions.";
+                  }
                 }
 
                 logger($user->data()->id, "$result->next_ver", 'Hash match failed');
@@ -337,8 +454,12 @@ $update_available = false;
               echo '<br>Deleting zip file';
               logger($user->data()->id, "$result->next_ver", 'Deleting zip file');
               if (file_exists($zipFile)) {
-                @unlink($zipFile);
-              }
+                if (!unlink($zipFile)) {
+                  logger($user->data()->id, "$result->next_ver", "Failed to delete zip file");
+                  echo "Error: Could not delete zip file. Please check permissions.";
+                  }
+                }
+              die;
             }
           }
         }
@@ -364,22 +485,22 @@ $update_available = false;
           <div class="card-body">
             <p class="text-center mb-3">You cannot download automatic updates because you have not entered your free API key.</p>
             <p class="text-center mb-3">
-              <strong>Get your free API key at:</strong> 
+              <strong>Get your free API key at:</strong>
               <a class="text-primary" target="_blank" href="https://api.userspice.com/" target="_blank">https://api.userspice.com/</a>
             </p>
             <form action="" method="post" class="row g-3 justify-content-center">
               <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
               <div class="col-md-6">
                 <label for="spice_api" class="form-label">Enter your UserSpice API Key:</label>
-                <input type="text" class="form-control" id="spice_api" name="spice_api" 
-                       value="<?= hed($settings->spice_api ?? '') ?>" 
-                       placeholder="Enter your API key here">
+                <input type="text" class="form-control" id="spice_api" name="spice_api"
+                  value="<?= hed($settings->spice_api ?? '') ?>"
+                  placeholder="Enter your API key here">
               </div>
               <div class="col-12 text-center">
                 <input type="submit" name="save_api_key" value="Save API Key" class="btn btn-success">
                 <?php if (!empty($settings->spice_api)) { ?>
-                  <input type="submit" name="save_api_key" value="Clear API Key" class="btn btn-outline-danger ms-2" 
-                         onclick="document.getElementById('spice_api').value = '';">
+                  <input type="submit" name="save_api_key" value="Clear API Key" class="btn btn-outline-danger ms-2"
+                    onclick="document.getElementById('spice_api').value = '';">
                 <?php } ?>
                 <p class="text-muted">If you do not want to use the API system, updates are always available for free at <a class="text-primary" target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a></p>
               </div>
@@ -394,9 +515,7 @@ $update_available = false;
 </div>
 <div class="row">
   <div class="col-12 text-center">
-    
-    <?php 
-
+    <?php
     $plugins = $db->query('SELECT * FROM us_plugins WHERE last_check < ? AND status = ?', [date('Y-m-d H:i:s', strtotime('-3 hours')), 'active'])->results();
     foreach ($plugins as $p) {
       echo "<br>Checking $p->plugin ";

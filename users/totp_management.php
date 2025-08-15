@@ -1,4 +1,5 @@
 <?php
+$noMaintenanceRedirect = true; 
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 //if totp active and php >= 8.2.0

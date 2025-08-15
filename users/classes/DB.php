@@ -26,82 +26,95 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //logs to the logs table with the logtype of DATABASE_INSERT or DATABASE_UPDATE
 class DB
 {
-	private static $_instance = null;
-	private $_pdo, $_query, $_error = false, $_errorInfo, $_results = [], $_resultsArray = [], $_count = 0, $_lastId, $_queryCount = 0;
-	private $database_logging = false;
-	private $database_logging_tables_only = [];
+	private static $_instance        = null;
+	private ?PDO 	$_pdo 			 = null;
+	private         $_query;
+	private bool    $_error          = false;
+	private array   $_errorInfo      = ['00000', null, null];
+	private array   $_results        = [];
+	private array   $_resultsArray   = [];
+	private int     $_count          = 0;
+	private int     $_lastId         = 0;
+	private int     $_queryCount     = 0;
+
+	private bool  $database_logging = false;
+	private array $database_logging_tables_only = [];
+
+	/*  Cached connection info for reconnect()  */
+	private string  $dsn;
+	private ?string $user;
+	private ?string $pass;
+	private array   $opts;
 
 	private function __construct($config = [])
 	{
+		// Build PDO options once
+		$this->opts = Config::get('mysql/options') ?: [
+			PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''",
+		];
+		$this->opts[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;   // always throw exceptions
 
-		if (!$opts = Config::get('mysql/options'))
-			$opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
+		$charset = Config::get('mysql/charset') ?: 'utf8';
+
+		/* Decide which credential/DSN set to use — identical logic to the
+		   original code, but we ALSO cache the outcome so reconnect() is
+		   guaranteed to hit the same server / database.  */
+		if ($config === []) {
+			// default db from init.php
+			$this->dsn  = 'mysql:host=' . Config::get('mysql/host') .
+				';dbname='    . Config::get('mysql/db') .
+				';charset='  . $charset;
+			$this->user = Config::get('mysql/username');
+			$this->pass = Config::get('mysql/password');
+		} elseif (!is_array($config) || count($config) === 1) {
+			// DB::getDB('other_db')  or  DB::getDB(['other_db'])
+			if (is_array($config)) $config = $config[0];
+			$this->dsn  = 'mysql:host=' . Config::get('mysql/host') .
+				';dbname='    . $config .
+				';charset='  . $charset;
+			$this->user = Config::get('mysql/username');
+			$this->pass = Config::get('mysql/password');
+		} elseif (in_array('init', $config, true)) {
+			//this allows you to get another db from your init file that is added to your init.php config
+			//array and call it like this 
+			// $db2 = DB::getDB(['mysql2','init']);
+			//your init file can have as many of these sets of db creds as you would like added like this
+			// 'mysql'      => array(
+			// 'host'         => '127.0.0.1',
+			// 'username'     => 'root',
+			// 'password'     => '',
+			// 'db'           => '513',
+			// ),
+			// 'mysql2'      => array(
+			// 'host'         => 'localhost',
+			// 'username'     => 'root',
+			// 'password'     => '',
+			// 'db'           => 'dbname',
+			// ),
+			//be sure to give each one a unique name like mysql2, mysql3
+
+			$group      = $config[0];
+			$this->dsn  = 'mysql:host=' . Config::get("$group/host") .
+				';dbname='    . Config::get("$group/db") .
+				';charset='  . $charset;
+			$this->user = Config::get("$group/username");
+			$this->pass = Config::get("$group/password");
+		} else {
+			// DB::getDB(['host','db','user','pass'])
+			$this->dsn  = 'mysql:host=' . $config[0] .
+				';dbname='    . $config[1] .
+				';charset='  . $charset;
+			$this->user = $config[2];
+			$this->pass = $config[3];
+		}
+
 		try {
-			$dbCharset = Config::get('mysql/charset') ? Config::get('mysql/charset') : 'utf8';
-			if ($config == []) {
-				//grab the default db from the init.php file
-				$this->_pdo = new PDO(
-					'mysql:host=' .
-						Config::get('mysql/host') . ';dbname=' .
-						Config::get('mysql/db') . ';charset=' . $dbCharset,
-					Config::get('mysql/username'),
-					Config::get('mysql/password'),
-					$opts
-				);
-			} elseif (!is_array($config) || count($config) == 1) {
-				//this allows you to pass DB::getDB('dbname') OR DB::getDB(['dbname']) to get
-				//a second db on the same server with the same username and password
-				if (is_array($config)) {
-					$config = $config[0];
-				}
-				$this->_pdo = new PDO(
-					'mysql:host=' .
-						Config::get('mysql/host') . ';dbname=' .
-						($config) . ';charset=' . $dbCharset,
-					Config::get('mysql/username'),
-					Config::get('mysql/password'),
-					$opts
-				);
-			} elseif (in_array('init', $config)) {
-				//this allows you to get another db from your init file that is added to your init.php config
-				//array and call it like this DB::getDB(['mysql2','init']);
-				//your init file can have as many of these sets of db creds as you would like added like this
-				// 'mysql'      => array(
-				// 'host'         => '127.0.0.1',
-				// 'username'     => 'root',
-				// 'password'     => '',
-				// 'db'           => '513',
-				// ),
-				// 'mysql2'      => array(
-				// 'host'         => 'localhost',
-				// 'username'     => 'root',
-				// 'password'     => '',
-				// 'db'           => 'dbname',
-				// ),
-				//be sure to give each one a unique name like mysql2, mysql3
-
-				$this->_pdo = new PDO(
-					'mysql:host=' .
-						Config::get($config[0] . '/host') . ';dbname=' .
-						Config::get($config[0] . '/db') . ';charset=' . $dbCharset,
-					Config::get($config[0] . '/username'),
-					Config::get($config[0] . '/password'),
-					$opts
-				);
-			} else {
-				$this->_pdo = new PDO(
-					'mysql:host=' .
-						$config[0] . ';dbname=' .
-						$config[1] . ';charset=' . $dbCharset,
-					$config[2],
-					$config[3],
-					$opts
-				);
-			}
+			$this->_pdo = new PDO($this->dsn, $this->user, $this->pass, $this->opts);
 		} catch (PDOException $e) {
 			die($e->getMessage());
 		}
 	}
+
 
 	public static function getInstance()
 	{
@@ -117,44 +130,68 @@ class DB
 		return self::$_instance;
 	}
 
-	public function query($sql, $params = array())
+
+	public function beginTransaction()
 	{
-		#echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
-		$this->_queryCount++;
-		$this->_error = false;
-		$this->_errorInfo = array(0, null, null);
-		$this->_resultsArray = [];
-		$this->_count = 0;
-		$this->_lastId = 0;
-		if ($this->_query = $this->_pdo->prepare($sql)) {
-			$x = 1;
-			if (count($params)) {
-				foreach ($params as $param) {
-					$this->_query->bindValue($x, $param);
-					$x++;
-				}
-			}
-
-			try {
-				if ($this->_query->execute()) {
-					if ($this->_query->columnCount() > 0) {
-						$this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
-						$this->_resultsArray = json_decode(json_encode($this->_results), true);
-					}
-					$this->_count = $this->_query->rowCount();
-					$this->_lastId = $this->_pdo->lastInsertId();
-				} else {
-					throw new Exception("db error");
-				}
-			} catch (Exception $e) {
-				$this->_error = true;
-				$this->_results = [];
-				$this->_errorInfo = $this->_query->errorInfo();
-			}
-		}
-
-		return $this;
+		return $this->_pdo->beginTransaction();
 	}
+
+	public function commit()
+	{
+		return $this->_pdo->commit();
+	}
+
+	public function rollBack()
+	{
+		return $this->_pdo->rollBack();
+	}
+
+	public function inTransaction()
+	{
+		return $this->_pdo->inTransaction();
+	}
+
+public function query($sql, $params = array())
+{
+    #echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
+    $this->_queryCount++;
+    $this->_error = false;
+    $this->_errorInfo = array(0, null, null);
+    $this->_resultsArray = [];
+    $this->_count = 0;
+    $this->_lastId = 0;
+    if ($this->_query = $this->_pdo->prepare($sql)) {
+        $x = 1;
+        if (count($params)) {
+            foreach ($params as $param) {
+                $this->_query->bindValue($x, $param);
+                $x++;
+            }
+        }
+
+        try {
+            if ($this->_query->execute()) {
+                if ($this->_query->columnCount() > 0) {
+                    $this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
+                    $this->_resultsArray = json_decode(json_encode($this->_results), true) ?: [];
+                } else {
+                    // Ensure _resultsArray is empty array for non-SELECT queries
+                    $this->_resultsArray = [];
+                }
+                $this->_count = $this->_query->rowCount();
+                $this->_lastId = $this->_pdo->lastInsertId();
+            } else {
+                throw new Exception("db error");
+            }
+        } catch (Exception $e) {
+            $this->_error = true;
+            $this->_results = [];
+            $this->_errorInfo = $this->_query->errorInfo();
+        }
+    }
+
+    return $this;
+}
 
 	public function findAll($table)
 	{
@@ -627,6 +664,37 @@ class DB
 		} catch (Exception $e) {
 			logger(1, "Database Schema", "Exception modifying column {$oldColumn} in table {$table}: " . $e->getMessage());
 			return false;
+		}
+	}
+
+	// detect if connection is still alive
+	public function ping(): bool
+	{
+		try {
+			if (!$this->_pdo) return false;
+			$this->_pdo->query('SELECT 1');
+			return true;
+		} catch (PDOException) {
+			return false;
+		}
+	}
+
+	/**
+	 * Reconnect to the database, resetting the PDO instance
+	 * This is useful for handling connection timeouts or lost connections, especially on websockets and other long-lived connections.
+	 */
+	public function reconnect(): void
+	{
+		$this->_pdo = null;
+		try {
+			$this->_pdo = new PDO($this->dsn, $this->user, $this->pass, $this->opts);
+			$this->_error = false; // Reset error state on successful reconnect
+			$this->_errorInfo = ['00000', null, null];
+		} catch (PDOException $e) {
+			$this->_error = true;
+			$this->_errorInfo = $e->errorInfo ?? ['HY000', null, $e->getMessage()];
+			error_log('Database reconnect failed: ' . $e->getMessage());
+			throw $e;
 		}
 	}
 }

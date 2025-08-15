@@ -216,10 +216,14 @@ if (!$totpDisabled) {
               </label>
             </span>
           </div>
-
+          <?php 
+          if(!isset($og_container_open_class )){
+            $og_container_open_class = $settings->container_open_class;
+          }
+          ?>
           <div class="form-group">
             <label>Main Div Class <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Traditionally you'll use container or container-fluid in this field. You can add multiple classes by adding spaces. Not every theme will respect this setting. Default: container-fluid"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Main Div Class" name="container_open_class" id="container_open_class" value="<?= $settings->container_open_class; ?>">
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Main Div Class" name="container_open_class" id="container_open_class" value="<?= $og_container_open_class; ?>">
           </div>
         </div>
       </div>
@@ -320,6 +324,7 @@ if (!$totpDisabled) {
         </div>
         <div class="card-body">
           <!-- Passkeys -->
+
           <div class="form-group">
             <label>Enable Passkeys <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
@@ -329,7 +334,7 @@ if (!$totpDisabled) {
                 <div class="form-check form-switch">
 
                   <label class="switch switch-text switch-success">
-                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) {
+                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) { echo 'checked="true"';
                                                                                                                     } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
@@ -425,19 +430,6 @@ if (!$totpDisabled) {
           <div class="form-group">
             <label>Allow Passwordless Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $email_login ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
 
-
-            <span class="float-end offset-switch">
-              <div class="form-check form-switch">
-                <label class="switch switch-text switch-success">
-
-                  <input id="email_login" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Email Login" <?php if ($settings->email_login == 1) {
-                                                                                                                                                echo 'checked="true"';
-                                                                                                                                              } ?>>
-              </div>
-              <span data-on="Yes" data-off="No" class="switch-label"></span>
-              <span class="switch-handle"></span>
-              </label>
-            </span>
             <select id="email_login" class="form-control ajxnum" data-desc="Email Login" name="email_login">
               <option value="0" <?php if ($settings->email_login == 0) {
                                   echo 'selected="selected"';
