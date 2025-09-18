@@ -1,14 +1,8 @@
 <?php
 $errors = [];
 $successes = [];
-$ignore = [];
 $w = Input::get("w");
-if ($w != "") {
-  $ips = $db->query("SELECT * FROM us_ip_whitelist")->results();
-  foreach ($ips as $i) {
-    $ignore[] = $i->ip;
-  }
-}
+$token = Token::generate();
 ?>
 <style>
   tfoot input {
@@ -33,11 +27,10 @@ if ($w != "") {
 </div>
 
 <p>These logs are updated every time someone tries to access a page that they do not have permission to access. Note that this could be because they are logged out, from a bad redirect, or many other causes other than someone attempting to hack your system.</p>
-<!-- <a href='admin.php?view=logsman'>Go to Logs Manager</a> -->
-<?php resultBlock($errors, $successes);
-$logs = $db->query("SELECT * FROM audit ORDER BY id DESC LIMIT 5000")->results(); ?>
-<div class="card">
 
+<?php resultBlock($errors, $successes); ?>
+
+<div class="card">
   <div class="card-body table-sm table-responsive">
     <table id="seclogstable" class='table table-hover table-striped table-list-search display'>
       <thead>
@@ -50,34 +43,6 @@ $logs = $db->query("SELECT * FROM audit ORDER BY id DESC LIMIT 5000")->results()
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($logs as $m) {
-          if (in_array($m->ip, $ignore)) {
-            continue;
-          }
-        ?>
-          <tr>
-            <td><?= $m->id ?></td>
-            <td><?php
-                if ($m->user > 0) {
-                  echouser($m->user);
-                } else {
-                  $q = $db->query("SELECT * FROM us_ip_list WHERE ip = ? ORDER BY id DESC", array($m->ip));
-                  $c = $q->count();
-                  if ($c > 0) {
-                    $f = $q->first();
-                    echo "IP last used by ";
-                    echouser($f->user_id);
-                  } else {
-                    echo "<span style='color:red'>Unknown IP</span>";
-                  }
-                }
-                ?></td>
-
-            <td><?php echopage($m->page); ?></td>
-            <td><?= $m->ip ?></td>
-            <td><?= $m->timestamp ?></td>
-          </tr>
-        <?php } ?>
       </tbody>
     </table>
   </div>
@@ -86,14 +51,28 @@ $logs = $db->query("SELECT * FROM audit ORDER BY id DESC LIMIT 5000")->results()
 <script type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
 <script>
   $(document).ready(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const whitelistFilter = urlParams.get('w') || '';
+
     $('#seclogstable').DataTable({
-      "pageLength": 25,
-      "stateSave": true,
-      "aLengthMenu": [
-        [25, 50, 100, -1],
-        [25, 50, 100, 250, 500]
-      ],
-      "aaSorting": []
+      pageLength: 25,
+      stateSave: true,
+      aLengthMenu: [ [25, 50, 100, -1], [25, 50, 100, "All"] ],
+      aaSorting: [],
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "<?= $us_url_root ?>users/parsers/ssp_security_logs.php",
+        type: "GET",
+        data: {
+          token: "<?= $token ?>",
+          w: whitelistFilter
+        }
+      },
+      // Disable sorting on columns that don't make sense to sort
+      columnDefs: [
+        { "targets": [1], "orderable": false } // User column might be complex to sort
+      ]
     });
   });
 </script>

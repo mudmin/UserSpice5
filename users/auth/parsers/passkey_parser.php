@@ -86,7 +86,7 @@ try {
     }
     $csrf = $data['csrf'] ?? null;
     if (!$csrf || !Token::check($csrf)) {
-        throw new Exception(lang("CSRF_ERROR" ));
+        throw new Exception(lang("CSRF_ERROR"));
     }
 
     // Apply security validation
@@ -227,19 +227,29 @@ try {
                 $authenticatorSelection = [];
                 $authSel = $publicKeyCredentialCreationOptions->authenticatorSelection;
 
-                if ($authSel->authenticatorAttachment !== null) {
-                    $authenticatorSelection['authenticatorAttachment'] = $authSel->authenticatorAttachment;
+                if (is_object($authSel)) {
+                    if (property_exists($authSel, 'authenticatorAttachment') && $authSel->authenticatorAttachment !== null) {
+                        $authenticatorSelection['authenticatorAttachment'] = $authSel->authenticatorAttachment;
+                    }
+
+                    if (property_exists($authSel, 'requireResidentKey') && $authSel->requireResidentKey !== null) {
+                        $authenticatorSelection['requireResidentKey'] = (bool)$authSel->requireResidentKey;
+                    }
+
+                    if (property_exists($authSel, 'userVerification') && $authSel->userVerification !== null) {
+                        $authenticatorSelection['userVerification'] = $authSel->userVerification;
+                    }
+
+                    if (property_exists($authSel, 'residentKey') && $authSel->residentKey !== null) {
+                        $authenticatorSelection['residentKey'] = $authSel->residentKey;
+
+
+                        if (!isset($authenticatorSelection['requireResidentKey'])) {
+                            $authenticatorSelection['requireResidentKey'] = ($authSel->residentKey === 'required');
+                        }
+                    }
                 }
-                if ($authSel->requireResidentKey !== null) {
-                    $authenticatorSelection['requireResidentKey'] = $authSel->requireResidentKey;
-                }
-                if ($authSel->userVerification !== null) {
-                    $authenticatorSelection['userVerification'] = $authSel->userVerification;
-                }
-                // Check if residentKey property exists and is not null
-                if (property_exists($authSel, 'residentKey') && $authSel->residentKey !== null) {
-                    $authenticatorSelection['residentKey'] = $authSel->residentKey;
-                }
+
 
                 // Convert for JSON response
                 $response = [

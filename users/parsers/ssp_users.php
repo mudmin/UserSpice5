@@ -2,7 +2,7 @@
 require_once '../init.php';
 
 // Security Checks
-if (!in_array($user->data()->id, $master_account)) { die(); }
+if (!hasPerm(2)) { die(); }
 if (!Token::check(Input::get('token'))) { die('A token error has occurred.'); }
 
 $params = [];
@@ -15,7 +15,8 @@ $tables = "users AS u LEFT JOIN user_permission_matches AS upm ON u.id = upm.use
 
 // Global Search
 if (!empty($_GET['search']['value'])) {
-    $searchTerm = '%' . $_GET['search']['value'] . '%';
+    $val = Input::sanitize($_GET['search']['value']);
+    $searchTerm = '%' . $val . '%';
     $where .= " AND (u.username LIKE ? OR u.fname LIKE ? OR u.lname LIKE ? OR u.email LIKE ?)";
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
@@ -39,17 +40,23 @@ if (isset($_GET['order'][0]['column'])) {
         6 => 'perms',
         // Columns 1 (icon) and 7 (status) are not sortable from the DB
     ];
-    $colIndex = $_GET['order'][0]['column'];
+    $colIndex = (int)Input::sanitize($_GET['order'][0]['column']);
     if (array_key_exists($colIndex, $columns)) {
         $col = $columns[$colIndex];
-        $dir = ($_GET['order'][0]['dir'] === 'asc') ? 'ASC' : 'DESC';
+        $direction = Input::sanitize($_GET['order'][0]['dir']);
+        $dir = ($direction === 'asc') ? 'ASC' : 'DESC';
         $order = "ORDER BY {$col} {$dir}";
     }
+} else {
+    // Default sort: users by ID ascending
+    $order = "ORDER BY u.id ASC";
 }
 
 // Limit
 if (isset($_GET['start']) && $_GET['length'] != -1) {
-    $limit = "LIMIT " . (int)$_GET['start'] . ", " . (int)$_GET['length'];
+    $start = (int)Input::sanitize($_GET['start']);
+    $length = (int)Input::sanitize($_GET['length']);
+    $limit = "LIMIT {$start}, {$length}";
 }
 
 // Final Query
@@ -106,8 +113,9 @@ foreach ($userData as $v1) {
 
 // Output
 header('Content-Type: application/json');
+$draw = isset($_GET['draw']) ? (int)Input::sanitize($_GET['draw']) : 0;
 echo json_encode([
-    "draw" => isset($_GET['draw']) ? (int)$_GET['draw'] : 0,
+    "draw" => $draw,
     "recordsTotal" => $totalRecords,
     "recordsFiltered" => $totalFiltered,
     "data" => $data

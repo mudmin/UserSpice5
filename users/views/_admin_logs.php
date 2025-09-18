@@ -92,13 +92,14 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   <div class="card-body">
     <table id="logstable" class='table table-hover table-striped table-list-search display'>
       <thead>
-        <th>ID</th>
-        <th>IP</th>
-        <th>User (ID)</th>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Note</th>
-        <th></th>
+        <th class="text-start">ID</th>
+        <th class="text-start">IP</th>
+        <th class="text-start">User (ID)</th>
+        <th class="text-start">Cloak From</th>
+        <th class="text-start">Date</th>
+        <th class="text-start">Type</th>
+        <th class="text-start">Note</th>
+        <th class="text-start">Data</th>
       </thead>
       <tbody>
         </tbody>
@@ -106,19 +107,17 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   </div>
 </div>
 <div class="modal" id="logMetadata" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Log ID #<span id="logMetadataID"></span></h5>
-        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="logMetadataBody">
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -193,7 +192,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
       },
       // Disable sorting on the last two columns
       columnDefs: [
-        { "targets": [5, 6], "orderable": false }
+        { "targets": [6, 7], "orderable": false }
       ]
     });
     });

@@ -674,7 +674,7 @@ public function query($sql, $params = array())
 			if (!$this->_pdo) return false;
 			$this->_pdo->query('SELECT 1');
 			return true;
-		} catch (PDOException) {
+		} catch (PDOException $e){
 			return false;
 		}
 	}

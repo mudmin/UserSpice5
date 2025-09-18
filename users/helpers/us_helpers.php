@@ -455,6 +455,10 @@ if (!function_exists('logger')) {
       'metadata' => $metadata,
     ];
 
+    if(isset($_SESSION['cloak_from']) && $_SESSION['cloak_from'] > 0){
+      $fields['cloak_from'] = (int) $_SESSION['cloak_from'];
+    }
+
     $db->insert('logs', $fields);
     $lastId = $db->lastId();
 

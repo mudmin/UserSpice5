@@ -160,6 +160,7 @@ foreach ($validation->errors() as $error) {
           </div>
         </div>
         <div class="modal-footer">
+          <?=tokenHere();?>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <input class='btn btn-primary' type='submit' id="addUser" name="addUser" value='Add User' />
         </div>
