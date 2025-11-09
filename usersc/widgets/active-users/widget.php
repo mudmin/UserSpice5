@@ -13,7 +13,7 @@
 <?php
 global $chartsLoaded;
 if($chartsLoaded !="true"){ ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <?php }
 $top = $db->query("SELECT id, fname, lname, logins FROM users ORDER BY logins DESC LIMIT 6")->results(true);
 shuffle($top);
@@ -26,7 +26,7 @@ foreach($top as $t){
 
 ?>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   const ctx = document.getElementById('myChart');
   ctx.height = 100;
   new Chart(ctx, {

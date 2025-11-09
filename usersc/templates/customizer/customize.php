@@ -726,7 +726,7 @@ function renderInputField($name, $set)
 </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   document.addEventListener('DOMContentLoaded', function() {
     // Accordion handling using Bootstrap's collapse events
 
@@ -896,7 +896,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';</
   }
 </style>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   document.addEventListener('DOMContentLoaded', function() {
     const wideModals = document.querySelectorAll('.modal-dialog.modal-xl');
     
