@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -32,7 +32,6 @@ class Input {
             break;
         }
     }
-
 
     /**
      * Gets an item from $_POST or $_GET.

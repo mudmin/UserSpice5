@@ -116,11 +116,11 @@ if (!empty($_POST)) {
                         <tbody>
                             <?php foreach ($searchResults as $result) { ?>
                                 <tr>
-                                    <td><?= hed($result['timestamp']) ?></td>
-                                    <td class="fetchUser text-primary" data-uid="<?= $result['user_id'] ?>"><?= hed($result['user_id']) ?></td>
-                                    <td><?= hed($result['ip']) ?></td>
-                                    <td><small><?= hed($result['full_url'] ?? $result['page']) ?></small></td>
-                                    <td><?= hed($result['request_method']) ?></td>
+                                    <td><?= safeReturn($result['timestamp']) ?></td>
+                                    <td class="fetchUser text-primary" data-uid="<?= (int)$result['user_id'] ?>><?= safeReturn($result['user_id']) ?></td>
+                                    <td><?= safeReturn($result['ip']) ?></td>
+                                    <td><small><?= safeReturn($result['full_url'] ?? $result['page']) ?></small></td>
+                                    <td><?= safeReturn($result['request_method']) ?></td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
                                             data-bs-target="#detailsModal<?= md5($result['timestamp'] . $result['ip']) ?>">View</button>
@@ -137,15 +137,15 @@ if (!empty($_POST)) {
                                                         <div class="row mb-3">
                                                             <div class="col-md-4">
                                                                 <strong>File:</strong><br>
-                                                                <?= hed($result['_file']) ?>
+                                                                <?= safeReturn($result['_file']) ?>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <strong>Time:</strong><br>
-                                                                <?= hed($result['timestamp']) ?>
+                                                                <?= safeReturn($result['timestamp']) ?>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <strong>User ID:</strong><br>
-                                                                <?= hed($result['user_id']) ?>
+                                                                <?= safeReturn($result['user_id']) ?>
                                                             </div>
                                                         </div>
 
@@ -155,34 +155,34 @@ if (!empty($_POST)) {
                                                         <div class="row mb-3">
                                                             <div class="col-md-12">
                                                                 <strong>Full URL:</strong><br>
-                                                                <?= hed($result['full_url'] ?? $result['page']) ?>
+                                                                <?= safeReturn($result['full_url'] ?? $result['page']) ?>
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
                                                             <div class="col-md-12">
                                                                 <strong>User Agent:</strong><br>
-                                                                <?= hed($result['user_agent']) ?>
+                                                                <?= safeReturn($result['user_agent']) ?>
                                                             </div>
                                                         </div>
 
                                                         <?php if (!empty($result['get_data'])) { ?>
                                                             <h6>GET Data:</h6>
-                                                            <pre><?= hed(json_encode($result['get_data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                            <pre><?= safeReturn(json_encode($result['get_data'], JSON_PRETTY_PRINT)) ?></pre>
                                                         <?php } ?>
 
                                                         <?php if (!empty($result['post_data'])) { ?>
                                                             <h6>POST Data:</h6>
-                                                            <pre><?= hed(json_encode($result['post_data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                            <pre><?= safeReturn(json_encode($result['post_data'], JSON_PRETTY_PRINT)) ?></pre>
                                                         <?php } ?>
 
                                                         <?php if (!empty($result['json_data'])) { ?>
                                                             <h6>JSON Data:</h6>
-                                                            <pre><?= hed(json_encode($result['json_data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                            <pre><?= safeReturn(json_encode($result['json_data'], JSON_PRETTY_PRINT)) ?></pre>
                                                         <?php } ?>
 
                                                         <?php if (!empty($result['additional_data'])) { ?>
                                                             <h6>Additional Data:</h6>
-                                                            <pre><?= hed(json_encode($result['additional_data'], JSON_PRETTY_PRINT)) ?></pre>
+                                                            <pre><?= safeReturn(json_encode($result['additional_data'], JSON_PRETTY_PRINT)) ?></pre>
                                                         <?php } ?>
                                                     </div>
                                                 </div>
@@ -277,7 +277,7 @@ if (!empty($_POST)) {
     </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     $(document).on('click', '[data-bs-target="#helpModal"]', function() {
         $('#helpModal').modal('show');
     });

@@ -47,7 +47,7 @@ if (!empty($_POST)) {
         $successes[] = "Cron Added";
         logger($user->data()->id, "Cron Manager", "Added cron named $name.");
       } catch (Exception $e) {
-        die($e->getMessage());
+        logger(null, 'Exception Caught', Input::sanitize($e->getMessage())); die("A system error occurred. We apologize for the inconvenience. Logging is available.");
       }
     }
   }
@@ -122,13 +122,13 @@ $count = $query->count();
   A cron job is an automated task which allows you to perform powerful tasks without your interaction. Before implementing cron jobs,
   you want to do some thinking about security. In almost all circumstances, you do not want someone to be able to type <?php 
   $scheme = isHTTPSConnection() ? 'https' : 'http';
-  echo $scheme . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php';
+  echo $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
   ?>
   and run a bunch of commands on your server.<br><br>
 
   The recommended way of implementing cron jobs is...<br>
   Step 1: Go into your server and set your cron job to fire off to <?php 
-  echo $scheme . '://' . $_SERVER['HTTP_HOST'] . $us_url_root . 'users/cron/cron.php';
+  echo $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
   ?> every few minutes.<br>
   Step 2: Go into <a href="admin.php?view=logs">the system logs</a> and see which ip address was rejected for trying to do a cron job.<br>
   Step 3: Then go into <a href="admin.php?view=general">the admin dashboard</a> and set that IP address in the 'Only allow cron jobs from the following IP' box.<br>
@@ -166,8 +166,8 @@ $count = $query->count();
   </div>
 </div>
 
-<script type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js?v2"></script>
-<script type="text/javascript">
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js?v2"></script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
   function messages(data) {
     data = JSON.parse(data);
     $('#messages').removeClass();

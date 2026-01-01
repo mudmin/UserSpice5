@@ -234,7 +234,7 @@ $db->query("DELETE FROM us_ip_blacklist WHERE expires IS NOT NULL AND expires < 
   </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   $(document).ready(function() {
     $('.removeWhite').on('click', function(e) {
       $('.white').prop('checked', $(e.target).prop('checked'));

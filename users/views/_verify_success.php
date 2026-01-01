@@ -18,7 +18,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-if($settings->no_passwords == 1){
+// Auto-login if passwords are not allowed (either fully disabled or localhost-only and not on localhost)
+if(!passwordsAllowed($settings->no_passwords)){
 $user = $verify;
 $user->login();
 $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';

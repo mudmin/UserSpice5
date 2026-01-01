@@ -1,4 +1,6 @@
 <?php
+$hooks = getMyHooks(['page' => 'admin.php?view=permission']);
+includeHook($hooks, 'pre');
 $validation = new Validate();
 $permission_exempt = array(1, 2);
 $manage = Input::get('manage');
@@ -15,6 +17,7 @@ if (!empty($_POST)) {
     if (!Token::check($token)) {
         include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
     }
+     includeHook($hooks, 'post');
 
     if (!empty($_POST['updatePages'])) {
         $add = Input::get('add');
@@ -98,7 +101,10 @@ if (!empty($_POST)) {
 
 
 $perms = $db->query("SELECT * FROM permissions ORDER BY id")->results();
-$userCount = $db->query("SELECT id FROM users")->count();
+$userCount = $db->query("SELECT COUNT(id) as count FROM users")->first()->count;
+
+$maxUsers = 5000;
+includeHook($hooks, 'body');
 ?>
 
 
@@ -133,15 +139,14 @@ $userCount = $db->query("SELECT id FROM users")->count();
         $c = $q->count();
         if ($c > 0) {
             $perm = $q->first();
-            $usersQ = $db->query("SELECT u.id,u.fname, u.lname, u.email,
-            CASE WHEN p.permission_id is null THEN 0 ELSE 1 END AS hasPerm
-            FROM users AS u
-            LEFT JOIN user_permission_matches AS p ON p.user_id = u.id AND p.permission_id = ?
-            GROUP BY u.id
-            ", [$manage]);
-
-            $usersC = $usersQ->count();
-            if ($usersC <= 5000) {
+            // Check user count BEFORE running the expensive join query
+            if ($userCount <= $maxUsers) {
+                $usersQ = $db->query("SELECT u.id,u.fname, u.lname, u.email,
+                CASE WHEN p.permission_id is null THEN 0 ELSE 1 END AS hasPerm
+                FROM users AS u
+                LEFT JOIN user_permission_matches AS p ON p.user_id = u.id AND p.permission_id = ?
+                GROUP BY u.id
+                ", [$manage]);
                 $users = $usersQ->results();
             }
         ?>
@@ -159,6 +164,9 @@ $userCount = $db->query("SELECT id FROM users")->count();
                         <label for="name">Permission Description</label>
                         <input type="text" name="descrip" value="<?= $perm->descrip ?>" class="form-control">
                     </div>
+                    <?php 
+                    includeHook($hooks, 'form');
+                    ?>
                     <div class="col-12 col-md-4">
 
 
@@ -178,7 +186,7 @@ $userCount = $db->query("SELECT id FROM users")->count();
     </div>
 
 
-<?php if ($usersC <= 5000) { ?>
+<?php if ($userCount <= $maxUsers) { ?>
 
     <h3 class="text-center">User Permissions</h3>
     <form class="" action="" method="post">
@@ -274,9 +282,15 @@ $userCount = $db->query("SELECT id FROM users")->count();
         </div>
     </form>
 <?php
-            } else {
-                echo "<b>User management on this page is disabled because you have more than 5000 users</b>";
-            }
+            } else { ?>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>User management disabled</strong><br>
+                        This feature is unavailable because you have more than <?= number_format($maxUsers) ?> users (current: <?= number_format($userCount) ?>).
+                    </div>
+                </div>
+            <?php }
         }
 ?>
 
@@ -379,8 +393,11 @@ if (is_numeric($manage)) {
                 </div>
             </div>
     </form>
-<?php } ?>
-<script>
+<?php 
+    includeHook($hooks, 'bottom');
+    } 
+?>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     $(document).ready(function() {
         $('.addAll').on('click', function(e) {
             $('.add').prop('checked', $(e.target).prop('checked'));

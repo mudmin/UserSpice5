@@ -43,7 +43,7 @@ if($settings->email_login == 1){
         dir="ltr"
       >
         <span style="font-family:inherit;">
-          <?=htmlspecialchars($verification_code, ENT_QUOTES, 'UTF-8')?>
+          <?=safeReturn($verification_code)?>
         </span>
       </div>
     <?php } ?>

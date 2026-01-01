@@ -1,5 +1,4 @@
 <?php
-
 $hooks = getMyHooks(['page' => 'admin.php?view=general']);
 includeHook($hooks, 'pre');
 $verify_url = $db->query("SELECT verify_url FROM email")->first()->verify_url;
@@ -32,7 +31,7 @@ if (version_compare($min_passkey_version, $phpver) == 1) {
     usError("TOTP is not supported on PHP versions below {$min_passkey_version}. Please upgrade your PHP version to use this feature. It has been disabled.");
     $settings->totp = 0;
   }
-}elseif(!defined('PASSKEY_RP_ID')){
+} elseif (!defined('PASSKEY_RP_ID')) {
   $pkDisabled = true;
   $pkVersionReason = 'rpid';
   $pkDisabledReason = "PASSKEY_RP_ID not defined";
@@ -47,76 +46,76 @@ $totpKeyWarning = '';
 
 // Check if we already disabled TOTP due to PHP version
 if (!$totpDisabled) {
-    // Check if encryption functions are available
-    if (!function_exists('totp_is_crypto_available')) {
-        require_once $abs_us_root . $us_url_root . 'users/includes/encryption.php';
+  // Check if encryption functions are available
+  if (!function_exists('totp_is_crypto_available')) {
+    require_once $abs_us_root . $us_url_root . 'users/includes/encryption.php';
+  }
+
+  if (!totp_is_crypto_available()) {
+    $totpDisabled = true;
+    $totpDisabledReason = "No crypto backend available (need sodium or OpenSSL with AES-256-GCM)";
+
+    // Auto-disable if it was somehow enabled
+    if ($settings->totp > 0) {
+      $db->update('settings', 1, ['totp' => 0]);
+      usError("TOTP has been disabled because no suitable encryption backend is available. Please ensure sodium extension or OpenSSL with AES-256-GCM support is installed.");
+      $settings->totp = 0;
     }
-    
-    if (!totp_is_crypto_available()) {
-        $totpDisabled = true;
-        $totpDisabledReason = "No crypto backend available (need sodium or OpenSSL with AES-256-GCM)";
-        
-        // Auto-disable if it was somehow enabled
-        if ($settings->totp > 0) {
-            $db->update('settings', 1, ['totp' => 0]);
-            usError("TOTP has been disabled because no suitable encryption backend is available. Please ensure sodium extension or OpenSSL with AES-256-GCM support is installed.");
-            $settings->totp = 0;
-        }
-    } else {
-        // Check if key file exists
-        if (!file_exists($totpKeyFile)) {
-            $totpKeyWarning = "<div class='alert alert-warning'>
+  } else {
+    // Check if key file exists
+    if (!file_exists($totpKeyFile)) {
+      $totpKeyWarning = "<div class='alert alert-warning'>
                 <strong>TOTP Key Missing:</strong> The encryption key file <code>usersc/includes/totp_key.php</code> does not exist. 
                 It will be automatically generated when TOTP is first enabled, but you may want to generate it now for testing. 
                 Make sure your <code>usersc/includes/</code> directory is writable.
             </div>";
-        } else {
-            // Key file exists, check if it's valid
-            try {
-                // Load the key file
-                require_once $totpKeyFile;
-                
-                if (!defined('TOTP_ENC_KEY')) {
-                    $totpKeyWarning = "<div class='alert alert-danger'>
+    } else {
+      // Key file exists, check if it's valid
+      try {
+        // Load the key file
+        require_once $totpKeyFile;
+
+        if (!defined('TOTP_ENC_KEY')) {
+          $totpKeyWarning = "<div class='alert alert-danger'>
                         <strong>Invalid TOTP Key File:</strong> The key file exists but TOTP_ENC_KEY is not defined. 
                         You may need to delete <code>usersc/includes/totp_key.php</code> and let it regenerate.
                     </div>";
-                } else {
-                    // Check if the crypto engine is still valid
-                    $currentEngine = totp_get_active_crypto_engine();
-                    $storedEngine = defined('TOTP_CRYPTO_ENGINE') ? TOTP_CRYPTO_ENGINE : 'unknown';
-                    
-                    if (defined('TOTP_FORCE_CRYPTO_ENGINE')) {
-                        $forcedEngine = TOTP_FORCE_CRYPTO_ENGINE;
-                        if ($currentEngine !== $forcedEngine) {
-                            $totpKeyWarning = "<div class='alert alert-warning'>
+        } else {
+          // Check if the crypto engine is still valid
+          $currentEngine = totp_get_active_crypto_engine();
+          $storedEngine = defined('TOTP_CRYPTO_ENGINE') ? TOTP_CRYPTO_ENGINE : 'unknown';
+
+          if (defined('TOTP_FORCE_CRYPTO_ENGINE')) {
+            $forcedEngine = TOTP_FORCE_CRYPTO_ENGINE;
+            if ($currentEngine !== $forcedEngine) {
+              $totpKeyWarning = "<div class='alert alert-warning'>
                                 <strong>TOTP Engine Override:</strong> You have forced crypto engine to '<strong>$forcedEngine</strong>' 
                                 but the available engine is '<strong>$currentEngine</strong>'. This may cause encryption/decryption failures.
                             </div>";
-                        }
-                    } elseif ($currentEngine !== $storedEngine && $storedEngine !== 'unknown') {
-                        $totpKeyWarning = "<div class='alert alert-info'>
+            }
+          } elseif ($currentEngine !== $storedEngine && $storedEngine !== 'unknown') {
+            $totpKeyWarning = "<div class='alert alert-info'>
                             <strong>TOTP Engine Changed:</strong> Your key file was created with '<strong>$storedEngine</strong>' 
                             but the current engine is '<strong>$currentEngine</strong>'. Existing secrets will be automatically 
                             re-encrypted when accessed.
                         </div>";
-                    }
-                    
-                    $totpEncryptionValid = true;
-                }
-            } catch (Exception $e) {
-                $totpKeyWarning = "<div class='alert alert-danger'>
+          }
+
+          $totpEncryptionValid = true;
+        }
+      } catch (Exception $e) {
+        $totpKeyWarning = "<div class='alert alert-danger'>
                     <strong>TOTP Key Error:</strong> Error loading key file: " . htmlspecialchars($e->getMessage()) . "
                 </div>";
-            }
-        }
-        
-        // Final check - if TOTP is enabled but we don't have valid encryption
-        if ($settings->totp > 0 && !$totpEncryptionValid && empty($totpKeyWarning)) {
-            $totpDisabled = true;
-            $totpDisabledReason = "Encryption validation failed";
-        }
+      }
     }
+
+    // Final check - if TOTP is enabled but we don't have valid encryption
+    if ($settings->totp > 0 && !$totpEncryptionValid && empty($totpKeyWarning)) {
+      $totpDisabled = true;
+      $totpDisabledReason = "Encryption validation failed";
+    }
+  }
 }
 
 ?>
@@ -161,20 +160,31 @@ if (!$totpDisabled) {
             </div>
           </div>
 
-          <!-- User Manager Search Engine -->
           <div class="form-group">
-            <label>User Manager Search Engine <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="If you have a lot of users, you may not want to load them all when you visit the user manager. Turning this feature on will allow you to search for the users you wish to manage instead of displaying them all. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
-                <div class="form-check form-switch">
-                  <input id="uman_search" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="User Manager Search" <?php if ($settings->uman_search == 1) {
-                                                                                                                                                        echo 'checked="true"';
-                                                                                                                                                      } ?>>
-                </div>
-                <span data-on="Yes" data-off="No" class="switch-label"></span>
-                <span class="switch-handle"></span>
-              </label>
-            </span>
+            <label>Max users before User Manager Search Engine turns on.
+            <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="If you have a lot of users, you may see performance issues with the datatables on the user manager.  Setting this number below your current number of users will turn on the search engine."><i class="fa fa-question-circle offset-circle"></i></a>
+          <small class="ps-2">Current user count is <span class="text-success"><?= $db->query("SELECT count(*) as counter from users")->first()->counter; ?></span></small>
+          </label>
+
+            <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="Max users for datatables" name="max_users_dt" id="max_users_dt" value="<?= $settings->max_users_dt; ?>">
+          </div>
+
+          <!-- Social Login Location -->
+          <div class="form-group">
+            <label>Social Login Location<a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Determines if you want your social login / passkey buttons at the top or bottom of your login and registration pages"><i class="fa fa-question-circle offset-circle"></i></a></label>
+
+            <select id="social_login_location" class="form-control ajxnum" data-desc="Social Login Location" name="social_login_location">
+              <option <?php if ($settings->social_login_location == 0) {
+                        echo "selected='selected'";
+                      } ?> value="0">Top of Forms</option>
+
+              <option <?php if ($settings->social_login_location == 1) {
+                        echo "selected='selected'";
+                      } ?> value="1">Bottom of Forms</option>
+
+
+            </select>
+
           </div>
 
           <!-- Site Offline -->
@@ -192,6 +202,7 @@ if (!$totpDisabled) {
               </label>
             </span>
           </div>
+
         </div>
       </div>
 
@@ -216,8 +227,8 @@ if (!$totpDisabled) {
               </label>
             </span>
           </div>
-          <?php 
-          if(!isset($og_container_open_class )){
+          <?php
+          if (!isset($og_container_open_class)) {
             $og_container_open_class = $settings->container_open_class;
           }
           ?>
@@ -334,33 +345,34 @@ if (!$totpDisabled) {
                 <div class="form-check form-switch">
 
                   <label class="switch switch-text switch-success">
-                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) { echo 'checked="true"';
-                                                                                                                    } ?>>
+                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) {
+                                                                                                                                            echo 'checked="true"';
+                                                                                                                                          } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
                 </label>
               <?php } ?>
             </span>
-            <?php if($pkDisabled && isset($rpidWarning)) {
+            <?php if ($pkDisabled && isset($rpidWarning)) {
               echo $rpidWarning;
             } ?>
           </div>
 
-<!-- TOTP -->
+          <!-- TOTP -->
           <div class="form-group">
-            <label>Enable TOTP (Two-Factor Authentication) 
-            <?php  
+            <label>Enable TOTP (Two-Factor Authentication)
+              <?php
 
-            if ($totpEncryptionValid) {
+              if ($totpEncryptionValid) {
                 $currentEngine = totp_get_active_crypto_engine();
                 echo "<span class='text-success mt-2'><small><i class='fa fa-check-circle'></i> Encryption ready (using: $currentEngine)</small></span>";
-            }else{
+              } else {
                 echo "<span class='text-danger mt-2'><small><i class='fa fa-exclamation-triangle'></i> Encryption not ready. See <a href='{$us_url_root}users/admin.php?view=security' target='_blank'>security dashboard</a>.</small></span>";
-            }
-            ?>
-            <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Allows users to enable Time-based One-Time Password (TOTP) two-factor authentication for their accounts. This does not force it, but makes the option available on their user settings page."><i class="fa fa-question-circle offset-circle"></i></a>
-          </label>
+              }
+              ?>
+              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Allows users to enable Time-based One-Time Password (TOTP) two-factor authentication for their accounts. This does not force it, but makes the option available on their user settings page."><i class="fa fa-question-circle offset-circle"></i></a>
+            </label>
 
             <?php if ($totpDisabled) { ?>
               <span class="float-end">
@@ -380,36 +392,36 @@ if (!$totpDisabled) {
               </select>
             <?php } ?>
 
-            <?php 
+            <?php
             // Show TOTP key/encryption warnings
             if (!empty($totpKeyWarning)) {
-                echo $totpKeyWarning;
-              
+              echo $totpKeyWarning;
             }
-            
+
             // Show site name warning
             if ($settings->site_name == "UserSpice") { ?>
               <div class="text-primary mt-2"><small><b>Note:</b> TOTP uses your Site Name, which is currently set to <span class="fw-bold">UserSpice</span>. You may want to consider changing that to make your site easier to find in the authenticator app.</small></div>
-            <?php } 
-            
+            <?php }
+
 
             ?>
           </div>
 
           <!-- Remove Password Logins -->
           <div class="form-group">
-            <label>Remove Password Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <span class="float-end offset-switch">
-              <div class="form-check form-switch">
-                <label class="switch switch-text switch-success">
-                  <input id="no_passwords" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="No Passwords Feature" <?php if ($settings->no_passwords == 1) {
-                                                                                                                                                          echo 'checked="true"';
-                                                                                                                                                        } ?>>
-              </div>
-              <span data-on="Yes" data-off="No" class="switch-label"></span>
-              <span class="switch-handle"></span>
-              </label>
-            </span>
+            <label>Password Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <select id="no_passwords" class="form-control ajxnum" data-desc="Password Logins" name="no_passwords">
+              <option <?php if ($settings->no_passwords == 0) {
+                        echo "selected='selected'";
+                      } ?> value="0">Enabled</option>
+              <option <?php if ($settings->no_passwords == 1) {
+                        echo "selected='selected'";
+                      } ?> value="1">Disabled</option>
+              <option <?php if ($settings->no_passwords == 2) {
+                        echo "selected='selected'";
+                      } ?> value="2">Disabled (except localhost)</option>
+            </select>
+            <small class="text-muted">When set to "Disabled (except localhost)", password logins are only allowed from 127.0.0.1 or ::1</small>
           </div>
 
           <!-- passwordless code length -->
@@ -495,14 +507,14 @@ if (!$totpDisabled) {
             </select>
           </div>
 
-                    <div class="form-group">
+          <div class="form-group">
             <label>Enable OAuth Server <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This UserSpice install can act as a centralized OAuth server for other applications.  These can be UserSpice, WordPress or dozens of other applications and languages. Default: Off."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
                 <label class="switch switch-text switch-success">
                   <input id="oauth_server" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="OAuth Server" <?php if ($settings->oauth_server == 1) {
-                                                                                                                                                            echo 'checked="true"';
-                                                                                                                                                          } ?>>
+                                                                                                                                                  echo 'checked="true"';
+                                                                                                                                                } ?>>
               </div>
               <span data-on="Yes" data-off="No" class="switch-label"></span>
               <span class="switch-handle"></span>
@@ -622,11 +634,11 @@ if (!$totpDisabled) {
   <input type="hidden" name="csrf" value="<?= Token::generate(); ?>" />
 </form>
 <?php if (in_array($user->data()->id, $master_account)) { ?>
-  <script type="text/javascript">
+  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
     $(document).ready(function() {
 
       $('#no_passwords').change(function() {
-        if ($(this).is(':checked')) {
+        if ($(this).val() == '1' || $(this).val() == '2') {
           alert("<?= $no_passwords ?>");
         }
       });

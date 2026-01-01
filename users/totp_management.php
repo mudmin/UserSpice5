@@ -1,11 +1,11 @@
 <?php
-$noMaintenanceRedirect = true; 
+$noMaintenanceRedirect = true;
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 //if totp active and php >= 8.2.0
-if($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
+if ($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
     require_once $abs_us_root . $us_url_root . 'users/auth/TOTPHandler.php';
-}else{
+} else {
     $settings->totp = 0; // Disable TOTP if not supported
     $currentSessionName = $config['session']['session_name'];
 }
@@ -31,35 +31,122 @@ if (isset($settings->totp) && $settings->totp > 0) {
     exit;
 }
 
+// Check for pending action after verification
+// Execute it if we just came from verification and it's still valid
+$executePendingAction = false;
+$pendingActionToExecute = null;
+$pendingToken = null;
+
+if (isset($_SESSION[INSTANCE . '_totp_pending']) &&
+    isset($_SESSION[INSTANCE . '_totp_verified']) &&
+    empty($_POST)) { // Only execute if this is a GET request (no form submission)
+
+    $pending = $_SESSION[INSTANCE . '_totp_pending'];
+    $now = time();
+
+    // Validate structure
+    if (is_array($pending) &&
+        isset($pending['action']) &&
+        isset($pending['token']) &&
+        isset($pending['exp'])) {
+
+        // Check expiry (fail-safe: expired = invalid)
+        if ($now <= $pending['exp']) {
+            // Mark as in-progress to prevent replay
+            if (!isset($pending['in_progress'])) {
+                $_SESSION[INSTANCE . '_totp_pending']['in_progress'] = true;
+
+                $executePendingAction = true;
+                $pendingActionToExecute = $pending['action'];
+                $pendingToken = $pending['token'];
+
+                // Clear any stale error messages
+                unset($_SESSION['totp_error_message']);
+            } else {
+                // Already in progress - potential replay attempt
+                logger($userId, "TOTP_Security", "Attempted replay of pending action");
+                unset($_SESSION[INSTANCE . '_totp_pending']);
+            }
+        } else {
+            // Expired
+            logger($userId, "TOTP_Security", "Pending action expired");
+            unset($_SESSION[INSTANCE . '_totp_pending']);
+        }
+    } else {
+        // Invalid structure
+        unset($_SESSION[INSTANCE . '_totp_pending']);
+    }
+}
+
+// Require TOTP validation for sensitive actions
+// For highly sensitive actions (disable, regenerate), always require fresh verification
+if ($totpHandler->isTOTPEnabled($userId) && !empty($_POST['totp_action'])) {
+    $action = Input::get('totp_action');
+    $blocked_actions = ['disable', 'regenerate_backup_codes'];
+
+    if (in_array($action, $blocked_actions)) {
+        // Create atomic pending action with secure token
+        $_SESSION[INSTANCE . '_totp_pending'] = [
+            'action' => $action,
+            'token'  => bin2hex(random_bytes(24)), // 48-character hex token
+            'exp'    => time() + 300 // 5 minutes from now
+        ];
+        $_SESSION[INSTANCE . '_totp_return_to'] = Server::get('REQUEST_URI');
+
+        usError("MFA verification required before performing this action.");
+        Redirect::to($us_url_root . 'users/totp_verification.php?force_reverify=1');
+        die();
+    }
+}
+
 $errors = [];
 $successes = [];
 
-// TOTP Actions Handling
+$baseRedirectUrl = 'totp_management.php';
+$anchor = '#totp_management_section_anchor';
+
+// TOTP Actions Handling - either from POST or from pending action
+$totpAction = null;
+
 if ($totpHandler && !empty($_POST['totp_action'])) {
+    // Regular POST form submission - validate CSRF
     if (!Token::check($_POST['csrf'])) {
         $_SESSION['totp_error_message'] = lang("CSRF_ERROR");
-        Redirect::to('totp_management.php');
+        Redirect::to($baseRedirectUrl);
         exit;
-    } else {
-        $totpAction = Input::get('totp_action');
-        $redirectUrl = 'totp_management.php#totp_management_section_anchor';
+    }
+    $totpAction = Input::get('totp_action');
+} elseif ($executePendingAction && $pendingActionToExecute) {
+    // Pending action after TOTP verification - no CSRF needed (already verified)
+    $totpAction = $pendingActionToExecute;
+}
 
-        switch ($totpAction) {
+if ($totpAction) {
+    switch ($totpAction) {
             case 'init_enable':
                 $_SESSION['totp_secret'] = $totpHandler->generateSecret();
                 $_SESSION['totp_setup_initiated'] = true;
-                 // logger($userId, "TOTP_Setup", "Initiated TOTP setup process via totp_management.php.");
-                Redirect::to($redirectUrl . '&totp_event=setup_initiated');
+                // logger($userId, "TOTP_Setup", "Initiated TOTP setup process via totp_management.php.");
+
+                Redirect::to($baseRedirectUrl . '?totp_event=setup_initiated' . $anchor);
                 break;
 
             case 'verify_and_activate':
                 if (!validateRateLimit('totp_verify_and_activate', $userId)) {
                     $_SESSION['totp_error_message'] = getRateLimitErrorMessage('totp_verify_and_activate');
-                    Redirect::to($redirectUrl);
+
+                    Redirect::to($baseRedirectUrl . $anchor);
                     exit;
                 }
-                
-                if (isset($_SESSION['totp_secret']) && !empty(Input::get('totp_code'))) {
+
+                // Prevent duplicate processing - if secret is missing, user already verified or needs to restart
+                if (!isset($_SESSION['totp_secret'])) {
+                    // Secret already processed or expired - redirect without error
+                    Redirect::to($baseRedirectUrl . $anchor);
+                    exit;
+                }
+
+                if (!empty(Input::get('totp_code'))) {
                     $secret = $_SESSION['totp_secret'];
                     $code = Input::get('totp_code');
                     if ($totpHandler->verifyCode($secret, $code)) {
@@ -70,105 +157,146 @@ if ($totpHandler && !empty($_POST['totp_action'])) {
                                 $_SESSION['totp_backup_codes_to_display'] = $backupCodes;
                                 unset($_SESSION['totp_secret']);
                                 unset($_SESSION['totp_setup_initiated']);
-                                markTotpVerified($userId);                                
-                                 // logger($userId, "TOTP_Setup", "TOTP enabled and verified successfully via totp_management.php.");
-                                Redirect::to($redirectUrl . '&totp_success=1');
+                                // Clear any stale pending actions
+                                unset($_SESSION[INSTANCE . '_totp_pending']);
+                                markTotpVerified($userId);
+                                // logger($userId, "TOTP_Setup", "TOTP enabled and verified successfully via totp_management.php.");
+
+                                Redirect::to($baseRedirectUrl . '?totp_success=1' . $anchor);
+                                exit;
                             } else {
-                                $_SESSION['totp_error_message'] = lang("2FA_FAIL");
+                                $_SESSION['totp_error_message'] = lang("2FA_FAIL") . " 1";
                                 handleAuthFailure('totp_verify_and_activate', $userId);
-                                 // logger($userId, "TOTP_Error", "Failed to activate TOTP status for user after verification in totp_management.php.");
-                                Redirect::to($redirectUrl . '&totp_error=activation_failed');
+                                // logger($userId, "TOTP_Error", "Failed to activate TOTP status for user after verification in totp_management.php.");
+
+                                Redirect::to($baseRedirectUrl . '?totp_error=activation_failed' . $anchor);
                             }
                         } else {
-                            $_SESSION['totp_error_message'] = lang("2FA_FAIL");
+                            $_SESSION['totp_error_message'] = lang("2FA_FAIL") . " 2";
                             handleAuthFailure('totp_verify_and_activate', $userId);
-                             // logger($userId, "TOTP_Error", "Failed to store TOTP secret for user after verification in totp_management.php.");
-                            Redirect::to($redirectUrl . '&totp_error=storage_failed');
+                            // logger($userId, "TOTP_Error", "Failed to store TOTP secret for user after verification in totp_management.php.");
+
+                            Redirect::to($baseRedirectUrl . '?totp_error=storage_failed' . $anchor);
                         }
                     } else {
                         $_SESSION['totp_error_message'] = lang("2FA_INV");
                         handleAuthFailure('totp_verify_and_activate', $userId);
-                        Redirect::to($redirectUrl . '&totp_error=invalid_code&setup_initiated=1');
+
+                        Redirect::to($baseRedirectUrl . '?totp_error=invalid_code&setup_initiated=1' . $anchor);
                     }
                 } else {
-                    $_SESSION['totp_error_message'] = lang("2FA_FAIL");
+                    $_SESSION['totp_error_message'] = lang("2FA_FAIL") . " 3";
                     handleAuthFailure('totp_verify_and_activate', $userId);
                     unset($_SESSION['totp_secret']);
                     unset($_SESSION['totp_setup_initiated']);
-                    Redirect::to($redirectUrl . '&totp_error=missing_data');
+
+                    Redirect::to($baseRedirectUrl . '?totp_error=missing_data' . $anchor);
                 }
                 break;
 
             case 'disable':
-                // Direct disable without password confirmation
+                // Regenerate session ID before state-changing operation (if coming from pending action)
+                if ($executePendingAction) {
+                    session_regenerate_id(true);
+                }
+
+                // Perform the disable operation
                 if ($totpHandler->disableTOTP($userId)) {
                     $_SESSION['totp_success_message'] = lang("REDIR_2FA_DIS");
-                     // logger($userId, "TOTP_Setup", "TOTP disabled by user via totp_management.php.");
+                    logger($userId, "TOTP_Setup", "TOTP disabled by user via totp_management.php.");
+
+                    // Clear all TOTP-related session data
                     unset($_SESSION['totp_secret'], $_SESSION['totp_setup_initiated'], $_SESSION['totp_backup_codes_to_display']);
+                    unset($_SESSION[INSTANCE . '_totp_verified']);
+
+                    // Clear pending action on success
+                    unset($_SESSION[INSTANCE . '_totp_pending']);
                 } else {
                     $_SESSION['totp_error_message'] = lang("2FA_ERR_DISABLE_FAILED");
-                     // logger($userId, "TOTP_Error", "DB error during TOTP disable for user in totp_management.php.");
+                    logger($userId, "TOTP_Error", "DB error during TOTP disable for user in totp_management.php.");
+
+                    // Clear pending action on failure (don't allow retry without re-verifying)
+                    unset($_SESSION[INSTANCE . '_totp_pending']);
                 }
-                Redirect::to($redirectUrl);
+
+                Redirect::to($baseRedirectUrl . "?totp_disabled=1" . $anchor);
                 break;
 
             case 'regenerate_backup_codes':
                 if (!validateRateLimit('totp_regenerate_backup_codes', $userId)) {
                     $_SESSION['totp_error_message'] = getRateLimitErrorMessage('totp_regenerate_backup_codes');
-                    Redirect::to($redirectUrl);
+                    unset($_SESSION[INSTANCE . '_totp_pending']); // Clear on failure
+                    Redirect::to($baseRedirectUrl . $anchor);
                     exit;
                 }
-                
-                // Direct regeneration without password confirmation
+
+                // Regenerate session ID before state-changing operation (if coming from pending action)
+                if ($executePendingAction) {
+                    session_regenerate_id(true);
+                }
+
+                // Perform backup code regeneration
                 $userTotpRecord = $totpHandler->getUserRecord($userId);
                 if ($userTotpRecord && $userTotpRecord->verified == 1) {
                     $newBackupCodes = $totpHandler->generateBackupCodes();
-                    
+
                     // Hash the new backup codes
                     $hashedBackupCodes = [];
                     foreach ($newBackupCodes as $code) {
                         $hashedBackupCodes[] = password_hash($code, PASSWORD_DEFAULT, ['cost' => 10]);
                     }
                     $encodedNewBackupCodes = json_encode($hashedBackupCodes);
-                    
+
                     $updateData = [
                         'backup_codes_h' => $encodedNewBackupCodes,
                         'updated_at' => date("Y-m-d H:i:s")
                     ];
-                    
+
                     if ($db->update('us_totp_secrets', $userTotpRecord->id, $updateData)) {
                         handleAuthSuccess('totp_regenerate_backup_codes', $userId);
                         $_SESSION['totp_backup_codes_to_display'] = $newBackupCodes;
                         $_SESSION['backup_codes_regenerated_message'] = true;
-                         // logger($userId, "TOTP_Setup", "Backup codes regenerated by user via totp_management.php.");
-                        Redirect::to($redirectUrl . '&backup_regenerated=1');
+                        logger($userId, "TOTP_Setup", "Backup codes regenerated by user via totp_management.php.");
+
+                        // Clear pending action on success
+                        unset($_SESSION[INSTANCE . '_totp_pending']);
+
+                        Redirect::to($baseRedirectUrl . '?backup_regenerated=1' . $anchor);
                     } else {
-                        $_SESSION['totp_error_message'] = lang("2FA_FAIL");
+                        $_SESSION['totp_error_message'] = lang("2FA_FAIL") . " 4";
                         handleAuthFailure('totp_regenerate_backup_codes', $userId);
-                         // logger($userId, "TOTP_Error", "DB error during backup code regeneration in totp_management.php: " . $db->errorString());
+                        logger($userId, "TOTP_Error", "DB error during backup code regeneration in totp_management.php: " . $db->errorString());
+
+                        // Clear pending action on failure
+                        unset($_SESSION[INSTANCE . '_totp_pending']);
                     }
                 } else {
-                    $_SESSION['totp_error_message'] = lang("2FA_FAIL");
+                    $_SESSION['totp_error_message'] = lang("2FA_FAIL") . " 5";
                     handleAuthFailure('totp_regenerate_backup_codes', $userId);
+
+                    // Clear pending action on failure
+                    unset($_SESSION[INSTANCE . '_totp_pending']);
                 }
-                Redirect::to($redirectUrl);
+
+                Redirect::to($baseRedirectUrl . $anchor);
                 break;
 
             case 'acknowledge_backup_codes':
                 unset($_SESSION['totp_backup_codes_to_display']);
                 unset($_SESSION['backup_codes_regenerated_message']);
                 $_SESSION['totp_success_message'] = lang("2FA_SUCCESS_BACKUP_ACK");
-                Redirect::to($redirectUrl);
+
+                Redirect::to($baseRedirectUrl . $anchor);
                 break;
 
             case 'cancel_setup':
                 unset($_SESSION['totp_secret']);
                 unset($_SESSION['totp_setup_initiated']);
                 $_SESSION['totp_success_message'] = lang("2FA_SUCCESS_SETUP_CANCELLED");
-                Redirect::to($redirectUrl . '&totp_setup_cancelled=1');
+
+                Redirect::to($baseRedirectUrl . '?totp_setup_cancelled=1' . $anchor);
                 break;
         }
-    }
 }
 
 // Clear action pending if user navigates away (no longer needed but keeping for safety)
@@ -195,12 +323,9 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
             <h1 class="text-center mt-4"><?= lang("ACCT_2FA") ?></h1>
             <div id="totp_management_section_anchor" class="mt-2 border bg-light p-3 p-md-4">
                 <?php
-                if (isset($_SESSION['totp_error_message'])) {
-                    echo '<div class="alert alert-danger">' . $_SESSION['totp_error_message'] . '</div>';
-                    unset($_SESSION['totp_error_message']);
-                }
+
                 if (isset($_SESSION['totp_success_message'])) {
-                    echo '<div class="alert alert-success">' . $_SESSION['totp_success_message'] . '</div>';
+                    echo '<div class="alert alert-success">' . safeReturn($_SESSION['totp_success_message']) . '</div>';
                     unset($_SESSION['totp_success_message']);
                 }
                 echo resultBlock($errors, $successes);
@@ -212,7 +337,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                     <div class="alert alert-warning"><strong><?= lang("GEN_IMPORTANT") ?>:</strong> <?= lang("2FA_BACKUP_CODES_WARNING") ?></div>
                     <ul class="list-group mb-3" style="columns: 2; -webkit-columns: 2; -moz-columns: 2;">
                         <?php foreach ($_SESSION['totp_backup_codes_to_display'] as $backupCode) : ?>
-                            <li class="list-group-item"><code><?= hed($backupCode); ?></code></li>
+                            <li class="list-group-item"><code><?= safeReturn($backupCode); ?></code></li>
                         <?php endforeach; ?>
                     </ul>
                     <form method="POST">
@@ -228,11 +353,11 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                 ?>
                     <h4><?= lang("2FA_SETUP_TITLE") ?></h4>
                     <p><?= lang("2FA_SCAN") ?></p>
-                    <div class="text-center mb-3"><img src="<?= $qrCodeUrl; ?>" alt="TOTP QR Code" class="img-fluid"></div>
+                    <div class="text-center mb-3"><img src="<?= safeReturn($qrCodeUrl); ?>" alt="TOTP QR Code" class="img-fluid"></div>
                     <div class="mb-3">
                         <p><strong><?= lang("2FA_SECRET_KEY_LABEL") ?></strong></p>
                         <div class="input-group">
-                            <input type="text" class="form-control" value="<?= hed($secret); ?>" readonly id="totp-secret">
+                            <input type="text" class="form-control" value="<?= safeReturn($secret); ?>" readonly id="totp-secret">
                             <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('totp-secret')">
                                 <i class="fa fa-copy"></i> Copy
                             </button>
@@ -248,8 +373,8 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                             <div class="form-text"><?= lang("2FA_VERIFY_INFO") ?></div>
                         </div>
                         <button type="submit" class="btn btn-primary"><?= lang("2FA_VERIFY_ACTIVATE_BTN") ?></button>
-                        <a class="btn btn-secondary" href="<?=$us_url_root?>users/account.php"><?= lang("2FA_CANCEL_SETUP_BTN") ?></a>
-               
+                        <a class="btn btn-secondary" href="<?= $us_url_root ?>users/account.php"><?= lang("2FA_CANCEL_SETUP_BTN") ?></a>
+
                     </form>
 
                 <?php elseif ($isTOTPActiveForUser): ?>
@@ -262,7 +387,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                         <form method="POST" style="display:inline-block;">
                             <?= tokenHere(); ?>
                             <input type="hidden" name="totp_action" value="regenerate_backup_codes">
-                            <?php 
+                            <?php
                             $str = lang("2FA_INVALIDATE_WARNING");
                             ?>
                             <button type="submit" class="btn btn-warning" onclick="return confirm('<?= $str ?>')">
@@ -270,7 +395,8 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                             </button>
                         </form>
                         <form method="POST" style="display:inline-block;">
-                            <?php echo tokenHere(); 
+                            <?php 
+                            echo tokenHere();
                             $str = lang("2FA_CONF");
                             ?>
                             <input type="hidden" name="totp_action" value="disable">
@@ -285,7 +411,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                         <i class="fa fa-mobile-alt fa-3x text-muted mb-3"></i>
                         <h4><?= lang("2FA_NOT_ENABLED_INFO") ?></h4>
                         <p class="text-muted"><?= lang("2FA_NOT_ENABLED_EXPLAIN") ?></p>
-                 
+
                     </div>
                     <form method="POST" class="text-center">
                         <?= tokenHere(); ?>
@@ -296,18 +422,18 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                     </form>
                 <?php endif; ?>
             </div>
-            <?php if (Input::get('setup_required') != 1){ ?>
-            <p class="text-center mt-3">
-                <a href="<?= $us_url_root ?>users/account.php" class="btn btn-link">
-                    <i class="fa fa-arrow-left"></i> <?= lang("GEN_BACK_TO_ACCT") ?>
-                </a>
-            </p>
+            <?php if (Input::get('setup_required') != 1) { ?>
+                <p class="text-center mt-3">
+                    <a href="<?= $us_url_root ?>users/account.php" class="btn btn-link">
+                        <i class="fa fa-arrow-left"></i> <?= lang("GEN_BACK_TO_ACCT") ?>
+                    </a>
+                </p>
             <?php } ?>
         </div>
     </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     function copyToClipboard(elementId) {
         const element = document.getElementById(elementId);
         element.select();
@@ -341,7 +467,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                     // Fade out effect
                     alertElement.style.transition = 'opacity 0.5s ease-in-out';
                     alertElement.style.opacity = '0';
-                    
+
                     // Remove from DOM after fade
                     setTimeout(function() {
                         if (alertElement.parentNode) {
@@ -351,13 +477,13 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                 }, delay);
             }
         }
-        
+
         // Auto-hide error messages after 10 seconds
         const errorAlerts = document.querySelectorAll('.alert-danger');
         errorAlerts.forEach(function(alert) {
             autoHideAlert(alert, 10000); // 10 seconds
         });
-        
+
         // Auto-hide success messages after 5 seconds
         const successAlerts = document.querySelectorAll('.alert-success');
         successAlerts.forEach(function(alert) {
@@ -366,7 +492,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
                 autoHideAlert(alert, 5000); // 5 seconds
             }
         });
-        
+
         // Auto-hide warning messages after 8 seconds
         const warningAlerts = document.querySelectorAll('.alert-warning');
         warningAlerts.forEach(function(alert) {

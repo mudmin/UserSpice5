@@ -1,5 +1,5 @@
-<script type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
-<script type="text/javascript">
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
   $(document).ready(function() {
     $('[data-toggle="popover"]').popover();
 

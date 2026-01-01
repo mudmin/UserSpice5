@@ -321,7 +321,7 @@ class RateLimit
 
 	public function getRealIP()
 	{
-		$remoteAddr = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+		$remoteAddr = Server::get('REMOTE_ADDR', 'unknown');
 
 		if (!$this->proxyConfig['behind_reverse_proxy'] || empty($this->proxyConfig['trusted_proxies'])) {
 			return $this->validateIP($remoteAddr, false); // Check without disallowing private ranges

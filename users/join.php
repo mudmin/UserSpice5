@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // error_reporting(E_ALL);
 // ini_set('display_errors', 1);
-ini_set('allow_url_fopen', 1);
+
 header('X-Frame-Options: DENY');
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
@@ -47,10 +47,12 @@ $act = $db->query('SELECT * FROM email')->first()->email_act;
 
 $form_valid = false;
 
+$allowPasswords = passwordsAllowed($settings->no_passwords);
+
 //If you say in email settings that you do NOT want email activation,
 //new users are active in the database, otherwise they will become
 //active after verifying their email.
-if ($act == 1 || $settings->no_passwords == 1) {
+if ($act == 1 || !$allowPasswords) {
     $pre = 0;
 } else {
     $pre = 1;
@@ -111,7 +113,7 @@ if (Input::exists()) {
                   'max' => 100,
             ],
         ];
-        if($settings->no_passwords == 0){
+        if($allowPasswords){
             $valArray['password'] = [
                     'display' => lang('PW_PASS'),
                     'required' => true,
@@ -154,7 +156,7 @@ if (Input::exists()) {
                       'join_vericode_expiry' => $settings->join_vericode_expiry,
                         ];
             
-            if($act == 1 || $settings->no_passwords == 1){
+            if($act == 1 || !$allowPasswords){
                 $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
             }else{
                 $vericode_expiry = date('Y-m-d H:i:s');
@@ -188,17 +190,17 @@ if (Input::exists()) {
                 handleAuthSuccess('registration_attempt', $theNewId, $email, [], [
                     'username' => $username,
                     'email' => $email,
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                    'user_agent' => Server::get('HTTP_USER_AGENT')
                 ]);
 
                 includeHook($hooks, 'post');
-                if ($act == 1 || $settings->no_passwords == 1) {
+                if ($act == 1 || !$allowPasswords) {
                     //Verify email address settings
                     $to = rawurlencode($email);
                     $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
                     $body = email_body('_email_template_verify.php', $params);
                     email($to, $subject, $body);
-                    
+
                 }
             } catch (Exception $e) {
                 // Record failed registration attempt
@@ -206,19 +208,19 @@ if (Input::exists()) {
                     'username_attempted' => $username,
                     'email_attempted' => $email,
                     'error' => $e->getMessage(),
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                    'user_agent' => Server::get('HTTP_USER_AGENT')
                 ]);
                 
                 if ($eventhooks = getMyHooks(['page' => 'joinFail'])) {
                     includeHook($eventhooks, 'body');
                 }
-                die($e->getMessage());
+                logger(null, 'Exception Caught', Input::sanitize($e->getMessage())); die("A system error occurred. We apologize for the inconvenience. Logging is available.");
             }
             if ($form_valid == true) {
               //this allows the plugin hook to kill the post but it must delete the created user
                 include $abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php';
 
-                if ($act == 1 || $settings->no_passwords == 1) {
+                if ($act == 1 || !$allowPasswords) {
                     logger($theNewId, 'User', 'Registration completed and verification email sent.');
 
                     Redirect::to($us_url_root . "users/complete.php?action=thank_you_verify");
@@ -243,7 +245,7 @@ if (Input::exists()) {
           'username_attempted' => $username ?? '',
           'email_attempted' => $email ?? '',
           'validation_errors' => $validation->_errors,
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
       ]);
       
       foreach($validation->_errors as $e){
@@ -273,7 +275,7 @@ if ($settings->registration == 1) {
 includeHook($hooks, 'bottom');
 ?>
 
-<script type="text/javascript">
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
     $(document).ready(function(){
         $('.password_view_control').hover(function () {
             $('#password').attr('type', 'text');

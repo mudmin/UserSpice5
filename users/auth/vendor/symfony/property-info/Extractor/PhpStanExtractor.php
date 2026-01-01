@@ -245,11 +245,12 @@ final class PhpStanExtractor implements PropertyDescriptionExtractorInterface, P
 
     public function getTypeFromConstructor(string $class, string $property): ?Type
     {
-        if (!$tagDocNode = $this->getDocBlockFromConstructor($class, $property)) {
+        $declaringClass = $class;
+        if (!$tagDocNode = $this->getDocBlockFromConstructor($declaringClass, $property)) {
             return null;
         }
 
-        $typeContext = $this->typeContextFactory->createFromClassName($class);
+        $typeContext = $this->typeContextFactory->createFromClassName($class, $declaringClass);
 
         return $this->stringTypeResolver->resolve((string) $tagDocNode->type, $typeContext);
     }
@@ -287,11 +288,11 @@ final class PhpStanExtractor implements PropertyDescriptionExtractorInterface, P
     }
 
     /**
-     * A docblock is splitted into a template marker, a short description, an optional long description and a tags section.
+     * A docblock is split into a template marker, a short description, an optional long description and a tags section.
      *
-     * - The template marker is either empty, or #@+ or #@-.
+     * - The template marker is either empty, #@+ or #@-.
      * - The short description is started from a non-tag character, and until one or multiple newlines.
-     * - The long description (optional), is started from a non-tag character, and until a new line is encountered followed by a tag.
+     * - The long description (optional) is started from a non-tag character, and until a new line is encountered followed by a tag.
      * - Tags, and the remaining characters
      *
      * This method returns the short and the long descriptions.
@@ -374,7 +375,7 @@ final class PhpStanExtractor implements PropertyDescriptionExtractorInterface, P
         ];
     }
 
-    private function getDocBlockFromConstructor(string $class, string $property): ?ParamTagValueNode
+    private function getDocBlockFromConstructor(string &$class, string $property): ?ParamTagValueNode
     {
         try {
             $reflectionClass = new \ReflectionClass($class);
@@ -389,6 +390,7 @@ final class PhpStanExtractor implements PropertyDescriptionExtractorInterface, P
         if (!$rawDocNode = $reflectionConstructor->getDocComment()) {
             return null;
         }
+        $class = $reflectionConstructor->class;
 
         $phpDocNode = $this->getPhpDocNode($rawDocNode);
 

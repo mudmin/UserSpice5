@@ -185,7 +185,7 @@ class Menu {
         @ob_end_flush();
       }
       $html .= "</span>";
-      $html .= "<div class='us_menu_mobile_control' data-target='{$this->menu->id}{$uniq}'><i class='fa fa-bars'></i></div></div>";
+      $html .= "<div class='us_menu_mobile_control' data-target='{$this->menu->id}{$uniq}' data-bs-target='{$this->menu->id}{$uniq}'><i class='fa fa-bars'></i></div></div>";
  
     }
     foreach($items as $item) {
@@ -202,7 +202,7 @@ class Menu {
       $liClass .= $item->li_class ? " $item->li_class": "";
 
       // check if the li should be active (i.e. its URL matches the current page)
-      $currentPage = substr($_SERVER["REQUEST_URI"], strrpos($_SERVER["REQUEST_URI"], "/") + 1);
+      $currentPage = basename(Server::get('REQUEST_URI'));
       $linkPage = substr($item->link, strrpos($item->link, "/") + 1);
 
         if(($this->show_active == 1 || $this->show_active == true) && $currentPage == $linkPage){
@@ -224,7 +224,7 @@ class Menu {
       
       if($hasDropdown) {
         $toggle = "menu_{$item->menu}{$uniq}_dropdown_{$item->id}";
-        $linkAttrs = "id='{$toggle}' role='button' aria-haspopup='true' aria-expanded='false' data-toggle='dropdown' data-target='#{$toggle}'";
+        $linkAttrs = "id='{$toggle}' role='button' aria-haspopup='true' aria-expanded='false' data-toggle='dropdown' data-target='#{$toggle}' data-bs-toggle='dropdown' data-bs-target='#{$toggle}'";
       }
 
       if($item->type == "snippet" && file_exists($abs_us_root . $us_url_root . $item->link)){

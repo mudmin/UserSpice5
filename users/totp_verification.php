@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5 - TOTP Verification Page
+UserSpice  - TOTP Verification Page
 Standalone TOTP verification for users who have TOTP set up but haven't verified this session
 */
 $noMaintenanceRedirect = true; 
@@ -48,6 +48,12 @@ if (!$totpHandler->isTOTPEnabled($userId)) {
         Redirect::to(getTotpReturnUrl());
     }
     exit;
+}
+
+if (!empty($_GET['force_reverify']) && $_GET['force_reverify'] == '1') {
+    if(isset($_SESSION[INSTANCE . '_totp_verified'])) {
+        unset($_SESSION[INSTANCE . '_totp_verified']);
+    }
 }
 
 // Check if already verified
@@ -101,14 +107,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            if ($verified) {
-                handleAuthSuccess('totp_verify', $userId);
-                markTotpVerified($userId);
-                $successes[] = "Verification successful! Redirecting...";
-                
-                // Redirect after a brief delay to show success message
-                echo '<script>setTimeout(function(){ window.location.href = "' . getTotpReturnUrl() . '"; }, 1500);</script>';
-            }
+if ($verified) {
+    handleAuthSuccess('totp_verify', $userId);
+    markTotpVerified($userId);
+    $successes[] = "Verification successful! Redirecting...";
+
+    $nonce = htmlspecialchars($usespice_nonce ?? '', ENT_QUOTES, 'UTF-8');
+    $redirect = htmlspecialchars(getTotpReturnUrl(), ENT_QUOTES, 'UTF-8');
+
+    echo '<script nonce="' . $nonce . '">
+        setTimeout(function () {
+            window.location.href = "' . $redirect . '";
+        }, 1500);
+    </script>';
+}
+
         }
     }
 }
@@ -231,7 +244,7 @@ if (isset($_SESSION['totp_success_message'])) {
     </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-format TOTP code input (digits only)
     const totpInput = document.getElementById('totp_code');

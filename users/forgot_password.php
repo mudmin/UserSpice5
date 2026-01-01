@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -24,7 +24,7 @@ require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 if(isset($user) && $user->isLoggedIn()){
   Redirect::to($us_url_root."users/user_settings.php");
 }
-if (!securePage($_SERVER['PHP_SELF'])){die();}
+if (!securePage(Server::get('PHP_SELF'))){die();}
 $hooks = getMyHooks();
 includeHook($hooks,'pre');
 $email = Input::get('email');

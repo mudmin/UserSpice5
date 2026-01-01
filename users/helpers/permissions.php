@@ -281,10 +281,10 @@ if (!function_exists('securePage')) {
     function securePage($uri)
     {
         global $db, $user, $master_account, $us_url_root, $abs_us_root;
-        $urlRootLength = strlen($us_url_root);
-        $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
-        $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-        $dest = encodeURIComponent($protocol . "://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+    $urlRootLength = strlen($us_url_root);
+    $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
+    $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+    $dest = encodeURIComponent($protocol . "://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
         $id = null;
         $private = null;
 
@@ -685,11 +685,17 @@ if (!function_exists('checkAccess')) {
     function checkAccess($key, $value)
     {
         global $db, $user, $master_account;
+        $value = Input::sanitize($value);
         //Check if they belong to the master account array or have the Administrator (default 2) Perm
         if (in_array($user->data()->id, $master_account) || hasPerm([2], $user->data()->id)) {
             return true;
         } else {
+            
             //They're not, now we're gonna check if the view exists in us_management and if they have perms
+            $sanitize = ['id', 'page', 'view', 'feature', 'access'];
+            if (!in_array($key, $sanitize)) {
+                return false;
+            }
             $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]);
             if (!$db->error()) {
                 $checkC = $checkQ->count();

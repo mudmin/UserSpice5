@@ -20,7 +20,6 @@ use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\PropertyInfo\PropertyWriteInfo;
 use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Serializer\Exception\LogicException;
-use Symfony\Component\Serializer\Mapping\AttributeMetadata;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
@@ -101,24 +100,21 @@ class ObjectNormalizer extends AbstractObjectNormalizer
             $attributeName = null;
 
             // ctype_lower check to find out if method looks like accessor but actually is not, e.g. hash, cancel
-            if (3 < \strlen($name) && !ctype_lower($name[3]) && match ($name[0]) {
-                'g' => str_starts_with($name, 'get'),
-                'h' => str_starts_with($name, 'has'),
-                'c' => str_starts_with($name, 'can'),
+            if (match ($name[0]) {
+                'g' => str_starts_with($name, 'get') && isset($name[$i = 3]),
+                'h' => str_starts_with($name, 'has') && isset($name[$i = 3]),
+                'c' => str_starts_with($name, 'can') && isset($name[$i = 3]),
+                'i' => str_starts_with($name, 'is') && isset($name[$i = 2]),
                 default => false,
-            }) {
-                // getters, hassers and canners
-                $attributeName = substr($name, 3);
+            } && !ctype_lower($name[$i])) {
+                if ($this->hasProperty($reflMethod, $name)) {
+                    $attributeName = $name;
+                } else {
+                    $attributeName = substr($name, $i);
 
-                if (!$reflClass->hasProperty($attributeName)) {
-                    $attributeName = lcfirst($attributeName);
-                }
-            } elseif ('is' !== $name && str_starts_with($name, 'is') && !ctype_lower($name[2])) {
-                // issers
-                $attributeName = substr($name, 2);
-
-                if (!$reflClass->hasProperty($attributeName)) {
-                    $attributeName = lcfirst($attributeName);
+                    if (!$reflClass->hasProperty($attributeName)) {
+                        $attributeName = lcfirst($attributeName);
+                    }
                 }
             }
 
@@ -143,6 +139,19 @@ class ObjectNormalizer extends AbstractObjectNormalizer
         return array_keys($attributes);
     }
 
+    private function hasProperty(\ReflectionMethod $method, string $propName): bool
+    {
+        $class = $method->getDeclaringClass();
+
+        do {
+            if ($class->hasProperty($propName)) {
+                return true;
+            }
+        } while ($class = $class->getParentClass());
+
+        return false;
+    }
+
     protected function getAttributeValue(object $object, string $attribute, ?string $format = null, array $context = []): mixed
     {
         $mapping = $this->classDiscriminatorResolver?->getMappingForMappedObject($object);
@@ -164,37 +173,17 @@ class ObjectNormalizer extends AbstractObjectNormalizer
         }
     }
 
-    protected function getAllowedAttributes(string|object $classOrObject, array $context, bool $attributesAsString = false): array|bool
-    {
-        if (false === $allowedAttributes = parent::getAllowedAttributes($classOrObject, $context, $attributesAsString)) {
-            return false;
-        }
-
-        if (null !== $this->classDiscriminatorResolver) {
-            $class = \is_object($classOrObject) ? $classOrObject::class : $classOrObject;
-            if (null !== $discriminatorMapping = $this->classDiscriminatorResolver->getMappingForMappedObject($classOrObject)) {
-                $allowedAttributes[] = $attributesAsString ? $discriminatorMapping->getTypeProperty() : new AttributeMetadata($discriminatorMapping->getTypeProperty());
-            }
-
-            if (null !== $discriminatorMapping = $this->classDiscriminatorResolver->getMappingForClass($class)) {
-                $attributes = [];
-                foreach ($discriminatorMapping->getTypesMapping() as $mappedClass) {
-                    $attributes[] = parent::getAllowedAttributes($mappedClass, $context, $attributesAsString);
-                }
-                $allowedAttributes = array_merge($allowedAttributes, ...$attributes);
-            }
-        }
-
-        return $allowedAttributes;
-    }
-
     protected function isAllowedAttribute($classOrObject, string $attribute, ?string $format = null, array $context = [])
     {
         if (!parent::isAllowedAttribute($classOrObject, $attribute, $format, $context)) {
             return false;
         }
 
-        $class = \is_object($classOrObject) ? \get_class($classOrObject) : $classOrObject;
+        $class = \is_object($classOrObject) ? $classOrObject::class : $classOrObject;
+
+        if ($this->classDiscriminatorResolver?->getMappingForMappedObject($classOrObject)?->getTypeProperty() === $attribute) {
+            return true;
+        }
 
         if ($context['_read_attributes'] ?? true) {
             if (!isset(self::$isReadableCache[$class.$attribute])) {
@@ -204,16 +193,9 @@ class ObjectNormalizer extends AbstractObjectNormalizer
             return self::$isReadableCache[$class.$attribute];
         }
 
-        if (!isset(self::$isWritableCache[$class.$attribute])) {
-            if (str_contains($attribute, '.')) {
-                self::$isWritableCache[$class.$attribute] = true;
-            } else {
-                self::$isWritableCache[$class.$attribute] = $this->propertyInfoExtractor->isWritable($class, $attribute)
-                    || (($writeInfo = $this->writeInfoExtractor->getWriteInfo($class, $attribute)) && PropertyWriteInfo::TYPE_NONE !== $writeInfo->getType());
-            }
-        }
-
-        return self::$isWritableCache[$class.$attribute];
+        return self::$isWritableCache[$class.$attribute] ??= str_contains($attribute, '.')
+            || $this->propertyInfoExtractor->isWritable($class, $attribute)
+            || !\in_array($this->writeInfoExtractor->getWriteInfo($class, $attribute)?->getType(), [null, PropertyWriteInfo::TYPE_NONE, PropertyWriteInfo::TYPE_PROPERTY], true);
     }
 
     private function hasAttributeAccessorMethod(string $class, string $attribute): bool

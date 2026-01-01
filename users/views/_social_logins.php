@@ -40,8 +40,10 @@ if($settings->passkeys == 1 && currentPage() != "join.php"){
 if($loginOpts > 0) {
 ?>
 <link rel="stylesheet" href="<?=$us_url_root?>users/css/social-logins.css">
-<div class="mb-2 mt-2">
+<div class="<?php echo (isset($settings->social_login_location) && $settings->social_login_location == 0) ? 'mb-3 mt-1' : 'mb-2 mt-2'; ?>">
+<?php if (!isset($settings->social_login_location) || $settings->social_login_location != 0): ?>
 <div class="separator"><?= strpos(lang('EML_SIGN_IN_WITH'), "{") !== false ? 'Sign in with:' : lang('EML_SIGN_IN_WITH') ?></div>
+<?php endif; ?>
 <div class="userspice-social-logins-list">
     <?php
     if($settings->email_login > 0 && currentPage() != "join.php"){ ?>
@@ -97,14 +99,27 @@ if ($settings->oauth == 1 && isset($oauthClients)) {
         <?php
     }
 }
-    foreach($socials as $social) {
-        if (!pluginActive($social->plugin, true) || $settings->{$social->enabledsetting} == 0) continue;
-        include $abs_us_root . $us_url_root . "usersc/plugins/{$social->plugin}/{$social->link}";
-        if(file_exists($abs_us_root . $us_url_root . "usersc/plugins/{$social->plugin}/{$social->image}")){
-            $socialImage = $us_url_root . "usersc/plugins/{$social->plugin}/{$social->image}";
-        }else{
-            $socialImage = $us_url_root . "users/images/login_icons/{$social->image}";
-        }
+$baseDir = $abs_us_root . $us_url_root . 'usersc/';
+
+foreach ($socials as $social) {
+    if (!pluginActive($social->plugin, true) || $settings->{$social->enabledsetting} == 0) continue;
+
+    $relativeIncludePath = "plugins/" . $social->plugin . "/" . $social->link;
+    $safeIncludePath = sanitizePath($relativeIncludePath, $baseDir);
+
+    if ($safeIncludePath) {
+        include $safeIncludePath;
+    }
+
+    $relativeImagePath = "plugins/" . $social->plugin . "/" . $social->image;
+    $safeImagePath = sanitizePath($relativeImagePath, $baseDir);
+
+    if ($safeImagePath && file_exists($safeImagePath)) {
+        $socialImage = $us_url_root . "usersc/plugins/" . basename($social->plugin) . "/" . basename($social->image);
+    } else {
+        $socialImage = $us_url_root . "users/images/login_icons/" . basename($social->image);
+    }
+
     ?>
         <a class="userspice-social-logins-item" href="<?=$link?>">
         <span class="userspice-social-parent">

@@ -1,7 +1,7 @@
 <?php
 ob_start();
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -62,5 +62,5 @@ if(!file_exists($abs_us_root.$us_url_root."usersc/templates/".$settings->templat
 	</style>
 <?php } //end v2 template check
 ?>
-	<script defer src="<?=$us_url_root?>users/js/messages.js"></script>
+	<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" defer src="<?=$us_url_root?>users/js/messages.js"></script>
 	<title><?= (($pageTitle != '') ? $pageTitle : ''); ?> <?=$settings->site_name?></title>

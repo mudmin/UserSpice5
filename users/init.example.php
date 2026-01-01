@@ -1,20 +1,23 @@
 <?php
 die("Please edit the users/init.php with your database credentials.  You should also update the cookie and session names to something unique.  After that, you can delete the die statement at the top of the file and your site should work as expected.");
 
+
+define('USERSPICE_ACTIVE_LOGGING', false);
 //turns file based active loggin on or off. If set to true, it will log every page a user visits 
 //with some exceptions defined in usersc\includes\active_logging_custom.php
-define('USERSPICE_ACTIVE_LOGGING', false);
-
+$noPHPInfo = false;
 require_once 'classes/class.autoloader.php';
-session_start();
 
+
+ini_set('session.cookie_httponly', 1);
+session_start();
 // disables the feature that prevents the updater from installing languages you didn't have before the update
 // $disable_language_purge = true;
 
+$abs_us_root = Server::get('DOCUMENT_ROOT'); 
 
-$abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+$self_path = explode("/", Server::get('PHP_SELF'));
 
-$self_path=explode("/", $_SERVER['PHP_SELF']);
 $self_path_length=count($self_path);
 $file_found=FALSE;
 
@@ -34,7 +37,9 @@ require_once $abs_us_root.$us_url_root.'users/helpers/helpers.php';
 
 // Set config
 $GLOBALS['config'] = array(
-	'mysql'      => array(
+'mysql'      => array(
+'force_utc_mysql' => false,
+'charset'      => 'utf8mb4',
 'host'         => 'localhost',
 'username'     => 'root',
 'password'     => '',
@@ -49,6 +54,9 @@ $GLOBALS['config'] = array(
   'token_name' => 'token',
 )
 );
+
+// $never_generate_totp_key_file = true; // Set to true to prevent TOTP key file generation
+// $dev_announcement_override = true;
 
 //If you changed your UserSpice or UserCake database prefix
 //put it here.
@@ -66,7 +74,9 @@ if(Cookie::exists(Config::get('remember/cookie_name')) && !Session::exists(Confi
 
 	if ($hashCheck->count()) {
 		$user = new User($hashCheck->first()->user_id);
-		$user->login();
+		$inst = Config::get('session/session_name');
+        $_SESSION[$inst . '_login_method'] = "cookie";
+        $user->login();
 
 	}
 }
@@ -83,4 +93,7 @@ if($user->isLoggedIn()){
 $timezone_string = 'America/New_York';
 date_default_timezone_set($timezone_string);
 
+
+$usespice_nonce = base64_encode(random_bytes(16));
 require_once $abs_us_root.$us_url_root."users/includes/loader.php";
+

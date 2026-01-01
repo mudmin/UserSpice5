@@ -49,6 +49,16 @@ class CollectionType extends Type implements WrappingTypeInterface
             if (!$keyType instanceof BuiltinType || TypeIdentifier::INT !== $keyType->getTypeIdentifier()) {
                 throw new InvalidArgumentException(\sprintf('"%s" is not a valid list key type.', (string) $keyType));
             }
+        } elseif ($type instanceof GenericType && $type->getWrappedType() instanceof BuiltinType && TypeIdentifier::ARRAY === $type->getWrappedType()->getTypeIdentifier()) {
+            $keyType = $this->getCollectionKeyType();
+
+            $keyTypes = $keyType instanceof UnionType ? $keyType->getTypes() : [$keyType];
+
+            foreach ($keyTypes as $type) {
+                if (!$type instanceof BuiltinType || !\in_array($type->getTypeIdentifier(), [TypeIdentifier::INT, TypeIdentifier::STRING], true)) {
+                    throw new InvalidArgumentException(\sprintf('"%s" is not a valid array key type.', (string) $keyType));
+                }
+            }
         }
     }
 
@@ -65,25 +75,27 @@ class CollectionType extends Type implements WrappingTypeInterface
         $boolTypes = [];
         $objectTypes = [];
 
-        foreach ($types as $t) {
-            // cannot create an union with a standalone type
-            if ($t->isIdentifiedBy(TypeIdentifier::MIXED)) {
-                return Type::mixed();
+        foreach ($types as $type) {
+            foreach (($type instanceof UnionType ? $type->getTypes() : [$type]) as $t) {
+                // cannot create an union with a standalone type
+                if ($t->isIdentifiedBy(TypeIdentifier::MIXED)) {
+                    return Type::mixed();
+                }
+
+                if ($t->isIdentifiedBy(TypeIdentifier::TRUE, TypeIdentifier::FALSE, TypeIdentifier::BOOL)) {
+                    $boolTypes[] = $t;
+
+                    continue;
+                }
+
+                if ($t->isIdentifiedBy(TypeIdentifier::OBJECT)) {
+                    $objectTypes[] = $t;
+
+                    continue;
+                }
+
+                $normalizedTypes[] = $t;
             }
-
-            if ($t->isIdentifiedBy(TypeIdentifier::TRUE, TypeIdentifier::FALSE, TypeIdentifier::BOOL)) {
-                $boolTypes[] = $t;
-
-                continue;
-            }
-
-            if ($t->isIdentifiedBy(TypeIdentifier::OBJECT)) {
-                $objectTypes[] = $t;
-
-                continue;
-            }
-
-            $normalizedTypes[] = $t;
         }
 
         $boolTypes = array_unique($boolTypes);
@@ -177,6 +189,10 @@ class CollectionType extends Type implements WrappingTypeInterface
 
     public function __toString(): string
     {
+        if ($this->isList && $this->type->isIdentifiedBy(TypeIdentifier::ARRAY)) {
+            return 'list<'.$this->getCollectionValueType().'>';
+        }
+
         return (string) $this->type;
     }
 }

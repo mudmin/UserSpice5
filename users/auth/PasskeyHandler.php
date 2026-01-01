@@ -1,5 +1,4 @@
 <?php
-// Complete Enhanced PasskeyHandler.php with cross-device improvements
 require_once $abs_us_root . $us_url_root . 'users/auth/vendor/autoload.php';
 
 if (!class_exists('Assert\Assertion')) {
@@ -58,14 +57,14 @@ class PasskeyHandler
                 $rpId = PASSKEY_RP_ID;
             } elseif (is_array(PASSKEY_RP_ID)) {
                 // Multiple domains - match against current host
-                $currentHost = $this->sanitizeHost($_SERVER['HTTP_HOST'] ?? '');
+                $currentHost = Server::get('HTTP_HOST', '');
                 $rpId = in_array($currentHost, PASSKEY_RP_ID) ? $currentHost : PASSKEY_RP_ID[0];
             } else {
                 throw new InvalidArgumentException('PASSKEY_RP_ID must be a string or array');
             }
         } else {
             // Fallback to HTTP_HOST with sanitization
-            $rpId = $options['rpId'] ?? $_SERVER['HTTP_HOST'];
+            $rpId = $options['rpId'] ?? Server::get('HTTP_HOST', '');
             if ($rpId !== 'localhost' && strpos($rpId, ':') !== false) {
                 $rpId = explode(':', $rpId)[0];
             }
@@ -117,24 +116,12 @@ class PasskeyHandler
         // logger(0, "PasskeyHandlerInit", "Passkey Handler Initialized with RP ID: " . $rpId . ", RP Name: " . $rpName . " using webauthn-lib v5+.");
     }
 
-    private function sanitizeHost($host)
-    {
-        if (empty($host)) return '';
-
-        // Remove port if present
-        if (strpos($host, ':') !== false) {
-            $host = explode(':', $host)[0];
-        }
-
-        return strtolower(trim($host));
-    }
-
     /**
      * Enhanced device detection with detailed analysis
      */
     private function getDetailedDeviceInfo(): array
     {
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $userAgent = Server::get('HTTP_USER_AGENT', '');
         $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $userAgent);
         $isUnity = strpos($userAgent, 'Unity') !== false;
         $isTablet = preg_match('/iPad|Android(?!.*Mobile)/i', $userAgent);
@@ -166,9 +153,8 @@ class PasskeyHandler
             'network_type' => 'unknown'
         ];
 
-        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        $headers = getallheaders();
+        $remoteAddr = Server::get('REMOTE_ADDR', '');
+        $userAgent = Server::get('HTTP_USER_AGENT', '');
 
         // Corporate network indicators
         if (
@@ -182,9 +168,9 @@ class PasskeyHandler
 
         // Proxy/VPN indicators
         if (
-            isset($headers['X-Forwarded-For']) ||
-            isset($headers['X-Real-IP']) ||
-            isset($headers['Via'])
+            Server::get('HTTP_X_FORWARDED_FOR', '') !== '' ||
+            Server::get('HTTP_X_REAL_IP', '') !== '' ||
+            Server::get('HTTP_VIA', '') !== ''
         ) {
             $analysis['likely_issues'][] = lang("PASSKEY_NETWORK_PROXY");
         }
@@ -196,7 +182,7 @@ class PasskeyHandler
         }
 
         // Corporate firewall indicators
-        if (isset($headers['X-Forwarded-Proto']) && $headers['X-Forwarded-Proto'] === 'https') {
+        if (Server::get('HTTP_X_FORWARDED_PROTO', '') === 'https') {
             $analysis['likely_issues'][] = lang("PASSKEY_NETWORK_CORPORATE");
         }
 
@@ -321,7 +307,7 @@ class PasskeyHandler
      */
     private function isMobileDevice(): bool
     {
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $userAgent = Server::get('HTTP_USER_AGENT', '');
         return preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $userAgent);
     }
 
@@ -330,7 +316,7 @@ class PasskeyHandler
      */
     private function isUnityWebView(): bool
     {
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $userAgent = Server::get('HTTP_USER_AGENT', '');
         return strpos($userAgent, 'Unity') !== false;
     }
 
@@ -538,8 +524,7 @@ class PasskeyHandler
             $publicKeyCredential = $serializer->deserialize($credentialJson, PublicKeyCredential::class, 'json');
             $authenticatorResponse = $publicKeyCredential->response;
 
-            $request = $this->serverRequestCreator->fromGlobals();
-            $host = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost();
+            $host = Server::getOrigin([]);
 
             // logger($userId, "PasskeyStoreAttempt", "Attempting to validate attestation. Origin: " . $host);
 
@@ -740,8 +725,7 @@ class PasskeyHandler
                 throw new Exception(lang("PASSKEY_CREDENTIAL_WRONG_USER"));
             }
 
-            $request = $this->serverRequestCreator->fromGlobals();
-            $host = $request->getUri()->getScheme() . '://' . $request->getUri()->getHost();
+            $host = Server::getOrigin([]);
 
             // logger($userToAuthenticateHandle, "PasskeyAuthAttempt", "Validating assertion. RP ID: " . $this->publicKeyCredentialRpEntity->id . ". Host: " . $host);
 
@@ -758,7 +742,7 @@ class PasskeyHandler
             $this->userSpicePasskeyCredentialRepository->saveCredentialSource($updatedCredentialSource);
 
             $this->db->query("UPDATE us_passkeys SET times_used = times_used + 1, last_used = NOW(), last_ip = ? WHERE credential_id = ?", [
-                $_SERVER['REMOTE_ADDR'],
+                Server::get('REMOTE_ADDR', ''),
                 $updatedCredentialSource->publicKeyCredentialId
             ]);
 
@@ -790,27 +774,25 @@ class PasskeyHandler
         $debugInfo = [
             'device_analysis' => $deviceInfo,
             'server_info' => [
-                'host' => $_SERVER['HTTP_HOST'] ?? 'unknown',
-                'origin' => $_SERVER['HTTP_ORIGIN'] ?? 'unknown',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-                'request_scheme' => $_SERVER['REQUEST_SCHEME'] ?? 'unknown',
-                'server_port' => $_SERVER['SERVER_PORT'] ?? 'unknown'
+                'host'            => Server::get('HTTP_HOST', 'unknown'),
+                'origin'          => Server::get('HTTP_ORIGIN', 'unknown'),
+                'user_agent'      => Server::get('HTTP_USER_AGENT', ''),
+                'remote_addr'     => Server::get('REMOTE_ADDR', ''),
+                'request_scheme'  => Server::getScheme(),
+                'server_port'     => Server::get('SERVER_PORT', 0),
             ],
             'rp_config' => [
-                'rp_id' => $this->publicKeyCredentialRpEntity->id,
-                'rp_name' => $this->publicKeyCredentialRpEntity->name
+                'rp_id'   => $this->publicKeyCredentialRpEntity->id,
+                'rp_name' => $this->publicKeyCredentialRpEntity->name,
             ],
             'session_info' => [
                 'has_assertion_options' => isset($_SESSION['passkey_assertion_options']),
-                'has_creation_options' => isset($_SESSION['passkey_creation_options']),
-                'session_id' => session_id()
+                'has_creation_options'  => isset($_SESSION['passkey_creation_options']),
+                'session_id'            => session_id(),
             ],
             'network_analysis' => $this->analyzeNetworkConditions(),
-            'recommendations' => $this->getCrossDeviceRecommendations($deviceInfo)
+            'recommendations'  => $this->getCrossDeviceRecommendations($deviceInfo),
         ];
-
-        // logger($context, 'CrossDeviceDebug', 'Complete analysis - ' . json_encode($debugInfo, JSON_PRETTY_PRINT));
 
         return $debugInfo;
     }
@@ -838,7 +820,7 @@ class PasskeyHandler
         }
 
         // Check for HTTPS
-        $isHttps = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+        $isHttps = Server::getScheme() === 'https';
         if (!$isHttps && $rpId !== 'localhost') {
             $validation['errors'][] = lang("PASSKEY_VALIDATION_HTTPS_REQUIRED");
             $validation['is_suitable'] = false;
@@ -867,81 +849,13 @@ class PasskeyHandler
 
         return $validation;
     }
-
-/**
- * Build an origin string (“https://example.com”) that is safe behind proxies.
- *
- * @return string
- * @throws RuntimeException if the Host header is bogus.
- */
-private function getRequestOrigin(): string
-{
-    // 1  Identify whether the caller is a trusted reverse-proxy
-    $remoteIp        = $_SERVER['REMOTE_ADDR'] ?? '';
-    $trustedProxies  = defined('TRUSTED_PROXIES')
-                        ? TRUSTED_PROXIES        // e.g. ['203.0.113.10','203.0.113.11']
-                        : [];
-    $fromProxy       = in_array($remoteIp, $trustedProxies, true);
-
-    /* ---------- 2  SCHEME ---------- */
-    $scheme = 'http';                                   // pessimistic default
-
-    if ($fromProxy) {
-        // RFC 7239 “proto=https” or legacy X-Forwarded-Proto
-        if (!empty($_SERVER['HTTP_FORWARDED'])) {
-            if (preg_match('/\\bproto=(https?)/i', $_SERVER['HTTP_FORWARDED'], $m)) {
-                $scheme = strtolower($m[1]);
-            }
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-            $scheme = strtolower(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]);
-        }
-    }
-
-    // fall-back for direct connections
-    if ($scheme === 'http') {
-        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-            $scheme = 'https';
-        } elseif (!empty($_SERVER['REQUEST_SCHEME'])) {
-            $scheme = strtolower($_SERVER['REQUEST_SCHEME']);
-        } elseif (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] === '443') {
-            $scheme = 'https';
-        }
-    }
-
-    /* ---------- 3  HOST ---------- */
-    $host = '';
-
-    if ($fromProxy) {
-        // RFC 7239 “host=example.com” or legacy X-Forwarded-Host
-        if (!empty($_SERVER['HTTP_FORWARDED'])) {
-            if (preg_match('/\\bhost=([^;]+)/i', $_SERVER['HTTP_FORWARDED'], $m)) {
-                $host = trim($m[1], '[]');             // strip v6 brackets
-            }
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-            $host = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_HOST'])[0]);
-        }
-    }
-
-    // fall-back for direct connections or if proxy headers absent
-    if ($host === '') {
-        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
-    }
-
-    /* ---------- 4  VALIDATE HOST ---------- */
-    // Basic syntax: domain (or IPv4/IPv6) with optional :port
-    if (!preg_match('#^([a-z0-9.-]+|\\[[0-9a-f:]+])(\\:[0-9]{1,5})?$#i', $host)) {
-        throw new RuntimeException('Invalid Host header: ' . htmlspecialchars($host, ENT_QUOTES));
-    }
-
-    return sprintf('%s://%s', $scheme, $host);
-}
 }
 
 // Global instantiation logic
 global $db, $settings, $user;
 $rpIdConfig = $settings->passkey_rp_id ?? null;
 if (empty($rpIdConfig)) {
-    $rpIdConfig = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $rpIdConfig = Server::get('HTTP_HOST', 'localhost');
     if ($rpIdConfig === '127.0.0.1') {
         $rpIdConfig = "localhost";
     }

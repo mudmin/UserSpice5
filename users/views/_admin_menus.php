@@ -121,8 +121,8 @@ $codeUsage = '<?php
   </div>
 </div>
 
-<script type="text/javascript" src="js/pagination/datatables.min.js"></script>
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   $(document).ready(function() {
     $('#menuTable').DataTable({
       "pageLength": 25,

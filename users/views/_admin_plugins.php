@@ -275,7 +275,7 @@ $token = Token::generate();
   </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   $(document).ready(function() {
   $('.showTooltip').tooltip();
   <?php if ($pluginsC > 0) { ?>

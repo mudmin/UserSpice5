@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
-if (!securePage($_SERVER['PHP_SELF'])) {
+if (!securePage(Server::get('PHP_SELF'))) {
   die();
 }
 $hooks = getMyHooks();
@@ -43,6 +43,8 @@ $userId = $user->data()->id;
 $grav = fetchProfilePicture($userId);
 $validation = new Validate();
 $userdetails = $user->data();
+
+$allowPasswords = passwordsAllowed($settings->no_passwords);
 //Temporary Success Message
 $holdover = Input::get('success');
 if ($holdover == 'true') {
@@ -175,7 +177,7 @@ if (!empty($_POST)) {
             $successes[] = lang('GEN_EMAIL') . ' ' . lang('GEN_UPDATED');
             logger($user->data()->id, 'User', "Changed email from $userdetails->email to $email.");
           }
-          if ($emailR->email_act == 1 || $settings->no_passwords == 1) {
+          if ($emailR->email_act == 1 || !$allowPasswords) {
             $vericode = uniqid() . randomstring(15);
             $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->join_vericode_expiry hours", strtotime(date('Y-m-d H:i:s'))));
             $db->update('users', $userId, ['email_new' => $email, 'vericode' => $vericode, 'vericode_expiry' => $vericode_expiry]);
@@ -207,7 +209,7 @@ if (!empty($_POST)) {
         }
       }
 
-      if ($settings->no_passwords == 0 && !empty($_POST['password'])) {
+      if ($allowPasswords && !empty($_POST['password'])) {
         $validation->check($_POST, [
           'password' => [
             'display' => lang('PW_NEW'),
@@ -336,7 +338,7 @@ if (!empty($_POST)) {
           </div>
 
 
-          <?php if ($settings->no_passwords == 0) { ?>
+          <?php if ($allowPasswords) { ?>
             <div class="row mb-3" id="password-group">
               <label for="password" class="col-form-label col-12 col-md-3text-end"><?= lang('PW_NEW'); ?></label>
               <div class="col-12 <?= $secondCol ?>">
@@ -388,12 +390,12 @@ if (!empty($_POST)) {
   </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   $(document).ready(function() {
     // $('body').removeClass('is-collapsed');
     // $('.meetingPag').DataTable({searching: false, paging: false, info: false});
 
-    <?php if ($settings->no_passwords == 0) { ?>
+    <?php if ($allowPasswords) { ?>
       $('.password_view_control').hover(function() {
         $('#password').attr('type', 'text');
         $('#confirm').attr('type', 'text');

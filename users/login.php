@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -18,7 +18,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-ini_set("allow_url_fopen", 1);
 if (!defined('USERSPICE_LOGIN_CALLED')) {
    define('USERSPICE_LOGIN_CALLED', true);
    require_once '../users/init.php';
@@ -47,17 +46,16 @@ $emailSet = $db->query("SELECT * FROM email")->first();
 if (!isset($settings->no_passwords)) {
     $settings->no_passwords = 0;
 }
-if ($emailSet->email_login == "yourEmail@gmail.com" || $emailSet->email_login == "" || $emailSet->email_pass == "1234" || $settings->no_passwords == 1) {
+
+$allowPasswords = passwordsAllowed($settings->no_passwords);
+
+if ($emailSet->email_login == "yourEmail@gmail.com" || $emailSet->email_login == "" || $emailSet->email_pass == "1234" || !$allowPasswords) {
     $showForgot = false;
 } else {
     $showForgot = true;
 }
 
-if ($settings->no_passwords == 1) {
-    $topPad = "";
-} else {
-    $topPad = "";
-}
+
 if ($showForgot == true && $settings->registration == 1) {
     $bottomClass = "col-12 col-lg-6";
     $showBottom = true;
@@ -148,7 +146,7 @@ if (!empty($_POST)) {
                         // Record successful TOTP verification and clear failed attempts
                         handleAuthSuccess('totp_verify', $tempUserId, null, [], [
                             'method' => $useBackup ? 'backup_code' : 'authenticator_app',
-                            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                            'user_agent' => Server::get('HTTP_USER_AGENT')
                         ]);
                         
                         // Complete the login process
@@ -206,7 +204,7 @@ if (!empty($_POST)) {
                         // TOTP verification failed
                         handleAuthFailure('totp_verify', $tempUserId, null, [], [
                             'method' => $useBackup ? 'backup_code' : 'authenticator_app',
-                            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                            'user_agent' => Server::get('HTTP_USER_AGENT')
                         ]);
                         // logger($tempUserId, "VerifyTOTP", "TOTP verification failed for user ID: $tempUserId");
                         // Keep the TOTP form displayed for retry
@@ -266,7 +264,7 @@ if (!empty($_POST)) {
                                     // Record successful login with TOTP
                                     handleAuthSuccess('login_attempt', $tempUser->data()->id, $username, [], [
                                         'method' => 'inline_totp',
-                                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                                        'user_agent' => Server::get('HTTP_USER_AGENT')
                                     ]);
 
                                     $user = $tempUser; // Set user object for further processing
@@ -296,7 +294,7 @@ if (!empty($_POST)) {
                                     // Invalid TOTP code
                                     handleAuthFailure('totp_verify', $tempUser->data()->id, null, [], [
                                         'method' => 'inline_totp',
-                                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                                        'user_agent' => Server::get('HTTP_USER_AGENT')
                                     ]);
                                     unset($_SESSION[$currentSessionName]);
                                     $errors[] = lang("2FA_ERR_INVALID_CODE");
@@ -328,7 +326,7 @@ if (!empty($_POST)) {
                             // Record successful login
                             handleAuthSuccess('login_attempt', $tempUser->data()->id, $username, [], [
                                 'method' => 'standard_login',
-                                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                                'user_agent' => Server::get('HTTP_USER_AGENT')
                             ]);
                             $user = $tempUser; // Set user object for further processing
 
@@ -357,7 +355,7 @@ if (!empty($_POST)) {
                         // Record failed login attempt
                         handleAuthFailure('login_attempt', $userId, $username, [], [
                             'username_attempted' => $username,
-                            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+                            'user_agent' => Server::get('HTTP_USER_AGENT')
                         ]);
                         
                         $eventhooks = getMyHooks(['page' => 'loginFail']);
@@ -413,7 +411,7 @@ if (empty($dest = sanitizedDest('dest'))) {
                     <b><?= $awaitingTOTP ? "Two-Factor Authentication" : lang("SIGNIN_TITLE") ?></b>
                     <a href="<?= $us_url_root ?>" aria-label="Close" class="close btn-close" style="top: 1rem!important;"></a>
                 </div>
-                <div class="modal-body p-4 <?= $topPad ?>">
+                <div class="modal-body p-3">
 
                     <div class="usmsgblock">
                         <?php
@@ -433,6 +431,16 @@ if (empty($dest = sanitizedDest('dest'))) {
                     </div>
 
                     <?php includeHook($hooks, 'body'); ?>
+
+                    <?php if (!$awaitingTOTP && isset($settings->social_login_location) && $settings->social_login_location == 0): ?>
+                        <?php
+                        if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
+                            require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
+                        } else {
+                            require_once $abs_us_root . $us_url_root . "users/views/_social_logins.php";
+                        }
+                        ?>
+                    <?php endif; ?>
 
                     <?php if ($awaitingTOTP): ?>
                         <div class="text-center mb-3">
@@ -478,13 +486,13 @@ if (empty($dest = sanitizedDest('dest'))) {
                             </a>
                         </div>
 
-                    <?php elseif ($settings->no_passwords == 0): ?>
+                    <?php elseif ($allowPasswords): ?>
                         <form name="login" id="login-form" class="form-signin" method="post" action="">
                             <?= tokenHere(); ?>
                             <div class="form-outline mb-4">
                                 <label class="form-label" for="username"><?= lang("SIGNIN_UORE") ?></label>
                                 <input type="text" id="username" name="username" class="form-control form-control-lg"
-                                    value="<?= isset($_POST['username']) ? hed($_POST['username']) : '' ?>"
+                                    value="<?= isset($_POST['username']) ? safeReturn(Input::get('username')) : '' ?>"
                                     required autocomplete="username">
                             </div>
 
@@ -522,7 +530,7 @@ if (empty($dest = sanitizedDest('dest'))) {
                         </form>
                     <?php endif; ?>
 
-                    <?php if (!$awaitingTOTP): ?>
+                    <?php if (!$awaitingTOTP && (!isset($settings->social_login_location) || $settings->social_login_location != 0)): ?>
                         <?php
                         if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
                             require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
@@ -531,26 +539,27 @@ if (empty($dest = sanitizedDest('dest'))) {
                         }
                         includeHook($hooks, 'bottom');
                         ?>
-                        <?php if ($showBottom) { ?>
-                            <div class="row p-3">
-                                <?php if ($showForgot) { ?>
-                                    <div class="<?= $bottomClass ?> <?= $forgotClass ?>">
-                                        <a class="" href='<?= $us_url_root ?>users/forgot_password.php' style="text-decoration:none;">
-                                            <i class="fa fa-wrench"></i> <?= lang("SIGNIN_FORGOTPASS") ?>
-                                        </a>
-                                    </div>
-                                <?php }
-
-                                if ($settings->registration == 1) { ?>
-                                    <div class="<?= $bottomClass ?> <?= $regClass ?>">
-                                        <a class="" href='<?= $us_url_root ?>users/join.php' style="text-decoration:none;">
-                                            <i class="fa fa-plus-square"></i> <?= lang("SIGNUP_TEXT") ?>
-                                        </a>
-                                    </div>
-                                <?php } ?>
-                            </div>
-                        <?php } ?>
                     <?php endif; ?>
+
+                    <?php if (!$awaitingTOTP && $showBottom) { ?>
+                        <div class="row p-3">
+                            <?php if ($showForgot) { ?>
+                                <div class="<?= $bottomClass ?> <?= $forgotClass ?>">
+                                    <a class="" href='<?= $us_url_root ?>users/forgot_password.php' style="text-decoration:none;">
+                                        <i class="fa fa-wrench"></i> <?= lang("SIGNIN_FORGOTPASS") ?>
+                                    </a>
+                                </div>
+                            <?php }
+
+                            if ($settings->registration == 1) { ?>
+                                <div class="<?= $bottomClass ?> <?= $regClass ?>">
+                                    <a class="" href='<?= $us_url_root ?>users/join.php' style="text-decoration:none;">
+                                        <i class="fa fa-plus-square"></i> <?= lang("SIGNUP_TEXT") ?>
+                                    </a>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    <?php } ?>
 
                 </div>
             </div>
@@ -558,7 +567,7 @@ if (empty($dest = sanitizedDest('dest'))) {
     </div>
 </div>
 </div>
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     $(document).ready(function() {
         $("#loginModal").modal({
             backdrop: 'static',
@@ -576,7 +585,7 @@ if (empty($dest = sanitizedDest('dest'))) {
             }, 500);
         <?php endif; ?>
 
-        <?php if ($settings->no_passwords == 0): ?>
+        <?php if ($allowPasswords): ?>
             const togglePassword = document.querySelector('#togglePassword');
             const togglePasswordIcon = document.querySelector('#togglePasswordIcon');
             const password = document.querySelector('#password');
@@ -639,7 +648,7 @@ if (empty($dest = sanitizedDest('dest'))) {
 </script>
 
 <?php if ($settings->passkeys == 1 && !$awaitingTOTP): ?>
-    <script>
+    <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
         function showPasskeyStatus(message, type = 'info') {
             const status = document.getElementById('passkeyStatus');
             if (!status) return;

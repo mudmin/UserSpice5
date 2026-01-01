@@ -137,7 +137,7 @@ if (!empty($_POST)) {
 }
 
 // Get current IP for testing
-$current_ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$current_ip = Server::get('REMOTE_ADDR', 'unknown');
 $real_ip = $current_ip; // Default fallback
 
 // Try to get real IP if method is available
@@ -854,7 +854,7 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
     </div>
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     // Define functions first to avoid reference errors
     function showAddProxyModal() {
         const modal = new bootstrap.Modal(document.getElementById('addProxyModal'));

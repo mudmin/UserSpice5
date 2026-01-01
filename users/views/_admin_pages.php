@@ -253,7 +253,7 @@ $csrf = Token::generate();
 <?php
 if ($delMsgs != '') {
 ?>
-  <script type="text/javascript">
+  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
     alert("The following pages have been deleted from your database because they are either no longer present or because you used securePage on a file that was not monitored by UserSpice. You can add additional folders at the top of this page.\n \n<?= $delMsgs; ?>");
   </script>
 

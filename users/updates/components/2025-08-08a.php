@@ -15,7 +15,6 @@ $db->query("CREATE TABLE IF NOT EXISTS us_rate_limit_proxy_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 $db->query("ALTER TABLE settings ADD COLUMN behind_reverse_proxy tinyint(1) default 0");
-
-
+$db->query("ALTER TABLE us_rate_limit_proxy_settings ADD COLUMN header varchar(255) DEFAULT NULL AFTER header_name");
 
 include($abs_us_root . $us_url_root . "users/updates/components/_complete.php");

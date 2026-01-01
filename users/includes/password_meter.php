@@ -73,7 +73,7 @@ if ($pw_settings->meter_active == 1) {
 
 
 
-      <script type="text/javascript">
+      <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
 
 function setupPasswordValidation(passwordSelector, confirmSelector, submitButtonId) {
   const minScore = <?= $pw_settings->min_score; ?>;

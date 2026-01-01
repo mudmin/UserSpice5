@@ -137,7 +137,8 @@ function validateRateLimit($action, $userId = null, $email = null, $extraIdentif
         // Record the failed attempt
         recordRateLimit($action, false, $userId, $email, $extraIdentifiers, [
             'blocked_by_rate_limit' => true,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+
+            'user_agent' => Server::get('HTTP_USER_AGENT'),
             'timestamp' => time()
         ]);
         

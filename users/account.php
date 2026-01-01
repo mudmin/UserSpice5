@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 require_once '../users/init.php';
-if (!securePage($_SERVER['PHP_SELF'])) {
+if (!securePage(Server::get('PHP_SELF'))) {
   die();
 }
 

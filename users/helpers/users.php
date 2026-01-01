@@ -28,10 +28,20 @@ if (!function_exists('fetchAllUsers')) {
       $q .= ' WHERE permissions=1';
     }
     if ($orderBy !== null) {
-      if ($desc === true) {
-        $q .= " ORDER BY $orderBy DESC";
-      } else {
-        $q .= " ORDER BY $orderBy";
+      $sanitize = $db->query("SELECT * FROM users LIMIT 1")->first();
+      $found = false;
+      foreach ($sanitize as $key => $value) {
+        if ($key == $orderBy) {
+          $found = true;
+        }
+      }
+      //don't order if the column doesn't exist
+      if ($found) {
+        if ($desc === true) {
+          $q .= " ORDER BY $orderBy DESC";
+        } else {
+          $q .= " ORDER BY $orderBy";
+        }
       }
     }
     $query = $db->query($q);
@@ -68,7 +78,16 @@ if (!function_exists('fetchUserDetails')) {
     if ($term == null || $term == "") {
       $term = $id;
     }
-
+    $sanitize = $db->query("SELECT * FROM users LIMIT 1")->first();
+    $found = false;
+    foreach ($sanitize as $key => $value) {
+      if ($key == $column) {
+        $found = true;
+      }
+    }
+    if ($found == false) {
+      return false;
+    }
     $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$term]);
     if ($query->count() == 1) {
       return $query->first();
@@ -458,41 +477,33 @@ if (!function_exists('socialLogin')) {
       $_SESSION['redirect'] = null;
     }
 
-    if($loginMethod !== null){
+    if ($loginMethod !== null) {
       setLoginMethod($loginMethod);
-    }else{
+    } else {
       $backtrace = debug_backtrace();
       $filePath = $backtrace[0]['file'];
-           if (strpos($filePath, 'oauth_login') !== false) {
-            $loginMethod = 'oauth';            
-          } elseif (strpos($filePath, 'google_login') !== false) {
-            $loginMethod = 'google';
-           
-          } elseif (strpos($filePath, 'facebook_login') !== false || strpos($filePath, 'fb') !== false) {
-            $loginMethod = 'facebook';
-          
-          } elseif (strpos($filePath, 'github_login') !== false) {
-            $loginMethod = 'github';
-           
-          } elseif (strpos($filePath, 'discord_login') !== false) {
-            $loginMethod = 'discord';
-            
-          } elseif (strpos($filePath, 'twitch_login') !== false) {
-            $loginMethod = 'twitch';
-           
-          } elseif (strpos($filePath, 'okta_login') !== false) {
-            $loginMethod = 'okta';
-            
-          } elseif (strpos($filePath, 'microsoft_login') !== false || strpos($filePath, 'azure_login') !== false) {
-            $loginMethod = 'microsoft';
-           
-          } elseif (strpos($filePath, 'saml') !== false ) {
-            $loginMethod = 'saml';
-           
-          }else{
-            $loginMethod = 'password';
-          }
-          setLoginMethod($loginMethod);
+      if (strpos($filePath, 'oauth_login') !== false) {
+        $loginMethod = 'oauth';
+      } elseif (strpos($filePath, 'google_login') !== false) {
+        $loginMethod = 'google';
+      } elseif (strpos($filePath, 'facebook_login') !== false || strpos($filePath, 'fb') !== false) {
+        $loginMethod = 'facebook';
+      } elseif (strpos($filePath, 'github_login') !== false) {
+        $loginMethod = 'github';
+      } elseif (strpos($filePath, 'discord_login') !== false) {
+        $loginMethod = 'discord';
+      } elseif (strpos($filePath, 'twitch_login') !== false) {
+        $loginMethod = 'twitch';
+      } elseif (strpos($filePath, 'okta_login') !== false) {
+        $loginMethod = 'okta';
+      } elseif (strpos($filePath, 'microsoft_login') !== false || strpos($filePath, 'azure_login') !== false) {
+        $loginMethod = 'microsoft';
+      } elseif (strpos($filePath, 'saml') !== false) {
+        $loginMethod = 'saml';
+      } else {
+        $loginMethod = 'password';
+      }
+      setLoginMethod($loginMethod);
     }
 
     $_POST['redirect'] = $_SESSION['redirect'];
@@ -551,11 +562,12 @@ if (!function_exists('generateUsername')) {
 /**
  * Set login method in session - called by various login handlers
  */
-function setLoginMethod($method) {
-    $_SESSION[INSTANCE . '_login_method'] = $method;
-    
-    // Log the login method for debugging
-    if (isset($GLOBALS['user']) && $GLOBALS['user']->isLoggedIn()) {
-        logger($GLOBALS['user']->data()->id, "Login_Method", "Login method set to: " . $method);
-    }
+function setLoginMethod($method)
+{
+  $_SESSION[INSTANCE . '_login_method'] = $method;
+
+  // Log the login method for debugging
+  if (isset($GLOBALS['user']) && $GLOBALS['user']->isLoggedIn()) {
+    logger($GLOBALS['user']->data()->id, "Login_Method", "Login method set to: " . $method);
+  }
 }

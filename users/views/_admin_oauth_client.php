@@ -142,7 +142,7 @@ $activeClients = $activeClientsQ->results();
 $activeClientCount = $activeClientsQ->count();
 ?>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
       // Success feedback could go here
@@ -360,7 +360,7 @@ $activeClientCount = $activeClientsQ->count();
                 </div>
 
                 <?php
-                $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+                $baseUrl = Server::getOrigin();
                 $exampleRedirectUri = $baseUrl . $us_url_root . "users/auth/parsers/oauth_response.php";
                 ?>
 

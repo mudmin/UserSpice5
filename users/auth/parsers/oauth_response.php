@@ -95,12 +95,12 @@ $existingUserC = $existingUserQ->count();
 if ($existingUserC > 0) {
     // Existing user - log them in
     $existingUser = $existingUserQ->first();
-    
+
     // Update user data if instructed
     if (isset($responseData['instructions']['updateUserData']) && $responseData['instructions']['updateUserData'] == true) {
         updateUserData($existingUser->id, $responseData);
     }
-    
+
     // Handle tags if present
     if (isset($responseData['tags'])) {
         storeUserTags($existingUser->id, $responseData);
@@ -112,17 +112,20 @@ if ($existingUserC > 0) {
         'new_user' => 0
     ];
     $db->insert('us_oauth_client_logins', $log);
-    
+
     // Execute custom login script if specified
-    if (!empty($oSettings->login_script) && 
-        file_exists($abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/' . $oSettings->login_script)) {
-        include $abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/' . $oSettings->login_script;
+    if (!empty($oSettings->login_script)) {
+        $loginScriptBaseDir = $abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/';
+        $safeLoginScriptPath = sanitizePath($oSettings->login_script, $loginScriptBaseDir);
+        if ($safeLoginScriptPath) {
+            include $safeLoginScriptPath;
+        }
     }
-    
+
     // Log the user in
     $sessionName = Config::get('session/session_name');
     Session::put($sessionName, $existingUser->id);
-    
+
     // Execute custom login script if it exists
     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
         include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
@@ -132,13 +135,12 @@ if ($existingUserC > 0) {
     if (function_exists('setLoginMethod')) {
         setLoginMethod('oauth');
     }
-    
+
     logger($existingUser->id, "OAuth Client Login", "User logged in via OAuth from: " . $oSettings->client_name);
-    
+
     // Redirect to dashboard
     Redirect::to($us_url_root . $settings->redirect_uri_after_login);
     exit;
-
 } else {
     // New user - create account
     $userId = createNewUser($userData, $responseData, $oSettings);
@@ -154,34 +156,35 @@ if ($existingUserC > 0) {
 /**
  * Update existing user data from OAuth response
  */
-function updateUserData($userId, $responseData) {
+function updateUserData($userId, $responseData)
+{
     global $db;
-    
+
     if (!isset($responseData['userdata'])) {
         return;
     }
-    
+
     $existingQ = $db->query("SELECT * FROM users WHERE id = ?", [$userId]);
     if ($existingQ->count() == 0) {
         return;
     }
-    
+
     $existing = $existingQ->first();
     $userData = $responseData['userdata'];
     $fields = [];
-    
+
     foreach ($userData as $key => $value) {
         // Skip protected fields
         if (in_array($key, ['email', 'id', 'username'])) {
             continue;
         }
-        
+
         // Only update if field exists and value has changed
         if (isset($existing->$key) && $existing->$key != $value) {
             $fields[$key] = $value;
         }
     }
-    
+
     if (count($fields) > 0) {
         $db->update('users', $userId, $fields);
         logger($userId, "OAuth Client Update", "User data updated from OAuth: " . implode(', ', array_keys($fields)));
@@ -191,14 +194,15 @@ function updateUserData($userId, $responseData) {
 /**
  * Create a new user from OAuth data
  */
-function createNewUser($userData, $responseData, $oSettings) {
+function createNewUser($userData, $responseData, $oSettings)
+{
     global $db, $abs_us_root, $us_url_root, $settings;
-    
+
     // Check if user creation from OAuth is allowed
     if (file_exists($abs_us_root . $us_url_root . 'usersc/oauth_client/assets/before_user_creation.php')) {
         include $abs_us_root . $us_url_root . 'usersc/oauth_client/assets/before_user_creation.php';
     }
-    
+
     $user = new User();
     $fields = [
         'email' => $userData['email'],
@@ -221,14 +225,14 @@ function createNewUser($userData, $responseData, $oSettings) {
         logger(1, "OAuth Client Error", "Failed to create new user account");
         return false;
     }
-    
+
     // Log the user in immediately
     $sessionName = Config::get('session/session_name');
     Session::put($sessionName, $theNewId);
 
     // Update user data from OAuth response
     updateUserData($theNewId, $responseData);
-    
+
     // Handle tags if present
     if (isset($responseData['tags'])) {
         storeUserTags($theNewId, $responseData);
@@ -245,13 +249,15 @@ function createNewUser($userData, $responseData, $oSettings) {
     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {
         include $abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php';
     }
-    
+
     // Execute custom login script if specified
-    if (!empty($oSettings->login_script) && 
-        file_exists($abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/' . $oSettings->login_script)) {
-        include $abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/' . $oSettings->login_script;
+    if (!empty($oSettings->login_script)) {
+        $loginScriptBaseDir = $abs_us_root . $us_url_root . 'usersc/oauth_client/login_scripts/';
+        $safeLoginScriptPath = sanitizePath($oSettings->login_script, $loginScriptBaseDir);
+        if ($safeLoginScriptPath) {
+            include $safeLoginScriptPath;
+        }
     }
-    
     // Execute custom login script if it exists
     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
         include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
@@ -270,14 +276,15 @@ function createNewUser($userData, $responseData, $oSettings) {
 /**
  * Store user tags from OAuth response
  */
-function storeUserTags($userId, $responseData) {
+function storeUserTags($userId, $responseData)
+{
     global $db;
 
     // Check if we should update tags and if tags plugin is active
     if (!isset($responseData['instructions']['updateTags']) || !$responseData['instructions']['updateTags']) {
         return;
     }
-    
+
     if (!isset($responseData['tags']) || !is_array($responseData['tags'])) {
         return;
     }
@@ -339,14 +346,15 @@ function storeUserTags($userId, $responseData) {
             }
         }
     }
-    
+
     logger($userId, "OAuth Client Tags", "Tags updated from OAuth response");
 }
 
 /**
  * Exchange authorization code for access token
  */
-function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $redirectUri) {
+function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $redirectUri)
+{
     $data = [
         'grant_type' => 'authorization_code',
         'code' => $authCode,
@@ -372,12 +380,17 @@ function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $r
     $curlError = curl_error($ch);
 
     if ($result === FALSE) {
-        curl_close($ch);
+        if (PHP_VERSION_ID < 80500) {
+            curl_close($ch);
+        }
+
         logger(1, "OAuth Client Error", "cURL error: $curlError");
         return ['error' => 'Network error: ' . $curlError];
     }
 
-    curl_close($ch);
+    if (PHP_VERSION_ID < 80500) {
+        curl_close($ch);
+    }
 
     logger(1, "OAuth Client", "Token exchange response - HTTP Code: $httpCode");
 
@@ -401,11 +414,13 @@ function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $r
 /**
  * Store the access token for future use
  */
-function storeAccessToken($userId, $accessToken, $expiresIn) {
+function storeAccessToken($userId, $accessToken, $expiresIn)
+{
     global $db;
-    
+
     $expiresAt = date('Y-m-d H:i:s', time() + $expiresIn);
-    $db->query("INSERT INTO us_oauth_client_login_tokens (user_id, access_token, expires_at) 
+    $db->query(
+        "INSERT INTO us_oauth_client_login_tokens (user_id, access_token, expires_at) 
                 VALUES (?, ?, ?) 
                 ON DUPLICATE KEY UPDATE access_token = VALUES(access_token), expires_at = VALUES(expires_at)",
         [$userId, $accessToken, $expiresAt]

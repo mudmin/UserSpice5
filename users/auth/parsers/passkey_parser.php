@@ -336,9 +336,9 @@ try {
             case 'network-test':
                 $networkInfo = [
                     'server_time' => date('Y-m-d H:i:s'),
-                    'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                    'host' => $_SERVER['HTTP_HOST'] ?? 'unknown',
+                    'client_ip' => Server::get('REMOTE_ADDR', 'unknown'),
+                    'user_agent' => Server::get('HTTP_USER_AGENT', 'unknown'),
+                    'host' => Server::get('HTTP_HOST', 'unknown'),
                     'protocol' => isset($_SERVER['HTTPS']) ? 'https' : 'http',
                     'headers' => getallheaders(),
                     'session_active' => session_status() === PHP_SESSION_ACTIVE
@@ -356,14 +356,14 @@ try {
                 throw new Exception(lang("PASSKEY_INVALID_ACTION") . $action);
         }
     } else {
-        throw new Exception(lang("PASSKEY_INVALID_METHOD") . $_SERVER['REQUEST_METHOD']);
+        throw new Exception(lang("PASSKEY_INVALID_METHOD") . Server::get('REQUEST_METHOD'));
     }
 } catch (Exception $e) {
     // Make sure we clear any output buffer that might contain HTML
     if (isset($action) && $action) {
         handleAuthFailure('passkey_' . $action, $userId, null, [], [
             'error_message' => $e->getMessage(),
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+            'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
     }
     if (ob_get_level()) {

@@ -58,19 +58,20 @@ if (!is_array($oauthData)) {
 }
 
 // STEP 3: Get client data from database
-$clientDataQ = $db->query("SELECT * FROM us_oauth_server_clients WHERE client_id = ? AND client_enabled = 1", [$oauthData['client_id']]);
 if ($clientDataQ->count() == 0) {
     // Client not found or disabled
-    $error_url = $oauthData['redirect_uri'] . '?error=invalid_client';
-    if (!empty($oauthData['state'])) {
-        $error_url .= '&state=' . urlencode($oauthData['state']);
-    }
+    http_response_code(400);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'error' => 'invalid_client',
+        'error_description' => 'The client ID is invalid or disabled.'
+    ]);
     logger(0, "OAuth Server Error", "Invalid or disabled client: " . $oauthData['client_id']);
-    Redirect::to($error_url);
     exit;
 }
 
 $oauthClientData = $clientDataQ->first();
+
 
 // STEP 4: Validate redirect_uri matches what's registered
 if ($oauthData['redirect_uri'] !== $oauthClientData->redirect_uri) {

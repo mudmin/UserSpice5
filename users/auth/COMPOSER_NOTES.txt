@@ -1,0 +1,10 @@
+Manually fixed unpatched bugs
+www/users/auth/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php line 225
+public function decode(SplFixedArray $data, SplFixedArray $erasures = null) : ?int
+to this:
+public function decode(SplFixedArray $data, ?SplFixedArray $erasures = null) : ?int
+
+users/auth/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
+private static function chooseMode(string $content, string $encoding = null) : Mode
+to this:
+private static function chooseMode(string $content, ?string $encoding = null) : Mode

@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -110,8 +110,17 @@ class DB
 
 		try {
 			$this->_pdo = new PDO($this->dsn, $this->user, $this->pass, $this->opts);
+			if (Config::get('mysql/force_utc_mysql') === true) {
+				$this->_pdo->exec("SET time_zone = '+00:00'");
+			}
+			$charset = Config::get('mysql/charset');
+			if ($charset != false && $charset != null && $charset != '') {
+				$this->_pdo->exec("SET NAMES '" . $charset . "'");
+			}
 		} catch (PDOException $e) {
-			die($e->getMessage());
+			//for debugging comment the line in below
+			//die($e->getMessage());
+			die("Could not connect to database.  Please check your configuration.");
 		}
 	}
 
@@ -151,47 +160,47 @@ class DB
 		return $this->_pdo->inTransaction();
 	}
 
-public function query($sql, $params = array())
-{
-    #echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
-    $this->_queryCount++;
-    $this->_error = false;
-    $this->_errorInfo = array(0, null, null);
-    $this->_resultsArray = [];
-    $this->_count = 0;
-    $this->_lastId = 0;
-    if ($this->_query = $this->_pdo->prepare($sql)) {
-        $x = 1;
-        if (count($params)) {
-            foreach ($params as $param) {
-                $this->_query->bindValue($x, $param);
-                $x++;
-            }
-        }
+	public function query($sql, $params = array())
+	{
+		#echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
+		$this->_queryCount++;
+		$this->_error = false;
+		$this->_errorInfo = array(0, null, null);
+		$this->_resultsArray = [];
+		$this->_count = 0;
+		$this->_lastId = 0;
+		if ($this->_query = $this->_pdo->prepare($sql)) {
+			$x = 1;
+			if (count($params)) {
+				foreach ($params as $param) {
+					$this->_query->bindValue($x, $param);
+					$x++;
+				}
+			}
 
-        try {
-            if ($this->_query->execute()) {
-                if ($this->_query->columnCount() > 0) {
-                    $this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
-                    $this->_resultsArray = json_decode(json_encode($this->_results), true) ?: [];
-                } else {
-                    // Ensure _resultsArray is empty array for non-SELECT queries
-                    $this->_resultsArray = [];
-                }
-                $this->_count = $this->_query->rowCount();
-                $this->_lastId = $this->_pdo->lastInsertId();
-            } else {
-                throw new Exception("db error");
-            }
-        } catch (Exception $e) {
-            $this->_error = true;
-            $this->_results = [];
-            $this->_errorInfo = $this->_query->errorInfo();
-        }
-    }
+			try {
+				if ($this->_query->execute()) {
+					if ($this->_query->columnCount() > 0) {
+						$this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
+						$this->_resultsArray = json_decode(json_encode($this->_results), true) ?: [];
+					} else {
+						// Ensure _resultsArray is empty array for non-SELECT queries
+						$this->_resultsArray = [];
+					}
+					$this->_count = $this->_query->rowCount();
+					$this->_lastId = $this->_pdo->lastInsertId();
+				} else {
+					throw new Exception("db error");
+				}
+			} catch (Exception $e) {
+				$this->_error = true;
+				$this->_results = [];
+				$this->_errorInfo = $this->_query->errorInfo();
+			}
+		}
 
-    return $this;
-}
+		return $this;
+	}
 
 	public function findAll($table)
 	{
@@ -205,6 +214,7 @@ public function query($sql, $params = array())
 
 	public function action($action, $table, $where = array())
 	{
+		$table = $this->_sanitizeTableName($table);
 		$sql    = "{$action} FROM {$table}";
 		$values = array();
 		$is_ok  = true;
@@ -324,6 +334,7 @@ public function query($sql, $params = array())
 
 	public function insert($table, $fields = [], $update = false)
 	{
+		$table = $this->_sanitizeTableName($table);
 		$keys    = array_keys($fields);
 		$values  = [];
 		$records = 0;
@@ -365,6 +376,7 @@ public function query($sql, $params = array())
 
 	public function update($table, $id, $fields)
 	{
+		$table = $this->_sanitizeTableName($table);
 		$sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) . (empty($fields) ? "" : "` = ? ");
 		$is_ok = true;
 
@@ -432,6 +444,7 @@ public function query($sql, $params = array())
 
 	private function get_subquery_sql($action, $table, $where, &$values, &$is_ok)
 	{
+		$table = $this->_sanitizeTableName($table);
 		if (is_array($where))
 			if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
 				$where_text = " WHERE $where_text";
@@ -439,6 +452,8 @@ public function query($sql, $params = array())
 		return " (SELECT $action FROM $table$where_text)";
 	}
 
+	/* Deprecated method cell
+	
 	public function cell($tablecolumn, $id = [])
 	{
 		$input = explode(".", $tablecolumn, 2);
@@ -450,6 +465,7 @@ public function query($sql, $params = array())
 
 		return ($result && $this->_count > 0)  ?  $this->_resultsArray[0][$input[1]]  :  null;
 	}
+	*/
 
 	public function getColCount()
 	{
@@ -526,8 +542,9 @@ public function query($sql, $params = array())
 	 */
 	public function columnExists($table, $column)
 	{
+		$table = $this->_sanitizeTableName($table);
 		try {
-			$sql = "SHOW COLUMNS FROM `{$table}` LIKE ?";
+			$sql = "SHOW COLUMNS FROM {$table} LIKE ?";
 			$result = $this->query($sql, [$column]);
 			return $result->count() > 0;
 		} catch (Exception $e) {
@@ -545,8 +562,9 @@ public function query($sql, $params = array())
 	 */
 	public function indexExists($table, $indexName)
 	{
+		$table = $this->_sanitizeTableName($table);
 		try {
-			$sql = "SHOW INDEX FROM `{$table}` WHERE Key_name = ?";
+			$sql = "SHOW INDEX FROM {$table} WHERE Key_name = ?";
 			$result = $this->query($sql, [$indexName]);
 			return $result->count() > 0;
 		} catch (Exception $e) {
@@ -562,9 +580,10 @@ public function query($sql, $params = array())
 	 */
 	public function tableExists($table)
 	{
+		$table = $this->_sanitizeTableName($table);
 		try {
-			$sql = "SHOW TABLES LIKE ?";
-			$result = $this->query($sql, [$table]);
+			$sql = "SHOW TABLES LIKE {$table} ";
+			$result = $this->query($sql);
 			return $result->count() > 0;
 		} catch (Exception $e) {
 			return false;
@@ -579,8 +598,9 @@ public function query($sql, $params = array())
 	 */
 	public function getColumnInfo($table, $column)
 	{
+		$table = $this->_sanitizeTableName($table);
 		try {
-			$sql = "SHOW COLUMNS FROM `{$table}` LIKE ?";
+			$sql = "SHOW COLUMNS FROM {$table} LIKE ?";
 			$result = $this->query($sql, [$column]);
 
 			if ($result->count() > 0) {
@@ -612,23 +632,23 @@ public function query($sql, $params = array())
 		try {
 			// Check if column already exists
 			if ($this->columnExists($table, $column)) {
-				logger(1, "Database Schema", "Column {$column} already exists in table {$table}");
+
 				return true;
 			}
 
-			$sql = "ALTER TABLE `{$table}` ADD COLUMN `{$column}` {$definition}";
+			$sql = "ALTER TABLE {$table} ADD COLUMN `{$column}` {$definition}";
 			$result = $this->query($sql);
 
 			if (!$result->error()) {
-				logger(1, "Database Schema", "Successfully added column {$column} to table {$table}");
+
 				return true;
 			} else {
 				$errorMsg = $this->errorString() ?: "Unknown error adding column {$column} to table {$table}";
-				logger(1, "Database Schema", "Failed to add column {$column} to table {$table}: " . $errorMsg);
+
 				return false;
 			}
 		} catch (Exception $e) {
-			logger(1, "Database Schema", "Exception adding column {$column} to table {$table}: " . $e->getMessage());
+
 			return false;
 		}
 	}
@@ -646,23 +666,23 @@ public function query($sql, $params = array())
 		try {
 			// Check if old column exists
 			if (!$this->columnExists($table, $oldColumn)) {
-				logger(1, "Database Schema", "Column {$oldColumn} does not exist in table {$table}");
+
 				return false;
 			}
 
-			$sql = "ALTER TABLE `{$table}` CHANGE `{$oldColumn}` `{$newColumn}` {$definition}";
+			$sql = "ALTER TABLE {$table} CHANGE `{$oldColumn}` `{$newColumn}` {$definition}";
 			$result = $this->query($sql);
 
 			if (!$result->error()) {
-				logger(1, "Database Schema", "Successfully modified column {$oldColumn} to {$newColumn} in table {$table}");
+
 				return true;
 			} else {
 				$errorMsg = $this->errorString() ?: "Unknown error modifying column {$oldColumn} in table {$table}";
-				logger(1, "Database Schema", "Failed to modify column {$oldColumn} in table {$table}: " . $errorMsg);
+
 				return false;
 			}
 		} catch (Exception $e) {
-			logger(1, "Database Schema", "Exception modifying column {$oldColumn} in table {$table}: " . $e->getMessage());
+
 			return false;
 		}
 	}
@@ -674,7 +694,7 @@ public function query($sql, $params = array())
 			if (!$this->_pdo) return false;
 			$this->_pdo->query('SELECT 1');
 			return true;
-		} catch (PDOException $e){
+		} catch (PDOException $e) {
 			return false;
 		}
 	}
@@ -688,6 +708,13 @@ public function query($sql, $params = array())
 		$this->_pdo = null;
 		try {
 			$this->_pdo = new PDO($this->dsn, $this->user, $this->pass, $this->opts);
+			if (Config::get('mysql/force_utc_mysql') === true) {
+				$this->_pdo->exec("SET time_zone = '+00:00'");
+			}
+			$charset = Config::get('mysql/charset');
+			if ($charset != false && $charset != null && $charset != '') {
+				$this->_pdo->exec("SET NAMES '" . $charset . "'");
+			}
 			$this->_error = false; // Reset error state on successful reconnect
 			$this->_errorInfo = ['00000', null, null];
 		} catch (PDOException $e) {
@@ -696,5 +723,26 @@ public function query($sql, $params = array())
 			error_log('Database reconnect failed: ' . $e->getMessage());
 			throw $e;
 		}
+	}
+
+
+	private function _sanitizeTableName(string $table): string
+	{
+
+		if (!is_string($table) || $table === '') {
+			throw new InvalidArgumentException("Invalid table name.");
+		}
+
+		if (strlen($table) > 64) {
+			throw new InvalidArgumentException("Table name too long (max 64 chars).");
+		}
+
+		// Allow only alphanumeric + underscore
+		// Reject anything with spaces, dots, backticks, or special chars
+		if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+			throw new InvalidArgumentException("Invalid characters in table name.");
+		}
+
+		return "`{$table}`";
 	}
 }

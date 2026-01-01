@@ -1,8 +1,8 @@
 <?php
 $path=['','users/','usersc/'];
-$abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+$abs_us_root=Server::get('DOCUMENT_ROOT');
 
-$self_path=explode("/", $_SERVER['PHP_SELF']);
+$self_path=explode("/", Server::get('PHP_SELF'));
 $self_path_length=count($self_path);
 $file_found=FALSE;
 

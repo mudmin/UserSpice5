@@ -62,8 +62,8 @@ function inputBlock($type,$label,$id,$divAttr=array(),$inputAttr=array(),$helper
 
 //returns the id of the current page
 function currentPageId($uri) {
-  $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
-  $self_path=explode("/", $_SERVER['PHP_SELF']);
+  $abs_us_root=Server::get('DOCUMENT_ROOT');
+  $self_path=explode("/", Server::get('PHP_SELF'));
   $self_path_length=count($self_path);
   $file_found=FALSE;
 
@@ -257,7 +257,7 @@ if (!function_exists('abbrev_date')) {
 			$ip = getenv('HTTP_FORWARDED');
 		}
 		else {
-			$ip = $_SERVER['REMOTE_ADDR'];
+			$ip = Server::get('REMOTE_ADDR');
 		}
 		return $ip;
 	}
@@ -485,3 +485,82 @@ if (!function_exists('mqtt')) {
 	  }
 	}
   }
+
+  if (!function_exists('generateForm')) {
+  function generateForm($table, $id, $skip = [])
+  {
+    global $db;
+
+    $fields = [];
+    $q = $db->query("SELECT * FROM {$table} WHERE id = ?", [$id]);
+    $r = $q->first();
+
+    foreach ($r as $field => $value) {
+      if (!in_array($field, $skip)) {
+        echo '<div class="form-group">';
+        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
+        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="' . $value . '">';
+        echo '</div>';
+      }
+    }
+
+    return true;
+  }
+}
+
+if (!function_exists('generateAddForm')) {
+  function generateAddForm($table, $skip = [])
+  {
+    global $db;
+
+    $fields = [];
+    $q = $db->query("SELECT * FROM {$table}");
+    $r = $q->first();
+
+    foreach ($r as $field => $value) {
+      if (!in_array($field, $skip)) {
+        echo '<div class="form-group">';
+        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
+        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="">';
+        echo '</div>';
+      }
+    }
+
+    return true;
+  }
+}
+
+if (!function_exists('updateFields2')) {
+  function updateFields2($post, $skip = [])
+  {
+    $fields = [];
+    foreach ($post as $field => $value) {
+      if (!in_array($field, $skip)) {
+        $fields[$field] = sanitize($post[$field]);
+      }
+    }
+
+    return $fields;
+  }
+}
+
+if (!function_exists('echoId')) {
+  function echoId($id, $table, $column)
+  {
+    global $db;
+
+    $query = $db->query("SELECT $column FROM $table WHERE id = $id LIMIT 1");
+    $count = $query->count();
+
+    if ($count > 0) {
+      $results = $query->first();
+      foreach ($results as $result) {
+        echo $result;
+      }
+    } else {
+      echo 'Not in database';
+
+      return false;
+    }
+  }
+}

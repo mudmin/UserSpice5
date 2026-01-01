@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -37,14 +37,14 @@ class User
             if (Session::exists($this->_sessionName)) {
                 $user = Session::get($this->_sessionName);
 
-                if ($this->find($user,$loginHandler)) {
+                if ($this->find($user, $loginHandler)) {
                     $this->_isLoggedIn = true;
                 } else {
                     //process Logout
                 }
             }
         } else {
-            $this->find($user,$loginHandler);
+            $this->find($user, $loginHandler);
         }
     }
 
@@ -68,10 +68,10 @@ class User
 
         if ($user) {
             if ($loginHandler !== null) {
-                if($loginHandler == "forceEmail"){
+                if ($loginHandler == "forceEmail") {
 
-                   $field = 'email';
-                }  elseif (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
+                    $field = 'email';
+                } elseif (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
                     $field = 'email';
                 } else {
                     $field = 'username';
@@ -102,8 +102,8 @@ class User
         if (!$username && !$password && $this->exists()) {
             Session::put($this->_sessionName, $this->data()->id);
             $date = date('Y-m-d H:i:s');
-			$this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
-			$_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+            $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
+            $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
         } else {
             $user = $this->find($username);
             if ($user) {
@@ -152,34 +152,34 @@ class User
     }
 
     public function loginEmail($email = null, $password = null, $remember = false, $rawpassword = null)
-    {   
+    {
         $success = false;
         if (!$email && !$password && $this->exists()) {
             Session::put($this->_sessionName, $this->data()->id);
         } else {
             $user = $this->find($email, 1);
-           
+
             if ($user) {
                 $strength = substr($this->data()->password, 4, 2);
-                if(!is_numeric($strength)){
+                if (!is_numeric($strength)) {
                     $strength = 999;
                 }
-       
-                if(password_verify($password, $this->data()->password)){
+
+                if (password_verify($password, $this->data()->password)) {
                     $success = true;
-                //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
-                }elseif(!is_null($rawpassword) && $strength < 13){
-                    if(password_verify(Input::sanitize($rawpassword,true,true), $this->data()->password)){
+                    //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
+                } elseif (!is_null($rawpassword) && $strength < 13) {
+                    if (password_verify(Input::sanitize($rawpassword, true, true), $this->data()->password)) {
                         $success = true;
                     }
                 }
-                
+
                 if ($success) {
-                    if($strength < 13){
+                    if ($strength < 13) {
                         //deal with custom login forms that do not properly pass the password
-                        if($rawpassword != null && $rawpassword != ""){
+                        if ($rawpassword != null && $rawpassword != "") {
                             $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);
-                        }             
+                        }
                     }
                     Session::put($this->_sessionName, $this->data()->id);
 
@@ -200,7 +200,7 @@ class User
                     $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
                     $ip = ipCheck();
                     $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $ip]);
-                    
+
                     $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
                     $c = $q->count();
                     if ($c < 1) {
@@ -234,45 +234,30 @@ class User
         $this->_cookieName = Config::get('remember/cookie_name');
         $fakeUN = $email;
         $active = 1;
-        //Check to see if a user has Google oAuth
-        $prevQuery = $this->_db->query("SELECT * FROM users WHERE oauth_provider = '".$oauth_provider."' AND oauth_uid = '".$oauth_uid."'") or die('Google oAuth Error');
-
-        //If a user is already setup with oAuth, get the latest info
+        $prevQuery = $this->_db->query("SELECT * FROM users WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid]);
         if ($prevQuery->count() > 0) {
-            // die("user already has oauth");
-            $update = $this->_db->query("UPDATE $this->tableName SET oauth_provider = '".$oauth_provider."', oauth_uid = '".$oauth_uid."', fname = '".$fname."', lname = '".$lname."', email = '".$email."', username = '".$fakeUN."',permissions = '".$active."',email_verfied = '".$active."',active = '".$active."',picture = '".$picture."', gpluslink = '".$link."', modified = '".date('Y-m-d H:i:s')."' WHERE oauth_provider = '".$oauth_provider."' AND oauth_uid = '".$oauth_uid."'") or die('Google oAuth Error');
+            $update = $this->_db->query("UPDATE users SET oauth_provider = ?, oauth_uid = ?, fname = ?, lname = ?, email = ?, username = ?, permissions = ?, email_verfied = ?, active = ?, picture = ?, gpluslink = ?, modified = ? WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid, $fname, $lname, $email, $fakeUN, $active, $active, $active, $picture, $link, date('Y-m-d H:i:s'), $oauth_provider, $oauth_uid]);
         } else {
-            //Check to see if the user has a regular UserSpice account that matches the google email.
             $findExistingUS = $this->_db->query('SELECT * FROM users WHERE email = ?', [$email]);
             $foundUS = $findExistingUS->count();
             $found = $findExistingUS->count();
-
             if ($foundUS == 1) {
-                //Found an existing UserSpice user with the same email
-                // die("user already has userspice");
             } else {
-                //If a user has neither UserSpice nor oAuth creds
-                //die("user has neither");
-                //$password = password_hash(Token::generate(),PASSWORD_BCRYPT,array('cost' => 13));
                 $settings = $this->_db->query('SELECT * FROM settings')->first();
                 $username = $email;
-
-                $insert = $this->_db->query("INSERT INTO $this->tableName SET `password` = NULL,username = '".$username."',active = '".$active."',oauth_provider = '".$oauth_provider."', oauth_uid = '".$oauth_uid."',permissions = '".$active."', email_verified = '".$active."', fname = '".$fname."', lname = '".$lname."', email = '".$email."', picture = '".$picture."', gpluslink = '".$link."', join_date = '".date('Y-m-d H:i:s')."',created = '".date('Y-m-d H:i:s')."', modified = '".date('Y-m-d H:i:s')."'") or die('Google oAuth Error');
+                $insert = $this->_db->query("INSERT INTO users (`password`, username, active, oauth_provider, oauth_uid, permissions, email_verified, fname, lname, email, picture, gpluslink, join_date, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [NULL, $username, $active, $oauth_provider, $oauth_uid, $active, $active, $fname, $lname, $email, $picture, $link, date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), date('Y-m-d H:i:s')]);
                 $lastID = $insert->lastId();
-
-                $insert2 = $this->_db->query("INSERT INTO user_permission_matches SET user_id = $lastID, permission_id = 1");
+                $insert2 = $this->_db->query("INSERT INTO user_permission_matches (user_id, permission_id) VALUES (?, ?)", [$lastID, 1]);
                 $this->_isNewAccount = true;
             }
         }
-
-        $query = $this->_db->query("SELECT * FROM $this->tableName WHERE oauth_provider = '".$oauth_provider."' AND oauth_uid = '".$oauth_uid."'") or die('Google oAuth Error');
+        $query = $this->_db->query("SELECT * FROM users WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid]);
         $result = $query->first();
         if ($this->_isNewAccount) {
             $result->isNewAccount = true;
         } else {
             $result->isNewAccount = false;
         }
-
         return $result;
     }
 

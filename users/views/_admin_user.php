@@ -901,7 +901,7 @@ includeHook($hooks, 'body'); ?>
 includeHook($hooks, 'bottom');
 
 if (!$canEdit) { ?>
-  <script>
+  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     document.addEventListener('DOMContentLoaded', function() {
       let form = document.getElementById('adminUser');
       // First disable all inputs except protected field

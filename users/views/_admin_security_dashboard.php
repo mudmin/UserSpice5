@@ -299,13 +299,18 @@ if (!empty($_POST) && isset($_POST['toggle_security_setting'])) {
     }
     $setting = Input::get('setting');
     $current_val = $settings->$setting;
+
+    // no_passwords now has 3 states (0, 1, 2), so it shouldn't be toggled from here
+    // Redirect to general settings page instead
+    if ($setting == 'no_passwords') {
+        usError("Password login settings have multiple options. Please use the General Settings page to configure this setting.");
+        Redirect::to($us_url_root . 'users/admin.php?view=general');
+    }
+
     $new_val = ($current_val == 1) ? 0 : 1;
 
     // Some settings have special considerations
     $message = "Setting {$setting} updated.";
-    if ($setting == 'no_passwords' && $new_val == 1) {
-        $message = "Password logins disabled. Ensure other login methods (OAuth, Passkey, Email) are configured and working.";
-    }
     if ($setting == 'force_ssl' && $new_val == 1) {
         $message = "Force HTTPS enabled. Ensure your SSL certificate is valid and properly configured.";
     }
@@ -316,54 +321,425 @@ if (!empty($_POST) && isset($_POST['toggle_security_setting'])) {
     Redirect::to($us_url_root . 'users/admin.php?view=security');
 }
 
-// Calculate overall security score
-function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits)
-{
-    $score = 0;
-    $max_score = 100;
-
-    // HTTPS (15 points)
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') $score += 15;
-
-    // PHP Version (10 points)
-    if ($php_status === 'success') $score += 10;
-    elseif ($php_status === 'warning') $score += 5;
-
-    // UserSpice Up to Date (10 points)
-    if ($is_updated) $score += 10;
-
-    // Email configured (10 points)
-    if ($email_configured) $score += 10;
-
-    // Rate limiting customized (10 points)
-    if (!$using_default_rate_limits) {
-        $score += 10;
+// Function to fix $_SERVER usage in z_us_root.php (only DOCUMENT_ROOT and PHP_SELF)
+function fixServerVariableUsageRoot($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
     }
 
-    // Force SSL setting (10 points)
-    if ($settings->force_ssl) $score += 10;
+    // Create backup first
+    if (file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
 
-    // Passkey configuration (10 points)
-    if ($rpid_status === 'success') $score += 10;
-    elseif ($rpid_status === 'warning') $score += 5;
+    // Only replace DOCUMENT_ROOT and PHP_SELF
+    $newContents = preg_replace(
+        '/\$_SERVER\s*\[\s*[\'"]DOCUMENT_ROOT[\'"]\s*\]/',
+        "Server::get('DOCUMENT_ROOT')",
+        $contents
+    );
+    $newContents = preg_replace(
+        '/\$_SERVER\s*\[\s*[\'"]PHP_SELF[\'"]\s*\]/',
+        "Server::get('PHP_SELF')",
+        $newContents
+    );
 
-    // TOTP enabled (5 points)
-    if ($settings->totp > 0) $score += 5;
+    if ($newContents === $contents) {
+        // No changes made, remove backup
+        @unlink($backup_path);
+        return false;
+    }
 
-    // Passkeys enabled (5 points)
-    if ($settings->passkeys) $score += 5;
-
-    // Email login available (5 points)
-    if ($settings->email_login > 0) $score += 5;
-
-    // Security headers (10 points)
-    $score += ($headers_configured * 2);
-
-    return min($score, $max_score);
+    return file_put_contents($file_path, $newContents) !== false;
 }
 
-$is_updated = version_compare($user_spice_ver, $versions->release_version, '>=');
-$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits);
+// Function to fix $_SERVER usage in users/init.php and add missing definitions
+function fixServerVariableUsageInit($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
+    }
+
+    // Create backup first
+    if (file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
+
+    $newContents = $contents;
+
+    // Replace $_SERVER['DOCUMENT_ROOT'] and $_SERVER['PHP_SELF']
+    $newContents = preg_replace(
+        '/\$_SERVER\s*\[\s*[\'"]DOCUMENT_ROOT[\'"]\s*\]/',
+        "Server::get('DOCUMENT_ROOT')",
+        $newContents
+    );
+    $newContents = preg_replace(
+        '/\$_SERVER\s*\[\s*[\'"]PHP_SELF[\'"]\s*\]/',
+        "Server::get('PHP_SELF')",
+        $newContents
+    );
+
+    // Add missing definitions after <?php
+    $additions = [];
+
+    // Check for USERSPICE_ACTIVE_LOGGING
+    if (strpos($newContents, 'USERSPICE_ACTIVE_LOGGING') === false) {
+        $additions[] = "define('USERSPICE_ACTIVE_LOGGING', false);";
+    }
+
+    // Check for $noPHPInfo
+    if (strpos($newContents, '$noPHPInfo') === false) {
+        $additions[] = '$noPHPInfo = false;';
+    }
+
+    // Insert additions after <?php if any
+    if (!empty($additions)) {
+        $additionsText = "\n" . implode("\n", $additions);
+        $newContents = preg_replace('/^<\?php\s*/', "<?php" . $additionsText . "\n", $newContents, 1);
+    }
+
+    // Add $usespice_nonce before loader.php if missing
+    if (strpos($newContents, '$usespice_nonce') === false) {
+        $newContents = preg_replace(
+            '/(require_once\s+\$abs_us_root\s*\.\s*\$us_url_root\s*\.\s*[\'"]users\/includes\/loader\.php[\'"]\s*;)/',
+            "\$usespice_nonce = base64_encode(random_bytes(16));\n$1",
+            $newContents
+        );
+    }
+
+    // Add $system_messages_justify before loader.php if missing
+    if (strpos($newContents, '$system_messages_justify') === false) {
+        $newContents = preg_replace(
+            '/(require_once\s+\$abs_us_root\s*\.\s*\$us_url_root\s*\.\s*[\'"]users\/includes\/loader\.php[\'"]\s*;)/',
+            "\$system_messages_justify = \"right\";\n$1",
+            $newContents
+        );
+    }
+
+    // Add EXTRA_CURL_SECURITY before loader.php if missing
+    if (strpos($newContents, 'EXTRA_CURL_SECURITY') === false) {
+        $newContents = preg_replace(
+            '/(require_once\s+\$abs_us_root\s*\.\s*\$us_url_root\s*\.\s*[\'"]users\/includes\/loader\.php[\'"]\s*;)/',
+            "// Forces SSL verification in cURL requests to UserSpice API\n// Will most likely break on localhost or self-signed certificates\ndefine('EXTRA_CURL_SECURITY', false);\n$1",
+            $newContents
+        );
+    }
+
+    if ($newContents === $contents) {
+        // No changes made, remove backup
+        @unlink($backup_path);
+        return false;
+    }
+
+    return file_put_contents($file_path, $newContents) !== false;
+}
+
+// Handle fix $_SERVER request for z_us_root.php
+if (!empty($_POST) && isset($_POST['fix_server_root'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'z_us_root.php';
+    $backup_path = $abs_us_root . $us_url_root . 'z_us_root.BACKUP.php';
+
+    if (fixServerVariableUsageRoot($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Fixed $_SERVER usage in z_us_root.php (backup created)');
+        usSuccess('Successfully replaced $_SERVER with Server::get() in z_us_root.php. A backup was created at z_us_root.BACKUP.php');
+    } else {
+        usError('Could not fix the file automatically. The file may not be writable or no changes were needed.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle fix $_SERVER request for users/init.php
+if (!empty($_POST) && isset($_POST['fix_server_init'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'users/init.php';
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.BACKUP.php';
+
+    if (fixServerVariableUsageInit($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Fixed $_SERVER usage in users/init.php (backup created)');
+        usSuccess('Successfully updated users/init.php. A backup was created at users/init.BACKUP.php');
+    } else {
+        usError('Could not fix the file automatically. The file may not be writable or no changes were needed.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle dismiss backup request for z_us_root.php (rename to .BACKUP.SAVE.php)
+if (!empty($_POST) && isset($_POST['dismiss_root_backup'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $backup_path = $abs_us_root . $us_url_root . 'z_us_root.BACKUP.php';
+    $save_path = $abs_us_root . $us_url_root . 'z_us_root.BACKUP.SAVE.php';
+
+    if (file_exists($backup_path) && @rename($backup_path, $save_path)) {
+        logger($user->data()->id, 'Security', 'Dismissed z_us_root.BACKUP.php (renamed to .BACKUP.SAVE.php)');
+        usSuccess('Backup dismissed. The file has been renamed to z_us_root.BACKUP.SAVE.php');
+    } else {
+        usError('Could not dismiss the backup file.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle dismiss backup request for users/init.php (rename to .BACKUP.SAVE.php)
+if (!empty($_POST) && isset($_POST['dismiss_init_backup'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.BACKUP.php';
+    $save_path = $abs_us_root . $us_url_root . 'users/init.BACKUP.SAVE.php';
+
+    if (file_exists($backup_path) && @rename($backup_path, $save_path)) {
+        logger($user->data()->id, 'Security', 'Dismissed users/init.BACKUP.php (renamed to .BACKUP.SAVE.php)');
+        usSuccess('Backup dismissed. The file has been renamed to users/init.BACKUP.SAVE.php');
+    } else {
+        usError('Could not dismiss the backup file.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Function to enable EXTRA_CURL_SECURITY in users/init.php
+function enableExtraCurlSecurity($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
+    }
+
+    // Check if already defined as true
+    if (preg_match("/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*true\s*\)/", $contents)) {
+        return false; // Already enabled
+    }
+
+    // Create backup first
+    if (file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
+
+    // If defined as false, change to true
+    if (preg_match("/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*false\s*\)/", $contents)) {
+        $newContents = preg_replace(
+            "/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*false\s*\)/",
+            "define('EXTRA_CURL_SECURITY', true)",
+            $contents
+        );
+    } else {
+        // Not defined at all, add it before loader.php
+        $newContents = preg_replace(
+            '/(require_once\s+\$abs_us_root\s*\.\s*\$us_url_root\s*\.\s*[\'"]users\/includes\/loader\.php[\'"]\s*;)/',
+            "// Forces SSL verification in cURL requests to UserSpice API\n// Will most likely break on localhost or self-signed certificates\ndefine('EXTRA_CURL_SECURITY', true);\n$1",
+            $contents
+        );
+    }
+
+    if ($newContents === $contents) {
+        @unlink($backup_path);
+        return false;
+    }
+
+    return file_put_contents($file_path, $newContents) !== false;
+}
+
+// Handle enable EXTRA_CURL_SECURITY request
+if (!empty($_POST) && isset($_POST['enable_curl_security'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'users/init.php';
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php';
+
+    if (enableExtraCurlSecurity($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Enabled EXTRA_CURL_SECURITY in users/init.php (backup created)');
+        usSuccess('Successfully enabled EXTRA_CURL_SECURITY. A backup was created at users/init.CURL_BACKUP.php');
+    } else {
+        usError('Could not enable the setting automatically. The file may not be writable or no changes were needed.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle dismiss CURL backup request
+if (!empty($_POST) && isset($_POST['dismiss_curl_backup'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php';
+    $save_path = $abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.SAVE.php';
+
+    if (file_exists($backup_path) && @rename($backup_path, $save_path)) {
+        logger($user->data()->id, 'Security', 'Dismissed users/init.CURL_BACKUP.php (renamed to .CURL_BACKUP.SAVE.php)');
+        usSuccess('Backup dismissed. The file has been renamed to users/init.CURL_BACKUP.SAVE.php');
+    } else {
+        usError('Could not dismiss the backup file.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Check for $_SERVER usage in users/init.php - only fixable if it's exactly DOCUMENT_ROOT and PHP_SELF
+function checkServerVariableUsageInit($file_path) {
+    if (!file_exists($file_path)) {
+        return ['found' => false, 'error' => 'File not found', 'fixable' => false];
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return ['found' => false, 'error' => 'Could not read file', 'fixable' => false];
+    }
+
+    // Remove comments to avoid false positives
+    $contentsNoComments = preg_replace('#//.*$#m', '', $contents);
+    $contentsNoComments = preg_replace('#/\*.*?\*/#s', '', $contentsNoComments);
+
+    // Find all $_SERVER usages
+    preg_match_all('/\$_SERVER\s*\[\s*[\'"]([^\'"]+)[\'"]\s*\]/', $contentsNoComments, $matches);
+
+    if (empty($matches[1])) {
+        return ['found' => false, 'error' => null, 'fixable' => false];
+    }
+
+    // Check if all usages are only DOCUMENT_ROOT or PHP_SELF
+    $allowed = ['DOCUMENT_ROOT', 'PHP_SELF'];
+    $allAllowed = true;
+    foreach ($matches[1] as $key) {
+        if (!in_array($key, $allowed)) {
+            $allAllowed = false;
+            break;
+        }
+    }
+
+    return [
+        'found' => true,
+        'error' => null,
+        'fixable' => $allAllowed,
+        'keys_found' => array_unique($matches[1])
+    ];
+}
+
+// Special check for z_us_root.php - only fixable if it's exactly DOCUMENT_ROOT and PHP_SELF
+function checkServerVariableUsageRoot($file_path) {
+    if (!file_exists($file_path)) {
+        return ['found' => false, 'error' => 'File not found', 'fixable' => false];
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return ['found' => false, 'error' => 'Could not read file', 'fixable' => false];
+    }
+
+    // Remove comments to avoid false positives
+    $contentsNoComments = preg_replace('#//.*$#m', '', $contents);
+    $contentsNoComments = preg_replace('#/\*.*?\*/#s', '', $contentsNoComments);
+
+    // Find all $_SERVER usages
+    preg_match_all('/\$_SERVER\s*\[\s*[\'"]([^\'"]+)[\'"]\s*\]/', $contentsNoComments, $matches);
+
+    if (empty($matches[1])) {
+        return ['found' => false, 'error' => null, 'fixable' => false];
+    }
+
+    // Check if all usages are only DOCUMENT_ROOT or PHP_SELF
+    $allowed = ['DOCUMENT_ROOT', 'PHP_SELF'];
+    $allAllowed = true;
+    foreach ($matches[1] as $key) {
+        if (!in_array($key, $allowed)) {
+            $allAllowed = false;
+            break;
+        }
+    }
+
+    return [
+        'found' => true,
+        'error' => null,
+        'fixable' => $allAllowed,
+        'keys_found' => array_unique($matches[1])
+    ];
+}
+
+$server_var_init = checkServerVariableUsageInit($abs_us_root . $us_url_root . 'users/init.php');
+$server_var_root = checkServerVariableUsageRoot($abs_us_root . $us_url_root . 'z_us_root.php');
+
+// Check for backup files
+$root_backup_exists = file_exists($abs_us_root . $us_url_root . 'z_us_root.BACKUP.php');
+$init_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.BACKUP.php');
+$curl_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php');
+
+// Calculate overall security score
+function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root)
+{
+    $score = 100; // Start at 100 and deduct for missing items
+    $max_score = 100;
+
+    // HTTPS (15 points) - Deduct if not using HTTPS
+    if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') $score -= 15;
+
+    // PHP Version (10 points) - Deduct based on PHP status
+    if ($php_status === 'danger') $score -= 10;
+    elseif ($php_status === 'warning') $score -= 5;
+
+    // UserSpice Up to Date (10 points) - Deduct if outdated
+    if (!$is_updated) $score -= 10;
+
+    // Email configured (10 points) - Deduct if not configured
+    if (!$email_configured) $score -= 10;
+
+    // Rate limiting customized (10 points) - Deduct if using defaults
+    if ($using_default_rate_limits) {
+        $score -= 10;
+    }
+
+    // Force SSL setting (10 points) - Deduct if not forced
+    if (!$settings->force_ssl) $score -= 10;
+
+    // Passkey configuration (10 points) - Deduct based on status
+    if ($rpid_status === 'danger') $score -= 10;
+    elseif ($rpid_status === 'warning') $score -= 5;
+
+    // TOTP enabled (5 points) - Deduct if disabled
+    if ($settings->totp == 0) $score -= 5;
+
+    // Passkeys enabled (5 points) - Deduct if disabled
+    if (!$settings->passkeys) $score -= 5;
+
+    // Email login available (5 points) - Deduct if disabled
+    if ($settings->email_login == 0) $score -= 5;
+
+    // Security headers (10 points) - Deduct 2 points per missing header
+    $score -= ((5 - $headers_configured) * 2);
+
+    // Extra cURL security (3 points) - Deduct if not enabled
+    if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) $score -= 3;
+
+    // $_SERVER usage in critical files (5 points each)
+    if ($server_var_init['found']) $score -= 5;
+    if ($server_var_root['found']) $score -= 5;
+
+    return max($score, 0); // Don't go below 0
+}
+
+$is_updated = version_compare($user_spice_ver, $versions->release_version ?? "", '>=');
+$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root);
 $score_color = $security_score >= 75 ? 'success' : ($security_score >= 60 ? 'warning' : 'danger');
 
 // Build dynamic recommendations
@@ -461,6 +837,87 @@ if ($settings->debug > 0) {
         'text' => "Debug mode is currently active {$debug_level}. While useful for development, it can expose sensitive information and should be disabled on a live site.",
         'link_text' => 'Disable Debug Mode',
         'link_url' => $us_url_root . 'users/admin.php?view=general#debug'
+    ];
+}
+
+if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) {
+    $recommendations[] = [
+        'title' => 'Enable Extra cURL Security',
+        'text' => 'Extra cURL security is not enabled. This setting forces SSL certificate verification for all outbound HTTPS connections, protecting against man-in-the-middle attacks. <strong>Note:</strong> This may cause issues on localhost or with self-signed certificates.',
+        'link_text' => 'Enable Now',
+        'link_url' => '#',
+        'modal' => 'confirm-enable_curl_security'
+    ];
+}
+
+// Show recommendation to dismiss CURL backup if it exists and EXTRA_CURL_SECURITY is now enabled
+if ($curl_backup_exists && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) {
+    $recommendations[] = [
+        'title' => 'Dismiss cURL Security Backup',
+        'text' => 'A backup file <code>users/init.CURL_BACKUP.php</code> exists from enabling extra cURL security. Since your site is working correctly, you can dismiss this backup.',
+        'link_text' => 'Dismiss',
+        'link_url' => '#',
+        'modal' => 'confirm-dismiss_curl_backup'
+    ];
+}
+
+if ($server_var_init['found']) {
+    if ($server_var_init['fixable']) {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from users/init.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>users/init.php</code> for <code>' . implode('</code> and <code>', $server_var_init['keys_found']) . '</code>. Use <code>Server::get()</code> instead for improved security.',
+            'link_text' => 'Fix Now',
+            'link_url' => '#',
+            'modal' => 'confirm-fix_server_init'
+        ];
+    } else {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from users/init.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>users/init.php</code>. The file contains usages beyond DOCUMENT_ROOT and PHP_SELF that cannot be automatically fixed. Please update the file manually to use <code>Server::get()</code>.',
+            'link_text' => 'Learn More',
+            'link_url' => '#system-security-card'
+        ];
+    }
+}
+
+// Show recommendation to dismiss backup if it exists and init.php is now clean
+if ($init_backup_exists && !$server_var_init['found']) {
+    $recommendations[] = [
+        'title' => 'Dismiss users/init.php Backup',
+        'text' => 'A backup file <code>users/init.BACKUP.php</code> exists from a previous fix. Since your site is working correctly, you can dismiss this backup.',
+        'link_text' => 'Dismiss',
+        'link_url' => '#',
+        'modal' => 'confirm-dismiss_init_backup'
+    ];
+}
+
+if ($server_var_root['found']) {
+    if ($server_var_root['fixable']) {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from z_us_root.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>z_us_root.php</code> for <code>' . implode('</code> and <code>', $server_var_root['keys_found']) . '</code>. Use <code>Server::get()</code> instead for improved security.',
+            'link_text' => 'Fix Now',
+            'link_url' => '#',
+            'modal' => 'confirm-fix_server_root'
+        ];
+    } else {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from z_us_root.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>z_us_root.php</code>. The file contains usages beyond DOCUMENT_ROOT and PHP_SELF that cannot be automatically fixed. Please update the file manually to use <code>Server::get()</code>.',
+            'link_text' => 'Learn More',
+            'link_url' => '#system-security-card'
+        ];
+    }
+}
+
+// Show recommendation to dismiss backup if it exists and z_us_root is now clean
+if ($root_backup_exists && !$server_var_root['found']) {
+    $recommendations[] = [
+        'title' => 'Dismiss z_us_root.php Backup',
+        'text' => 'A backup file <code>z_us_root.BACKUP.php</code> exists from a previous fix. Since your site is working correctly, you can dismiss this backup.',
+        'link_text' => 'Dismiss',
+        'link_url' => '#',
+        'modal' => 'confirm-dismiss_root_backup'
     ];
 }
 
@@ -619,10 +1076,10 @@ if ($settings->debug > 0) {
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn" data-bs-toggle="modal" data-bs-target="#confirm-no_passwords">
-                            <i class="icon fas fa-key <?= $settings->no_passwords ? 'text-danger' : 'text-success' ?>"></i>
+                        <a href="<?= $us_url_root ?>users/admin.php?view=general" class="quick-action-btn">
+                            <i class="icon fas fa-key <?= $settings->no_passwords == 0 ? 'text-success' : ($settings->no_passwords == 2 ? 'text-warning' : 'text-danger') ?>"></i>
                             <span>Password Logins</span>
-                            <span class="status <?= $settings->no_passwords ? 'text-danger' : 'text-success' ?>"><?= $settings->no_passwords ? 'DISABLED' : 'ENABLED' ?></span>
+                            <span class="status <?= $settings->no_passwords == 0 ? 'text-success' : ($settings->no_passwords == 2 ? 'text-warning' : 'text-danger') ?>"><?= $settings->no_passwords == 0 ? 'ENABLED' : ($settings->no_passwords == 2 ? 'LOCALHOST' : 'DISABLED') ?></span>
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
@@ -719,8 +1176,8 @@ if ($settings->debug > 0) {
                 <div class="row mb-3">
                     <div class="col-8"><strong>Username/Password:</strong></div>
                     <div class="col-4 text-end">
-                        <span class="badge bg-<?= $settings->no_passwords ? 'danger' : 'success' ?>">
-                            <?= $settings->no_passwords ? 'Disabled' : 'Enabled' ?>
+                        <span class="badge bg-<?= $settings->no_passwords == 0 ? 'success' : ($settings->no_passwords == 2 ? 'warning' : 'danger') ?>">
+                            <?= $settings->no_passwords == 0 ? 'Enabled' : ($settings->no_passwords == 2 ? 'Localhost Only' : 'Disabled') ?>
                         </span>
                     </div>
                 </div>
@@ -812,7 +1269,7 @@ if ($settings->debug > 0) {
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="card mb-4" id="system-security-card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-server me-2"></i>System Security Status
@@ -865,7 +1322,7 @@ if ($settings->debug > 0) {
                         </span>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-sm-6"><strong>Security Headers:</strong></div>
                     <div class="col-sm-6 text-end">
                         <span class="badge bg-<?= $headers_configured > 2 ? 'success' : ($headers_configured > 0 ? 'warning' : 'danger') ?>">
@@ -873,6 +1330,31 @@ if ($settings->debug > 0) {
                         </span>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>Extra cURL Security:</strong>
+                        <a class="nounderline no-disable" data-toggle="tooltip" title="When enabled, forces cURL to verify SSL certificates when making outbound HTTPS connections. May break on localhost or with self-signed certificates."><i class="fa fa-question-circle offset-circle font-info"></i></a>
+                    </div>
+                    <div class="col-sm-6 text-end">
+                        <?php if (defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) : ?>
+                            <span class="badge bg-success">Enabled</span>
+                        <?php else : ?>
+                            <span class="badge bg-warning">Disabled</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) : ?>
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="alert alert-info p-2 small mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            To enable extra cURL security, set <code>define('EXTRA_CURL_SECURITY', true);</code> at the bottom of your <code>users/init.php</code> file.
+                            This forces SSL certificate verification for all outbound cURL connections to the UserSpice API.
+                            <strong>Note:</strong> This may cause issues on localhost or with self-signed certificates.
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
             <div class="card-footer">
                 <a href="<?= $us_url_root ?>users/admin.php?view=updates" class="btn btn-sm btn-outline-primary me-2">
@@ -961,12 +1443,20 @@ if ($settings->debug > 0) {
                     ];
                 }
 
-                if ($settings->no_passwords && $settings->email_login == 0 && !$settings->passkeys && $oauthProviders == 0) {
+                if ($settings->no_passwords == 1 && $settings->email_login == 0 && !$settings->passkeys && $oauthProviders == 0) {
                     $alerts[] = [
                         'level' => 'danger',
                         'icon' => 'fas fa-key',
                         'title' => 'No Login Methods Available',
                         'message' => 'Password logins are disabled but no alternative authentication methods are configured!'
+                    ];
+                }
+                if ($settings->no_passwords == 2 && $settings->email_login == 0 && !$settings->passkeys && $oauthProviders == 0) {
+                    $alerts[] = [
+                        'level' => 'warning',
+                        'icon' => 'fas fa-key',
+                        'title' => 'Limited Login Methods',
+                        'message' => 'Password logins are only available from localhost. Remote users have no alternative authentication methods configured!'
                     ];
                 }
 
@@ -997,6 +1487,12 @@ if ($settings->debug > 0) {
                     ];
                 }
 
+                $alerts[] = [
+                    'level' => 'info',
+                    'icon' => 'fas fa-info-circle',
+                    'title' => 'New Server Class',
+                    'message' => 'Our new Server class provides various methods for sanitizing things that were traditionally fetched with $_SERVER. Consider using <code>Server::get("HTTP_HOST")</code> in place of <code>$_SERVER["HTTP_HOST"]</code> for improved security.'
+                ];
 
 
                 if (empty($alerts)) : ?>
@@ -1278,7 +1774,11 @@ Header always set Referrer-Policy "no-referrer-when-downgrade"</code></pre>
 function generate_confirmation_modal($id, $title, $message, $setting_name, $settings)
 {
     $current_val = $settings->$setting_name;
-    $action_text = $current_val ? "Disable" : "Enable";
+    // For 'no_passwords', the logic is inverted: 1 means passwords are disabled, 0 means enabled
+    $is_inverted = ($setting_name === 'no_passwords');
+    $action_text = $is_inverted
+        ? ($current_val ? "Enable" : "Disable")  // if no_passwords=1, we enable passwords; if 0, we disable
+        : ($current_val ? "Disable" : "Enable"); // normal logic for other settings
     $btn_class = $current_val ? 'danger' : 'success';
 ?>
     <div class="modal fade" id="confirm-<?= $id ?>" tabindex="-1" aria-labelledby="confirm-<?= $id ?>-label" aria-hidden="true">
@@ -1348,3 +1848,214 @@ generate_confirmation_modal(
     $settings
 );
 ?>
+
+<?php if ($server_var_init['found'] && $server_var_init['fixable']) : ?>
+<div class="modal fade" id="confirm-fix_server_init" tabindex="-1" aria-labelledby="confirm-fix_server_init-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_server_init-label">Fix $_SERVER Usage in users/init.php</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will replace <code>$_SERVER['DOCUMENT_ROOT']</code> and <code>$_SERVER['PHP_SELF']</code> with <code>Server::get('DOCUMENT_ROOT')</code> and <code>Server::get('PHP_SELF')</code>.
+                </div>
+                <p>The <code>Server</code> class provides sanitized access to server variables, helping prevent header injection and other security vulnerabilities.</p>
+                <p>Additionally, the following will be added if missing:</p>
+                <ul class="small">
+                    <li><code>define('USERSPICE_ACTIVE_LOGGING', false);</code> after <code>&lt;?php</code></li>
+                    <li><code>$noPHPInfo = false;</code> after <code>&lt;?php</code></li>
+                    <li><code>$usespice_nonce = base64_encode(random_bytes(16));</code> before loader.php</li>
+                    <li><code>$system_messages_justify = "right";</code> before loader.php</li>
+                    <li><code>define('EXTRA_CURL_SECURITY', false);</code> before loader.php</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>users/init.BACKUP.php</code> before any changes are made.
+                </div>
+
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_server_init" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($init_backup_exists) : ?>
+<div class="modal fade" id="confirm-dismiss_init_backup" tabindex="-1" aria-labelledby="confirm-dismiss_init_backup-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-dismiss_init_backup-label">Dismiss Backup File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Your site is working correctly with the updated <code>users/init.php</code>.
+                </div>
+                <p>The backup file <code>users/init.BACKUP.php</code> will be renamed to <code>users/init.BACKUP.SAVE.php</code> so it won't appear in future checks.</p>
+                <p><strong>Are you sure you want to dismiss this backup?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="dismiss_init_backup" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Dismiss
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($server_var_root['found'] && $server_var_root['fixable']) : ?>
+<div class="modal fade" id="confirm-fix_server_root" tabindex="-1" aria-labelledby="confirm-fix_server_root-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_server_root-label">Fix $_SERVER Usage in z_us_root.php</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will replace <code>$_SERVER['DOCUMENT_ROOT']</code> and <code>$_SERVER['PHP_SELF']</code> with <code>Server::get('DOCUMENT_ROOT')</code> and <code>Server::get('PHP_SELF')</code>.
+                </div>
+                <p>The <code>Server</code> class provides sanitized access to server variables, helping prevent header injection and other security vulnerabilities.</p>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>z_us_root.BACKUP.php</code> before any changes are made.
+                </div>
+
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_server_root" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($root_backup_exists) : ?>
+<div class="modal fade" id="confirm-dismiss_root_backup" tabindex="-1" aria-labelledby="confirm-dismiss_root_backup-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-dismiss_root_backup-label">Dismiss Backup File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Your site is working correctly with the updated <code>z_us_root.php</code>.
+                </div>
+                <p>The backup file <code>z_us_root.BACKUP.php</code> will be renamed to <code>z_us_root.BACKUP.SAVE.php</code> so it won't appear in future checks.</p>
+                <p><strong>Are you sure you want to dismiss this backup?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="dismiss_root_backup" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Dismiss
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) : ?>
+<div class="modal fade" id="confirm-enable_curl_security" tabindex="-1" aria-labelledby="confirm-enable_curl_security-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-enable_curl_security-label">Enable Extra cURL Security</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will enable <code>EXTRA_CURL_SECURITY</code> in your <code>users/init.php</code> file.
+                </div>
+                <p>When enabled, this setting forces SSL certificate verification for all outbound cURL connections to the UserSpice API, protecting against man-in-the-middle attacks.</p>
+
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This may cause issues on localhost or with self-signed certificates. Only enable this on production servers with valid SSL certificates.
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>users/init.CURL_BACKUP.php</code> before any changes are made.
+                </div>
+
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="enable_curl_security" class="btn btn-primary">
+                        <i class="fas fa-lock me-1"></i>Enable Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($curl_backup_exists) : ?>
+<div class="modal fade" id="confirm-dismiss_curl_backup" tabindex="-1" aria-labelledby="confirm-dismiss_curl_backup-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-dismiss_curl_backup-label">Dismiss Backup File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Extra cURL security is enabled and your site is working correctly.
+                </div>
+                <p>The backup file <code>users/init.CURL_BACKUP.php</code> will be renamed to <code>users/init.CURL_BACKUP.SAVE.php</code> so it won't appear in future checks.</p>
+                <p><strong>Are you sure you want to dismiss this backup?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="dismiss_curl_backup" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Dismiss
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

@@ -22,10 +22,10 @@ if (ipCheckBan()) {
 }
 include $abs_us_root . $us_url_root . 'users/includes/dashboard_language.php';
 
-if (!securePage($_SERVER['PHP_SELF'])) {
+if(!securePage(Server::get('PHP_SELF'))){
   die();
 }
 $chartsLoaded = "true"; //widget signal not to reload js
 ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/user_spice_ver.php'; ?>

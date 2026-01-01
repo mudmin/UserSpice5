@@ -517,7 +517,7 @@ if ($_POST) {
     line-height: .9rem;
   }
 </style>
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   let dirty = false;
 
   function setDirty(state) {

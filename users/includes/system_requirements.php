@@ -1,6 +1,6 @@
 
 <?php if(count(get_included_files()) ==1) die(); 
-$rec = "8.5.0";
+$rec = "8.2.0";
 $current = phpversion();
 //find the first version of php whose eol date is > today + 3 months
 $searchQ = $db->query("SELECT * FROM us_php_eol WHERE eol_date > DATE_ADD(CURDATE(), INTERVAL 3 MONTH) ORDER BY eol_date ASC LIMIT 1");

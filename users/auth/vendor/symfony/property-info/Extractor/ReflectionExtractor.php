@@ -563,7 +563,7 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
             return $this->extractFromReflectionType($reflectionType, $reflectionMethod->getDeclaringClass());
         }
 
-        if (\in_array($prefix, ['is', 'can', 'has'])) {
+        if (\in_array($prefix, ['is', 'can', 'has'], true)) {
             return [new LegacyType(LegacyType::BUILTIN_TYPE_BOOL)];
         }
 
@@ -899,6 +899,10 @@ class ReflectionExtractor implements PropertyListExtractorInterface, PropertyTyp
      */
     private function camelize(string $string): string
     {
+        if ('' === ltrim($string, '_')) {
+            return $string;
+        }
+
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
     }
 

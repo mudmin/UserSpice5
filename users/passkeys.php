@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
 </div>
 
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
 
 var us_url_root = '<?php echo $us_url_root; ?>';
 var passkeyCSRF = '<?= Token::generate(); ?>'; 

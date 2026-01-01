@@ -240,7 +240,7 @@ trait TypeFactoryTrait
      * @param T      $className
      * @param U|null $backingType
      *
-     * @return ($className is class-string<\BackedEnum> ? ($backingType is U ? BackedEnumType<T,U> : BackedEnumType<T,BuiltinType<TypeIdentifier::INT>|BuiltinType<TypeIdentifier::STRING>>) : EnumType<T>))
+     * @return ($className is class-string<\BackedEnum> ? ($backingType is U ? BackedEnumType<T, U> : BackedEnumType<T, BuiltinType<TypeIdentifier::INT>|BuiltinType<TypeIdentifier::STRING>>) : EnumType<T>))
      */
     public static function enum(string $className, ?BuiltinType $backingType = null): EnumType
     {
@@ -299,9 +299,7 @@ trait TypeFactoryTrait
         foreach ($types as $type) {
             if ($type instanceof NullableType) {
                 $nullableUnion = true;
-                $unionTypes[] = $type->getWrappedType();
-
-                continue;
+                $type = $type->getWrappedType();
             }
 
             if ($type instanceof UnionType) {
@@ -412,6 +410,7 @@ trait TypeFactoryTrait
         }
 
         $type = match (true) {
+            $value instanceof \UnitEnum => Type::enum($value::class),
             \is_object($value) => \stdClass::class === $value::class ? self::object() : self::object($value::class),
             \is_array($value) => self::builtin(TypeIdentifier::ARRAY),
             default => null,
@@ -428,8 +427,6 @@ trait TypeFactoryTrait
             /** @var list<Type> $valueTypes */
             $valueTypes = [];
 
-            $i = 0;
-
             foreach ($value as $k => $v) {
                 $keyTypes[] = self::fromValue($k);
                 $valueTypes[] = self::fromValue($v);
@@ -444,7 +441,7 @@ trait TypeFactoryTrait
 
             $valueType = $valueTypes ? CollectionType::mergeCollectionValueTypes($valueTypes) : Type::mixed();
 
-            return self::collection($type, $valueType, $keyType, \is_array($value) && array_is_list($value));
+            return self::collection($type, $valueType, $keyType, \is_array($value) && [] !== $value && array_is_list($value));
         }
 
         if ($value instanceof \ArrayAccess) {

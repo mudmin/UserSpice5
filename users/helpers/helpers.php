@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -62,7 +62,7 @@ if (file_exists($abs_us_root . $us_url_root . 'users/vendor/autoload.php')) {
 
 
 
-require $abs_us_root . $us_url_root . 'users/classes/phpmailer/PHPMailerAutoload.php';
+require_once $abs_us_root . $us_url_root . 'users/classes/phpmailer/PHPMailerAutoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -99,7 +99,7 @@ if (!function_exists('sanitize')) {
 if (!function_exists('currentPage')) {
   function currentPage()
   {
-    $uri = $_SERVER['PHP_SELF'];
+    $uri = Server::get('PHP_SELF');
     $path = explode('/', $uri);
     $currentPage = end($path);
 
@@ -108,13 +108,15 @@ if (!function_exists('currentPage')) {
 }
 
 if (!function_exists('currentFolder')) {
-  function currentFolder()
-  {
-    $uri = $_SERVER['PHP_SELF'];
-    $path = explode('/', $uri);
-    $currentFolder = $path[count($path) - 2];
+  function currentFolder() {
+    $uri = Server::get('PHP_SELF') ?? '';
+    $parts = explode('/', trim($uri, '/'));
+    $count = count($parts);
 
-    return $currentFolder;
+    if ($count >= 2) {
+      return $parts[$count - 2];
+    }
+    return ''; 
   }
 }
 
@@ -225,7 +227,7 @@ if (!function_exists('email')) {
     $mail->Body    = $body;
     if (!empty($attachment)) $mail->addAttachment($attachment);
     if (file_exists($abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php")) {
-      include $abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php";
+      require_once $abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php";
     }
     $result = $mail->send();
 
@@ -284,6 +286,17 @@ if (!function_exists('dump')) {
       echo '</pre>';
     }
   }
+}
+
+function safeDump($var): void
+{
+    ob_start();
+    var_dump($var);
+    $output = ob_get_clean();
+
+    echo '<pre style="white-space: pre-wrap;">'
+       . htmlspecialchars($output, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+       . '</pre>';
 }
 
 if (!function_exists("isDebugModeActive")) {
@@ -528,10 +541,286 @@ function spiceUpdateFail() {
     }
 }
 
-function fetchExpectedRPID(){
-  $your_host = $_SERVER['HTTP_HOST'];
-if ($your_host !== 'localhost' && strpos($your_host, ':') !== false) {
-    $your_host = explode(':', $your_host)[0];
+function fetchExpectedRPID(): string {
+    return Server::get('HTTP_HOST'); 
 }
-return $your_host;
+
+
+function usersc_override_redirect(string $currentPage, ?array $query = null, array $opts = []): bool {
+    if (currentFolder() !== 'users') return false;
+    global $abs_us_root, $us_url_root;
+
+    $strict      = !empty($opts['strict']);
+    $blockedKeys = $opts['blockedKeys'] ?? ['redirect','return','url','next','dest'];
+
+    $bad = function() use ($strict): bool {
+        if ($strict) { http_response_code(400); echo 'Bad request'; exit; }
+        return false;
+    };
+
+    // Validate target page and existence
+    $safePage = ltrim($currentPage, '/');
+    if ($safePage === '' || strpos($safePage, '..') !== false || !preg_match('#^[A-Za-z0-9/_\.-]+$#', $safePage)) {
+        return $bad();
+    }
+    if (!file_exists($abs_us_root.$us_url_root.'usersc/'.$safePage)) return false;
+
+    // Start from $_GET unless caller supplied one
+    $query = $query ?? $_GET;
+
+    // Minimal key-level filter; let Redirect::sanitized handle encoding/sanitizing values
+    $args = [];
+    foreach ((array)$query as $k => $v) {
+        $lk = strtolower((string)$k);
+        if (in_array($lk, $blockedKeys, true)) continue;        // drop dangerous meta-params
+        $kk = preg_replace('/[^A-Za-z0-9_-]/', '', (string)$k);  // keys only
+        if ($kk === '') continue;
+        $args[$kk] = $v; // values will be sanitized in Redirect::sanitized()
+    }
+
+    // Hand off to the centralized sanitizer (relative path + base_path)
+    Redirect::sanitized('usersc/'.$safePage, $args, 302, [
+        'base_path'   => $us_url_root,  // ensures it anchors under your app root
+        'same_origin' => true,          // default anyway; keeps you on-site even if someone passes absolute junk
+    ]);
+    return true;
+}
+
+/* New UserSpice Encryption Functions 
+// ============================================
+// USAGE EXAMPLES
+// ============================================
+
+// You can define your custom ENV_PATH constant in your init.php file, example:
+// define('ENV_PATH', '/custom/path/.customFilename.env');
+
+// if you do not have one, this creates an env file below your webroot with
+.userspice.<cookie_name>.env 
+
+// and requires your system to be able to read/write it.
+
+// Example 1: Generate encryption key if it doesn't exist
+echo "=== Example 1: Generate encryption key (if needed) ===\n";
+$keyGenResult = generateSpiceEncryptionKey();
+if ($keyGenResult['success']) {
+    echo "✓ New encryption key generated and saved!\n";
+    echo "Key: " . substr($keyGenResult['key'], 0, 20) . "...\n";
+} else {
+    echo "ℹ " . $keyGenResult['message'] . "\n";
+}
+echo "\n";
+
+// Example 2: Basic encryption and decryption
+echo "=== Example 2: Basic encryption and decryption ===\n";
+$originalString = "Hello, this is a secret message!";
+
+// Encrypt the string
+$encrypted = spiceEncrypt($originalString);
+if ($encrypted !== false) {
+    echo "Original: " . $originalString . "\n";
+    echo "Encrypted: " . $encrypted['encrypted'] . "\n";
+
+    // Decrypt the string
+    $decrypted = spiceDecrypt($encrypted['encrypted'], $encrypted['iv'], $encrypted['tag']);
+    if ($decrypted !== false) {
+        echo "Decrypted: " . $decrypted . "\n";
+        echo "Match: " . ($originalString === $decrypted ? "YES ✓" : "NO ✗") . "\n";
+    } else {
+        echo "Decryption failed!\n";
+    }
+} else {
+    echo "Encryption failed!\n";
+}
+
+echo "\n";
+
+// Example 3: Encrypting sensitive user data
+echo "=== Example 3: Encrypting sensitive user data ===\n";
+$userData = json_encode([
+    'user_id' => 12345,
+    'email' => 'user@example.com',
+    'api_key' => 'sk_live_abc123xyz789'
+]);
+
+$encryptedData = spiceEncrypt($userData);
+if ($encryptedData !== false) {
+    // Store $encryptedData['encrypted'] in database
+    echo "User data encrypted successfully\n";
+    echo "Encrypted data: " . substr($encryptedData['encrypted'], 0, 50) . "...\n";
+
+    // Later, retrieve and decrypt
+    $decryptedData = spiceDecrypt($encryptedData['encrypted'], $encryptedData['iv'], $encryptedData['tag']);
+    $originalUserData = json_decode($decryptedData, true);
+    echo "Decrypted user data:\n";
+    print_r($originalUserData);
+}
+
+echo "\n";
+
+// Example 4: Encrypting passwords or tokens
+echo "=== Example 4: Encrypting passwords or tokens ===\n";
+$sensitiveToken = "my-super-secret-token-12345";
+$result = spiceEncrypt($sensitiveToken);
+
+if ($result !== false) {
+    // Save to database or config
+    $storedEncrypted = $result['encrypted'];
+    echo "Original token: " . $sensitiveToken . "\n";
+    echo "Token encrypted: " . $storedEncrypted . "\n";
+
+    // Retrieve and decrypt when needed
+    $retrievedToken = spiceDecrypt($result['encrypted'], $result['iv'], $result['tag']);
+    echo "Retrieved token: " . $retrievedToken . "\n";
+    echo "Match: " . ($sensitiveToken === $retrievedToken ? "YES ✓" : "NO ✗") . "\n";
+}
+
+echo "</pre>";
+
+*/
+
+
+if (!function_exists('generateSpiceEncryptionKey')) {
+  function generateSpiceEncryptionKey()
+  {
+    global $config, $abs_us_root;
+
+    // Use ENV_PATH constant if defined (set in init.php), otherwise calculate path
+    if (defined('ENV_PATH')) {
+      $envPath = ENV_PATH;
+    } else {
+      // Get cookie name for unique env filename
+      $cookieName = Config::get('remember/cookie_name');
+      $envFilename = '.userspice.' . $cookieName . '.env';
+
+      // Determine the correct path to .env file
+      if (isset($config['mysql']['password']) && $config['mysql']['password'] != "password" && $config['mysql']['password'] != "") {
+        $envPath = $abs_us_root . '/../' . $envFilename;
+      } else {
+        $envPath = $abs_us_root . '/' . $envFilename;
+      }
+    }
+
+    // Check if ENCRYPTION_KEY already exists
+    if (file_exists($envPath)) {
+      $env = parse_ini_file($envPath);
+      if (isset($env['ENCRYPTION_KEY'])) {
+        return ['success' => false, 'message' => 'ENCRYPTION_KEY already exists in .env file'];
+      }
+    }
+
+    // Generate a secure 256-bit (32 bytes) encryption key
+    $key = random_bytes(32);
+    $hexKey = bin2hex($key);
+
+    // Append to .env file
+    $envContent = "\n# Encryption key for spiceEncrypt/spiceDecrypt\nENCRYPTION_KEY=" . $hexKey . "\n";
+
+    if (file_put_contents($envPath, $envContent, FILE_APPEND | LOCK_EX) !== false) {
+      // Set secure permissions (0600 = read/write for owner only)
+      chmod($envPath, 0600);
+      return ['success' => true, 'message' => 'ENCRYPTION_KEY generated and saved to .env file', 'key' => $hexKey];
+    } else {
+      return ['success' => false, 'message' => 'Failed to write ENCRYPTION_KEY to .env file'];
+    }
+  }
+}
+
+if (!function_exists('spiceEncryptionKey')) {
+  function spiceEncryptionKey()
+  {
+  global $config, $abs_us_root;
+
+  // Use ENV_PATH constant if defined (set in init.php), otherwise calculate path
+  if (defined('ENV_PATH')) {
+    $envPath = ENV_PATH;
+  } else {
+    // Get cookie name for unique env filename
+    $cookieName = Config::get('remember/cookie_name');
+    $envFilename = '.userspice.' . $cookieName . '.env';
+
+    // Determine the correct path to .env file
+    $envPath = ($config['mysql']['password'] == "password" || $config['mysql']['password'] == "")
+      ? $abs_us_root . '/' . $envFilename
+      : $abs_us_root . '/../' . $envFilename;
+  }
+
+  // Load and parse the .env file
+  $env = parse_ini_file($envPath);
+  if (!isset($env['ENCRYPTION_KEY'])) {
+    // Try to generate the key automatically
+    $result = generateSpiceEncryptionKey();
+    if ($result['success']) {
+      // Re-parse the .env file to get the new key
+      $env = parse_ini_file($envPath);
+    } else {
+      throw new Exception('ENCRYPTION_KEY not found in .env file and could not be generated');
+    }
+  }
+
+  return hex2bin($env['ENCRYPTION_KEY']);
+  }
+}
+
+if (!function_exists('spiceEncrypt')) {
+  function spiceEncrypt($string)
+  {
+  try {
+    $key = spiceEncryptionKey();
+    $iv = random_bytes(12);
+    $tag = "";
+
+    $encrypted = openssl_encrypt(
+      $string,
+      'aes-256-gcm',
+      $key,
+      OPENSSL_RAW_DATA,
+      $iv,
+      $tag
+    );
+
+    // Concatenate all components and base64 encode
+    $combined = $iv . $encrypted . $tag;
+    return [
+      'encrypted' => base64_encode($combined),
+      'iv' => $iv,
+      'tag' => $tag
+    ];
+  } catch (Exception $e) {
+    error_log('Encryption error: ' . $e->getMessage());
+    return false;
+  }
+  }
+}
+
+if (!function_exists('spiceDecrypt')) {
+  function spiceDecrypt($encrypted, $iv, $tag)
+  {
+  try {
+    $key = spiceEncryptionKey();
+    $decoded = base64_decode($encrypted);
+
+    // Extract components
+    $actualIv = substr($decoded, 0, 12);
+    $actualTag = substr($decoded, -16);
+    $actualEncrypted = substr($decoded, 12, -16);
+
+    $decrypted = openssl_decrypt(
+      $actualEncrypted,
+      'aes-256-gcm',
+      $key,
+      OPENSSL_RAW_DATA,
+      $actualIv,
+      $actualTag
+    );
+
+    if ($decrypted === false) {
+      throw new Exception('Decryption failed: ' . openssl_error_string());
+    }
+
+    return $decrypted;
+  } catch (Exception $e) {
+    error_log('Decryption error: ' . $e->getMessage());
+    return false;
+  }
+  }
 }

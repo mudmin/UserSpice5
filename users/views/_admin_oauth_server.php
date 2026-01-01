@@ -101,7 +101,7 @@ if (!empty($_POST)) {
   }
 }
 ?>
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
       // alert('Copied to clipboard!');

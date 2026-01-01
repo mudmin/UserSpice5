@@ -32,6 +32,16 @@ Special thanks to John Bovey for the basis of the password strength feature.
 
       <h1 class="form-signin-heading mt-4 mb-3 alternate-background"> <?= lang("SIGNUP_TEXT", ""); ?></h1>
 
+      <?php if (isset($settings->social_login_location) && $settings->social_login_location == 0): ?>
+        <?php
+        if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
+          require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
+        } else {
+          require_once $abs_us_root . $us_url_root . "users/views/_social_logins.php";
+        }
+        ?>
+      <?php endif; ?>
+
       <form class="form-signup border p-4 bg-light mb-5" action="" method="POST" id="payment-form">
 
         <div class="row mb-3">
@@ -129,13 +139,16 @@ Special thanks to John Bovey for the basis of the password strength feature.
         </div>
 
       </form>
-      <?php
-      if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
-        require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
-      } else {
-        require_once $abs_us_root . $us_url_root . "users/views/_social_logins.php";
-      }
-      ?>
+
+      <?php if (!isset($settings->social_login_location) || $settings->social_login_location != 0): ?>
+        <?php
+        if (file_exists($abs_us_root . $us_url_root . "usersc/views/_social_logins.php")) {
+          require_once $abs_us_root . $us_url_root . "usersc/views/_social_logins.php";
+        } else {
+          require_once $abs_us_root . $us_url_root . "users/views/_social_logins.php";
+        }
+        ?>
+      <?php endif; ?>
     </main>
   </div>
 </div>

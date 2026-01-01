@@ -10,12 +10,9 @@ use Psr\Http\Message\{StreamInterface, UploadedFileInterface};
  * @author Michael Dowling and contributors to guzzlehttp/psr7
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  * @author Martijn van der Ven <martijn@vanderven.se>
- *
- * @final This class should never be extended. See https://github.com/Nyholm/psr7/blob/master/doc/final.md
  */
 class UploadedFile implements UploadedFileInterface
 {
-    /** @var array */
     private const ERRORS = [
         \UPLOAD_ERR_OK => 1,
         \UPLOAD_ERR_INI_SIZE => 1,
@@ -27,34 +24,14 @@ class UploadedFile implements UploadedFileInterface
         \UPLOAD_ERR_EXTENSION => 1,
     ];
 
-    /** @var string */
     private $clientFilename;
-
-    /** @var string */
     private $clientMediaType;
-
-    /** @var int */
     private $error;
-
-    /** @var string|null */
     private $file;
-
-    /** @var bool */
     private $moved = false;
-
-    /** @var int */
     private $size;
-
-    /** @var StreamInterface|null */
     private $stream;
 
-    /**
-     * @param StreamInterface|string|resource $streamOrFile
-     * @param int $size
-     * @param int $errorStatus
-     * @param string|null $clientFilename
-     * @param string|null $clientMediaType
-     */
     public function __construct($streamOrFile, $size, $errorStatus, $clientFilename = null, $clientMediaType = null)
     {
         if (false === \is_int($errorStatus) || !isset(self::ERRORS[$errorStatus])) {
@@ -79,7 +56,6 @@ class UploadedFile implements UploadedFileInterface
         $this->clientMediaType = $clientMediaType;
 
         if (\UPLOAD_ERR_OK === $this->error) {
-            // Depending on the value set file or stream variable.
             if (\is_string($streamOrFile) && '' !== $streamOrFile) {
                 $this->file = $streamOrFile;
             } elseif (\is_resource($streamOrFile)) {
@@ -92,9 +68,6 @@ class UploadedFile implements UploadedFileInterface
         }
     }
 
-    /**
-     * @throws \RuntimeException if is moved or not ok
-     */
     private function validateActive(): void
     {
         if (\UPLOAD_ERR_OK !== $this->error) {
@@ -108,53 +81,15 @@ class UploadedFile implements UploadedFileInterface
 
     public function getStream(): StreamInterface
     {
-        $this->validateActive();
-
-        if ($this->stream instanceof StreamInterface) {
-            return $this->stream;
-        }
-
-        if (false === $resource = @\fopen($this->file, 'r')) {
-            throw new \RuntimeException(\sprintf('The file "%s" cannot be opened: %s', $this->file, \error_get_last()['message'] ?? ''));
-        }
-
-        return Stream::create($resource);
+         throw new \RuntimeException("This feature is disabled in UserSpice");
+        
+       
     }
 
     public function moveTo($targetPath): void
     {
-        $this->validateActive();
+        throw new \RuntimeException("This feature is disabled in UserSpice");
 
-        if (!\is_string($targetPath) || '' === $targetPath) {
-            throw new \InvalidArgumentException('Invalid path provided for move operation; must be a non-empty string');
-        }
-
-        if (null !== $this->file) {
-            $this->moved = 'cli' === \PHP_SAPI ? @\rename($this->file, $targetPath) : @\move_uploaded_file($this->file, $targetPath);
-
-            if (false === $this->moved) {
-                throw new \RuntimeException(\sprintf('Uploaded file could not be moved to "%s": %s', $targetPath, \error_get_last()['message'] ?? ''));
-            }
-        } else {
-            $stream = $this->getStream();
-            if ($stream->isSeekable()) {
-                $stream->rewind();
-            }
-
-            if (false === $resource = @\fopen($targetPath, 'w')) {
-                throw new \RuntimeException(\sprintf('The file "%s" cannot be opened: %s', $targetPath, \error_get_last()['message'] ?? ''));
-            }
-
-            $dest = Stream::create($resource);
-
-            while (!$stream->eof()) {
-                if (!$dest->write($stream->read(1048576))) {
-                    break;
-                }
-            }
-
-            $this->moved = true;
-        }
     }
 
     public function getSize(): int
@@ -175,5 +110,22 @@ class UploadedFile implements UploadedFileInterface
     public function getClientMediaType(): ?string
     {
         return $this->clientMediaType;
+    }
+
+    private static function sanitizePath(string $path, string $baseDir): string|false
+    {
+        if (preg_match('~^(?:[a-z][a-z0-9+-.]*:)?//~i', $path)) {
+            return false;
+        }
+    
+        $fullPath = rtrim($baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $path;
+        $realFullPath = realpath($fullPath);
+        $realBaseDir = realpath($baseDir);
+    
+        if ($realFullPath === false || $realBaseDir === false || strpos($realFullPath, $realBaseDir) !== 0) {
+            return false;
+        }
+    
+        return $realFullPath;
     }
 }

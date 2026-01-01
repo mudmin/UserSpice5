@@ -6,6 +6,7 @@ $db = DB::getInstance();
 if (!isset($user) || (!in_array($user->data()->id, $master_account))) {
   die("Permission denied");
 }
+
 $type = Input::get('type');
 $url = Input::get('url');
 $hash = Input::get('hash');
@@ -66,17 +67,25 @@ curl_setopt($ch_start, CURLOPT_FAILONERROR, true);
 curl_setopt($ch_start, CURLOPT_HEADER, 0);
 curl_setopt($ch_start, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch_start, CURLOPT_AUTOREFERER, true);
-curl_setopt($ch_start, CURLOPT_BINARYTRANSFER, true);
 curl_setopt($ch_start, CURLOPT_TIMEOUT, 10);
+$ip = ipCheck();
+if (($ip == "::1" || $ip == "127.0.0.1") || (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) {
 curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 0);
+}else{
+curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 2);
+curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 1);
+}
+
 curl_setopt($ch_start, CURLOPT_FILE, $zip_resource);
 $page = curl_exec($ch_start);
 if (!$page) {
   if($diag){logger($user->data()->id, "DIAG", "CURL Error :- " . curl_error($ch_start));}
   echo "Error :- " . curl_error($ch_start);
 }
-curl_close($ch_start);
+if (PHP_VERSION_ID < 80500) {
+       curl_close($ch_start);
+ }
 
 $zip = new ZipArchive;
 
@@ -108,7 +117,9 @@ $result .= "==";
 
 
 
-curl_close($ch);
+if (PHP_VERSION_ID < 80500) {
+       curl_close($ch);
+ }
 if ($newCrc == $hash && $newCrc == $result) { //Note that we are checking the hash against the api call and the one supplied by ajax
   if($diag){
     logger($user->data()->id, "DIAG", "The security hash matches...unzipping");

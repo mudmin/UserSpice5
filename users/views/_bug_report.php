@@ -43,7 +43,9 @@ if (!empty($_POST) && $settings->spice_api != '') {
   $result = curl_exec($ch);
 
   //close cURL resource
-  curl_close($ch);
+  if (PHP_VERSION_ID < 80500) {
+       curl_close($ch);
+ }
   $result = json_decode($result);
   // dnd($result);
   if ($result->success == true) {
@@ -72,7 +74,9 @@ if ($settings->spice_api != '') {
   //execute the POST request
   $result = curl_exec($ch);
   //close cURL resource
-  curl_close($ch);
+  if (PHP_VERSION_ID < 80500) {
+       curl_close($ch);
+ }
   $result = json_decode($result);
 }
 ?>
@@ -137,10 +141,13 @@ if ($settings->spice_api != '') {
         <tbody>
           <?php foreach ($result->fetch as $p) { ?>
             <tr>
-              <td><span class="hideMe"><?= sprintf('%08d', $p->kIssueID) ?></span> Issue #<?= $p->kIssueID ?></td>
-              <td><?= $p->Issue_Title ?></td>
-              <td><?= $p->Issue_Resolution_Title ?></td>
-              <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= $p->kIssueID ?>&source=userspice">View Ticket</a></td>
+              <td><span class="hideMe"><?= sprintf('%08d', (int)$p->kIssueID) ?></span> Issue #<?= (int)$p->kIssueID ?></td>
+
+              <td><?= safeReturn(hed($p->Issue_Title)) ?></td>
+
+              <td><?= safeReturn(hed($p->Issue_Resolution_Title)) ?></td>
+
+              <td><a class="btn btn-primary" href="https://bugs.userspicet.com/usersc/issue_detail.php?id=<?= (int)$p->kIssueID ?>&source=userspice">View Ticket</a></td>
             </tr>
           <?php } ?>
         </tbody>

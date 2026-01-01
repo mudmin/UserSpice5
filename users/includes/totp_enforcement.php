@@ -1,7 +1,8 @@
 <?php
 /*
-UserSpice 5 - TOTP Enforcement System
+UserSpice - TOTP Enforcement System
 This file handles all TOTP enforcement logic called from loader.php
+FIXED: Prevents AJAX/API URLs from being stored as return destinations
 */
 
 if (count(get_included_files()) == 1) die(); // Direct access not permitted
@@ -62,7 +63,54 @@ function shouldBypassTotp() {
     if ($settings->totp == 0) {
         return true;
     }
-        
+    
+    return false;
+}
+
+/**
+ * Check if current request is an AJAX/API request
+ */
+function isAjaxRequest() {
+    // Check for AJAX header
+    $x_requested_with = Server::get('HTTP_X_REQUESTED_WITH');
+    if ($x_requested_with !== '' && strtolower($x_requested_with) === 'xmlhttprequest') {
+        return true;
+    }
+
+    // Check for common API patterns in the URL
+    $request_uri = Server::get('REQUEST_URI');
+    $api_patterns = [
+        '/api/',
+        '/ajax/',
+        '.json',
+        '.xml',
+        '/webservice/',
+        '/ws/',
+        '/rest/'
+    ];
+
+    foreach ($api_patterns as $pattern) {
+        if (stripos($request_uri, $pattern) !== false) {
+            return true;
+        }
+    }
+
+    // Check Content-Type for API requests
+    $content_type = Server::get('CONTENT_TYPE');
+    if ($content_type === '') {
+        $content_type = Server::get('HTTP_CONTENT_TYPE');
+    }
+    if (stripos($content_type, 'application/json') !== false ||
+        stripos($content_type, 'application/xml') !== false) {
+        return true;
+    }
+
+    // Check Accept header for API responses
+    $accept = Server::get('HTTP_ACCEPT');
+    if (stripos($accept, 'application/json') !== false &&
+        stripos($accept, 'text/html') === false) {
+        return true;
+    }
 
     return false;
 }
@@ -162,6 +210,21 @@ function isTotpRequired($settings, $login_method, $totp_requirements, $user_id) 
 function handleTotpRedirects($totp_status, $user_id, $currentPage) {
     global $us_url_root;
     
+    // Don't redirect AJAX requests - return JSON error instead
+    if (isAjaxRequest()) {
+        if ($totp_status['needs_setup'] || $totp_status['needs_verification']) {
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode([
+                'error' => 'TOTP verification required',
+                'redirect' => $us_url_root . 'users/totp_verification.php',
+                'needs_setup' => $totp_status['needs_setup']
+            ]);
+            exit;
+        }
+        return;
+    }
+    
     if ($totp_status['needs_setup']) {
         // User needs to set up TOTP
         logger($user_id, "TOTP_Enforcement", "User redirected to TOTP setup - required but not configured");
@@ -179,14 +242,49 @@ function handleTotpRedirects($totp_status, $user_id, $currentPage) {
         // User has TOTP set up but hasn't verified this session
         logger($user_id, "TOTP_Enforcement", "User redirected to TOTP verification - session not verified");
         
-        // Store the page they were trying to access
-        if ($currentPage != 'totp_verification.php') {
-            $_SESSION[INSTANCE . '_totp_return_to'] = $_SERVER['REQUEST_URI'] ?? '';
+        // Store the page they were trying to access (but NOT if it's an API endpoint)
+        if ($currentPage != 'totp_verification.php' && !isAjaxRequest()) {
+            $current_url = Server::get('REQUEST_URI');
+            
+            // Validate it's not an API endpoint before storing
+            if (!isApiUrl($current_url)) {
+                $_SESSION[INSTANCE . '_totp_return_to'] = $current_url;
+            }
+            
             usError("Please verify your identity with your authenticator app.");
             Redirect::to($us_url_root . 'users/totp_verification.php');
             exit;
         }
     }
+}
+
+/**
+ * Check if a URL appears to be an API endpoint
+ */
+function isApiUrl($url) {
+    if (empty($url)) {
+        return false;
+    }
+    
+    $api_patterns = [
+        '/api/',
+        '/ajax/',
+        '.json',
+        '.xml',
+        '/webservice/',
+        '/ws/',
+        '/rest/',
+        '/endpoint/',
+        '/service/'
+    ];
+    
+    foreach ($api_patterns as $pattern) {
+        if (stripos($url, $pattern) !== false) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 /**
@@ -197,7 +295,9 @@ function markTotpVerified($user_id) {
     logger($user_id, "TOTP_Verification", "TOTP verified for session");
 }
 
-
+/**
+ * Clear TOTP verification from session
+ */
 function clearTotpVerification() {
     unset($_SESSION[INSTANCE . '_totp_verified']);
     unset($_SESSION[INSTANCE . '_login_method']);
@@ -213,10 +313,20 @@ function getTotpReturnUrl() {
     $return_to = $_SESSION[INSTANCE . '_totp_return_to'] ?? '';
     unset($_SESSION[INSTANCE . '_totp_return_to']);
     
-    if (!empty($return_to) && strpos($return_to, $us_url_root) === 0) {
-        return $return_to;
+    // Validate the return URL
+    if (!empty($return_to)) {
+        // Make sure it's not an API endpoint
+        if (isApiUrl($return_to)) {
+            logger(null, "TOTP_Verification", "Blocked redirect to API endpoint: " . $return_to);
+            $return_to = ''; // Clear it
+        }
+        // Make sure it starts with our URL root for security
+        elseif (strpos($return_to, $us_url_root) === 0) {
+            return $return_to;
+        }
     }
     
-    return $us_url_root . ($settings->redirect_uri_after_login ?? 'account.php');
+    // Fall back to default redirect
+    return $us_url_root . ($settings->redirect_uri_after_login ?? 'users/account.php');
 }
 ?>

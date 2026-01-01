@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -25,6 +25,12 @@ if ($settings->email_login == 0) {
   usError(lang("EML_FEATURE_DISABLED"));
   Redirect::to($us_url_root . 'users/login.php');
 }
+if(!function_exists('passwordlessCharset')){
+  function passwordlessCharset(){
+    return 'abcdefghijklmnopqrstuvwxyz0123456789';
+  }
+}
+
 if (!empty($_POST)) {
   //check token
   if (!Token::check(Input::get('csrf'))) {
@@ -65,7 +71,7 @@ if ($method == "verify_code") {
         handleAuthFailure('login_attempt', $user_id, $email, [], [
           'method' => 'passwordless_code',
           'failure_reason' => 'expired_code',
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         usError("Verification code has expired. Please request a new one.");
@@ -82,7 +88,7 @@ if ($method == "verify_code") {
           'method' => 'passwordless_code',
           'failure_reason' => 'too_many_invalid_attempts',
           'invalid_attempts' => $invalid_attempts,
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         usError("Too many invalid attempts. Please request a new code.");
@@ -94,7 +100,7 @@ if ($method == "verify_code") {
         // Record successful login
         handleAuthSuccess('login_attempt', $user_id, $email, [], [
           'method' => 'passwordless_code',
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         $user = new User($user_id);
@@ -120,7 +126,7 @@ if ($method == "verify_code") {
           'method' => 'passwordless_code',
           'failure_reason' => 'invalid_code',
           'invalid_attempts' => $invalid_attempts,
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         usError("Invalid code. Attempts remaining: " . (3 - $invalid_attempts));
@@ -131,7 +137,7 @@ if ($method == "verify_code") {
       handleAuthFailure('login_attempt', $user_id, $email, [], [
         'method' => 'passwordless_code',
         'failure_reason' => 'no_login_record',
-        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        'user_agent' => Server::get('HTTP_USER_AGENT')
       ]);
     }
   }
@@ -159,7 +165,7 @@ if ($method == "enter_email") {
         'method' => 'passwordless_request',
         'failure_reason' => 'user_not_found',
         'email_attempted' => $email,
-        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        'user_agent' => Server::get('HTTP_USER_AGENT')
       ]);
 
       if (isset($showEmailNotFound) && $showEmailNotFound == true) {
@@ -182,7 +188,7 @@ if ($method == "enter_email") {
 
       // Generate verification code for modes 2 and 3
       if ($settings->email_login == 2 || $settings->email_login == 3) {
-        $verification_code = substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, $settings->pwl_length);
+        $verification_code = substr(str_shuffle(passwordlessCharset()), 0, $settings->pwl_length);
         $fields['verification_code'] = $verification_code;
       }
 
@@ -218,7 +224,7 @@ if ($method == "enter_email") {
         handleAuthSuccess('password_reset_request', $user_id, $email, [], [
           'method' => 'passwordless_request',
           'email_sent' => true,
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . $encoded_email . '&user_id=' . $user_id);
@@ -227,7 +233,7 @@ if ($method == "enter_email") {
         handleAuthFailure('password_reset_request', $user_id, $email, [], [
           'method' => 'passwordless_request',
           'failure_reason' => 'email_send_failed',
-          'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+          'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
         usError(lang("PASS_GENERIC_ERROR"));
@@ -262,7 +268,7 @@ if ($method == "enter_email") {
     </div>
   </div>
 
-  <script>
+  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
     $(document).ready(function() {
       $("#loginModal").modal({
         backdrop: 'static',

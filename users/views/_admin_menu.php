@@ -15,7 +15,7 @@ else $pageTitle = '';
   <link rel="stylesheet" href="<?=$us_url_root?>users/css/dashboard/minimap.css">
 
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
-  <script src="<?=$us_url_root?>users/js/sortable.min.js"></script>
+  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" src="<?=$us_url_root?>users/js/sortable.min.js"></script>
 
 
 <?php if(file_exists($abs_us_root.$us_url_root."usersc/includes/dashboard.css")){ ?>

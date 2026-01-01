@@ -8,7 +8,7 @@ class UserSpiceOAuthProvider {
     }
 
     public function handleRequest() {
-        $requestUri = $_SERVER['REQUEST_URI'];
+        $requestUri = Server::get('REQUEST_URI');
         
         if (strpos($requestUri, '/oauth/authorize') !== false) {
             return $this->handleAuthorizationRequest();
@@ -257,12 +257,20 @@ private function sendErrorResponse($error, $description = null) {
 }
 
 private function redirectWithError($redirectUri, $error, $state = null) {
-    $errorUrl = $redirectUri . '?error=' . urlencode($error);
+    $args = ['error' => $error];
     if ($state) {
-        $errorUrl .= '&state=' . urlencode($state);
+        $args['state'] = $state;
     }
-    logger(1, "OAuth Server Error", "Redirecting with error: $error to $redirectUri");
-    Redirect::to($errorUrl);
+
+    // Log the intended redirect for debugging
+    $intendedUrl = $redirectUri . '?' . http_build_query($args);
+    $msg = Input::sanitize( "Redirecting with error: $error to $intendedUrl");
+    logger(1, "OAuth Server Error", $msg);
+    
+
+    Redirect::sanitized($redirectUri, $args);
+    // Note: Redirect::sanitized() calls exit(), so the script will stop here.
     return false;
 }
+
 }

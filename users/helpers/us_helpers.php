@@ -1,6 +1,6 @@
 <?php
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -19,14 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // UserSpice Specific Functions
 
-$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'MISSING';
+$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? Input::sanitize(Server::get('HTTP_USER_AGENT', 'MISSING')) : 'MISSING';
 if (!function_exists('ipCheck')) {
-  function ipCheck(): string {
+  function ipCheck(): string
+  {
     // Treat true CLI & PHPDBG as "no remote addr"
     if (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') {
       return '127.0.0.1';
     }
-    return $_SERVER['REMOTE_ADDR'] ?? '';
+    return Server::get('REMOTE_ADDR');
   }
 }
 
@@ -55,6 +56,29 @@ if (!function_exists('ipCheckBan')) {
       //not on blacklist
       return false;
     }
+  }
+}
+
+if (!function_exists('passwordsAllowed')) {
+  /**
+   * Check if password logins are allowed based on setting and client IP
+   * @param int $no_passwords_setting The no_passwords setting value (0=enabled, 1=disabled, 2=localhost only)
+   * @return bool True if passwords are allowed, false otherwise
+   */
+  function passwordsAllowed($no_passwords_setting)
+  {
+    if ($no_passwords_setting == 0) {
+      return true; // Passwords enabled
+    }
+    if ($no_passwords_setting == 1) {
+      return false; // Passwords disabled
+    }
+    if ($no_passwords_setting == 2) {
+      // Passwords disabled except on localhost
+      $ip = ipCheck();
+      return ($ip === '127.0.0.1' || $ip === '::1');
+    }
+    return true; // Default to enabled
   }
 }
 
@@ -298,37 +322,18 @@ if (!function_exists('updateEmail')) {
   }
 }
 
-if (!function_exists('echoId')) {
-  function echoId($id, $table, $column)
-  {
-    global $db;
 
-    $query = $db->query("SELECT $column FROM $table WHERE id = $id LIMIT 1");
-    $count = $query->count();
-
-    if ($count > 0) {
-      $results = $query->first();
-      foreach ($results as $result) {
-        echo $result;
-      }
-    } else {
-      echo 'Not in database';
-
-      return false;
-    }
-  }
-}
 
 if (!function_exists('bin')) {
   function bin($number)
- 
+
   {
     global $lang;
     if ($number == 0) {
-      echo "<strong><span style='color:red'>".lang("GEN_NO")."</span></strong>";
+      echo "<strong><span style='color:red'>" . lang("GEN_NO") . "</span></strong>";
     }
     if ($number == 1) {
-      echo "<strong><span style='color:green'>".lang("GEN_YES")."</span></strong>";
+      echo "<strong><span style='color:green'>" . lang("GEN_YES") . "</span></strong>";
     }
     if ($number != 0 && $number != 1) {
       echo "<strong><span style='color:blue'>-</span></strong>";
@@ -336,63 +341,6 @@ if (!function_exists('bin')) {
   }
 }
 
-if (!function_exists('generateForm')) {
-  function generateForm($table, $id, $skip = [])
-  {
-    global $db;
-
-    $fields = [];
-    $q = $db->query("SELECT * FROM {$table} WHERE id = ?", [$id]);
-    $r = $q->first();
-
-    foreach ($r as $field => $value) {
-      if (!in_array($field, $skip)) {
-        echo '<div class="form-group">';
-        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
-        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="' . $value . '">';
-        echo '</div>';
-      }
-    }
-
-    return true;
-  }
-}
-
-if (!function_exists('generateAddForm')) {
-  function generateAddForm($table, $skip = [])
-  {
-    global $db;
-
-    $fields = [];
-    $q = $db->query("SELECT * FROM {$table}");
-    $r = $q->first();
-
-    foreach ($r as $field => $value) {
-      if (!in_array($field, $skip)) {
-        echo '<div class="form-group">';
-        echo '<label for="' . $field . '">' . ucfirst($field) . '</label>';
-        echo '<input type="text" class="form-control" name="' . $field . '" id="' . $field . '" value="">';
-        echo '</div>';
-      }
-    }
-
-    return true;
-  }
-}
-
-if (!function_exists('updateFields2')) {
-  function updateFields2($post, $skip = [])
-  {
-    $fields = [];
-    foreach ($post as $field => $value) {
-      if (!in_array($field, $skip)) {
-        $fields[$field] = sanitize($post[$field]);
-      }
-    }
-
-    return $fields;
-  }
-}
 
 
 
@@ -455,7 +403,7 @@ if (!function_exists('logger')) {
       'metadata' => $metadata,
     ];
 
-    if(isset($_SESSION['cloak_from']) && $_SESSION['cloak_from'] > 0){
+    if (isset($_SESSION['cloak_from']) && $_SESSION['cloak_from'] > 0) {
       $fields['cloak_from'] = (int) $_SESSION['cloak_from'];
     }
 
@@ -718,33 +666,35 @@ if (!function_exists('isLocalhost')) {
 }
 
 if (!function_exists('currentPageStrict')) {
-  function currentPageStrict()
+  function currentPageStrict(): string
   {
-    global $abs_us_root, $us_url_root;
-    $uri = $_SERVER['PHP_SELF'];
+    global $us_url_root;
 
-    $self_path = explode('/', $_SERVER['PHP_SELF']);
-    $self_path_length = count($self_path);
-    $file_found = false;
+    $uri  = Server::get('REQUEST_URI', '/');
+    $qpos = strpos($uri, '?');
+    if ($qpos !== false) $uri = substr($uri, 0, $qpos);
 
-    for ($i = 1; $i < $self_path_length; ++$i) {
-      array_splice($self_path, $self_path_length - $i, $i);
-      // $us_url_root=implode("/",$self_path)."/";
-
-      if (file_exists($abs_us_root . $us_url_root . 'z_us_root.php')) {
-        $file_found = true;
-        break;
-      } else {
-        $file_found = false;
-      }
+    $base = rtrim((string)$us_url_root, '/');
+    if ($base !== '' && $base !== '/' && str_starts_with($uri, $base)) {
+      $page = ltrim(substr($uri, strlen($base)), '/');
+    } else {
+      $page = ltrim($uri, '/');
     }
 
-    $urlRootLength = strlen($us_url_root);
-    $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
-
-    return $page;
+    $page = preg_replace('#/{2,}#', '/', $page);
+    $out  = [];
+    foreach (explode('/', $page) as $seg) {
+      if ($seg === '' || $seg === '.') continue;
+      if ($seg === '..') {
+        array_pop($out);
+        continue;
+      }
+      $out[] = $seg;
+    }
+    return implode('/', $out);
   }
 }
+
 
 if (!function_exists('UserSessionCount')) {
   function UserSessionCount()
@@ -904,48 +854,63 @@ if (!function_exists('username_helper')) {
 if (!function_exists('oxfordList')) {
   function oxfordList($data, $opts = ['final' => 'and'])
   {
-      if (!is_array($data) || empty($data)) {
-          return '';
-      }
-      $count = count($data);
-        if ($count === 1) {
-          return $data[0];
-      }
-  
-      $final = $opts['final'] ?? 'and';
-  
-      if ($count === 2) {
-          return $data[0] . ' ' . $final . ' ' . $data[1];
-      }
-  
-      $last = array_pop($data);
-      return implode(', ', $data) . ', ' . $final . ' ' . $last;
+    if (!is_array($data) || empty($data)) {
+      return '';
+    }
+    $count = count($data);
+    if ($count === 1) {
+      return $data[0];
+    }
+
+    $final = $opts['final'] ?? 'and';
+
+    if ($count === 2) {
+      return $data[0] . ' ' . $final . ' ' . $data[1];
+    }
+
+    $last = array_pop($data);
+    return implode(', ', $data) . ', ' . $final . ' ' . $last;
   }
 }
 
 if (!function_exists('currentFile')) {
-  function currentFile()
+  function currentFile(): string
   {
-    global $abs_us_root, $us_url_root;
+    global $us_url_root;
 
-    $self_path = explode('/', $_SERVER['PHP_SELF']);
-    $self_path_length = count($self_path);
-    $file_found = false;
+    $uri  = Server::get('REQUEST_URI', '/');
+    $qpos = strpos($uri, '?');
+    if ($qpos !== false) $uri = substr($uri, 0, $qpos);
 
-    for ($i = 1; $i < $self_path_length; ++$i) {
-      array_splice($self_path, $self_path_length - $i, $i);
+    $base = rtrim((string)$us_url_root, '/');
+    $rel  = $uri;
 
-      if (file_exists($abs_us_root . $us_url_root . 'z_us_root.php')) {
-        $file_found = true;
-        break;
-      } else {
-        $file_found = false;
-      }
+    if ($base !== '' && $base !== '/' && str_starts_with($uri, $base)) {
+      $rel = substr($uri, strlen($base));
     }
 
-    $urlRootLength = strlen($us_url_root);
+    $rel = ltrim($rel, '/');
+    $rel = preg_replace('#/{2,}#', '/', $rel);
 
-    return substr($_SERVER['PHP_SELF'], $urlRootLength, strlen($_SERVER['PHP_SELF']) - $urlRootLength);
+    $out = [];
+    foreach (explode('/', $rel) as $seg) {
+      if ($seg === '' || $seg === '.') continue;
+      if ($seg === '..') {
+        array_pop($out);
+        continue;
+      }
+      $out[] = $seg;
+    }
+
+    return implode('/', $out); // same as old: path from us_url_root (e.g., "users/profile.php")
+  }
+}
+
+if (!function_exists('currentFileName')) {
+  function currentFileName(): string
+  {
+    $p = currentFile();
+    return $p === '' ? '' : basename($p);
   }
 }
 
@@ -1114,11 +1079,9 @@ if (!function_exists('includeHook')) {
             include $abs_us_root . $us_url_root . 'usersc/plugins/' . $h;
           }
           //does the link include the string "oauth", manually include it
-        } elseif(strpos($h, 'oauth') !== false && file_exists($abs_us_root . $us_url_root . $h)) {
+        } elseif (strpos($h, 'oauth') !== false && file_exists($abs_us_root . $us_url_root . $h)) {
           include $abs_us_root . $us_url_root . $h;
-        
-        }else{
-          
+        } else {
         }
       }
     }
@@ -1221,7 +1184,8 @@ if (!function_exists('verifyadmin')) {
   function verifyadmin($page)
   {
     global $db, $user, $us_url_root, $settings;
-    $actual_link = encodeURIComponent("http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+    $fullUrl = Server::getOrigin() . Server::get('REQUEST_URI');
+    $actual_link = encodeURIComponent($fullUrl);
     $null = $settings->admin_verify_timeout - 1;
     if (isset($_SESSION['last_confirm']) && $_SESSION['last_confirm'] != '' && !is_null($_SESSION['last_confirm'])) {
       $last_confirm = $_SESSION['last_confirm'];
@@ -1301,57 +1265,58 @@ if (!function_exists('parseSessionMessages')) {
 if (!function_exists('sessionValMessages')) {
   function sessionValMessages($valErr = [], $valSuc = [], $genMsg = []): void
   {
-      $keys = ['valErr', 'valSuc', 'genMsg'];
-      foreach ($keys as $key) {
-          $sessionKey = Config::get('session/session_name') . $key;
-          $value = $$key;
+    $keys = ['valErr', 'valSuc', 'genMsg'];
+    foreach ($keys as $key) {
+      $sessionKey = Config::get('session/session_name') . $key;
+      $value = $$key;
 
-          if (!empty($value)) {
-              $value = is_array($value) ? $value : [$value];
-              
-              foreach ($value as $item) {
-                  $sanitizedItem = sanitizeHTML($item);
-                  
-                  if (isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
-                      $_SESSION[$sessionKey][] = $sanitizedItem;
-                  } elseif (isset($_SESSION[$sessionKey]) && $_SESSION[$sessionKey] !== '') {
-                      $save = $_SESSION[$sessionKey];
-                      $_SESSION[$sessionKey] = [
-                          sanitizeHTML($save),
-                          $sanitizedItem
-                      ];
-                  } else {
-                      $_SESSION[$sessionKey] = $sanitizedItem;
-                  }
-              }
+      if (!empty($value)) {
+        $value = is_array($value) ? $value : [$value];
+
+        foreach ($value as $item) {
+          $sanitizedItem = sanitizeHTML($item);
+
+          if (isset($_SESSION[$sessionKey]) && is_array($_SESSION[$sessionKey])) {
+            $_SESSION[$sessionKey][] = $sanitizedItem;
+          } elseif (isset($_SESSION[$sessionKey]) && $_SESSION[$sessionKey] !== '') {
+            $save = $_SESSION[$sessionKey];
+            $_SESSION[$sessionKey] = [
+              sanitizeHTML($save),
+              $sanitizedItem
+            ];
+          } else {
+            $_SESSION[$sessionKey] = $sanitizedItem;
           }
+        }
       }
+    }
   }
 }
 
-function sanitizeHTML($input) {
+function sanitizeHTML($input)
+{
   $allowed_tags = '<strong><em><p><br><ul><li><a>';
   $allowed_attributes = ['href', 'title'];
-  
+
   if (is_array($input)) {
-      return array_map('sanitizeHTML', $input);
+    return array_map('sanitizeHTML', $input);
   }
-  
+
   // Decode HTML entities first
   $input = html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-  
+
   // Remove all HTML tags except allowed ones
   $output = strip_tags($input, $allowed_tags);
-  
+
   // Remove all attributes except those in the whitelist
-  $output = preg_replace_callback('/<([^>]+)>/i', function($matches) use ($allowed_attributes) {
-      $tag = preg_replace('/\s+.*$/i', '', $matches[1]);
-      preg_match_all('/(\w+)\s*=\s*"[^"]*"/i', $matches[1], $attributes);
-      $filtered_attributes = array_intersect($attributes[1], $allowed_attributes);
-      $tag_content = $tag . ' ' . implode(' ', $filtered_attributes);
-      return "<$tag_content>";
+  $output = preg_replace_callback('/<([^>]+)>/i', function ($matches) use ($allowed_attributes) {
+    $tag = preg_replace('/\s+.*$/i', '', $matches[1]);
+    preg_match_all('/(\w+)\s*=\s*"[^"]*"/i', $matches[1], $attributes);
+    $filtered_attributes = array_intersect($attributes[1], $allowed_attributes);
+    $tag_content = $tag . ' ' . implode(' ', $filtered_attributes);
+    return "<$tag_content>";
   }, $output);
-  
+
   return $output;
 }
 
@@ -1430,7 +1395,7 @@ if (!function_exists('UserSpice_getLogs')) {
       // Most of my functions would use 1, but I can't assume that for all US installations
       $userId = 0;
     }
- 
+
     // Current Accepted $opts:
     // - preset | String: "diag"
     // - limit | int (eg. 1000) | string (eg. "LIMIT 5000") | null
@@ -1454,15 +1419,13 @@ if (!function_exists('UserSpice_getLogs')) {
       }
       // Since we are not allowing user input into this, it is safe to pass without sanitizing it
       $query_where .= "logtype = 'Redirect Diag' OR logtype = 'Form Data'";
-    
-    }elseif($preset == 'passwordless'){
+    } elseif ($preset == 'passwordless') {
       if (strpos(strtolower($query_where), 'where ') == false) {
         $query_where = 'WHERE ';
       }
 
       $query_where .= " logtype = 'Passwordless Debug' OR logtype = 'Passwordless Debug UA' ";
-    
-    }elseif($preset == "database_debug"){
+    } elseif ($preset == "database_debug") {
       if (strpos(strtolower($query_where), 'where ') == false) {
         $query_where = 'WHERE ';
       }
@@ -1585,9 +1548,13 @@ function offsetDate($number, $datestring = "", $unit = "days")
 }
 
 if (!function_exists("hed")) {
-  function hed($string)
+  function hed($string, $stripTags = false)
   {
-    return htmlspecialchars_decode(html_entity_decode($string ?? "", ENT_QUOTES, "UTF-8"));
+    if (!is_string($string)) {
+      return $string;
+    }
+    $decoded = htmlspecialchars_decode(html_entity_decode($string ?? "", ENT_QUOTES, "UTF-8"));
+    return $stripTags ? strip_tags($decoded) : $decoded;
   }
 }
 
@@ -1729,129 +1696,233 @@ function userSpicePasswordScore($password)
 // or add the page name to the array in usersc/includes/active_logging_custom.php
 
 //usersc/includes/active_logging_custom.php
-function userspiceActiveLog($currentPage, $user = null, $additionalData = []) {
+function userspiceActiveLog($currentPage, $user = null, $additionalData = [])
+{
   global $abs_us_root, $us_url_root;
   // Only proceed if active logging is enabled and page isn't excluded
   if (!defined('USERSPICE_ACTIVE_LOGGING') || !USERSPICE_ACTIVE_LOGGING) {
     return false;
-}
-
-  if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php')){
-  
-      include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';
   }
 
-  if(!isset($do_not_log_files)){
-      $do_not_log_files = ["heartbeat.php", "fetchMessages.php"];
+  if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php')) {
+
+    include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';
   }
 
-  if(in_array($currentPage, $do_not_log_files)){
-      return false;
+  if (!isset($do_not_log_files)) {
+    $do_not_log_files = ["heartbeat.php", "fetchMessages.php"];
+  }
+
+  if (in_array($currentPage, $do_not_log_files)) {
+    return false;
   }
 
   // Fields that should not be logged
-  if(!isset($do_not_log_fields)){
-      $do_not_log_fields = ["password", "password_confirm", "confirm"];
+  if (!isset($do_not_log_fields)) {
+    $do_not_log_fields = ["password", "password_confirm", "confirm"];
   }
-  
+
   // Check if this page should be excluded from logging
   if (defined('USERSPICE_DO_NOT_LOG') && USERSPICE_DO_NOT_LOG) {
-      return false;
+    return false;
   }
 
 
 
   // Get full URL
   $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
-  $fullUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  $fullUrl = $protocol . Server::get('HTTP_HOST') . Server::get('REQUEST_URI');
 
   // Prepare log entry
   $logEntry = [
-      'timestamp' => date('Y-m-d H:i:s'),
-      'ip' => $_SERVER['REMOTE_ADDR'],
-      'user_id' => ($user && isset($user->data()->id)) ? $user->data()->id : 0,
-      'page' => $currentPage,
-      'full_url' => $fullUrl,
-      'request_method' => $_SERVER['REQUEST_METHOD'],
-      'get_data' => [],
-      'post_data' => [],
-      'json_data' => [],
-      'additional_data' => $additionalData
+    'timestamp' => date('Y-m-d H:i:s'),
+    'ip' => Server::get('REMOTE_ADDR'),
+    'user_id' => ($user && isset($user->data()->id)) ? $user->data()->id : 0,
+    'page' => $currentPage,
+    'full_url' => $fullUrl,
+    'request_method' => Server::get('REQUEST_METHOD'),
+    'get_data' => [],
+    'post_data' => [],
+    'json_data' => [],
+    'additional_data' => $additionalData
   ];
 
   // Process GET data
   foreach ($_GET as $k => $v) {
-      $logEntry['get_data'][$k] = Input::sanitize($v);
+    $logEntry['get_data'][$k] = Input::sanitize($v);
   }
 
   // Process POST data (excluding sensitive fields)
   foreach ($_POST as $k => $v) {
-      if (!in_array($k, $do_not_log_fields)) {
-          $logEntry['post_data'][$k] = Input::sanitize($v);
-      }
+    if (!in_array($k, $do_not_log_fields)) {
+      $logEntry['post_data'][$k] = Input::sanitize($v);
+    }
   }
 
   // Process JSON input if content type is application/json
-  $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+  $contentType = isset($_SERVER["CONTENT_TYPE"]) ? Input::sanitize(Server::get("CONTENT_TYPE")) : '';
   if (stripos($contentType, 'application/json') !== false) {
-      $json_data = json_decode(file_get_contents('php://input'), true);
-      if ($json_data) {
-          // Remove sensitive fields from JSON data
-          array_walk_recursive($json_data, function(&$value, $key) use ($do_not_log_fields) {
-              if (in_array($key, $do_not_log_fields)) {
-                  $value = '[REDACTED]';
-              }
-          });
-          $logEntry['json_data'] = $json_data;
-      }
+    $json_data = json_decode(file_get_contents('php://input'), true);
+    if ($json_data) {
+      // Remove sensitive fields from JSON data
+      array_walk_recursive($json_data, function (&$value, $key) use ($do_not_log_fields) {
+        if (in_array($key, $do_not_log_fields)) {
+          $value = '[REDACTED]';
+        }
+      });
+      $logEntry['json_data'] = $json_data;
+    }
   }
 
   // Add user agent
-  $logEntry['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+  $logEntry['user_agent'] = Input::sanitize(Server::get('HTTP_USER_AGENT'));
 
   // Convert to JSON and append to file
   $jsonEntry = json_encode($logEntry) . "\n";
-  
+
   // Append log entry to file
   return file_put_contents($filename, $jsonEntry, FILE_APPEND | LOCK_EX);
 }
 
-function cleanupLogs($daysToKeep = 30) {
-	global $abs_us_root, $us_url_root;
-    $logDir = $abs_us_root . $us_url_root . 'users/logs';
-    $files = glob($logDir . '/*.log.php');
-    $cutoffDate = strtotime("-{$daysToKeep} days");
+function cleanupLogs($daysToKeep = 30)
+{
+  global $abs_us_root, $us_url_root;
+  $logDir = $abs_us_root . $us_url_root . 'users/logs';
+  $files = glob($logDir . '/*.log.php');
+  $cutoffDate = strtotime("-{$daysToKeep} days");
 
-    foreach ($files as $file) {
-        $dateFromFilename = substr(basename($file), 0, 8); // Extract YYYYMMDD
-        $fileDate = DateTime::createFromFormat('Ymd', $dateFromFilename);
-        
-        if ($fileDate && $fileDate->getTimestamp() < $cutoffDate) {
-            unlink($file);
-        }
+  foreach ($files as $file) {
+    $dateFromFilename = substr(basename($file), 0, 8); // Extract YYYYMMDD
+    $fileDate = DateTime::createFromFormat('Ymd', $dateFromFilename);
+
+    if ($fileDate && $fileDate->getTimestamp() < $cutoffDate) {
+      unlink($file);
     }
+  }
 }
 
-function isHTTPSConnection() {
+function isHTTPSConnection()
+{
   // Direct HTTPS check
   if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-      return true;
+    return true;
   }
-  
+
   // Proxy headers check for HTTPS
   if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-      return true;
+    return true;
   }
-  
+
   // Additional proxy SSL header check
   if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') {
-      return true;
+    return true;
   }
-  
+
   // Port check for SSL
   if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] === '443') {
-      return true;
+    return true;
   }
-  
+
   return false;
+}
+
+function safeReturn($string)
+{
+  return htmlspecialchars($string ?? "", ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Sanitizes a file path to prevent directory traversal and remote file inclusion.
+ *
+ * @param string $path The potentially unsafe path to sanitize.
+ * @param string $baseDir The absolute path to the trusted base directory.
+ * @return string|false The sanitized, absolute path if it's safe, or false if it's not.
+ */
+function sanitizePath(string $path, string $baseDir)
+{
+  if (preg_match('~^(?:[a-z][a-z0-9+-.]*:)?//~i', $path)) {
+    return false;
+  }
+
+  $fullPath = $baseDir . DIRECTORY_SEPARATOR . $path;
+  $realFullPath = realpath($fullPath);
+  $realBaseDir = realpath($baseDir);
+
+  if ($realFullPath === false || strpos($realFullPath, $realBaseDir) !== 0) {
+    return false;
+  }
+
+  return $realFullPath;
+}
+
+if (!function_exists('us_file_get_contents')) {
+  function us_file_get_contents($url)
+  {
+    // Check if it's a URL
+    if (filter_var($url, FILTER_VALIDATE_URL)) {
+      // Use cURL for URLs
+      if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; UserSpice)');
+        $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if (PHP_VERSION_ID < 80500) {
+       curl_close($ch);
+ }
+
+        if ($httpCode == 200) {
+          return $result;
+        }
+        return false;
+      }
+      return false;
+    } else {
+      // Use regular file_get_contents for local files
+      return file_get_contents($url);
+    }
+  }
+}
+
+if (!function_exists('is_path_writable')) {
+  // Check subdirectory permissions
+  function is_path_writable($path, &$non_writable = [], $max_examples = 10)
+  {
+    if (count($non_writable) >= $max_examples) {
+      return false;
+    }
+
+    // Skip files that are intentionally not writable for security
+    if (basename($path) == 'totp_key.php') {
+      return true;
+    }
+
+    if (!is_writable($path)) {
+      $non_writable[] = $path;
+      return false;
+    }
+
+    if (is_dir($path)) {
+      // We don't want to scan .git folders
+      if (basename($path) == '.git') {
+        return true;
+      }
+      $files = scandir($path);
+      foreach ($files as $file) {
+        if ($file !== '.' && $file !== '..') {
+          $full_path = rtrim($path, '/') . '/' . $file;
+          if (!is_path_writable($full_path, $non_writable, $max_examples)) {
+            if (count($non_writable) >= $max_examples) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+    return true;
+  }
 }

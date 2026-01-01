@@ -291,7 +291,7 @@ if (!empty($_POST)) {
           <div class="form-group">
             <label>Root URL of your UserSpice install 
             <?php 
-            $example_root = $urlProtocol . $_SERVER['HTTP_HOST'] . $us_url_root;
+            $example_root = $urlProtocol . Server::get('HTTP_HOST') . $us_url_root;
             //if last character is not / add it
             if (substr($example_root, -1) != '/') {
               $example_root = $example_root . '/';
@@ -353,7 +353,7 @@ if($results->email_act == 0){
   }
 }
 ?>
-<script>
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
   document.getElementById('set-most-likely-url').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('verify-url').value = document.getElementById('most-likely-url').innerText;

@@ -55,6 +55,6 @@
   </div>
 </div>
 
-<script type="text/javascript">
+<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
 
 </script>

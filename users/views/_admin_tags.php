@@ -1,7 +1,7 @@
 <?php
 // PHP Goes Here!
 $hooks = getMyHooks(['page' => 'adminTags']);
-$token = Token::generate();
+
 $mt = Input::get("manage");
 $tagQ = $db->query("SELECT * FROM plg_tags WHERE id = ?", [$mt]);
 $tagC = $tagQ->count();
@@ -12,8 +12,8 @@ if ($tagC < 1) {
 $tag = $tagQ->first();
 
 if (!empty($_POST)) {
-  $token = $_POST['csrf'];
-  if (!Token::check($token)) {
+
+  if (!Token::check(Input::get('csrf'))) {
     include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
   }
 
@@ -66,7 +66,7 @@ $usersWith = $usersWithQ->results();
     <div class="col-12 col-md-6">
       <h5 class="mt-3">Update the <?= $tag->tag ?> Tag</h5>
       <form class="" action="" method="post">
-        <input type="hidden" name="csrf" value="<?= $token ?>">
+        <?=tokenHere();?>
         <div class="form-group">
           <label for="tag">Tag Name</label>
           <input type="text" class="form-control" required name="tag" value="<?= $tag->tag ?>">
@@ -85,7 +85,7 @@ $usersWith = $usersWithQ->results();
       <br>
       <h5>Delete the <?= $tag->tag ?> Tag</h5>
       <form class="" action="" method="post" onsubmit="return confirm('Are you sure? This will delete the tag and untag all users who had it! It cannot be undone!');">
-        <input type="hidden" name="csrf" value="<?= $token ?>">
+         <?=tokenHere();?>
         <div class="input-group">
           <select class="form-control" name="tag">
             <option value="<?= $mt ?>"><?= $tag->tag ?></option>

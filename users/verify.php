@@ -1,7 +1,7 @@
 <?php
 // This is a user-facing page
 /*
-UserSpice 5
+UserSpice
 An Open Source PHP User Management System
 by the UserSpice Team at http://UserSpice.com
 
@@ -47,7 +47,7 @@ if (Input::exists('get')) {
         }
         if (isset($passwordlessDebug) && $passwordlessDebug == true) {
             logger($user_id, "Passwordless Debug", "Login Attempt with vericode: $vericode");
-            $user_agent = Input::sanitize($_SERVER['HTTP_USER_AGENT']);
+            $user_agent = Input::sanitize(Server::get('HTTP_USER_AGENT'));
             logger($user_id, "Passwordless Debug UA", $user_agent);
         }
         $searchQ = $db->query("SELECT 
