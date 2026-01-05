@@ -1131,7 +1131,7 @@ CREATE TABLE `us_password_strength` (
 --
 
 INSERT INTO `us_password_strength` (`id`, `enforce_rules`, `meter_active`, `min_length`, `max_length`, `require_lowercase`, `require_uppercase`, `require_numbers`, `require_symbols`, `min_score`, `uppercase_score`, `lowercase_score`, `number_score`, `symbol_score`, `greater_eight`, `greater_twelve`, `greater_sixteen`) VALUES
-(1, 0, 1, 6, 150, 1, 0, 0, 1, 75, 6, 6, 6, 11, 15, 28, 40);
+(1, 0, 1, 10, 150, 1, 1, 1, 1, 75, 6, 6, 6, 11, 15, 28, 40);
 
 -- --------------------------------------------------------
 
