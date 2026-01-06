@@ -10,7 +10,7 @@
         "symfony/event-dispatcher": "^6.4",
         "symfony/serializer": "^6.4",
         "webmozart/assert": "^1.11",
-        "paragonie/sodium_compat": "1.19"
+        "paragonie/sodium_compat": "1.24.0"
         
     }
 }
