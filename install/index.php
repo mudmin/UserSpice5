@@ -928,7 +928,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
 
                         <?php if ($phpWarn === 1) { ?>
                             <div class="alert alert-warning mt-4">
-                                Your PHP is out of date and you are using an unsupported version. UserSpice will work fine, but if you have the option to update to 7.2 or greater, it is strongly suggested that you do.
+                                Your PHP is out of date and you are using an unsupported version. UserSpice may work fine, but if you have the option to update to 8.0 or greater, it is strongly suggested that you do.
                             </div>
                         <?php } ?>
 
