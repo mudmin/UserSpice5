@@ -71,16 +71,25 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
     if (empty($_POST['dbh']) || empty($_POST['dbu']) || empty($_POST['dbn']) || empty($_POST['port']) || empty($_POST['timezone'])) {
         $missingFields = true;
     } else {
-        $dbh = $_POST['dbh'];
-        $dbu = $_POST['dbu'];
-        $dbp = $_POST['dbp'] ?? '';
-        $dbn = $_POST['dbn'];
-        $port = $_POST['port'];
-        $tz = $_POST['timezone'];
+        /**
+         * SANITIZATION LAYER
+         * We strip single quotes and backslashes from structural fields to prevent 
+         * breaking out of the 'key' => 'value' array syntax in the config file.
+         */
+        $dbh  = str_replace(["'", "\\"], "", $_POST['dbh']);
+        $dbu  = str_replace(["'", "\\"], "", $_POST['dbu']);
+        $dbn  = str_replace(["'", "\\"], "", $_POST['dbn']);
+        $port = intval($_POST['port']); // Force integer to kill string injection
+        $tz   = str_replace(["'", "\\"], "", $_POST['timezone']);
+
+        // Password: keep raw version for DB connections, escaped version for config file
+        $dbp_raw = $_POST['dbp'] ?? '';
+        // Escape for single-quoted PHP string context (order matters: backslashes first)
+        $dbp_escaped = str_replace(['\\', "'"], ['\\\\', "\\'"], $dbp_raw);
 
         if (isset($_POST['submit'])) {
-            // Finalize installation - APPEND to the file instead of overwriting
-            $fh = fopen($config_file, "a+"); // Changed from "w" to "a+" to append
+            // Finalize installation - APPEND to the file
+            $fh = fopen($config_file, "a+");
 
             $end = "',";
 
@@ -89,12 +98,12 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
             $dbp_syn = "'password'     => '";
             $dbn_syn = "'db'           => '";
 
-            // Updated connection string format - IMPORTANT FIX
+            // Write sanitized data (use escaped password for config file)
             fwrite(
                 $fh,
                 $dbh_syn . $dbh . $end . PHP_EOL .
                     $dbu_syn . $dbu . $end . PHP_EOL .
-                    $dbp_syn . $dbp . $end . PHP_EOL .
+                    $dbp_syn . $dbp_escaped . $end . PHP_EOL .
                     $dbn_syn . $dbn . $end . PHP_EOL .
                     "'port'         => '" . $port . $end . PHP_EOL
             );
@@ -135,8 +144,8 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
 
                     // Update the admin account in the database
                     try {
-                        // Create connection
-                        $link = mysqli_connect($dbh, $dbu, $dbp, $dbn, $port);
+                        // Create connection (use raw password for actual DB connection)
+                        $link = mysqli_connect($dbh, $dbu, $dbp_raw, $dbn, $port);
 
                         if ($link) {
                             // Hash the password if provided, otherwise use default hash
@@ -193,14 +202,14 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
                 );
 
-                $pdo = new PDO($dsn, $dbu, $dbp, $opt);
+                $pdo = new PDO($dsn, $dbu, $dbp_raw, $opt);
                 $dbConnectionPartial = true; // Server connection successful
 
                 // Now check if the database exists
                 try {
                     // Try to connect specifically to the database
                     $dsn_with_db = "mysql:host=$dbh;port=$port;dbname=$dbn;charset=utf8";
-                    $pdo_with_db = new PDO($dsn_with_db, $dbu, $dbp, $opt);
+                    $pdo_with_db = new PDO($dsn_with_db, $dbu, $dbp_raw, $opt);
 
                     // If we get here, the database exists and we can connect to it
                     $success = true;
@@ -208,7 +217,7 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
 
                     // Import SQL if requested
                     if (isset($_POST['test']) && !isset($_POST['tryToCreate'])) {
-                        $link = mysqli_connect($dbh, $dbu, $dbp, $dbn, $port);
+                        $link = mysqli_connect($dbh, $dbu, $dbp_raw, $dbn, $port);
                         if ($link) {
                             // Import SQL
                             $templine = '';
@@ -244,7 +253,7 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
 
                             // Re-test connection with the new database
                             $dsn_with_db = "mysql:host=$dbh;port=$port;dbname=$dbn;charset=utf8";
-                            $pdo_with_db = new PDO($dsn_with_db, $dbu, $dbp, $opt);
+                            $pdo_with_db = new PDO($dsn_with_db, $dbu, $dbp_raw, $opt);
 
                             // Database created successfully
                             $success = true;
@@ -252,7 +261,7 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
                             $needCreateDb = false;
 
                             // Import SQL after creating database
-                            $link = mysqli_connect($dbh, $dbu, $dbp, $dbn, $port);
+                            $link = mysqli_connect($dbh, $dbu, $dbp_raw, $dbn, $port);
                             if ($link) {
                                 // Import SQL
                                 $templine = '';
@@ -342,6 +351,31 @@ if ($step == 3 && isset($_POST['cleanup'])) {
 
         * {
             box-sizing: border-box;
+        }
+
+        /* Real-time security feedback styles */
+        .form-control.is-valid-security {
+            border-color: var(--success) !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%231cc88a' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success) !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%231cc88a' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .security-feedback {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
         }
 
         a {
@@ -965,7 +999,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 <input type="hidden" name="test" value="1">
                                 <input type="hidden" name="dbh" value="<?php echo htmlspecialchars($dbh); ?>">
                                 <input type="hidden" name="dbu" value="<?php echo htmlspecialchars($dbu); ?>">
-                                <input type="hidden" name="dbp" value="<?php echo htmlspecialchars($dbp); ?>">
+                                <input type="hidden" name="dbp" value="<?php echo htmlspecialchars($dbp_raw); ?>">
                                 <input type="hidden" name="dbn" value="<?php echo htmlspecialchars($dbn); ?>">
                                 <input type="hidden" name="port" value="<?php echo htmlspecialchars($port); ?>">
                                 <input type="hidden" name="timezone" value="<?php echo htmlspecialchars($tz); ?>">
@@ -996,7 +1030,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 <input type="hidden" name="step" value="2">
                                 <input type="hidden" name="dbh" value="<?php echo htmlspecialchars($dbh); ?>">
                                 <input type="hidden" name="dbu" value="<?php echo htmlspecialchars($dbu); ?>">
-                                <input type="hidden" name="dbp" value="<?php echo htmlspecialchars($dbp); ?>">
+                                <input type="hidden" name="dbp" value="<?php echo htmlspecialchars($dbp_raw); ?>">
                                 <input type="hidden" name="dbn" value="<?php echo htmlspecialchars($dbn); ?>">
                                 <input type="hidden" name="port" value="<?php echo htmlspecialchars($port); ?>">
                                 <input type="hidden" name="timezone" value="<?php echo htmlspecialchars($tz); ?>">
@@ -1045,7 +1079,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                             confirmField.classList.remove('is-invalid', 'is-valid');
                                             feedbackDiv.style.display = 'none';
 
-                                            // Only validate when confirm password has at least 8 chars
+                                            // Only validate when confirm password has at least 7 chars
                                             if (confirmPassword.length >= 7) {
                                                 if (password.length < 8) {
                                                     passwordField.classList.add('is-invalid');
@@ -1192,17 +1226,70 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                     }
                                 }
 
-                                // Form validation
                                 const form = document.getElementById('dbForm');
+                                const dangerousChars = /['\\]/; // Single quote or backslash
+
+                                // Fields that should not contain dangerous characters (password is exempt)
+                                const securityFields = ['dbh', 'dbu', 'dbn'];
+
+                                // Real-time validation for security-sensitive fields
+                                securityFields.forEach(function(fieldId) {
+                                    const field = document.getElementById(fieldId);
+                                    if (!field) return;
+
+                                    field.addEventListener('input', function() {
+                                        validateSecurityField(this);
+                                    });
+                                });
+
+                                function validateSecurityField(field) {
+                                    // Remove previous feedback if exists
+                                    const existingFeedback = field.parentNode.querySelector('.security-feedback');
+                                    if (existingFeedback) {
+                                        existingFeedback.remove();
+                                    }
+
+                                    field.classList.remove('is-invalid', 'is-valid-security');
+
+                                    if (field.value.trim() === '') {
+                                        return true; // Empty is handled by required validation
+                                    }
+
+                                    if (dangerousChars.test(field.value)) {
+                                        field.classList.add('is-invalid');
+
+                                        // Add specific feedback
+                                        const feedback = document.createElement('div');
+                                        feedback.className = 'invalid-feedback security-feedback';
+                                        feedback.style.display = 'block';
+                                        feedback.textContent = "Single quotes (') and backslashes (\\) are not allowed";
+                                        field.parentNode.insertBefore(feedback, field.nextSibling);
+
+                                        return false;
+                                    } else {
+                                        field.classList.add('is-valid-security');
+                                        return true;
+                                    }
+                                }
+
+                                // Form submission validation
                                 form.addEventListener('submit', function(event) {
                                     let isValid = true;
+
+                                    // Check required fields
                                     const requiredFields = form.querySelectorAll('[required]');
                                     requiredFields.forEach(function(field) {
                                         if (!field.value.trim()) {
                                             field.classList.add('is-invalid');
                                             isValid = false;
-                                        } else {
-                                            field.classList.remove('is-invalid');
+                                        }
+                                    });
+
+                                    // Check security fields for dangerous characters
+                                    securityFields.forEach(function(fieldId) {
+                                        const field = document.getElementById(fieldId);
+                                        if (field && !validateSecurityField(field)) {
+                                            isValid = false;
                                         }
                                     });
 
@@ -1212,14 +1299,16 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                     }
                                 });
 
-                                // Remove invalid class on input
+                                // Remove invalid class on input for non-security fields
                                 const inputs = form.querySelectorAll('input, select');
                                 inputs.forEach(function(input) {
-                                    input.addEventListener('input', function() {
-                                        if (this.value.trim()) {
-                                            this.classList.remove('is-invalid');
-                                        }
-                                    });
+                                    if (!securityFields.includes(input.id)) {
+                                        input.addEventListener('input', function() {
+                                            if (this.value.trim()) {
+                                                this.classList.remove('is-invalid');
+                                            }
+                                        });
+                                    }
                                 });
                             });
                         </script>

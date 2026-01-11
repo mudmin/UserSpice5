@@ -3,11 +3,14 @@ define('USERSPICE_ACTIVE_LOGGING', false);
 $noPHPInfo = false;
 require_once 'classes/class.autoloader.php';
 
-define('PASSKEY_RP_ID', 'localhost');
+
+
+
 ini_set('session.cookie_httponly', 1);
 session_start();
 // disables the feature that prevents the updater from installing languages you didn't have before the update
 // $disable_language_purge = true;
+
 
 $abs_us_root=Server::get('DOCUMENT_ROOT');
 
