@@ -244,7 +244,7 @@ $token = Token::generate();
                         <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
                         <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
                         <input type="hidden" name="plugin" value="<?= $t ?>">
-                        <?php if ($usplugins[$t] == 1) {  //plugin installed and active 
+                        <?php if ($usplugins[$t] == 1) {  //plugin installed and active
                         ?>
                           <button type="submit" name="deactivate" value="Deactivate" class="btn btn-outline-dark" title="Deactivate">
                             <i class="fa fa-ban" aria-hidden="true"></i>
@@ -260,6 +260,9 @@ $token = Token::generate();
                             <i class="fa fa-trash-o" aria-hidden="true"></i>
                           </button>
                         <?php } ?>
+                        <a class="btn btn-outline-info" title="Check for Updates" href="<?= $us_url_root . 'users/admin.php?view=spice&search=' . urlencode($t) ?>" target="_blank" role="button">
+                          <i class="fa fa-refresh" aria-hidden="true"></i>
+                        </a>
                       </form>
                     </div>
                   </td>
