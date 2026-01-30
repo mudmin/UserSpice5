@@ -22,6 +22,12 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
 ?>
 
 <style>
+#us-toast-container {
+    padding-top: 4.6rem; 
+    padding-left: .5rem;
+    padding-right: 1rem;   
+}
+
 .us-toast {
     background: white !important;
     border: none !important;
@@ -30,6 +36,7 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
     overflow: hidden !important;
     min-width: 30vw;
     max-width: 85vw;
+    margin-bottom: 0.5rem !important; 
 }
 
 .us-toast-bar {

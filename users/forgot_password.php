@@ -53,7 +53,10 @@ includeHook($eventhooks,'body');
 
 
 if (Input::get('forgotten_password')) {
-
+    // Check rate limit before processing
+    if (!checkRateLimit('password_reset_request', null, $email)) {
+        $errors[] = getRateLimitErrorMessage('password_reset_request');
+    } else {
     $fuser = new User($email);
     //validate the form
     $validate = new Validate();
@@ -73,32 +76,38 @@ if (Input::get('forgotten_password')) {
         if($fuser->exists()){
           $vericode=randomstring(15);
           $vericode_expiry=date("Y-m-d H:i:s",strtotime("+$settings->reset_vericode_expiry minutes",strtotime(date("Y-m-d H:i:s"))));
-          $db->update('users',$fuser->data()->id,['vericode' => $vericode,'vericode_expiry' => $vericode_expiry]);
+          // Store hashed vericode for security
+          $hashedVericode = hashVericode($vericode);
+          $db->update('users',$fuser->data()->id,['vericode' => $hashedVericode,'vericode_expiry' => $vericode_expiry]);
             //send the email
             $options = array(
               'fname' => $fuser->data()->fname,
               'email' => rawurlencode($email),
               'vericode' => $vericode,
+              'user_id' => $fuser->data()->id,
               'reset_vericode_expiry' => $settings->reset_vericode_expiry
             );
             $subject = lang("PW_RESET");
             $encoded_email=rawurlencode($email);
             $body =  email_body('_email_template_forgot_password.php',$options);
             $email_sent=email($email,$subject,$body);
-   
+
             logger($fuser->data()->id,"User","Requested password reset.");
+            handleAuthSuccess('password_reset_request', $fuser->data()->id, $email);
             if(!$email_sent){
                 $errors[] = lang("ERR_EMAIL");
             }
         }else{
             sleep(2); //pretend to send
             logger("","Password Reset","Attempted password reset on ".$email);
+            handleAuthFailure('password_reset_request', null, $email);
             $email_sent = true;
         }
     }else{
         //display the errors
         $errors = $validation->errors();
     }
+    } // end rate limit check
 }
 
 if($email_sent){

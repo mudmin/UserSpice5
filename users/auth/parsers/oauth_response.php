@@ -27,6 +27,7 @@ $oSettings = $oSettingsQ->first();
 $authCode = $_GET['code'] ?? null;
 $state = $_GET['state'] ?? null;
 $response = $_GET['response'] ?? null;
+$signature = $_GET['signature'] ?? null;
 $error = $_GET['error'] ?? null;
 
 // Handle OAuth errors
@@ -57,13 +58,41 @@ if (!$state || $state !== ($_SESSION['oauth_state'] ?? '')) {
 unset($_SESSION['oauth_state']);
 unset($_SESSION['oauth_client_id']);
 
-// Decode response data if present
+// Decode and verify response data if present
 $responseData = null;
 if ($response) {
-    $responseData = json_decode(base64_decode($response), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        logger(1, "OAuth Client Error", "Failed to decode response data: " . json_last_error_msg());
-        $responseData = null;
+    $decodedResponse = base64_decode($response);
+    if ($decodedResponse === false) {
+        logger(1, "OAuth Client Error", "Failed to base64 decode response data");
+    } else {
+        // Verify HMAC signature if response_secret is configured
+        if (!empty($oSettings->response_secret)) {
+            if (empty($signature)) {
+                logger(1, "OAuth Client Security", "Response signature missing but response_secret is configured - rejecting unsigned response");
+                usError('OAuth authentication failed: Response signature missing');
+                Redirect::to($us_url_root . 'users/login.php');
+                exit;
+            }
+
+            $expectedSignature = hash_hmac('sha256', $decodedResponse, $oSettings->response_secret);
+            if (!hash_equals($expectedSignature, $signature)) {
+                logger(1, "OAuth Client Security", "Response signature verification failed - possible tampering detected");
+                usError('OAuth authentication failed: Invalid response signature');
+                Redirect::to($us_url_root . 'users/login.php');
+                exit;
+            }
+
+            logger(1, "OAuth Client", "Response signature verified successfully");
+        } elseif (!empty($signature)) {
+            // Signature provided but no secret configured - log warning but continue
+            logger(1, "OAuth Client Warning", "Response signature provided but no response_secret configured - signature not verified");
+        }
+
+        $responseData = json_decode($decodedResponse, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            logger(1, "OAuth Client Error", "Failed to decode response data: " . json_last_error_msg());
+            $responseData = null;
+        }
     }
 }
 
@@ -95,11 +124,6 @@ $existingUserC = $existingUserQ->count();
 if ($existingUserC > 0) {
     // Existing user - log them in
     $existingUser = $existingUserQ->first();
-
-    // Update user data if instructed
-    if (isset($responseData['instructions']['updateUserData']) && $responseData['instructions']['updateUserData'] == true) {
-        updateUserData($existingUser->id, $responseData);
-    }
 
     // Handle tags if present
     if (isset($responseData['tags'])) {
@@ -154,44 +178,6 @@ if ($existingUserC > 0) {
 }
 
 /**
- * Update existing user data from OAuth response
- */
-function updateUserData($userId, $responseData)
-{
-    global $db;
-
-    if (!isset($responseData['userdata'])) {
-        return;
-    }
-
-    $existingQ = $db->query("SELECT * FROM users WHERE id = ?", [$userId]);
-    if ($existingQ->count() == 0) {
-        return;
-    }
-
-    $existing = $existingQ->first();
-    $userData = $responseData['userdata'];
-    $fields = [];
-
-    foreach ($userData as $key => $value) {
-        // Skip protected fields
-        if (in_array($key, ['email', 'id', 'username'])) {
-            continue;
-        }
-
-        // Only update if field exists and value has changed
-        if (isset($existing->$key) && $existing->$key != $value) {
-            $fields[$key] = $value;
-        }
-    }
-
-    if (count($fields) > 0) {
-        $db->update('users', $userId, $fields);
-        logger($userId, "OAuth Client Update", "User data updated from OAuth: " . implode(', ', array_keys($fields)));
-    }
-}
-
-/**
  * Create a new user from OAuth data
  */
 function createNewUser($userData, $responseData, $oSettings)
@@ -213,7 +199,7 @@ function createNewUser($userData, $responseData, $oSettings)
         'permissions' => 1,
         'join_date' => date('Y-m-d H:i:s'),
         'email_verified' => 1,
-        'vericode' => randomstring(12),
+        'vericode' => hashVericode(randomstring(12)),
         'vericode_expiry' => date('Y-m-d H:i:s'),
         'oauth_tos_accepted' => true,
         'language' => 'en-US',
@@ -229,9 +215,6 @@ function createNewUser($userData, $responseData, $oSettings)
     // Log the user in immediately
     $sessionName = Config::get('session/session_name');
     Session::put($sessionName, $theNewId);
-
-    // Update user data from OAuth response
-    updateUserData($theNewId, $responseData);
 
     // Handle tags if present
     if (isset($responseData['tags'])) {
@@ -280,8 +263,18 @@ function storeUserTags($userId, $responseData)
 {
     global $db;
 
-    // Check if we should update tags and if tags plugin is active
-    if (!isset($responseData['instructions']['updateTags']) || !$responseData['instructions']['updateTags']) {
+    // Safely extract and validate instructions as booleans
+    $instructions = $responseData['instructions'] ?? [];
+    if (!is_array($instructions)) {
+        $instructions = [];
+    }
+
+    $updateTags = filter_var($instructions['updateTags'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $createTagIfNeeded = filter_var($instructions['createTagIfNeeded'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $removeTagIfNotSpecified = filter_var($instructions['removeTagIfNotSpecified'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+    // Check if we should update tags
+    if (!$updateTags) {
         return;
     }
 
@@ -296,9 +289,22 @@ function storeUserTags($userId, $responseData)
         return;
     }
 
-    $tags = $responseData['tags'];
-    $createTagIfNeeded = $responseData['instructions']['createTagIfNeeded'] ?? false;
-    $removeTagIfNotSpecified = $responseData['instructions']['removeTagIfNotSpecified'] ?? false;
+    // Sanitize and validate tags array
+    $tags = [];
+    foreach ($responseData['tags'] as $tag) {
+        if (!is_array($tag) || !isset($tag['tag_name'])) {
+            continue; // Skip malformed tag entries
+        }
+        $tagName = Input::sanitize($tag['tag_name']);
+        if (empty($tagName) || strlen($tagName) > 100) {
+            continue; // Skip empty or excessively long tag names
+        }
+        $tags[] = ['tag_name' => $tagName];
+    }
+
+    if (empty($tags)) {
+        return;
+    }
 
     // Get all existing tags for this user
     $existingTagsQ = $db->query("SELECT plg_tags.id, plg_tags.tag FROM plg_tags

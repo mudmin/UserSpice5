@@ -82,17 +82,155 @@ if (!function_exists('passwordsAllowed')) {
   }
 }
 
-if (!function_exists('randomstring')) {
-  function randomstring($len)
-  {
-    $len = $len++;
-    $string = '';
-    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for ($i = 0; $i < $len; ++$i) {
-      $string .= substr($chars, rand(0, strlen($chars)), 1);
+function randomString(int $len): string
+{
+    if ($len <= 0) {
+        return '';
     }
 
-    return $string;
+    static $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    static $max   = 61;
+
+    $out = '';
+
+    for ($i = 0; $i < $len; $i++) {
+        $out .= $chars[random_int(0, $max)];
+    }
+
+    return $out;
+}
+
+/**
+ * Get the server secret key for HMAC operations.
+ * Generates and stores a key file if one doesn't exist.
+ */
+if (!function_exists('getVericodeSecret')) {
+  function getVericodeSecret(): string
+  {
+    global $abs_us_root, $us_url_root;
+    $keyFile = $abs_us_root . $us_url_root . 'usersc/vericode_secret.php';
+
+    if (file_exists($keyFile)) {
+      include $keyFile;
+      if (isset($vericode_secret) && !empty($vericode_secret)) {
+        return $vericode_secret;
+      }
+    }
+
+    // Generate a new secret
+    $newSecret = bin2hex(random_bytes(32));
+    $content = "<?php\n\$vericode_secret = '" . $newSecret . "';\n";
+
+    if (file_put_contents($keyFile, $content) !== false) {
+      return $newSecret;
+    }
+
+    // Fallback: derive from config if file write fails
+    return hash('sha256', Config::get('mysql/password') . Config::get('session/session_name'));
+  }
+}
+
+/**
+ * Hash a vericode using HMAC-SHA256
+ */
+if (!function_exists('hashVericode')) {
+  function hashVericode(string $vericode): string
+  {
+    return hash_hmac('sha256', $vericode, getVericodeSecret());
+  }
+}
+
+/**
+ * Find a user by vericode, trying hashed first then falling back to plaintext.
+ * Returns the user data or null if not found.
+ */
+if (!function_exists('findUserByVericode')) {
+  function findUserByVericode(string $vericode, ?int $user_id = null): ?object
+  {
+    global $db;
+
+    $hashedVericode = hashVericode($vericode);
+
+    // Build query with optional user_id constraint
+    if ($user_id !== null) {
+      // Try hashed first
+      $result = $db->query(
+        "SELECT * FROM users WHERE vericode = ? AND id = ?",
+        [$hashedVericode, $user_id]
+      );
+
+      if ($result->count() > 0) {
+        return $result->first();
+      }
+
+      // Fall back to plaintext
+      $result = $db->query(
+        "SELECT * FROM users WHERE vericode = ? AND id = ?",
+        [$vericode, $user_id]
+      );
+    } else {
+      // Try hashed first (no user_id)
+      $result = $db->query(
+        "SELECT * FROM users WHERE vericode = ?",
+        [$hashedVericode]
+      );
+
+      if ($result->count() > 0) {
+        return $result->first();
+      }
+
+      // Fall back to plaintext
+      $result = $db->query(
+        "SELECT * FROM users WHERE vericode = ?",
+        [$vericode]
+      );
+    }
+
+    return $result->count() > 0 ? $result->first() : null;
+  }
+}
+
+/**
+ * Find an email login record by vericode, trying hashed first then falling back to plaintext.
+ * Returns the login data or null if not found.
+ */
+if (!function_exists('findEmailLoginByVericode')) {
+  function findEmailLoginByVericode(string $vericode, ?int $user_id = null): ?object
+  {
+    global $db;
+
+    $hashedVericode = hashVericode($vericode);
+
+    $baseQuery = "SELECT l.*, u.email_verified
+      FROM us_email_logins l
+      LEFT OUTER JOIN users u ON l.user_id = u.id
+      WHERE l.vericode = ?";
+
+    if ($user_id !== null) {
+      $baseQuery .= " AND l.user_id = ?";
+
+      // Try hashed first
+      $result = $db->query($baseQuery, [$hashedVericode, $user_id]);
+
+      if ($result->count() > 0) {
+        return $result->first();
+      }
+
+      // Fall back to plaintext
+      $result = $db->query($baseQuery, [$vericode, $user_id]);
+    } else {
+      // Try hashed first
+      $result = $db->query($baseQuery, [$hashedVericode]);
+
+      if ($result->count() > 0) {
+        return $result->first();
+      }
+
+      // Fall back to plaintext
+      $result = $db->query($baseQuery, [$vericode]);
+    }
+
+    return $result->count() > 0 ? $result->first() : null;
   }
 }
 
@@ -128,37 +266,7 @@ if (!function_exists('usernameExists')) {
   }
 }
 
-//Retrieve a list of all .php files in root files folder
-if (!function_exists('getPageFiles')) {
-  function getPageFiles()
-  {
-    global $us_url_root;
-    $directory = '../';
-    $pages = glob($directory . '*.php');
-    foreach ($pages as $page) {
-      $fixed = str_replace('../', '/' . $us_url_root, $page);
-      $row[$fixed] = $fixed;
-    }
 
-    return $row;
-  }
-}
-
-//Retrive a list of all .php files in users/ folder
-if (!function_exists('getUSPageFiles')) {
-  function getUSPageFiles()
-  {
-    global $us_url_root;
-    $directory = '../users/';
-    $pages = glob($directory . '*.php');
-    foreach ($pages as $page) {
-      $fixed = str_replace('../users/', '/' . $us_url_root . 'users/', $page);
-      $row[$fixed] = $fixed;
-    }
-
-    return $row;
-  }
-}
 
 // retrieve ?dest=page and check that it exists in the legitimate pages in the
 // database or is in the Config::get('whitelisted_destinations')
@@ -294,12 +402,12 @@ if (!function_exists('isValidEmail')) {
 }
 
 if (!function_exists('emailExists')) {
-  //Check if an email exists in the DB
+  //Check if an email exists in the DB (either in email or username column)
   function emailExists($email)
   {
     global $db;
 
-    $query = $db->query('SELECT email FROM users WHERE email = ?', [$email]);
+    $query = $db->query('SELECT id FROM users WHERE (email = ? OR username = ?)', [$email,$email]);
     $num_returns = $query->count();
     if ($num_returns > 0) {
       return true;
@@ -314,7 +422,16 @@ if (!function_exists('updateEmail')) {
   function updateEmail($id, $email)
   {
     global $db;
-
+    //Check if this email is the username or email of another user
+    $query = $db->query('SELECT id FROM users WHERE (email = ? OR username = ?) AND id != ?', [$email, $email, $id]);
+    $num_returns = $query->count();
+    if ($num_returns > 0) {
+      return false;
+    }
+    //check if it's an email address
+    if (!isValidEmail($email)) {
+      return false;
+    }
     $fields = ['email' => $email];
     $db->update('users', $id, $fields);
 
@@ -329,6 +446,7 @@ if (!function_exists('bin')) {
 
   {
     global $lang;
+    $number = (int) $number;
     if ($number == 0) {
       echo "<strong><span style='color:red'>" . lang("GEN_NO") . "</span></strong>";
     }
@@ -355,16 +473,6 @@ if (!function_exists('clean')) {
   }
 }
 
-if (!function_exists('stripPagePermissions')) {
-  function stripPagePermissions($id)
-  {
-    global $db;
-
-    $result = $db->query('DELETE from permission_page_matches WHERE page_id = ?', [$id]);
-
-    return $result;
-  }
-}
 
 if (!function_exists('encodeURIComponent')) {
   function encodeURIComponent($str)
@@ -611,7 +719,7 @@ if (!function_exists('adminNotifications')) {
         logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id unread.");
       }
       if ($type == 'delete') {
-        $db->query("UPDATE notifications SET is_archived = 1 WHERE id = $id");
+        $db->query("UPDATE notifications SET is_archived = 1 WHERE id = ?", [$id]);
         logger($user_id, 'Notifications - Admin', "Deleted Notification ID #$id.");
       }
       ++$i;

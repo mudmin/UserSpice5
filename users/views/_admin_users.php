@@ -31,6 +31,7 @@ if (!empty($_POST)) {
     $username = Input::get('username');
     $password = Input::get('password');
     $vericode = uniqid().randomstring(15);
+    $hashedVericode = hashVericode($vericode);
 
     $form_valid = false; // assume the worst
 
@@ -98,7 +99,7 @@ if (!empty($_POST)) {
           'permissions' => 1,
           'join_date' => $join_date,
           'email_verified' => 1,
-          'vericode' => $vericode,
+          'vericode' => $hashedVericode,
           'force_pr' => $settings->force_pr,
           'vericode_expiry' => $vericode_expiry,
           'oauth_tos_accepted' => true,
@@ -125,6 +126,7 @@ if (!empty($_POST)) {
             'fname' => $fname,
             'email' => rawurlencode($email),
             'vericode' => $vericode,
+            'user_id' => $theNewId,
             'join_vericode_expiry' => $settings->join_vericode_expiry,
           ];
           $to = rawurlencode($email);
@@ -348,8 +350,8 @@ foreach ($validation->errors() as $error) {
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   $(document).ready(function() {
     $('#userstable').DataTable({
       "pageLength": 25,

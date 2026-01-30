@@ -110,17 +110,21 @@ class Validate
 								$item = $this->_alias[$item];
 							}
 
-							$field = $item; // The field name to be checked
+							$field = $item;
+							if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table) || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $field)) {
+								$this->addError(["Invalid table or field name configuration.", $item]);
+								break;
+							}
+
 							if ($table == "users" && ($field == "username" || $field == "email")) {
-								// Special logic for users table when checking username or email
 								$query = "SELECT id FROM users WHERE (email = ?) OR (username = ?)";
 								$count = $this->_db->query($query, [$value, $value])->count();
-				
+
 							} else {
-								// Standard logic for other tables/fields
-								$query = "SELECT id FROM {$table} WHERE {$field} = ?";
+								$query = "SELECT id FROM `{$table}` WHERE `{$field}` = ?";
 								$count = $this->_db->query($query, [$value])->count();
 							}
+
 							if(isset($orig)){
 								$item = $orig;
 							}
@@ -136,19 +140,31 @@ class Validate
 							$t     = explode(',', $rule_value);
 							$table = $t[0];
 							$id    = $t[1];
+
+							if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
+								$this->addError(["Invalid table name configuration.", $item]);
+								break;
+							}
+							$id = (int)$id;
+
 							if($table == "users" && array_key_exists($item, $this->_alias)) {
 								$orig = $item;
 								$item = $this->_alias[$item];
 							}
 
+							if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $item)) {
+								$this->addError(["Invalid field name configuration.", $item]);
+								break;
+							}
+
 							if ($table == "users" && ($item == "username" || $item == "email")) {
-						
 								$query = "SELECT id FROM users WHERE id != ? AND ((email = ?) OR (username = ?))";
 								$count = $this->_db->query($query, [$id, $value, $value])->count();
 							} else {
-								$query = "SELECT id FROM {$table} WHERE id != ? AND {$item} = ?";
+								$query = "SELECT id FROM `{$table}` WHERE id != ? AND `{$item}` = ?";
 								$count = $this->_db->query($query, [$id, $value])->count();
 							}
+							
 							if(isset($orig)){
 								$item = $orig;
 							}
@@ -284,8 +300,8 @@ class Validate
 
 						case 'in':
 						$verb           = lang("VAL_MUST");
-						$list_of_names  = [];	// if doesn't match then display these in an error message
-						$list_of_values = [];	// to compare it against
+						$list_of_names  = [];	
+						$list_of_values = [];	
 
 						if (!is_array($rule_value))
 						$rule_value = [$rule_value];
@@ -328,12 +344,12 @@ class Validate
 						break;
 
 						case 'is_in_array':
-						if(!is_array($rule_value)){ //If we're not checking $value against an array, that's a developer fail.
+						if(!is_array($rule_value)){ 
 							$str = lang("2FA_FATAL");
 							$this->addError(["{$display} $str",$item]);
 						} else {
-							$to_be_checked = $value; //The value to checked
-							$array_to_check_in = $rule_value; //The array to check $value against
+							$to_be_checked = $value;
+							$array_to_check_in = $rule_value;
 							if(!in_array($to_be_checked, $array_to_check_in)){
 								$str = lang("VAL_SEL");
 								$this->addError(["{$display} $str",$item]);
@@ -345,6 +361,18 @@ class Validate
 						case 'is_in_database':
 						$table  = is_array($rule_value) ? $rule_value[0] : $rule_value;
 						$fields = is_array($rule_value) ? $rule_value[1] : [$item, '=', $value];
+
+						// HARDENING: Validate table and field names before query
+						if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
+							$this->addError(["Invalid database configuration for check.", $item]);
+							break;
+						}
+						
+						// If fields is an array like ['field', '=', 'value'], check the field name
+						if (is_array($fields) && count($fields) >= 1 && !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $fields[0])) {
+							$this->addError(["Invalid field configuration for check.", $item]);
+							break;
+						}
 
 						if ($this->_db->get($table, $fields)) {
 							$str = lang("VAL_EXISTS");
@@ -361,13 +389,13 @@ class Validate
 						break;
 
 						case 'is_valid_north_american_phone':
-						$numeric_only_phone = preg_replace("/[^0-9]/", "", $value); //Strip out all non-numeric characters
+						$numeric_only_phone = preg_replace("/[^0-9]/", "", $value);
 						$str = lang("VAL_NA_PHONE");
-						if($numeric_only_phone[0] == 0 || $numeric_only_phone[0] == 1){ //It the number starts with a 0 or 1, it's not a valid North American phone number.
+						if($numeric_only_phone[0] == 0 || $numeric_only_phone[0] == 1){ 
 							$this->addError(["{$display} $str",$item]);
 							$this->ruleBroken([$item,"is_valid_north_american_phone",false]);
 						}
-						if(strlen($numeric_only_phone) != 10){ //Valid North American phone numbers are 10 digits long
+						if(strlen($numeric_only_phone) != 10){ 
 							$this->addError(["{$display} $str",$item]);
 							$this->ruleBroken([$item,"is_valid_north_american_phone",false]);
 						}
@@ -403,14 +431,11 @@ class Validate
 	
 		foreach($this->_errors as $error) {
 			if (is_array($error)) {
-				// Sanitize both the error message and the element ID
-				// Although the error messages are set by the system, sanitizing them doesn' hurt.
 				$sanitizedErrorMessage = Input::sanitize($error[0]);
 				$sanitizedElementId = Input::sanitize($error[1]);
 				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>
 				<SCRIPT>jQuery('document').ready(function(){jQuery('#{$sanitizedElementId}').parent().closest('div').addClass('has-error');});</SCRIPT>";
 			} else {
-				// Sanitize the error message
 				$sanitizedErrorMessage = Input::sanitize($error);
 				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>";
 			}
@@ -433,3 +458,4 @@ class Validate
 		return empty($this->_errors);
 	}
 }
+?>

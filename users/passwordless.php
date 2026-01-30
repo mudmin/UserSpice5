@@ -20,7 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 $noMaintenanceRedirect = true;
 require_once '../users/init.php';
+$suppress_toast_messages = true; // Use inline alerts in modal instead
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
+
+$hooks = getMyHooks();
+includeHook($hooks, 'pre');
+
 if ($settings->email_login == 0) {
   usError(lang("EML_FEATURE_DISABLED"));
   Redirect::to($us_url_root . 'users/login.php');
@@ -36,6 +41,7 @@ if (!empty($_POST)) {
   if (!Token::check(Input::get('csrf'))) {
     include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
   }
+  includeHook($hooks, 'post');
 }
 $method = Input::get('method');
 if ($method == "") {
@@ -95,8 +101,9 @@ if ($method == "verify_code") {
         Redirect::to($us_url_root . 'users/passwordless.php');
       }
 
-      // Verify the code
-      if ($code === $login->verification_code) {
+      // Verify the code (try hashed first, then plaintext fallback)
+      $codeMatches = hashVericode($code) === $login->verification_code || $code === $login->verification_code;
+      if ($codeMatches) {
         // Record successful login
         handleAuthSuccess('login_attempt', $user_id, $email, [], [
           'method' => 'passwordless_code',
@@ -106,6 +113,11 @@ if ($method == "verify_code") {
         $user = new User($user_id);
         $user->login();
         $db->update('us_email_logins', $login->id, ['expired' => 1]);
+
+        // Execute login success hooks
+        $successHooks = getMyHooks(['page' => 'loginSuccess']);
+        includeHook($successHooks, 'body');
+
         if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
           require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
         }
@@ -128,6 +140,10 @@ if ($method == "verify_code") {
           'invalid_attempts' => $invalid_attempts,
           'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
+
+        // Execute login fail hooks
+        $failHooks = getMyHooks(['page' => 'loginFail']);
+        includeHook($failHooks, 'body');
 
         usError("Invalid code. Attempts remaining: " . (3 - $invalid_attempts));
         Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . urlencode($email) . '&user_id=' . $user_id);
@@ -179,9 +195,11 @@ if ($method == "enter_email") {
       $vericode = uniqid() . randomstring(15);
       $check = $db->query("UPDATE us_email_logins set expired = 1 WHERE user_id = ?", array($user_id));
 
+      // Store hashed vericode for security
+      $hashedVericode = hashVericode($vericode);
       $fields = [
         'user_id' => $user_id,
-        'vericode' => $vericode,
+        'vericode' => $hashedVericode,
         'expires' => date('Y-m-d H:i:s', strtotime('+15 minutes')),
         'invalid_attempts' => 0
       ];
@@ -189,7 +207,7 @@ if ($method == "enter_email") {
       // Generate verification code for modes 2 and 3
       if ($settings->email_login == 2 || $settings->email_login == 3) {
         $verification_code = substr(str_shuffle(passwordlessCharset()), 0, $settings->pwl_length);
-        $fields['verification_code'] = $verification_code;
+        $fields['verification_code'] = hashVericode($verification_code);
       }
 
       $db->insert('us_email_logins', $fields);
@@ -197,7 +215,7 @@ if ($method == "enter_email") {
       $options = [
         'fname' => $search->fname,
         'email' => rawurlencode($search->email),
-        'vericode' => $vericode,
+        'vericode' => $vericode,  // Send unhashed in email
         'passwordless_expiry' => 15,
         'user_id' => $user_id,
         'url' => "users/verify.php?vericode=" . $vericode . "&user_id=" . $user_id,
@@ -250,6 +268,42 @@ if ($method == "enter_email") {
             <a href="<?= $us_url_root ?>" aria-label="Close" class="close btn-close" style="top: 1rem!important;"></a>
           </div>
           <div class="modal-body p-4 py-5 p-md-5">
+            <?php
+            // Display inline messages for modal context
+            $inlineMessages = function_exists('parseSessionMessages') ? parseSessionMessages() : [];
+            $hasMessages = !empty($_GET['err']) || !empty($_GET['msg']) ||
+                           !empty($inlineMessages['valErr']) || !empty($inlineMessages['valSuc']) ||
+                           !empty($inlineMessages['genMsg']);
+
+            if ($hasMessages):
+            ?>
+            <div class="us-inline-messages mb-3">
+            <?php
+            // Check GET params
+            if (!empty($_GET['err'])) {
+                echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                echo htmlspecialchars($_GET['err']);
+                echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            }
+            if (!empty($_GET['msg'])) {
+                echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
+                echo htmlspecialchars($_GET['msg']);
+                echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+            }
+
+            // Check session messages
+            $alertTypes = ['valErr' => 'danger', 'valSuc' => 'success', 'genMsg' => 'secondary'];
+            foreach ($alertTypes as $key => $alertClass) {
+                if (!empty($inlineMessages[$key])) {
+                    echo '<div class="alert alert-' . $alertClass . ' alert-dismissible fade show" role="alert">';
+                    echo $inlineMessages[$key];
+                    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                }
+            }
+            ?>
+            </div>
+            <?php endif; ?>
+            <?php includeHook($hooks, 'body'); ?>
             <form name="login" id="login-form" class="form-signin" action="" method="post">
               <input type="hidden" name="method" value="enter_email">
               <?= tokenHere(); ?>
@@ -257,18 +311,20 @@ if ($method == "enter_email") {
                 <label class="form-label" for="email"><?= lang("GEN_EMAIL") ?></label>
                 <input type="email" id="email" name="email" class="form-control form-control-lg" required autocomplete="email" />
               </div>
+              <?php includeHook($hooks, 'form'); ?>
               <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
               <button class="submit col-12 btn btn-primary rounded submit px-3" id="next_button" type="submit">
                 <i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT", ""); ?>
               </button>
             </form>
+            <?php includeHook($hooks, 'bottom'); ?>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     $(document).ready(function() {
       $("#loginModal").modal({
         backdrop: 'static',
@@ -299,6 +355,7 @@ if ($method == "check_email") {
           <span class="fw-bold"><?= lang("EML_VER"); ?></span>
         </div>
         <div class="card-body p-3">
+          <?php includeHook($hooks, 'body'); ?>
           <h2 class="text-center">
             <?= $EML_PASSWORDLESS_SENT ?>
           </h2>
@@ -314,10 +371,12 @@ if ($method == "check_email") {
                   <label for="code" class="h5"><?= lang("PASS_ENTER_CODE"); ?></label>
                   <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-z0-9]{5,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
                 </div>
+                <?php includeHook($hooks, 'form'); ?>
                 <button type="submit" class="btn btn-primary btn-lg mt-3"><?= lang("PASS_VER_BUTTON"); ?></button>
               </form>
             </div>
           <?php } ?>
+          <?php includeHook($hooks, 'bottom'); ?>
         </div>
       </div>
     </div>

@@ -127,11 +127,21 @@ function completeOAuthFlow($user, $oauthData, $oauthClientData) {
             }
         }
         
-        $response = base64_encode(json_encode($response));
-        
+        $responseJson = json_encode($response);
+        $responseEncoded = base64_encode($responseJson);
+
+        // Sign the response with HMAC-SHA256 if response_secret is configured
+        $signature = '';
+        if (!empty($oauthClientData->response_secret)) {
+            $signature = hash_hmac('sha256', $responseJson, $oauthClientData->response_secret);
+        }
+
         // Construct redirect URL
         $redirectUrl = $oauthData['redirect_uri'] . '?code=' . $authCode;
-        $redirectUrl .= '&response=' . urlencode($response);
+        $redirectUrl .= '&response=' . urlencode($responseEncoded);
+        if (!empty($signature)) {
+            $redirectUrl .= '&signature=' . urlencode($signature);
+        }
         if (!empty($oauthData['state'])) {
             $redirectUrl .= '&state=' . urlencode($oauthData['state']);
         }
@@ -179,6 +189,7 @@ function clearOAuthFlow() {
     unset($_SESSION[INSTANCE . '_oauth_client_data']);
     unset($_SESSION[INSTANCE . '_oauth_login_form']);
     unset($_SESSION[INSTANCE . '_oauth_login_title']);
+    unset($_SESSION[INSTANCE . '_oauth_csrf_token']);
 }
 
 /**
@@ -188,8 +199,30 @@ function initializeOAuthFlow($oauthData, $oauthClientData) {
     $_SESSION[INSTANCE . '_oauth_flow_active'] = true;
     $_SESSION[INSTANCE . '_oauth_data'] = $oauthData;
     $_SESSION[INSTANCE . '_oauth_client_data'] = $oauthClientData;
-    
+
+    // Generate server-side CSRF token for OAuth flow protection
+    // This is separate from the client's 'state' parameter and protects against CSRF attacks
+    $_SESSION[INSTANCE . '_oauth_csrf_token'] = bin2hex(random_bytes(32));
+
     logger(0, "OAuth Server", "OAuth flow initialized for client: " . $oauthData['client_id']);
+}
+
+/**
+ * Get the OAuth CSRF token for embedding in forms
+ */
+function getOAuthCsrfToken() {
+    return $_SESSION[INSTANCE . '_oauth_csrf_token'] ?? null;
+}
+
+/**
+ * Validate OAuth CSRF token
+ */
+function validateOAuthCsrfToken($token) {
+    $storedToken = $_SESSION[INSTANCE . '_oauth_csrf_token'] ?? null;
+    if (empty($storedToken) || empty($token)) {
+        return false;
+    }
+    return hash_equals($storedToken, $token);
 }
 
 /**

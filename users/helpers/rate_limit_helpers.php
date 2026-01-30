@@ -192,6 +192,7 @@ function getRateLimitErrorMessage($action) {
         'totp_regenerate_backup_codes' => lang("RATE_LIMIT_TOTP"),
         'passkey_verify' => lang("RATE_LIMIT_PASSKEY"),
         'passkey_store' => lang("RATE_LIMIT_PASSKEY_STORE"),
+        'passkey_register' => lang("RATE_LIMIT_PASSKEY_STORE"),
         'password_reset_request' => lang("RATE_LIMIT_PASSWORD_RESET"),
         'password_reset_submit' => lang("RATE_LIMIT_PASSWORD_RESET_SUBMIT"),
         'registration_attempt' => lang("RATE_LIMIT_REGISTRATION"),

@@ -199,8 +199,8 @@ if($navCheck->navigation_type == 0){
 
 </form>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="js/pagination/datatables.min.js"></script>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   $(document).ready(function() {
     $('#navTable').DataTable({
       "pageLength": 25,

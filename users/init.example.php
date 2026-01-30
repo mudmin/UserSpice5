@@ -14,8 +14,14 @@ session_start();
 // disables the feature that prevents the updater from installing languages you didn't have before the update
 // $disable_language_purge = true;
 
+// Forces SSL verification in cURL requests to UserSpice API
+// Will most likely break on localhost or self-signed certificates
+define('EXTRA_CURL_SECURITY', true);
+
+// $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
 $abs_us_root = Server::get('DOCUMENT_ROOT'); 
 
+// $self_path=explode("/", $_SERVER['PHP_SELF']);
 $self_path = explode("/", Server::get('PHP_SELF'));
 
 $self_path_length=count($self_path);
@@ -94,6 +100,6 @@ $timezone_string = 'America/New_York';
 date_default_timezone_set($timezone_string);
 
 
-$usespice_nonce = base64_encode(random_bytes(16));
+$userspice_nonce = base64_encode(random_bytes(16));
 require_once $abs_us_root.$us_url_root."users/includes/loader.php";
 

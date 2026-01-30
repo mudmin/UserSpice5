@@ -244,7 +244,7 @@ $token = Token::generate();
                         <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
                         <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
                         <input type="hidden" name="plugin" value="<?= $t ?>">
-                        <?php if ($usplugins[$t] == 1) {  //plugin installed and active
+                        <?php if ($usplugins[$t] == 1) {  //plugin installed and active 
                         ?>
                           <button type="submit" name="deactivate" value="Deactivate" class="btn btn-outline-dark" title="Deactivate">
                             <i class="fa fa-ban" aria-hidden="true"></i>
@@ -252,6 +252,11 @@ $token = Token::generate();
                           <a class="btn btn-outline-primary" title="Configure" href="<?= $us_url_root . 'users/admin.php?view=plugins_config&plugin=' . $t ?>" role="button">
                             <i class="fa fa-cogs" aria-hidden="true"></i>
                           </a>
+                          <?php if ($settings->spice_api != '') { ?>
+                          <a class="btn btn-outline-info" title="Check for Updates" href="<?= $us_url_root . 'users/admin.php?view=spice&search=' . urlencode($xml->name) ?>" target="_blank" role="button">
+                            <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                          </a>
+                          <?php } ?>
                         <?php } else { ?>
                           <button type="submit" name="activate" value="Activate" class="btn btn-outline-success" title="Activate">
                             <i class="fa fa-toggle-on" aria-hidden="true"></i>
@@ -259,10 +264,12 @@ $token = Token::generate();
                           <button type="submit" name="delete" value="Delete" class="btn btn-outline-danger" title="Delete" onclick="return confirm('If you continue, the plugin files will be deleted.  The plugin may also choose to delete/clean up the data it created in your database.  To see which actions would be performed, take a look at the delete.php file in the plugin folder (if it exists).  This cannot be undone.');">
                             <i class="fa fa-trash-o" aria-hidden="true"></i>
                           </button>
+                          <?php if ($settings->spice_api != '') { ?>
+                          <a class="btn btn-outline-info" title="Check for Updates" href="<?= $us_url_root . 'users/admin.php?view=spice&search=' . urlencode($xml->name) ?>" target="_blank" role="button">
+                            <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                          </a>
+                          <?php } ?>
                         <?php } ?>
-                        <a class="btn btn-outline-info" title="Check for Updates" href="<?= $us_url_root . 'users/admin.php?view=spice&search=' . urlencode($t) ?>" target="_blank" role="button">
-                          <i class="fa fa-refresh" aria-hidden="true"></i>
-                        </a>
                       </form>
                     </div>
                   </td>
@@ -278,7 +285,7 @@ $token = Token::generate();
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   $(document).ready(function() {
   $('.showTooltip').tooltip();
   <?php if ($pluginsC > 0) { ?>

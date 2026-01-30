@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function(){
 function closeSiblings(dropdown) {
   const parent = dropdown.parentNode; // menu UL
   if(!parent) return;
-  let sibling = parent.firstChild; // children are DIV, LI, or TEXT
+  let sibling = parent.firstElementChild; // skip text nodes, only get elements
   while (sibling) {
     if (sibling != dropdown) {
       const dd = sibling.querySelector('.us_sub-menu.show');
@@ -37,7 +37,7 @@ function closeSiblings(dropdown) {
         dd.parentNode.classList.remove('open');
       }
     }
-    sibling = sibling.nextSibling;
+    sibling = sibling.nextElementSibling;
   }
 }
 

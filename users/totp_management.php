@@ -433,7 +433,7 @@ $shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_d
     </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     function copyToClipboard(elementId) {
         const element = document.getElementById(elementId);
         element.select();

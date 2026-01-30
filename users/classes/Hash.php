@@ -17,19 +17,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class Hash{
-
-	public static function make($string, $salt = ''){
+class Hash
+{
+	public static function make($string, $salt = '')
+	{
 		return hash('sha256', $string . $salt);
 	}
 
-	//Deprecated because mcrypt_create_iv is no longer availabe in modern php versions.
-	
-	// public static function salt($length){
-	// 	return mcrypt_create_iv($length);
-	// }
-
-	public static function unique(){
-		return self::make(uniqid());
+	public static function unique()
+	{
+		return bin2hex(random_bytes(32));
 	}
 }

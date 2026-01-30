@@ -123,8 +123,8 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="js/pagination/datatables.min.js"></script>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   $(function() {
     $('[data-toggle="tooltip"]').tooltip()
   })

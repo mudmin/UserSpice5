@@ -50,22 +50,16 @@ if (Input::exists('get')) {
             $user_agent = Input::sanitize(Server::get('HTTP_USER_AGENT'));
             logger($user_id, "Passwordless Debug UA", $user_agent);
         }
-        $searchQ = $db->query("SELECT 
-            l.*, 
-            u.email_verified 
-            FROM us_email_logins l 
-            LEFT OUTER JOIN users u ON l.user_id = u.id
-            WHERE l.user_id = ? 
-            AND l.vericode = ? 
-            ", array($user_id, $vericode));
-        $searchC = $searchQ->count();
+
+        // Try hashed lookup first, fall back to plaintext for legacy tokens
+        $search = findEmailLoginByVericode($vericode, (int)$user_id);
+        $searchC = $search ? 1 : 0;
 
         if (isset($passwordlessDebug) && $passwordlessDebug == true) {
             logger($user_id, "Passwordless Debug", "Vericode Search Count: $searchC");
         }
 
         if ($searchC > 0) {
-            $search = $searchQ->first();
             if ($search->expired == 1) {
                 if (isset($passwordlessDebug) && $passwordlessDebug == true) {
                     logger($user_id, "Passwordless Debug", "Login Failed - Expired");
@@ -190,12 +184,27 @@ if (Input::exists('get')) {
             includeHook($eventhooks, 'body');
             if (isset($hookData['verify'])) {
                 $verify = $hookData['verify'];
+                $vericode_valid = true; // Trust hook override
             } else {
-                $verify = new User($email);
+                // Try hashed lookup first, fall back to email-based lookup
+                $foundUser = findUserByVericode($vericode, $user_id ? (int)$user_id : null);
+                if ($foundUser) {
+                    $verify = new User($foundUser->id);
+                    $vericode_valid = true;
+                } else {
+                    $verify = new User($email);
+                    // Check plaintext for legacy tokens
+                    $vericode_valid = $verify->exists() && $verify->data()->vericode == $vericode;
+                }
             }
         }
 
-        if ($verify->data()->email_verified == 1 && $verify->data()->vericode == $vericode && $verify->data()->email_new == "") {
+        // Check if already verified with matching vericode
+        $hashedMatch = $verify->exists() && $verify->data()->vericode == hashVericode($vericode);
+        $plaintextMatch = $verify->exists() && $verify->data()->vericode == $vericode;
+        $codeMatches = $hashedMatch || $plaintextMatch;
+
+        if ($verify->data()->email_verified == 1 && $codeMatches && $verify->data()->email_new == "") {
             $eventhooks = getMyHooks(['page' => 'verifySuccess']);
             includeHook($eventhooks, 'body');
             ?>
@@ -228,9 +237,10 @@ if (Input::exists('get')) {
                     <div class="card-body">
                       <?php
                       echo lang("ERR_EMAIL_STR");
+                      $newVericode = randomstring(15);
                       $verify->update(array(
                           'email_verified'   => 0,
-                          'vericode'         => randomstring(15),
+                          'vericode'         => hashVericode($newVericode),
                           'vericode_expiry'   => $vericode_expiry
                       ), $verify->data()->id);
                       $eventhooks = getMyHooks(['page' => 'verifyResend']);
@@ -245,11 +255,13 @@ if (Input::exists('get')) {
             <?php
             exit();
         } else {
-            if ($verify->exists() && $verify->data()->vericode == $vericode && (strtotime($verify->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) > 0)) {
+            $notExpired = strtotime($verify->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) > 0;
+            if ($verify->exists() && $codeMatches && $notExpired) {
+                $newVericode = randomstring(15);
                 if ($new == 1 && !$verify->data()->email_new == NULL) {
                     $verify->update(array(
                         'email_verified'   => 1,
-                        'vericode'         => randomstring(15),
+                        'vericode'         => hashVericode($newVericode),
                         'vericode_expiry'   => date("Y-m-d H:i:s"),
                         'email'            => $verify->data()->email_new,
                         'email_new'        => NULL
@@ -257,7 +269,7 @@ if (Input::exists('get')) {
                 } else {
                     $verify->update(array(
                         'email_verified'   => 1,
-                        'vericode'         => randomstring(15),
+                        'vericode'         => hashVericode($newVericode),
                         'vericode_expiry'   => date("Y-m-d H:i:s")
                     ), $verify->data()->id);
                 }

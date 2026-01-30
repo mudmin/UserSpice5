@@ -59,23 +59,24 @@ $usSessionMessageClasses = [
   opacity: 1;
 }
 </style>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 (function(){
   const container = document.getElementById('us-toast-container');
   const justify = container ? (container.getAttribute('data-justify') || 'left') : 'left';
   const LEFT = justify === 'left';
-  
+
   // A randomized break token to prevent attackers from forcing breaks.
   const USERSPICE_BREAK = `---USERSPICE_BREAK-${Math.random().toString(36).substring(7)}---`;
   const MAX_MESSAGE_LENGTH = 500; // Limit message size to prevent DOM blowups.
 
-  function userSpiceMessage(message, bootstrapType){
+  function userSpiceMessage(message, bootstrapType) {
     const wrap = container || document.body;
+
     const toast = document.createElement('div');
     toast.className = 'toast us-toast ' + (LEFT ? 'us-toast-left' : '');
-    toast.setAttribute('role','alert');
-    toast.setAttribute('aria-live','assertive');
-    toast.setAttribute('aria-atomic','true');
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
 
     const bar = document.createElement('div');
     bar.className = 'us-toast-bar ' + mapTypeToBar(bootstrapType);
@@ -86,22 +87,27 @@ $usSessionMessageClasses = [
 
     const body = document.createElement('div');
     body.className = 'toast-body flex-grow-1';
-
-    // Sanitize and format the message, then build the nodes directly.
     buildToastBodyContent(body, String(message == null ? '' : message));
 
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn-close ms-2 me-2 mt-2';
-    btn.setAttribute('data-bs-dismiss','toast');
-    btn.setAttribute('aria-label','Close');
+    btn.setAttribute('data-bs-dismiss', 'toast');
+    btn.setAttribute('aria-label', 'Close');
 
     row.appendChild(body);
     row.appendChild(btn);
     toast.appendChild(row);
     wrap.appendChild(toast);
 
-    try { new bootstrap.Toast(toast, { delay: 6000, autohide: true }).show(); } catch(e){}
+    // Clean up after hidden (works for both manual close and auto-hide)
+    toast.addEventListener('hidden.bs.toast', function() {
+      toast.remove();
+    });
+
+    try {
+      new bootstrap.Toast(toast, { delay: 6000, autohide: true }).show();
+    } catch(e) {}
   }
 
   function mapTypeToBar(t){

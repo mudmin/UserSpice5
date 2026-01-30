@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ?>
 <?php
-ini_set('allow_url_fopen', 1);
 require_once '../users/init.php';
 
 $view = Input::get('view');

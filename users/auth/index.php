@@ -12,7 +12,7 @@ $oauthProvider = new UserSpiceOAuthProvider();
 $user = new User();
 
 // HANDLE TOKEN REQUESTS FIRST (POST to /users/auth/)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['grant_type'])) {
+if (Server::get('REQUEST_METHOD') === 'POST' && isset($_POST['grant_type'])) {
     logger(1, "OAuth Server", "Token request received: " . json_encode($_POST));
     
     if ($_POST['grant_type'] === 'authorization_code') {
@@ -58,6 +58,7 @@ if (!is_array($oauthData)) {
 }
 
 // STEP 3: Get client data from database
+$clientDataQ = $db->query("SELECT * FROM us_oauth_server_clients WHERE client_id = ? AND client_enabled = 1", [$oauthData['client_id']]);
 if ($clientDataQ->count() == 0) {
     // Client not found or disabled
     http_response_code(400);

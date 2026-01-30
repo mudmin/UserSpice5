@@ -18,38 +18,6 @@ if (!function_exists('userIdExists')) {
   }
 }
 
-//Retrieve information for all users
-if (!function_exists('fetchAllUsers')) {
-  function fetchAllUsers($orderBy = null, $desc = false, $disabled = true)
-  {
-    global $db;
-    $q = 'SELECT * FROM users';
-    if (!$disabled) {
-      $q .= ' WHERE permissions=1';
-    }
-    if ($orderBy !== null) {
-      $sanitize = $db->query("SELECT * FROM users LIMIT 1")->first();
-      $found = false;
-      foreach ($sanitize as $key => $value) {
-        if ($key == $orderBy) {
-          $found = true;
-        }
-      }
-      //don't order if the column doesn't exist
-      if ($found) {
-        if ($desc === true) {
-          $q .= " ORDER BY $orderBy DESC";
-        } else {
-          $q .= " ORDER BY $orderBy";
-        }
-      }
-    }
-    $query = $db->query($q);
-    $results = $query->results();
-
-    return $results;
-  }
-}
 
 //Retrieve complete user info by id ID
 if (!function_exists('fetchUser')) {
@@ -65,37 +33,7 @@ if (!function_exists('fetchUser')) {
   }
 }
 
-//Retrieve complete user information by username, token or ID
-//This function is primarily for legacy purposes
-if (!function_exists('fetchUserDetails')) {
-  function fetchUserDetails($column = null, $term = null, $id = null)
-  {
-    global $db;
-    if ($column == null || $column == "") {
-      $column = "id";
-    }
 
-    if ($term == null || $term == "") {
-      $term = $id;
-    }
-    $sanitize = $db->query("SELECT * FROM users LIMIT 1")->first();
-    $found = false;
-    foreach ($sanitize as $key => $value) {
-      if ($key == $column) {
-        $found = true;
-      }
-    }
-    if ($found == false) {
-      return false;
-    }
-    $query = $db->query("SELECT * FROM users WHERE $column = ? LIMIT 1", [$term]);
-    if ($query->count() == 1) {
-      return $query->first();
-    } else {
-      return false;
-    }
-  }
-}
 
 //Delete a defined array of users
 if (!function_exists('deleteUsers')) {
@@ -120,68 +58,45 @@ if (!function_exists('deleteUsers')) {
 if (!function_exists('echouser')) {
   function echouser($id, $echoType = null, $return = false)
   {
-
     global $db, $settings;
+
     if ($id == "" || $id == 0) {
       $string = "Guest";
-      if ($return) {
-        return $string;
+    } else {
+      $id = (int) $id;
+      $echoType = ($echoType !== null) ? (int) $echoType : $settings->echouser;
+
+      $query = $db->query('SELECT username, fname, lname FROM users WHERE id = ? LIMIT 1', [$id]);
+      if ($query->count() == 0) {
+        $string = "Unknown";
       } else {
-        echo $string;
+        $user = $query->first();
+        switch ($echoType) {
+          case 0:
+            $string = $user->fname . ' ' . $user->lname;
+            break;
+          case 1:
+            $string = ucfirst($user->username);
+            break;
+          case 2:
+            $string = ucfirst($user->username) . ' (' . $user->fname . ' ' . $user->lname . ')';
+            break;
+          case 3:
+            $string = ucfirst($user->username) . ' (' . $user->fname . ')';
+            break;
+          case 4:
+            $string = ucfirst($user->fname) . ' ' . substr(ucfirst($user->lname), 0, 1);
+            break;
+          default:
+            $string = "Unknown";
+        }
       }
     }
 
-    $id = (int) $id;
-
-    if ($echoType !== null) {
-      $echoType = (int) $echoType;
-    } else {
-      $echoType = $settings->echouser;
+    if ($return) {
+      return safeReturn($string);
     }
-    $string = "Unknown";
-    if ($echoType == 0) {
-      $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-
-      $count = $query->count();
-      if ($count > 0) {
-        $results = $query->first();
-        $string = $results->fname . ' ' . $results->lname;
-      }
-    } elseif ($echoType == 1) {
-      $query = $db->query('SELECT username FROM users WHERE id = ? LIMIT 1', [$id]);
-      $count = $query->count();
-      if ($count > 0) {
-        $results = $query->first();
-        $string = ucfirst($results->username);
-      }
-    } elseif ($echoType == 2) {
-      $query = $db->query('SELECT username,fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-      $count = $query->count();
-      if ($count > 0) {
-        $results = $query->first();
-        $string = ucfirst($results->username) . ' (' . $results->fname . ' ' . $results->lname . ')';
-      }
-    } elseif ($echoType == 3) {
-      $query = $db->query('SELECT username,fname FROM users WHERE id = ? LIMIT 1', [$id]);
-      $count = $query->count();
-      if ($count > 0) {
-        $results = $query->first();
-        $string =  ucfirst($results->username) . ' (' . $results->fname . ')';
-      }
-    } elseif ($echoType == 4) {
-      $query = $db->query('SELECT fname,lname FROM users WHERE id = ? LIMIT 1', [$id]);
-      $count = $query->count();
-      if ($count > 0) {
-        $results = $query->first();
-        $string = ucfirst($results->fname) . ' ' . substr(ucfirst($results->lname), 0, 1);
-      }
-    }
-
-    if ($return == true) {
-      return $string;
-    } else {
-      echo $string;
-    }
+    echo safeReturn($string);
   }
 }
 
@@ -195,46 +110,7 @@ if (!function_exists('echousername')) {
     if ($count > 0) {
       $results = $query->first();
 
-      return $results->username;
-    } else {
-      return 'Unknown';
-    }
-  }
-}
-
-if (!function_exists('updateUser')) {
-  //Update User
-  function updateUser($column, $id, $value)
-  {
-    global $db, $user;
-    if (isset($user->data()->$column)) { //check for a valid column
-      $result = $db->query("UPDATE users SET $column = ? WHERE id = ?", [$value, $id]);
-      return $result;
-    } else {
-      return false;
-    }
-  }
-}
-
-if (!function_exists('fetchUserName')) {
-  //Fetches CONCAT of Fname Lname
-  function fetchUserName($username = null, $token = null, $id = null)
-  {
-    global $db;
-    if ($username != null) {
-      $column = 'username';
-      $data = $username;
-    } elseif ($id != null) {
-      $column = 'id';
-      $data = $id;
-    }
-
-    $query = $db->query("SELECT CONCAT(fname,' ',lname) AS name FROM users WHERE $column = ? LIMIT 1", [$data]);
-    $count = $query->count();
-    if ($count > 0) {
-      $results = $query->first();
-
-      return $results->name;
+      return safeReturn($results->username);
     } else {
       return 'Unknown';
     }
@@ -390,24 +266,159 @@ if (!function_exists('socialLogin')) {
   {
     global $db, $settings, $abs_us_root, $us_url_root;
 
-    $idQuery = "";
+    // =========================================================================
+    // #1: Sanitize $idArray - only allow valid column names from users table
+    // =========================================================================
+    $userColumns = socialLoginGetUserColumns($db);
+    $sanitizedIdArray = [];
     foreach ($idArray as $key => $value) {
-      $idQuery .= " OR $key = ?";
+      // Key must be a valid SQL identifier
+      if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
+        continue;
+      }
+      // Key must exist as a column in users table
+      if (!in_array($key, $userColumns, true)) {
+        continue;
+      }
+      // Value must be non-empty
+      if ($value === null || $value === '') {
+        continue;
+      }
+      $sanitizedIdArray[$key] = $value;
     }
-    // Handle no registration allowed, verify email already exists
-    if ($settings->registration == 0) {
-      $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
-      if ($findExistingUS->count() === 0) {
-        session_destroy();
-        Redirect::to($us_url_root . 'users/join.php');
-        die();
+
+    // =========================================================================
+    // #2: Normalize email and handle blank email case
+    // =========================================================================
+    $email = trim((string)$email);
+    $hasValidEmail = ($email !== '');
+
+    // Build query parts as arrays (proper condition builder)
+    $idConditions = [];
+    $idParams = [];
+    foreach ($sanitizedIdArray as $key => $value) {
+      $idConditions[] = "`$key` = ?";
+      $idParams[] = $value;
+    }
+
+    // If no email and no provider IDs, we can't identify the user
+    // Keep original behavior: redirect to join.php without error param
+    if (!$hasValidEmail && empty($sanitizedIdArray)) {
+      session_destroy();
+      Redirect::to($us_url_root . 'users/join.php');
+      die();
+    }
+
+    // =========================================================================
+    // #3: Provider-ID-first lookup (non-breaking pre-check)
+    // =========================================================================
+    $existingUser = null;
+
+    // First, try to find by provider ID (more reliable than email)
+    // Use known provider order for deterministic behavior when multiple IDs present
+    if (!empty($sanitizedIdArray)) {
+      $providerPriority = ['oauth_uid', 'google_id', 'github_id', 'disc_uid', 'facebook_id', 'twitter_id', 'twitch_id', 'okta_id', 'microsoft_id'];
+      $providerKey = null;
+      $providerValue = null;
+
+      // Find first matching provider in priority order
+      foreach ($providerPriority as $pKey) {
+        if (isset($sanitizedIdArray[$pKey])) {
+          $providerKey = $pKey;
+          $providerValue = $sanitizedIdArray[$pKey];
+          break;
+        }
+      }
+      // Fall back to first key if no priority match
+      if ($providerKey === null) {
+        $providerKey = array_key_first($sanitizedIdArray);
+        $providerValue = $sanitizedIdArray[$providerKey];
+      }
+
+      $providerCheck = $db->query("SELECT * FROM users WHERE `$providerKey` = ? LIMIT 1", [$providerValue]);
+      if ($providerCheck->count() > 0) {
+        $existingUser = $providerCheck->first();
       }
     }
 
-    //Handle already existing UserSpice account with matching email
-    $findExistingUS = $db->query("SELECT * FROM users WHERE email = ?" . $idQuery, array_merge([$email], array_values($idArray)));
-    if ($findExistingUS->count() > 0) {
-      $user = new User($findExistingUS->first()->id);
+    // Fall back to email OR provider ID lookup if provider-first didn't match
+    if ($existingUser === null) {
+      if ($hasValidEmail && !empty($idConditions)) {
+        // email OR provider_id OR provider_id2 ...
+        $whereClause = "email = ? OR " . implode(' OR ', $idConditions);
+        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", array_merge([$email], $idParams));
+      } elseif ($hasValidEmail) {
+        // email only
+        $findExistingUS = $db->query("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
+      } elseif (!empty($idConditions)) {
+        // provider IDs only (no email)
+        $whereClause = implode(' OR ', $idConditions);
+        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", $idParams);
+      } else {
+        $findExistingUS = null;
+      }
+
+      if ($findExistingUS !== null && $findExistingUS->count() > 0) {
+        $existingUser = $findExistingUS->first();
+      }
+    }
+
+    // Handle no registration allowed
+    if ($settings->registration == 0 && $existingUser === null) {
+      session_destroy();
+      Redirect::to($us_url_root . 'users/join.php');
+      die();
+    }
+
+    // =========================================================================
+    // #4: Mass-assignment hardening - filter $fields
+    // =========================================================================
+    $protectedFields = [
+      'id',
+      'permissions',
+      'password',
+      'pin',
+      'active',
+      'protected',
+      'dev_user',
+      'email_verified',
+      'vericode',
+      'vericode_expiry',
+      'join_date',
+      'last_login',
+      'logins',
+      'force_pr',
+      'account_owner',
+      'account_id',
+    ];
+
+    // Filter incoming $fields to remove protected columns and invalid keys
+    $filteredFields = [];
+    foreach ($fields as $key => $value) {
+      // Key must be valid identifier
+      if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $key)) {
+        continue;
+      }
+      // Key must exist in users table
+      if (!in_array($key, $userColumns, true)) {
+        continue;
+      }
+      // Key must not be protected
+      if (in_array($key, $protectedFields, true)) {
+        continue;
+      }
+      $filteredFields[$key] = $value;
+    }
+
+    // For existing users, don't allow OAuth to overwrite email
+    $isNewUser = ($existingUser === null);
+    if (!$isNewUser) {
+      unset($filteredFields['email']);
+    }
+
+    // Handle existing user
+    if ($existingUser !== null) {
+      $user = new User($existingUser->id);
       $date = date('Y-m-d H:i:s');
       $db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $user->data()->id]);
       $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
@@ -430,10 +441,20 @@ if (!function_exists('socialLogin')) {
         ]);
       }
 
-      $user->update($fields);
+      // Update with filtered fields only
+      if (!empty($filteredFields)) {
+        $user->update($filteredFields);
+      }
 
-      // Handle new user
+    // Handle new user
     } else {
+      // #2 continued: If no valid email, don't create new user
+      if (!$hasValidEmail) {
+        session_destroy();
+        Redirect::to($us_url_root . 'users/join.php?err=' . urlencode('Email address required to create account'));
+        die();
+      }
+
       $user = new User();
 
       if (isset($_SESSION['us_lang'])) {
@@ -442,12 +463,13 @@ if (!function_exists('socialLogin')) {
         $newLang = $settings->default_language;
       }
       $date = date("Y-m-d H:i:s");
+
+      // #7: Removed duplicate join_date assignment
       $defaultFields = [
-        'username' => generateUsername($username, $fields['fname'] ?? "", $fields['lname'] ?? "", $fields['email'] ?? ""),
+        'username' => generateUsername($username, $filteredFields['fname'] ?? "", $filteredFields['lname'] ?? "", $email),
         'email' => $email,
         'password' => null,
         'permissions' => 1,
-        'join_date' => date('Y-m-d H:i:s'),
         'oauth_tos_accepted' => false,
         'language' => $newLang,
         'logins' => 1,
@@ -456,14 +478,22 @@ if (!function_exists('socialLogin')) {
         'email_verified' => 1,
       ];
 
-      $fields = array_merge($defaultFields, $fields);
+      // Merge: defaults first, then filtered OAuth fields (can add profile fields but not override security)
+      $createFields = array_merge($defaultFields, $filteredFields);
 
-      $activeCheck = $db->query('SELECT active FROM users');
+      // Re-apply protected defaults that OAuth shouldn't override
+      $createFields['permissions'] = 1;
+      $createFields['email_verified'] = 1;
+      $createFields['join_date'] = $date;
+      $createFields['last_login'] = $date;
+      $createFields['logins'] = 1;
+
+      $activeCheck = $db->query('SELECT active FROM users LIMIT 1');
       if (!$activeCheck->error()) {
-        $fields['active'] = 1;
+        $createFields['active'] = 1;
       }
 
-      $theNewId = $user->create($fields);
+      $theNewId = $user->create($createFields);
       $user->find($theNewId);
 
       if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {
@@ -506,13 +536,11 @@ if (!function_exists('socialLogin')) {
       setLoginMethod($loginMethod);
     }
 
-    $_POST['redirect'] = $_SESSION['redirect'];
-    $redirect = Input::get('redirect');
-    if (!isset($_SESSION['dest'])) {
-      $_SESSION['dest'] = $settings->redirect_uri_after_login;
-    }
-    $_POST['dest'] = $_SESSION['dest'];
-    $dest = sanitizedDest('dest');
+    // =========================================================================
+    // #5 & #6: Redirect handling - use Redirect::sanitized() for safe redirects
+    // =========================================================================
+    $redirect = $_SESSION['redirect'] ?? Input::get('redirect');
+    $dest = $_SESSION['dest'] ?? $settings->redirect_uri_after_login;
 
     $hooks = getMyHooks(['page' => 'loginSuccess']);
     includeHook($hooks, 'body');
@@ -524,15 +552,35 @@ if (!function_exists('socialLogin')) {
       require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
     }
 
-    if (!empty($dest)) {
-      if (!empty($redirect) || $redirect !== '') {
-        Redirect::to($redirect);
-      } else {
-        Redirect::to($dest);
-      }
+    // Use Redirect::sanitized() which enforces same-origin, blocks schemes, normalizes paths
+    if (!empty($redirect)) {
+      Redirect::sanitized($redirect);
+    } elseif (!empty($dest)) {
+      Redirect::sanitized($dest);
     }
 
-    Redirect::to($settings->redirect_uri_after_login);
+    Redirect::sanitized($settings->redirect_uri_after_login);
+  }
+}
+
+/**
+ * Get cached list of column names from users table
+ * Caches result for the duration of the request
+ */
+if (!function_exists('socialLoginGetUserColumns')) {
+  function socialLoginGetUserColumns($db)
+  {
+    static $columns = null;
+    if ($columns === null) {
+      $columns = [];
+      $result = $db->query('DESCRIBE users');
+      if (!$result->error()) {
+        foreach ($result->results() as $row) {
+          $columns[] = $row->Field;
+        }
+      }
+    }
+    return $columns;
   }
 }
 
@@ -569,5 +617,119 @@ function setLoginMethod($method)
   // Log the login method for debugging
   if (isset($GLOBALS['user']) && $GLOBALS['user']->isLoggedIn()) {
     logger($GLOBALS['user']->data()->id, "Login_Method", "Login method set to: " . $method);
+  }
+}
+
+if (!function_exists('fetchUserDetails')) {
+  function fetchUserDetails($column = null, $term = null, $id = null)
+  {
+    global $db;
+
+    $column = trim((string)$column);
+    $column = ($column === '') ? 'id' : $column;
+
+    $termTrimmed = trim((string)$term);
+    $term = ($term === null || $termTrimmed === '') ? $id : $term;
+
+    static $whitelist = null;
+    if ($whitelist === null) {
+      $whitelist = [];
+      $columns = $db->query("SHOW COLUMNS FROM users")->results();
+      foreach ($columns as $col) {
+        $whitelist[] = $col->Field;
+      }
+    }
+
+    if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $column)) {
+      return false;
+    }
+
+    if (!in_array($column, $whitelist, true)) {
+      return false;
+    }
+
+    if ($column === 'id') {
+      $term = (int)$term;
+    }
+
+    $query = $db->query("SELECT * FROM users WHERE `$column` = ? LIMIT 1", [$term]);
+    return ($query->count() === 1) ? $query->first() : false;
+  }
+}
+
+if (!function_exists('updateUser')) {
+
+  function updateUser($column, $id, $value)
+  {
+    global $db;
+
+    $column = trim((string)$column);
+    $id = (int)$id;
+
+    if ($column === '' || $id <= 0) {
+      return false;
+    }
+
+
+    static $cols = null;
+    if ($cols === null) {
+      $cols = [];
+      $rows = $db->query("SHOW COLUMNS FROM users")->results();
+      foreach ($rows as $r) {
+        $cols[$r->Field] = $r;
+      }
+    }
+
+    if (!isset($cols[$column])) {
+      return false;
+    }
+
+    $sanitizedColumn = $column;
+
+    if ($sanitizedColumn === 'id') {
+      return false;
+    }
+
+    return $db->query(
+      "UPDATE users SET `$sanitizedColumn` = ? WHERE id = ? LIMIT 1",
+      [$value, $id]
+    );
+  }
+}
+
+if (!function_exists('fetchAllUsers')) {
+  function fetchAllUsers($orderBy = null, $desc = false, $onlyPermissionOne = true)
+  {
+    global $db;
+
+    $q = 'SELECT * FROM users';
+    if ($onlyPermissionOne) {
+      $q .= ' WHERE permissions = 1';
+    }
+
+    if ($orderBy !== null) {
+      $orderBy = trim((string)$orderBy);
+
+      // Defense-in-depth: validate identifier format before any further processing
+      if ($orderBy !== '' && !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $orderBy)) {
+        logger(0, 'fetchAllUsers', "Invalid ORDER BY column format attempted: " . substr($orderBy, 0, 50));
+        $orderBy = ''; // Neutralize invalid input
+      }
+
+      static $whitelist = null;
+      if ($whitelist === null) {
+        $whitelist = [];
+        $columns = $db->query("SHOW COLUMNS FROM users")->results();
+        foreach ($columns as $col) {
+          $whitelist[] = $col->Field;
+        }
+      }
+
+      if ($orderBy !== '' && in_array($orderBy, $whitelist, true)) {
+        $q .= " ORDER BY `{$orderBy}` " . ($desc ? 'DESC' : 'ASC');
+      }
+    }
+
+    return $db->query($q)->results();
   }
 }

@@ -213,7 +213,14 @@ function writeRpidToInit(string $rpid): bool
         }
     }
 
-    return file_put_contents($initFile, $newContents) !== false;
+    $result = file_put_contents($initFile, $newContents) !== false;
+
+    // Invalidate opcache so the new definition is picked up on next request
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($initFile, true);
+    }
+
+    return $result;
 }
 
 // TOTP Configuration Checks
@@ -354,7 +361,14 @@ function fixServerVariableUsageRoot($file_path, $backup_path): bool {
         return false;
     }
 
-    return file_put_contents($file_path, $newContents) !== false;
+    $result = file_put_contents($file_path, $newContents) !== false;
+
+    // Invalidate opcache so the changes are picked up on next request
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+
+    return $result;
 }
 
 // Function to fix $_SERVER usage in users/init.php and add missing definitions
@@ -405,11 +419,11 @@ function fixServerVariableUsageInit($file_path, $backup_path): bool {
         $newContents = preg_replace('/^<\?php\s*/', "<?php" . $additionsText . "\n", $newContents, 1);
     }
 
-    // Add $usespice_nonce before loader.php if missing
-    if (strpos($newContents, '$usespice_nonce') === false) {
+    // Add $userspice_nonce before loader.php if missing
+    if (strpos($newContents, '$userspice_nonce') === false) {
         $newContents = preg_replace(
             '/(require_once\s+\$abs_us_root\s*\.\s*\$us_url_root\s*\.\s*[\'"]users\/includes\/loader\.php[\'"]\s*;)/',
-            "\$usespice_nonce = base64_encode(random_bytes(16));\n$1",
+            "\$userspice_nonce = base64_encode(random_bytes(16));\n$1",
             $newContents
         );
     }
@@ -438,7 +452,14 @@ function fixServerVariableUsageInit($file_path, $backup_path): bool {
         return false;
     }
 
-    return file_put_contents($file_path, $newContents) !== false;
+    $result = file_put_contents($file_path, $newContents) !== false;
+
+    // Invalidate opcache so the changes are picked up on next request
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+
+    return $result;
 }
 
 // Handle fix $_SERVER request for z_us_root.php
@@ -558,7 +579,56 @@ function enableExtraCurlSecurity($file_path, $backup_path): bool {
         return false;
     }
 
-    return file_put_contents($file_path, $newContents) !== false;
+    $result = file_put_contents($file_path, $newContents) !== false;
+
+    // Invalidate opcache so the changes are picked up on next request
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+
+    return $result;
+}
+
+// Function to disable EXTRA_CURL_SECURITY in users/init.php
+function disableExtraCurlSecurity($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
+    }
+
+    // Check if already defined as false or not defined
+    if (!preg_match("/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*true\s*\)/", $contents)) {
+        return false; // Already disabled or not defined
+    }
+
+    // Create backup first
+    if (file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
+
+    // Change true to false
+    $newContents = preg_replace(
+        "/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*true\s*\)/",
+        "define('EXTRA_CURL_SECURITY', false)",
+        $contents
+    );
+
+    if ($newContents === $contents) {
+        @unlink($backup_path);
+        return false;
+    }
+
+    $result = file_put_contents($file_path, $newContents) !== false;
+
+    // Invalidate opcache so the changes are picked up on next request
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+
+    return $result;
 }
 
 // Handle enable EXTRA_CURL_SECURITY request
@@ -595,6 +665,32 @@ if (!empty($_POST) && isset($_POST['dismiss_curl_backup'])) {
         usSuccess('Backup dismissed. The file has been renamed to users/init.CURL_BACKUP.SAVE.php');
     } else {
         usError('Could not dismiss the backup file.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle disable EXTRA_CURL_SECURITY request (for localhost)
+if (!empty($_POST) && isset($_POST['disable_curl_security'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    // Verify user typed YES
+    $confirmation = trim($_POST['disable_curl_confirm'] ?? '');
+    if (strtoupper($confirmation) !== 'YES') {
+        usError('You must type YES to confirm disabling extra cURL security.');
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'users/init.php';
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php';
+
+    if (disableExtraCurlSecurity($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Disabled EXTRA_CURL_SECURITY in users/init.php (backup created)');
+        usSuccess('Successfully disabled EXTRA_CURL_SECURITY. A backup was created at users/init.CURL_BACKUP.php');
+    } else {
+        usError('Could not disable the setting automatically. The file may not be writable or no changes were needed.');
     }
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
@@ -857,7 +953,22 @@ if ($curl_backup_exists && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY
         'text' => 'A backup file <code>users/init.CURL_BACKUP.php</code> exists from enabling extra cURL security. Since your site is working correctly, you can dismiss this backup.',
         'link_text' => 'Dismiss',
         'link_url' => '#',
-        'modal' => 'confirm-dismiss_curl_backup'
+        'modal' => 'confirm-dismiss_curl_backup',
+        'level' => 'warning',
+        'icon' => 'fa-archive'
+    ];
+}
+
+// Show warning if localhost AND EXTRA_CURL_SECURITY is enabled - may cause connection issues
+if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) {
+    $recommendations[] = [
+        'title' => 'Localhost with Extra cURL Security',
+        'text' => 'You are running on localhost with <code>EXTRA_CURL_SECURITY</code> enabled. If you experience issues connecting to download updates, use Spice Shaker, or perform backups, you can disable this feature.',
+        'link_text' => 'Disable Now',
+        'link_url' => '#',
+        'modal' => 'confirm-disable_curl_security',
+        'level' => 'warning',
+        'icon' => 'fa-info-circle'
     ];
 }
 
@@ -887,7 +998,9 @@ if ($init_backup_exists && !$server_var_init['found']) {
         'text' => 'A backup file <code>users/init.BACKUP.php</code> exists from a previous fix. Since your site is working correctly, you can dismiss this backup.',
         'link_text' => 'Dismiss',
         'link_url' => '#',
-        'modal' => 'confirm-dismiss_init_backup'
+        'modal' => 'confirm-dismiss_init_backup',
+        'level' => 'warning',
+        'icon' => 'fa-archive'
     ];
 }
 
@@ -917,8 +1030,30 @@ if ($root_backup_exists && !$server_var_root['found']) {
         'text' => 'A backup file <code>z_us_root.BACKUP.php</code> exists from a previous fix. Since your site is working correctly, you can dismiss this backup.',
         'link_text' => 'Dismiss',
         'link_url' => '#',
-        'modal' => 'confirm-dismiss_root_backup'
+        'modal' => 'confirm-dismiss_root_backup',
+        'level' => 'warning',
+        'icon' => 'fa-archive'
     ];
+}
+
+// Check if custom_login_script.php handles redirect-after-login
+$customLoginScript = $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+if (file_exists($customLoginScript)) {
+    $scriptContent = file_get_contents($customLoginScript);
+    // Look for actual code usage of $dest (not just in comments)
+    // Match patterns like: if($dest, if ($dest, !empty($dest), isset($dest), Redirect::sanitized($dest)
+    $hasDestCode = preg_match('/(?:if\s*\(\s*(?:isset\s*\(\s*)?\$dest|!empty\s*\(\s*\$dest|Redirect::sanitized\s*\(\s*\$dest)/', $scriptContent);
+    if (!$hasDestCode) {
+        $recommendations[] = [
+            'title' => 'Enable Redirect-After-Login',
+            'text' => 'Your <code>custom_login_script.php</code> doesn\'t handle post-login redirects. Users who visit a protected page while logged out won\'t be redirected back after login. Add <code>$dest</code> handling to improve UX.',
+            'link_text' => 'View Example',
+            'link_url' => '#',
+            'modal' => 'dest-redirect-example',
+            'level' => 'info',
+            'icon' => 'fa-lightbulb'
+        ];
+    }
 }
 
 ?>
@@ -1142,9 +1277,12 @@ if ($root_backup_exists && !$server_var_root['found']) {
                     </div>
                 <?php else : ?>
                     <div class="list-group list-group-flush">
-                        <?php foreach ($recommendations as $rec) : ?>
+                        <?php foreach ($recommendations as $rec) :
+                            $level = $rec['level'] ?? 'danger';
+                            $icon = $rec['icon'] ?? 'fa-exclamation-circle';
+                        ?>
                             <div class="list-group-item d-flex flex-column flex-md-row align-items-md-center">
-                                <div class="me-3 mb-2 mb-md-0 text-danger"><i class="fas fa-exclamation-circle fa-2x"></i></div>
+                                <div class="me-3 mb-2 mb-md-0 text-<?= $level ?>"><i class="fas <?= $icon ?> fa-2x"></i></div>
                                 <div class="flex-grow-1">
                                     <strong class="mb-1"><?= $rec['title'] ?></strong>
                                     <p class="mb-0 text-muted small"><?= $rec['text'] ?></p>
@@ -1867,7 +2005,7 @@ generate_confirmation_modal(
                 <ul class="small">
                     <li><code>define('USERSPICE_ACTIVE_LOGGING', false);</code> after <code>&lt;?php</code></li>
                     <li><code>$noPHPInfo = false;</code> after <code>&lt;?php</code></li>
-                    <li><code>$usespice_nonce = base64_encode(random_bytes(16));</code> before loader.php</li>
+                    <li><code>$userspice_nonce = base64_encode(random_bytes(16));</code> before loader.php</li>
                     <li><code>$system_messages_justify = "right";</code> before loader.php</li>
                     <li><code>define('EXTRA_CURL_SECURITY', false);</code> before loader.php</li>
                 </ul>
@@ -2059,3 +2197,82 @@ generate_confirmation_modal(
     </div>
 </div>
 <?php endif; ?>
+
+<?php if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) : ?>
+<div class="modal fade" id="confirm-disable_curl_security" tabindex="-1" aria-labelledby="confirm-disable_curl_security-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-disable_curl_security-label">Disable Extra cURL Security</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    You are running on <strong>localhost</strong> with extra cURL security enabled.
+                </div>
+                <p>This setting enforces SSL certificate verification for outbound cURL connections. On localhost or development environments with self-signed certificates, this can cause connection failures when:</p>
+                <ul>
+                    <li>Downloading updates from UserSpice</li>
+                    <li>Using Spice Shaker to install addons</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> You should re-enable this feature when deploying to a production server with valid SSL certificates.
+                </div>
+
+                <div class="alert alert-secondary">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>users/init.CURL_BACKUP.php</code> before any changes are made.
+                </div>
+
+                <div class="mb-3">
+                    <label for="disable_curl_confirm" class="form-label"><strong>Type YES to confirm:</strong></label>
+                    <input type="text" class="form-control" id="disable_curl_confirm" name="disable_curl_confirm" placeholder="Type YES to confirm" autocomplete="off" form="disable-curl-form">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post" id="disable-curl-form">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="disable_curl_security" class="btn btn-warning">
+                        <i class="fas fa-unlock me-1"></i>Disable Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Redirect-After-Login Example Modal -->
+<div class="modal fade" id="dest-redirect-example" tabindex="-1" aria-labelledby="dest-redirect-example-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dest-redirect-example-label"><i class="fas fa-lightbulb me-2"></i>Redirect-After-Login Feature</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    When users visit a protected page while logged out, <code>securePage()</code> stores their intended destination. After login, you can redirect them back to that page.
+                </div>
+                <p>Add this code to your <code>usersc/scripts/custom_login_script.php</code>:</p>
+                <pre class="bg-dark text-light p-3 rounded"><code>if (isset($dest) && !empty($dest)) {
+    // User was redirected to login from a protected page - send them back there
+    Redirect::sanitized($dest);
+} elseif (hasPerm([2], $user->data()->id)) {
+    Redirect::to($us_url_root . 'users/admin.php');
+} else {
+    Redirect::to($us_url_root . $settings->redirect_uri_after_login);
+}</code></pre>
+                <p class="text-muted small mb-0"><strong>How it works:</strong> The <code>$dest</code> variable contains the page path (with query string) the user was trying to access. <code>Redirect::sanitized()</code> ensures the redirect is safe (same-origin only).</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,26 +18,43 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Token {
-	public static function generate($force=false){
-		$tokenName = Config::get('session/token_name');
-		if($force) {
-			return Session::put($tokenName, md5(uniqid()));
-		} else {
-			if(Session::exists($tokenName)) {
-				return Session::get($tokenName);
-			} else {
-				return Session::put($tokenName, md5(uniqid()));
-			}
-		}
-	}
+  public static function generate($force = false) {
+    $tokenName = Config::get('session/token_name');
 
-	public static function check($token){
-		$tokenName = Config::get('session/token_name');
+    if (Session::exists($tokenName)) {
+      $token = Session::get($tokenName);
+      if (
+        !$force &&
+        is_string($token) &&
+        strlen($token) === 64 &&
+        ctype_xdigit($token)
+      ) {
+        return $token;
+      }
+    }
 
-		if (Session::exists($tokenName) && $token === Session::get($tokenName)) {
-			//Session::delete($tokenName);
-			return true;
-		}
-		return false;
-	}
+    return Session::put($tokenName, bin2hex(random_bytes(32)));
+  }
+
+  public static function check($token) {
+    $tokenName = Config::get('session/token_name');
+
+    // Validate incoming token format
+    if (!is_string($token) || strlen($token) !== 64 || !ctype_xdigit($token)) {
+      return false;
+    }
+
+    if (!Session::exists($tokenName)) {
+      return false;
+    }
+
+    $storedToken = Session::get($tokenName);
+
+    // Validate stored token format
+    if (!is_string($storedToken) || strlen($storedToken) !== 64 || !ctype_xdigit($storedToken)) {
+      return false;
+    }
+
+    return hash_equals($storedToken, $token);
+  }
 }

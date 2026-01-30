@@ -9,7 +9,7 @@ $countE=0;
 
 if(file_exists($abs_us_root.$us_url_root."/usersc/user_agreement_acknowledge.php")){
   ?>
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   alert("We see that you are using a custom version of usersc/user_agreement_acknowledge. We recommend that you rename that file and put your custom terms and conditions in usersc/lang now.");
   </script>
   <?php

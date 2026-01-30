@@ -6,12 +6,22 @@ if (!hasPerm(2)) { die(); }
 if (!Token::check(Input::get('token'))) { die('A token error has occurred.'); }
 
 $params = [];
-$limit = '';
-$order = '';
 $where = 'WHERE 1=1';
 
 // Define the tables with aliases
 $tables = "users AS u LEFT JOIN user_permission_matches AS upm ON u.id = upm.user_id LEFT JOIN permissions AS p ON p.id = upm.permission_id";
+
+// Initialize DataTableRequest helper for secure ORDER BY and LIMIT handling
+$dtRequest = new DataTableRequest($db);
+$dtRequest->setColumns([
+    0 => 'u.id',
+    2 => 'u.username',
+    3 => 'CONCAT(u.fname, " ", u.lname)',
+    4 => 'u.email',
+    5 => 'u.last_login',
+    6 => 'perms',
+    // Columns 1 (icon) and 7 (status) are not sortable from the DB
+])->loadTableColumns(['users', 'permissions']);
 
 // Global Search
 if (!empty($_GET['search']['value'])) {
@@ -29,35 +39,9 @@ $totalRecords = $db->query("SELECT COUNT(id) as count FROM users")->first()->cou
 $filteredQuery = $db->query("SELECT COUNT(DISTINCT u.id) as count FROM {$tables} {$where}", $params);
 $totalFiltered = $filteredQuery->first()->count;
 
-// Ordering
-if (isset($_GET['order'][0]['column'])) {
-    $columns = [
-        0 => 'u.id',
-        2 => 'u.username',
-        3 => 'CONCAT(u.fname, " ", u.lname)',
-        4 => 'u.email',
-        5 => 'u.last_login',
-        6 => 'perms',
-        // Columns 1 (icon) and 7 (status) are not sortable from the DB
-    ];
-    $colIndex = (int)Input::sanitize($_GET['order'][0]['column']);
-    if (array_key_exists($colIndex, $columns)) {
-        $col = $columns[$colIndex];
-        $direction = Input::sanitize($_GET['order'][0]['dir']);
-        $dir = ($direction === 'asc') ? 'ASC' : 'DESC';
-        $order = "ORDER BY {$col} {$dir}";
-    }
-} else {
-    // Default sort: users by ID ascending
-    $order = "ORDER BY u.id ASC";
-}
-
-// Limit
-if (isset($_GET['start']) && $_GET['length'] != -1) {
-    $start = (int)Input::sanitize($_GET['start']);
-    $length = (int)Input::sanitize($_GET['length']);
-    $limit = "LIMIT {$start}, {$length}";
-}
+// Get validated ORDER BY and LIMIT clauses
+$order = $dtRequest->getOrderBy('u.id', 'ASC');
+$limit = $dtRequest->getLimit();
 
 // Final Query
 $userData = $db->query("
@@ -113,9 +97,8 @@ foreach ($userData as $v1) {
 
 // Output
 header('Content-Type: application/json');
-$draw = isset($_GET['draw']) ? (int)Input::sanitize($_GET['draw']) : 0;
 echo json_encode([
-    "draw" => $draw,
+    "draw" => $dtRequest->getDraw(),
     "recordsTotal" => $totalRecords,
     "recordsFiltered" => $totalFiltered,
     "data" => $data

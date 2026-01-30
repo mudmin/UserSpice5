@@ -170,7 +170,7 @@ if (in_array($user->data()->id, $master_account)) {
 
 ?>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
     $(document).ready(function() {
         //dismiss notifications
         $(".dismiss-announcement").click(function(event) {

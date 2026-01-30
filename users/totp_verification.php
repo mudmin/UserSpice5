@@ -66,7 +66,7 @@ $errors = [];
 $successes = [];
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (Server::get('REQUEST_METHOD') === 'POST') {
     if (!Token::check($_POST['csrf'])) {
         $errors[] = lang("CSRF_ERROR");
     } elseif (!validateRateLimit('totp_verify', $userId)) {
@@ -112,7 +112,7 @@ if ($verified) {
     markTotpVerified($userId);
     $successes[] = "Verification successful! Redirecting...";
 
-    $nonce = htmlspecialchars($usespice_nonce ?? '', ENT_QUOTES, 'UTF-8');
+    $nonce = htmlspecialchars($userspice_nonce ?? '', ENT_QUOTES, 'UTF-8');
     $redirect = htmlspecialchars(getTotpReturnUrl(), ENT_QUOTES, 'UTF-8');
 
     echo '<script nonce="' . $nonce . '">
@@ -244,7 +244,7 @@ if (isset($_SESSION['totp_success_message'])) {
     </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-format TOTP code input (digits only)
     const totpInput = document.getElementById('totp_code');

@@ -48,14 +48,34 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 	$email = Input::get('email');
 	$email = str_replace(" ","+",$email);
 	$vericode = Input::get('vericode');
-	$ruser = new User($email);
+	$user_id = Input::get('user_id');
+
+	// Try to find user by vericode (hashed first, then plaintext fallback)
+	$user_id_int = is_numeric($user_id) ? (int)$user_id : null;
+	$foundUser = findUserByVericode($vericode, $user_id_int);
+
+	// Fall back to email lookup for backwards compatibility with old links
+	if ($foundUser) {
+		$ruser = new User($foundUser->id);
+		$vericode_valid = true;
+	} else {
+		$ruser = new User($email);
+		// Check if plaintext vericode matches (legacy)
+		$vericode_valid = $ruser->exists() && $ruser->data()->vericode == $vericode;
+	}
+
 	$eventhooks =  getMyHooks(['page' => 'forgotPasswordResponse']);
 	includeHook($eventhooks, 'body');
 	if (isset($hookData['ruser'])) {
 		$ruser = $hookData['ruser'];
+		$vericode_valid = true; // Trust hook override
 	}
 
 	if (Input::get('resetPassword')) {
+		// Check rate limit before processing
+		if (!checkRateLimit('password_reset_submit', null, $email, ['token' => $vericode])) {
+			$errors[] = getRateLimitErrorMessage('password_reset_submit');
+		} else {
 		$newPw = lang("PW_NEW");
 		$confPw = lang("PW_CONF");
 		$validate = new Validate();
@@ -81,21 +101,26 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 			}
 		}
 		if ($validation->passed()) {
-			if ($ruser->data()->vericode != $vericode || (strtotime($ruser->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) <= 0)) {
+			// Check vericode validity and expiry
+			$expired = strtotime($ruser->data()->vericode_expiry) - strtotime(date("Y-m-d H:i:s")) <= 0;
+			if (!$vericode_valid || $expired) {
 				$msg = lang("REDIR_SOMETHING_WRONG");
 				usError($msg);
+				handleAuthFailure('password_reset_submit', $ruser->data()->id, $email, ['token' => $vericode]);
 				Redirect::to($us_url_root . 'users/forgot_password_reset.php');
 			}
-			//update password
+			//update password - store hashed vericode
+			$newVericode = randomstring(15);
 			$ruser->update(array(
 				'password' => password_hash(Input::get('password'), PASSWORD_BCRYPT, array('cost' => 13)),
-				'vericode' => randomstring(15),
+				'vericode' => hashVericode($newVericode),
 				'vericode_expiry' => date("Y-m-d H:i:s"),
 				'email_verified' => true,
 				'force_pr' => 0,
 			), $ruser->data()->id);
 			$reset_password_success = TRUE;
 			logger($ruser->data()->id, "User", "Reset password.");
+			handleAuthSuccess('password_reset_submit', $ruser->data()->id, $email, ['token' => $vericode]);
 			$eventhooks =  getMyHooks(['page' => 'passwordResetSuccess']);
 			includeHook($eventhooks, 'body');
 			if ($settings->session_manager == 1) {
@@ -114,12 +139,14 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 		} else {
 			$reset_password_success = FALSE;
 			$errors = $validation->errors();
+			handleAuthFailure('password_reset_submit', $ruser->data()->id ?? null, $email, ['token' => $vericode]);
 			$eventhooks =  getMyHooks(['page' => 'passwordResetFail']);
 			includeHook($eventhooks, 'body');
 		}
+		} // end rate limit check
 	}
-	if ($ruser->exists() && $ruser->data()->vericode == $vericode) {
-		//if the user email is in DB and verification code is correct, show the form
+	if ($ruser->exists() && $vericode_valid) {
+		//if the user exists and verification code is correct, show the form
 		$password_change_form = TRUE;
 	}
 }

@@ -25,7 +25,7 @@ if ($oauthClientData) {
         }
     </style>
     
-    <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+    <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
         // OAuth-specific JavaScript
         console.log('OAuth flow active for client: <?= htmlspecialchars($oauthClientData->client_name ?? 'Unknown') ?>');
     </script>

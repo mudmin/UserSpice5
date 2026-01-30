@@ -305,7 +305,7 @@ if (!empty($_POST)) {
       }
       $vericode_expiry = date('Y-m-d H:i:s', strtotime("+$settings->reset_vericode_expiry minutes", strtotime(date('Y-m-d H:i:s'))));
       $vericode = uniqid() . randomstring(15);
-      $db->update('users', $userdetails->id, ['vericode' => $vericode, 'vericode_expiry' => $vericode_expiry]);
+      $db->update('users', $userdetails->id, ['vericode' => hashVericode($vericode), 'vericode_expiry' => $vericode_expiry]);
       if (isset($_POST['sendPwReset'])) {
         $params = [
           'username' => $userdetails->username,
@@ -313,6 +313,7 @@ if (!empty($_POST)) {
           'fname' => $userdetails->fname,
           'email' => rawurlencode($userdetails->email),
           'vericode' => $vericode,
+          'user_id' => $userdetails->id,
           'reset_vericode_expiry' => $settings->reset_vericode_expiry,
         ];
         $to = rawurlencode($userdetails->email);
@@ -901,7 +902,7 @@ includeHook($hooks, 'body'); ?>
 includeHook($hooks, 'bottom');
 
 if (!$canEdit) { ?>
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     document.addEventListener('DOMContentLoaded', function() {
       let form = document.getElementById('adminUser');
       // First disable all inputs except protected field

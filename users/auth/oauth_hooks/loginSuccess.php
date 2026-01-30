@@ -6,10 +6,21 @@ if (!isset($_SESSION[INSTANCE . '_oauth_flow_active'])) {
     return;
 }
 
-require_once $abs_us_root . $us_url_root . 'users\auth\userspice_oauth_provider.php';
+require_once $abs_us_root . $us_url_root . 'users/includes/oauth_enforcement.php';
+require_once $abs_us_root . $us_url_root . 'users/auth/userspice_oauth_provider.php';
 
 $oauthData = $_SESSION[INSTANCE . '_oauth_data'] ?? null;
 $oauthClientData = $_SESSION[INSTANCE . '_oauth_client_data'] ?? null;
+
+// Validate OAuth CSRF token to prevent cross-site request forgery
+$submittedCsrfToken = Input::get('oauth_csrf_token');
+if (!validateOAuthCsrfToken($submittedCsrfToken)) {
+    logger(0, "OAuth Server Security", "OAuth CSRF token validation failed - possible CSRF attack");
+    clearOAuthFlow();
+    usError("Security validation failed. Please try logging in again.");
+    Redirect::to($us_url_root . 'users/login.php');
+    exit;
+}
 
 if ($oauthData && $oauthClientData && $user->isLoggedIn()) {
     $oauthProvider = new UserSpiceOAuthProvider();
@@ -31,25 +42,38 @@ if ($oauthData && $oauthClientData && $user->isLoggedIn()) {
         $response['userdata']['email'] = $user->data()->email;
         
         // Execute custom login script if specified
-        if ($oauthClientData->login_script != "" && 
+        if ($oauthClientData->login_script != "" &&
             file_exists($abs_us_root . $us_url_root . 'usersc/oauth_server/login_scripts/' . $oauthClientData->login_script)) {
-            include $abs_us_root . $us_url_root . 'usersc/oauth_server/login_scripts/' . $oauthClientData->login_script;
+            try {
+                include $abs_us_root . $us_url_root . 'usersc/oauth_server/login_scripts/' . $oauthClientData->login_script;
+            } catch (Exception $e) {
+                logger($user->data()->id, "OAuth Server Error", "Login script error: " . $e->getMessage());
+                // Continue without custom script data
+            }
         }
-        
-        $response = base64_encode(json_encode($response));
-        
+
+        $responseJson = json_encode($response);
+        $responseEncoded = base64_encode($responseJson);
+
+        // Sign the response with HMAC-SHA256 if response_secret is configured
+        $signature = '';
+        if (!empty($oauthClientData->response_secret)) {
+            $signature = hash_hmac('sha256', $responseJson, $oauthClientData->response_secret);
+        }
+
         // Construct the redirect URL
         $redirectUrl = $oauthData['redirect_uri'] . '?code=' . $authCode;
-        $redirectUrl .= '&response=' . urlencode($response);
+        $redirectUrl .= '&response=' . urlencode($responseEncoded);
+        if (!empty($signature)) {
+            $redirectUrl .= '&signature=' . urlencode($signature);
+        }
         if (!empty($oauthData['state'])) {
             $redirectUrl .= '&state=' . urlencode($oauthData['state']);
         }
         
         // Clear OAuth session data
-        unset($_SESSION[INSTANCE . '_oauth_flow_active']);
-        unset($_SESSION[INSTANCE . '_oauth_data']);
-        unset($_SESSION[INSTANCE . '_oauth_client_data']);
-        
+        clearOAuthFlow();
+
         // Redirect to the OAuth client
         Redirect::to($redirectUrl);
         exit;

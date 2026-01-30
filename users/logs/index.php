@@ -277,7 +277,7 @@ if (!empty($_POST)) {
     </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     $(document).on('click', '[data-bs-target="#helpModal"]', function() {
         $('#helpModal').modal('show');
     });

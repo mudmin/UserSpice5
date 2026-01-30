@@ -6,9 +6,20 @@ if (!hasPerm(2)) { die(); }
 if (!Token::check(Input::get('token'))) { die('A token error has occurred.'); }
 
 $params = [];
-$limit = '';
-$order = '';
 $where = 'WHERE 1=1';
+
+// Define the tables with aliases for the JOIN
+$tables = "audit a LEFT JOIN users u ON a.user = u.id";
+
+// Initialize DataTableRequest helper for secure ORDER BY and LIMIT handling
+$dtRequest = new DataTableRequest($db);
+$dtRequest->setColumns([
+    0 => 'a.id',
+    1 => 'u.username',
+    2 => 'a.page',
+    3 => 'a.ip',
+    4 => 'a.timestamp',
+])->loadTableColumns(['audit', 'users']);
 
 // Handle whitelist filtering
 $ignoreWhitelisted = false;
@@ -22,7 +33,7 @@ if (!empty($_GET['w'])) {
         foreach ($whitelistQuery as $ip) {
             $whitelistedIPs[] = $ip->ip;
         }
-        
+
         // Add NOT IN clause if we have whitelisted IPs
         if (!empty($whitelistedIPs)) {
             $placeholders = str_repeat('?,', count($whitelistedIPs) - 1) . '?';
@@ -31,9 +42,6 @@ if (!empty($_GET['w'])) {
         }
     }
 }
-
-// Define the tables with aliases for the JOIN
-$tables = "audit a LEFT JOIN users u ON a.user = u.id";
 
 // Global Search
 if (!empty($_GET['search']['value'])) {
@@ -50,25 +58,9 @@ $totalRecords = $db->query("SELECT COUNT(*) as count FROM audit")->first()->coun
 $filteredQuery = $db->query("SELECT COUNT(a.id) as count FROM {$tables} {$where}", $params);
 $totalFiltered = $filteredQuery->first()->count;
 
-// Ordering
-if (isset($_GET['order'][0]['column'])) {
-    $columns = ['a.id', 'u.username', 'a.page', 'a.ip', 'a.timestamp'];
-    $columnIndex = (int)Input::sanitize($_GET['order'][0]['column']);
-    $col = isset($columns[$columnIndex]) ? $columns[$columnIndex] : null;
-    $direction = Input::sanitize($_GET['order'][0]['dir']);
-    $dir = ($direction == 'asc') ? 'ASC' : 'DESC';
-    if ($col) { $order = "ORDER BY {$col} {$dir}"; }
-} else {
-    // Default sort: newest logs first
-    $order = "ORDER BY a.id DESC";
-}
-
-// Limit
-if (isset($_GET['start']) && $_GET['length'] != -1) {
-    $start = (int)Input::sanitize($_GET['start']);
-    $length = (int)Input::sanitize($_GET['length']);
-    $limit = "LIMIT {$start}, {$length}";
-}
+// Get validated ORDER BY and LIMIT clauses
+$order = $dtRequest->getOrderBy('a.id', 'DESC');
+$limit = $dtRequest->getLimit();
 
 // Final Query
 $logs = $db->query("SELECT a.*, u.username, u.fname, u.lname FROM {$tables} {$where} {$order} {$limit}", $params)->results();
@@ -123,9 +115,8 @@ foreach ($logs as $l) {
 
 // Output
 header('Content-Type: application/json');
-$draw = isset($_GET['draw']) ? (int)Input::sanitize($_GET['draw']) : 0;
 echo json_encode([
-    "draw" => $draw,
+    "draw" => $dtRequest->getDraw(),
     "recordsTotal" => $totalRecords,
     "recordsFiltered" => $totalFiltered,
     "data" => $data

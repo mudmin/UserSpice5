@@ -27,11 +27,16 @@ $email_sent = FALSE;
 $errors = array();
 
 if (Input::exists('post')) {
+    $email = Input::get('email');
+
+    // Check rate limit before processing
+    if (!checkRateLimit('email_verification', null, $email)) {
+        $errors[] = getRateLimitErrorMessage('email_verification');
+    } else {
     $hooks = getMyHooks(['page'=>'verifyResendSubmit']);
     includeHook($hooks, 'body');
 
     if (!isset($hookData['overrideEmailVerification'])) {
-      $email = Input::get('email');
       $fuser = new User($email);
       $check = $db->query("SELECT id FROM users WHERE email = ? AND email_verified = 1", [$email])->count();
       $validate = new Validate();
@@ -60,11 +65,12 @@ if (Input::exists('post')) {
           }
           $vericode = randomstring(15);
           $vericode_expiry = date("Y-m-d H:i:s", strtotime("+$settings->join_vericode_expiry hours"));
-          $db->update('users', $fuser->data()->id, ['vericode' => $vericode, 'vericode_expiry' => $vericode_expiry]);
+          $db->update('users', $fuser->data()->id, ['vericode' => hashVericode($vericode), 'vericode_expiry' => $vericode_expiry]);
           $options = array(
               'fname'                => $fuser->data()->fname,
               'email'                => $email,
               'vericode'             => $vericode,
+              'user_id'              => $fuser->data()->id,
               'join_vericode_expiry' => $settings->join_vericode_expiry
           );
           $encoded_email = rawurlencode($email);
@@ -73,15 +79,18 @@ if (Input::exists('post')) {
           $email_sent = email($email, $subject, $body);
           $es = json_encode($email_sent);
           logger($fuser->data()->id, "User", "Requested a new verification email. $es");
+          handleAuthSuccess('email_verification', $fuser->data()->id, $email);
           if (!$email_sent) {
               $errors[] = lang("ERR_EMAIL");
           }
         } else {
+            handleAuthFailure('email_verification', null, $email);
             $errors[] = lang("ERR_EM_DB");
         }
     } else {
         $errors = $validation->errors();
     }
+    } // end rate limit check
 }
 
 if ($debug_mode) {

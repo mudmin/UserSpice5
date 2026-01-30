@@ -41,6 +41,7 @@ includeHook($hooks, 'pre');
 $form_method = 'POST';
 $form_action = 'join.php';
 $vericode = uniqid().randomstring(15);
+$hashedVericode = hashVericode($vericode);
 
 //Decide whether or not to use email activation
 $act = $db->query('SELECT * FROM email')->first()->email_act;
@@ -177,7 +178,7 @@ if (Input::exists()) {
                     'permissions' => 1,
                     'join_date' => $join_date,
                     'email_verified' => $pre,
-                    'vericode' => $vericode,
+                    'vericode' => $hashedVericode,
                     'vericode_expiry' => $vericode_expiry,
                     'oauth_tos_accepted' => true,
                     'language'=>$newLang,
@@ -196,6 +197,7 @@ if (Input::exists()) {
                 includeHook($hooks, 'post');
                 if ($act == 1 || !$allowPasswords) {
                     //Verify email address settings
+                    $params['user_id'] = $theNewId;  // Add user_id for email template
                     $to = rawurlencode($email);
                     $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
                     $body = email_body('_email_template_verify.php', $params);
@@ -275,7 +277,7 @@ if ($settings->registration == 1) {
 includeHook($hooks, 'bottom');
 ?>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
     $(document).ready(function(){
         $('.password_view_control').hover(function () {
             $('#password').attr('type', 'text');

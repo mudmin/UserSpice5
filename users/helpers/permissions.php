@@ -3,6 +3,33 @@
 //UserSpice functions for Pages and Permissions
 //Do not deactivate!
 
+//Safely capture the current page URL for redirect after login
+//Use this when implementing custom auth checks outside of securePage()
+//Example: if (!$user->isLoggedIn()) { safelyCaptureDest(); Redirect::to($us_url_root.'users/login.php'); }
+if (!function_exists('safelyCaptureDest')) {
+    function safelyCaptureDest()
+    {
+        global $us_url_root;
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Get current page path relative to us_url_root
+        $uri = Server::get('PHP_SELF');
+        $urlRootLength = strlen($us_url_root);
+        $page = substr($uri, $urlRootLength);
+
+        // Append query string if present
+        $qs = Server::get('QUERY_STRING', '');
+        if ($qs !== '') {
+            $page .= '?' . $qs;
+        }
+
+        $_SESSION[Config::get('session/session_name') . '_login_dest'] = $page;
+    }
+}
+
 //Check if a permission level ID exists in the DB
 if (!function_exists('permissionIdExists')) {
     function permissionIdExists($id)
@@ -284,7 +311,7 @@ if (!function_exists('securePage')) {
     $urlRootLength = strlen($us_url_root);
     $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
     $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-    $dest = encodeURIComponent($protocol . "://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"]);
+    $dest = encodeURIComponent($protocol . "://" . Server::get('HTTP_HOST') . Server::get('REQUEST_URI'));
         $id = null;
         $private = null;
 
@@ -356,7 +383,10 @@ if (!function_exists('securePage')) {
             ];
             $db->insert('audit', $fields);
             require_once $abs_us_root . $us_url_root . 'usersc/scripts/not_logged_in.php';
-            Redirect::to($us_url_root . 'users/login.php?dest=' . $page . '&redirect=' . $dest);
+
+            safelyCaptureDest();
+
+            Redirect::to($us_url_root . 'users/login.php');
 
             return false;
         } else {
@@ -505,24 +535,6 @@ if (!function_exists('fetchAllPermissions')) {
         global $db;
 
         return $db->query('SELECT * FROM permissions')->results();
-    }
-}
-
-
-//Check if a permission level name exists in the DB
-if (!function_exists('permissionNameExists')) {
-    function permissionNameExists($permission)
-    {
-        global $db;
-
-        $query = $db->query('SELECT id FROM permissions WHERE
-			`name` = ?', [$permission]);
-        $results = $query->results();
-        if ($results) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }
 

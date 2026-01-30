@@ -634,7 +634,7 @@ if (!$totpDisabled) {
   <input type="hidden" name="csrf" value="<?= Token::generate(); ?>" />
 </form>
 <?php if (in_array($user->data()->id, $master_account)) { ?>
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
     $(document).ready(function() {
 
       $('#no_passwords').change(function() {

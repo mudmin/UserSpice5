@@ -324,7 +324,7 @@
                 }
                 ?>
               </div>
-              <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+              <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
                 $(document).ready(function() {
                   $("#meter_active").on("change", function() {
                     let meterVal = $(this).prop("checked") ? 1 : 0;

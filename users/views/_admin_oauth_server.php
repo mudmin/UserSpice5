@@ -1,5 +1,4 @@
 <?php
-
 $clientsQ = $db->query("SELECT * FROM us_oauth_server_clients");
 $clientsC = $clientsQ->count();
 $clients = $clientsQ->results();
@@ -68,6 +67,33 @@ if (!empty($_POST)) {
     Redirect::to($us_url_root . 'users/admin.php?view=oauth');
   }
 
+  // Regenerate client secret (for migrating plaintext to hashed)
+  if (is_numeric(Input::get('regenerate_secret'))) {
+    $clientDbId = (int)Input::get('regenerate_secret');
+    $clientQ = $db->query("SELECT client_id, client_name FROM us_oauth_server_clients WHERE id = ?", [$clientDbId]);
+    if ($clientQ->count() > 0) {
+      $clientData = $clientQ->first();
+      $newSecretPlain = bin2hex(random_bytes(32));
+      $newSecretHashed = password_hash($newSecretPlain, PASSWORD_BCRYPT, ['cost' => 12]);
+
+      $db->update('us_oauth_server_clients', $clientDbId, ['client_secret' => $newSecretHashed]);
+
+      if (!$db->error()) {
+        // Store in session to display once
+        $_SESSION['oauth_new_client_secret'] = $newSecretPlain;
+        $_SESSION['oauth_new_client_id'] = $clientData->client_id;
+
+        usSuccess("Client secret regenerated. <strong>IMPORTANT: Copy the new Client Secret now - it will only be shown once!</strong>");
+        logger($user->data()->id, "OAuth Server", "Client secret regenerated for: " . $clientData->client_name);
+      } else {
+        usError("Error regenerating client secret");
+      }
+    } else {
+      usError("Client not found");
+    }
+    Redirect::to($us_url_root . 'users/admin.php?view=oauth&client=' . $clientDbId);
+  }
+
 
   $fields = [
     'client_name' => Input::get('client_name'),
@@ -77,6 +103,7 @@ if (!empty($_POST)) {
     'login_title' => Input::get('login_title'),
     'login_form' => Input::get('login_form'),
     'login_script' => Input::get('login_script'),
+    'response_secret' => Input::get('response_secret'),
   ];
 
   if ($e) {
@@ -85,10 +112,16 @@ if (!empty($_POST)) {
     $id = $client->id;
   } else {
     $clientId = bin2hex(random_bytes(16));  // 32 character string
-    $clientSecret = bin2hex(random_bytes(32));  // 64 character string
+    $clientSecretPlain = bin2hex(random_bytes(32));  // 64 character string - shown once to user
+    $clientSecretHashed = password_hash($clientSecretPlain, PASSWORD_BCRYPT, ['cost' => 12]);
     $fields['client_id'] = $clientId;
-    $fields['client_secret'] = $clientSecret;
-    usSuccess("Client created");
+    $fields['client_secret'] = $clientSecretHashed;
+
+    // Store plaintext secret temporarily in session to display once
+    $_SESSION['oauth_new_client_secret'] = $clientSecretPlain;
+    $_SESSION['oauth_new_client_id'] = $clientId;
+
+    usSuccess("Client created. <strong>IMPORTANT: Copy the Client Secret now - it will only be shown once!</strong>");
     $db->insert('us_oauth_server_clients', $fields);
     $id = $db->lastId();
   }
@@ -101,13 +134,19 @@ if (!empty($_POST)) {
   }
 }
 ?>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
       // alert('Copied to clipboard!');
     }, function(err) {
       console.error('Could not copy text: ', err);
     });
+  }
+
+  function generateSecret() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 </script>
 
@@ -173,6 +212,43 @@ if (!empty($_POST)) {
       </h1>
 
       <div class="row">
+        <?php
+        // Check if we have a one-time secret to display
+        $oneTimeSecret = $_SESSION['oauth_new_client_secret'] ?? null;
+        $oneTimeClientId = $_SESSION['oauth_new_client_id'] ?? null;
+        if ($oneTimeSecret && $oneTimeClientId) {
+          // Clear from session immediately after retrieval
+          unset($_SESSION['oauth_new_client_secret']);
+          unset($_SESSION['oauth_new_client_id']);
+        ?>
+          <div class="col-12 mb-3">
+            <div class="alert alert-danger fade show" role="alert">
+              <h4 class="alert-heading"><strong>IMPORTANT: Copy Your Client Secret Now!</strong></h4>
+              <p class="mb-2">
+                <strong>This secret will NEVER be shown again.</strong> Once you leave or refresh this page, it cannot be retrieved.
+                If you lose it, you will need to regenerate a new secret and update your client application.
+              </p>
+              <hr>
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="mb-1"><strong>Client ID:</strong></p>
+                  <div class="input-group mb-2">
+                    <input type="text" class="form-control font-monospace" value="<?= hed($oneTimeClientId) ?>" readonly>
+                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= hed($oneTimeClientId) ?>')">Copy</button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-1"><strong>Client Secret:</strong></p>
+                  <div class="input-group mb-2">
+                    <input type="text" class="form-control font-monospace" value="<?= hed($oneTimeSecret) ?>" readonly>
+                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= hed($oneTimeSecret) ?>')">Copy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <?php } ?>
+
         <?php if ($clientsC > 0) { ?>
           <div class="col-12 mb-3">
             <div class="card">
@@ -186,6 +262,7 @@ if (!empty($_POST)) {
                       <tr>
                         <th>Client Name</th>
                         <th>Client Info</th>
+                        <th>Security</th>
                         <th>Redirect URI</th>
                         <th>IP Restriction</th>
                         <th>Login Title</th>
@@ -196,7 +273,10 @@ if (!empty($_POST)) {
                       </tr>
                     </thead>
                     <tbody>
-                      <?php foreach ($clients as $c) { ?>
+                      <?php foreach ($clients as $c) {
+                        // Check if secret is hashed (bcrypt starts with $2)
+                        $isSecretHashed = strpos($c->client_secret, '$2') === 0;
+                      ?>
                         <tr>
                           <td><?= hed($c->client_name) ?></td>
                           <td class="client-info">
@@ -206,9 +286,31 @@ if (!empty($_POST)) {
                               <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= hed($c->client_id) ?>')">Copy</button>
                               Client Id: <?= hed($c->client_id) ?>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= hed($c->client_secret) ?>')">Copy</button>
-                              Client Secret: <?= hed($c->client_secret) ?>
+                              <?php if ($isSecretHashed) { ?>
+                                <span class="text-success">Client Secret: [Securely Hashed]</span>
+                              <?php } else { ?>
+                                <span class="text-danger">Client Secret: [Plaintext - Insecure!]</span>
+                              <?php } ?>
+                              <?php if (!empty($c->response_secret)) { ?>
+                              <br>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= hed($c->response_secret) ?>')">Copy</button>
+                              Response Secret: <?= hed($c->response_secret) ?>
+                              <?php } ?>
                             </div>
+                          </td>
+                          <td>
+                            <?php if ($isSecretHashed) { ?>
+                              <span class="badge bg-success" title="Secret is securely hashed">Secure</span>
+                            <?php } else { ?>
+                              <span class="badge bg-danger" title="Secret is stored in plaintext - regenerate to fix">Insecure</span>
+                            <?php } ?>
+                            <form method="post" action="" class="d-inline" onsubmit="return confirm('WARNING: This will generate a new client secret.\n\nThe old secret will stop working IMMEDIATELY.\n\nYou will need to update your client application with the new secret.\n\nAre you sure you want to continue?');">
+                              <?= tokenHere(); ?>
+                              <input type="hidden" name="regenerate_secret" value="<?= $c->id ?>">
+                              <button type="submit" class="btn btn-sm <?= $isSecretHashed ? 'btn-outline-secondary' : 'btn-warning' ?>" title="Generate a new client secret">
+                                <?= $isSecretHashed ? 'Regenerate' : 'Migrate' ?>
+                              </button>
+                            </form>
                           </td>
                           <td><?= hed($c->redirect_uri) ?></td>
                           <td><?= hed($c->ip_restrict) ?></td>
@@ -291,6 +393,13 @@ if (!empty($_POST)) {
                   <?php } ?>
                 </select>
 
+                <label for="response_secret">Response Secret (HMAC Signing):</label><br>
+                <small>Optional. If set, the response data sent to the client will be signed with HMAC-SHA256 using this secret. The client must have the same secret configured to verify the signature. This prevents response tampering during redirect. Use a strong random string (32+ characters recommended).</small>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" id="response_secret" name="response_secret" value="<?= $e ? hed($client->response_secret ?? '') : '' ?>" placeholder="Leave empty to disable signing">
+                  <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('response_secret').value = generateSecret()">Generate</button>
+                </div>
+
                 <input type="submit" value="<?= $e ? 'Update Client' : 'Create Client' ?>" class="btn btn-outline-primary">
               </form>
             </div>
@@ -318,9 +427,12 @@ if (!empty($_POST)) {
 
               <p class="mt-2"><strong>Client ID and Secret:</strong> These are automatically generated when creating a new client. The client application uses these credentials to authenticate with your OAuth server. Keep these secure and only share them with trusted parties.</p>
 
+              <p class="mt-2"><strong>Security Status:</strong> Client secrets are now stored using bcrypt hashing for security. Older clients with plaintext secrets will show an "Insecure" badge and a "Migrate" button. Clicking "Migrate" will generate a new hashed secret - you will need to update the client application with the new secret. <b>New secrets are only displayed once upon creation</b> - make sure to copy them immediately.</p>
+
 
               <p class="mt-2"><strong>Login Script:</strong> An optional script that runs after successful authentication. <b>These login scripts can provide all sorts of magical capabilities.</b> Please view the script in <span style="color:red">usersc/oauth_server/login_scripts/</span> for a more detailed example of how this works.</p>
 
+              <p class="mt-2"><strong>Response Secret:</strong> An optional security feature that signs the response data with HMAC-SHA256. When configured, the server signs the user data before redirecting to the client. The client must have the same secret configured to verify the signature. This prevents man-in-the-middle attacks from tampering with user data during the OAuth redirect. <b>Both the server and client must have the same secret for this to work.</b></p>
 
               <p class="mt-2">This feature works in conjunction with the <a target="_blank" href="<?= $us_url_root ?>users/admin.php?view=spice&search=oauth_login" style="color:blue;">OAuth Client</a> which allows you to authenticate users on your client applications using this server. There is also an <a href="https://github.com/mudmin/userspice-oauth-examples" target="_blank" style="color:blue;">extensive repository</a> of tools to authenticate to this server in many other languages and applications including Wordpress, Rust, Python, React and many others.
 

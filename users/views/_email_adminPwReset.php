@@ -13,7 +13,7 @@ $results = $query->first();
   <p><?=lang("EML_HELLO")?><?=$sitename?>,</p>
   <p><?=lang("EML_AD_HAS")?></p>
   <p><label><?=lang("GEN_UNAME")?>:</label> <?=$username?></p>
-  <p><label><?=lang("SIGNIN_PASS")?>:</label> <a href="<?php echo $results->verify_url."users/forgot_password_reset.php?email=".$email."&vericode=$vericode&reset=1"; ?>" class="nounderline"><?=lang("PW_RESET");?></a></p>
+  <p><label><?=lang("SIGNIN_PASS")?>:</label> <a href="<?php echo $results->verify_url."users/forgot_password_reset.php?email=".$email."&vericode=$vericode&user_id=$user_id&reset=1"; ?>" class="nounderline"><?=lang("PW_RESET");?></a></p>
   <p><?=lang("EML_REQ");?></p>
   <sup><p><?=lang("EML_EXP")?> <?=$reset_vericode_expiry?> <?=lang("T_MINUTES")?>.</p></sup>
 </body>

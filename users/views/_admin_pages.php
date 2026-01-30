@@ -214,6 +214,7 @@ $csrf = Token::generate();
           <th>ID</th>
           <th>Page</th>
           <th>Page Name</th>
+          <th>Lang Key</th>
           <th>Access</th>
         </tr>
       </thead>
@@ -230,6 +231,7 @@ $csrf = Token::generate();
               <?= $dbpages[$count]->id; ?></td>
             <td><a class="nounderline text-dark" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->page; ?></a></td>
             <td><a class="nounderline text-dark" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title; ?></a></td>
+            <td><?= htmlspecialchars($dbpages[$count]->lang_key ?? ''); ?></td>
             <td>
               <a class="nounderline" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'>
                 <?php
@@ -253,7 +255,7 @@ $csrf = Token::generate();
 <?php
 if ($delMsgs != '') {
 ?>
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
     alert("The following pages have been deleted from your database because they are either no longer present or because you used securePage on a file that was not monitored by UserSpice. You can add additional folders at the top of this page.\n \n<?= $delMsgs; ?>");
   </script>
 

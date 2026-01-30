@@ -40,7 +40,7 @@ class DB
 	private bool  $database_logging = false;
 	private array $database_logging_tables_only = [];
 
-	/*  Cached connection info for reconnect()  */
+	/* Cached connection info for reconnect()  */
 	private string  $dsn;
 	private ?string $user;
 	private ?string $pass;
@@ -54,7 +54,12 @@ class DB
 		];
 		$this->opts[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;   // always throw exceptions
 
-		$charset = Config::get('mysql/charset') ?: 'utf8';
+		$charset = Config::get('mysql/charset') ?: 'utf8mb4';
+		$allowedCharsets = ['utf8', 'utf8mb4', 'latin1', 'ascii'];
+		$charset = strtolower(trim((string)$charset));
+		if (!in_array($charset, $allowedCharsets, true)) {
+		$charset = 'utf8mb4';
+		}
 
 		/* Decide which credential/DSN set to use — identical logic to the
 		   original code, but we ALSO cache the outcome so reconnect() is
@@ -257,60 +262,114 @@ class DB
 					#echo "DEBUG: w=".print_r($w,true)."<br />\n";
 					$sql = '';
 					$combop = '';
+					// Normalize combop to uppercase for consistent SQL output
+					$normalizedCombop = strtoupper(trim((string)$w[0]));
 					for ($i = 1; $i < $wcount; $i++) {
 						$sql .= ' ' . $combop . ' ' . $this->_calcWhere($w[$i], $vals, "and", $is_ok);
-						$combop = $w[0];
+						$combop = $normalizedCombop;
 					}
 					return '(' . $sql . ')';
-				} elseif ($wcount == 3  &&  in_array($w[1], $valid_ops)) {
-					#echo "DEBUG: normal condition w=".print_r($w,true)."<br />\n";
-					$vals[] = $w[2];
-					return "{$w[0]} {$w[1]} ?";
-				} elseif ($wcount == 2  &&  in_array($w[1], $two_args)) {
-					return "{$w[0]} {$w[1]}";
-				} elseif ($wcount == 4  &&  in_array($w[1], $four_args)) {
-					$vals[] = $w[2];
-					$vals[] = $w[3];
-					return "{$w[0]} {$w[1]} ? AND ?";
-				} elseif ($wcount == 3  &&  in_array($w[1], $arr_arg)  &&  is_array($w[2])) {
-					$vals = array_merge($vals, $w[2]);
-					return "{$w[0]} {$w[1]} (" . substr(str_repeat(",?", count($w[2])), 1) . ")";
-				} elseif (($wcount == 5 || $wcount == 6 && is_array($w[5]))  &&  in_array($w[1], $valid_ops)  &&  in_array($w[2], $nested_arg)) {
-					return  "{$w[0]} {$w[1]} {$w[2]}" . $this->get_subquery_sql($w[4], $w[3], $w[5], $vals, $is_ok);
-				} elseif (($wcount == 3 || $wcount == 4 && is_array($w[3]))  &&  in_array($w[0], $nested)) {
-					return $w[0] . $this->get_subquery_sql($w[2], $w[1], $w[3], $vals, $is_ok);
-				} elseif (($wcount == 4 || $wcount == 5 && is_array($w[4]))  &&  in_array($w[1], $nestedIN)) {
-					return "{$w[0]} " . substr($w[1], 0, -7) . $this->get_subquery_sql($w[3], $w[2], $w[4], $vals, $is_ok);
+				} elseif ($wcount == 2) {
+					// Normalize operator to uppercase for comparison
+					$op = strtoupper(trim((string)$w[1]));
+					if (in_array($op, $two_args, true)) {
+						return $this->_sanitizeColumnName($w[0]) . " {$op}";
+					} else {
+						$is_ok = false;
+						throw new InvalidArgumentException("Invalid WHERE clause: unrecognized 2-arg operator '{$w[1]}'.");
+					}
+				} elseif ($wcount == 3) {
+					// First check if this is EXISTS/NOT EXISTS format: ['EXISTS', 'table', 'column']
+					// where operator is in $w[0], not $w[1]
+					$op0 = strtoupper(trim((string)$w[0]));
+					if (in_array($op0, $nested, true)) {
+						return $op0 . $this->get_subquery_sql($w[2], $w[1], [], $vals, $is_ok);
+					}
+					// Normal 3-arg: ['column', 'operator', 'value']
+					$op = strtoupper(trim((string)$w[1]));
+					if (in_array($op, $valid_ops, true)) {
+						#echo "DEBUG: normal condition w=".print_r($w,true)."<br />\n";
+						$vals[] = $w[2];
+						return $this->_sanitizeColumnName($w[0]) . " {$op} ?";
+					} elseif (in_array($op, $arr_arg, true) && is_array($w[2])) {
+						// Handle empty arrays: IN [] = always false, NOT IN [] = always true
+						if (count($w[2]) === 0) {
+							return ($op === 'IN') ? '0=1' : '1=1';
+						}
+						$vals = array_merge($vals, $w[2]);
+						return $this->_sanitizeColumnName($w[0]) . " {$op} (" . substr(str_repeat(",?", count($w[2])), 1) . ")";
+					} else {
+						$is_ok = false;
+						throw new InvalidArgumentException("Invalid WHERE clause: unrecognized 3-arg operator '{$w[1]}'.");
+					}
+				} elseif ($wcount == 4) {
+					$op = strtoupper(trim((string)$w[1]));
+					if (in_array($op, $four_args, true)) {
+						$vals[] = $w[2];
+						$vals[] = $w[3];
+						return $this->_sanitizeColumnName($w[0]) . " {$op} ? AND ?";
+					} elseif (in_array($op, $nestedIN, true)) {
+						return $this->_sanitizeColumnName($w[0]) . " " . substr($op, 0, -7) . $this->get_subquery_sql($w[3], $w[2], [], $vals, $is_ok);
+					} else {
+						// Check if first element is EXISTS/NOT EXISTS with where clause
+						$op0 = strtoupper(trim((string)$w[0]));
+						if (in_array($op0, $nested, true) && is_array($w[3])) {
+							return $op0 . $this->get_subquery_sql($w[2], $w[1], $w[3], $vals, $is_ok);
+						}
+						$is_ok = false;
+						throw new InvalidArgumentException("Invalid WHERE clause: unrecognized 4-arg operator '{$w[1]}'.");
+					}
+				} elseif ($wcount == 5 || $wcount == 6) {
+					$op1 = strtoupper(trim((string)$w[1]));
+					$op2 = strtoupper(trim((string)$w[2]));
+					// Fix precedence: ($wcount == 5) || (($wcount == 6) && is_array($w[5]))
+					if (($wcount == 5 || ($wcount == 6 && is_array($w[5]))) && in_array($op1, $valid_ops, true) && in_array($op2, $nested_arg, true)) {
+						$whereArg = $wcount == 6 ? $w[5] : [];
+						return $this->_sanitizeColumnName($w[0]) . " {$op1} {$op2}" . $this->get_subquery_sql($w[4], $w[3], $whereArg, $vals, $is_ok);
+					} elseif (($wcount == 5 && is_array($w[4])) && in_array($op1, $nestedIN, true)) {
+						return $this->_sanitizeColumnName($w[0]) . " " . substr($op1, 0, -7) . $this->get_subquery_sql($w[3], $w[2], $w[4], $vals, $is_ok);
+					} else {
+						$is_ok = false;
+						throw new InvalidArgumentException("Invalid WHERE clause: unrecognized 5/6-arg structure.");
+					}
 				} else {
-					echo "ERROR: w=" . print_r($w, true) . "<br />\n";
 					$is_ok = false;
+					throw new InvalidArgumentException("Invalid WHERE clause: unrecognized format with {$wcount} elements.");
 				}
 			} else { // associative array ['field' => 'value']
 				#echo "DEBUG: Associative<br />\n";
 				$sql = '';
 				$combop = '';
+				// Normalize comboparg to uppercase for consistent SQL output
+				$normalizedComboparg = strtoupper(trim((string)$comboparg));
 				foreach ($w as $k => $v) {
 					if (in_array(strtolower($k), $comb_ops)) {
 						#echo "DEBUG: A<br />\n";
 						#echo "A: k=$k, v=".print_r($v,true)."<br />\n";
-						$sql .= $combop . ' (' . $this->_calcWhere($v, $vals, $k, $is_ok) . ') ';
-						$combop = $comboparg;
+						// Normalize the nested combop key to uppercase
+						$sql .= $combop . ' (' . $this->_calcWhere($v, $vals, strtoupper(trim((string)$k)), $is_ok) . ') ';
+						$combop = $normalizedComboparg;
 					} else {
 						#echo "DEBUG: B<br />\n";
 						#echo "B: k=$k, v=".print_r($v,true)."<br />\n";
 						$vals[] = $v;
-						if (in_array(substr($k, -1, 1), array('=', '<', '>'))) // 'field !='=>'value'
-							$sql .= $combop . ' ' . $k . ' ? ';
-						else // 'field'=>'value'
-							$sql .= $combop . ' ' . $k . ' = ? ';
-						$combop = $comboparg;
+						$k = trim($k);
+						// Handle 'field op' shortcut - only allow valid SQL comparison operators
+						// Column names must start with letter or underscore, not digit
+						if (preg_match('/^([A-Za-z_][A-Za-z0-9_]*)\s*(=|!=|<>|<=|>=|<|>)$/', $k, $matches)) {
+							$sql .= $combop . ' ' . $this->_sanitizeColumnName($matches[1]) . ' ' . $matches[2] . ' ? ';
+						} else {
+							// Plain field name - defaults to = operator
+							$sql .= $combop . ' ' . $this->_sanitizeColumnName($k) . ' = ? ';
+						}
+						$combop = $normalizedComboparg;
 					}
 				}
 				return ' (' . $sql . ') ';
 			}
 		} else {
-			echo "ERROR: No array in $w<br />\n";
 			$is_ok = false;
+			throw new InvalidArgumentException("Invalid WHERE clause: expected array, got " . gettype($w) . ".");
 		}
 	}
 
@@ -335,16 +394,16 @@ class DB
 	public function insert($table, $fields = [], $update = false)
 	{
 		$table = $this->_sanitizeTableName($table);
-		$keys    = array_keys($fields);
-		$values  = [];
+		$keys = array_keys($fields);
+		$values = [];
 		$records = 0;
 
 		foreach ($fields as $field) {
 			$count = is_array($field) ? count($field) : 1;
 
-			if (!isset($first_time)  ||  $count < $records) {
+			if (!isset($first_time) || $count < $records) {
 				$first_time = true;
-				$records    = $count;
+				$records = $count;
 			}
 		}
 
@@ -352,15 +411,22 @@ class DB
 			foreach ($fields as $field)
 				$values[] = is_array($field) ? $field[$i] : $field;
 
+		// Build column list by sanitizing each key
+		$colList = implode(',', array_map([$this, '_sanitizeColumnName'], $keys));
 		$col = ",(" . substr(str_repeat(",?", count($fields)), 1) . ")";
-		$sql = "INSERT INTO {$table} (`" . implode('`,`', $keys) . "`) VALUES " . substr(str_repeat($col, $records), 1);
+		$sql = "INSERT INTO {$table} ({$colList}) VALUES " . substr(str_repeat($col, $records), 1);
 
 		if ($update) {
 			$sql .= " ON DUPLICATE KEY UPDATE";
 
-			foreach ($keys as $key)
-				if ($key != "id")
-					$sql .= " `$key` = VALUES(`$key`),";
+			// Sanitize each key fresh for both assignment and VALUES()
+			// Produces: `col` = VALUES(`col`) which is valid MySQL syntax
+			foreach ($keys as $key) {
+				if ($key !== "id") {
+					$sanKey = $this->_sanitizeColumnName($key);
+					$sql .= " {$sanKey} = VALUES({$sanKey}),";
+				}
+			}
 
 			if (!empty($keys))
 				$sql = substr($sql, 0, -1);
@@ -376,8 +442,18 @@ class DB
 
 	public function update($table, $id, $fields)
 	{
+		// Cannot update with no fields - would produce invalid SQL
+		if (empty($fields)) {
+			return false;
+		}
+
 		$table = $this->_sanitizeTableName($table);
-		$sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) . (empty($fields) ? "" : "` = ? ");
+		// Sanitize all column keys to prevent identifier injection
+		$keys = array_keys($fields);
+		$sanitizedKeys = array_map([$this, '_sanitizeColumnName'], $keys);
+		// Build SET clause: `col1` = ? , `col2` = ? , ...
+		$setClause = implode(' = ? , ', $sanitizedKeys) . ' = ? ';
+		$sql = "UPDATE {$table} SET {$setClause}";
 		$is_ok = true;
 
 		if (!is_array($id)) {
@@ -445,6 +521,7 @@ class DB
 	private function get_subquery_sql($action, $table, $where, &$values, &$is_ok)
 	{
 		$table = $this->_sanitizeTableName($table);
+		$action = ($action === '*') ? '*' : $this->_sanitizeColumnName($action);
 		if (is_array($where))
 			if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
 				$where_text = " WHERE $where_text";
@@ -453,7 +530,7 @@ class DB
 	}
 
 	/* Deprecated method cell
-	
+
 	public function cell($tablecolumn, $id = [])
 	{
 		$input = explode(".", $tablecolumn, 2);
@@ -466,6 +543,23 @@ class DB
 		return ($result && $this->_count > 0)  ?  $this->_resultsArray[0][$input[1]]  :  null;
 	}
 	*/
+
+	public function cell($tablecolumn, $id = [])
+	{
+		$input = explode(".", $tablecolumn, 2);
+
+		if (count($input) != 2)
+			return null;
+
+		$table = $input[0];
+		$column = $input[1];
+
+		$safeColumn = $this->_sanitizeColumnName($column);
+
+		$result = $this->action("SELECT {$safeColumn}", $table, (is_numeric($id) ? ["id", "=", $id] : $id));
+
+		return ($result && $this->_count > 0) ? $this->_resultsArray[0][$column] : null;
+	}
 
 	public function getColCount()
 	{
@@ -580,10 +674,12 @@ class DB
 	 */
 	public function tableExists($table)
 	{
-		$table = $this->_sanitizeTableName($table);
 		try {
-			$sql = "SHOW TABLES LIKE {$table} ";
-			$result = $this->query($sql);
+			// Validate table name format (throws if invalid) but don't use the backticked result
+			// SHOW TABLES LIKE requires a string pattern, not a backticked identifier
+			$this->_sanitizeTableName($table);
+			$sql = "SHOW TABLES LIKE ?";
+			$result = $this->query($sql, [$table]);
 			return $result->count() > 0;
 		} catch (Exception $e) {
 			return false;
@@ -636,7 +732,8 @@ class DB
 				return true;
 			}
 
-			$sql = "ALTER TABLE {$table} ADD COLUMN `{$column}` {$definition}";
+			$sanitizedTable = $this->_sanitizeTableName($table);
+			$sql = "ALTER TABLE {$sanitizedTable} ADD COLUMN " . $this->_sanitizeColumnName($column) . " {$definition}";
 			$result = $this->query($sql);
 
 			if (!$result->error()) {
@@ -670,7 +767,8 @@ class DB
 				return false;
 			}
 
-			$sql = "ALTER TABLE {$table} CHANGE `{$oldColumn}` `{$newColumn}` {$definition}";
+			$sanitizedTable = $this->_sanitizeTableName($table);
+			$sql = "ALTER TABLE {$sanitizedTable} CHANGE " . $this->_sanitizeColumnName($oldColumn) . " " . $this->_sanitizeColumnName($newColumn) . " {$definition}";
 			$result = $this->query($sql);
 
 			if (!$result->error()) {
@@ -728,21 +826,41 @@ class DB
 
 	private function _sanitizeTableName(string $table): string
 	{
-
-		if (!is_string($table) || $table === '') {
-			throw new InvalidArgumentException("Invalid table name.");
+		// Empty check (type is already enforced by PHP type hint)
+		if ($table === '') {
+			throw new InvalidArgumentException("Invalid table name: cannot be empty.");
 		}
 
 		if (strlen($table) > 64) {
 			throw new InvalidArgumentException("Table name too long (max 64 chars).");
 		}
 
-		// Allow only alphanumeric + underscore
+		// Table names must start with letter or underscore, followed by alphanumeric/underscore
 		// Reject anything with spaces, dots, backticks, or special chars
-		if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
-			throw new InvalidArgumentException("Invalid characters in table name.");
+		if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
+			throw new InvalidArgumentException("Invalid table name: '{$table}'. Must start with letter/underscore, contain only alphanumeric/underscore.");
 		}
 
 		return "`{$table}`";
+	}
+
+	private function _sanitizeColumnName(string $column): string
+	{
+		// Empty check (type is already enforced by PHP type hint)
+		if ($column === '') {
+			throw new InvalidArgumentException("Invalid column name: cannot be empty.");
+		}
+
+		if (strlen($column) > 64) {
+			throw new InvalidArgumentException("Column name too long (max 64 chars).");
+		}
+
+		// Column names must start with letter or underscore, followed by alphanumeric/underscore
+		// This rejects: names starting with digits, *, table.column syntax, reserved chars
+		if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $column)) {
+			throw new InvalidArgumentException("Invalid column name: '{$column}'. Must start with letter/underscore, contain only alphanumeric/underscore.");
+		}
+
+		return "`{$column}`";
 	}
 }

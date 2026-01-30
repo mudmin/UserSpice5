@@ -48,8 +48,8 @@ $token = Token::generate();
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/pagination/datatables.min.js"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const whitelistFilter = urlParams.get('w') || '';

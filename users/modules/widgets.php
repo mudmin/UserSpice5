@@ -33,7 +33,7 @@
   }
   ?>
   </div>
-  <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+  <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
     let cardVisibility = "";
     <?php foreach($ordered as $w){ ?>
       cardVisibility = localStorage.getItem("<?=INSTANCE.$w?>");
@@ -73,7 +73,7 @@
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
 
 
 new Sortable(widgetList, {

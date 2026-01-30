@@ -257,6 +257,19 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
         color: #dc3545;
         font-weight: bold;
     }
+
+    .autoConfigBtn {
+        animation: breathe 5s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+        0%, 100% {
+            box-shadow: inset 0 0 0 1px rgba(13, 202, 240, 0.3);
+        }
+        50% {
+            box-shadow: inset 0 0 20px 2px rgba(13, 202, 240, 0.5);
+        }
+    }
 </style>
 
 <div class="row">
@@ -854,7 +867,7 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
     </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     // Define functions first to avoid reference errors
     function showAddProxyModal() {
         const modal = new bootstrap.Modal(document.getElementById('addProxyModal'));

@@ -70,7 +70,7 @@ try {
     $data = [];
 
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (Server::get('REQUEST_METHOD') === 'POST') {
         $rawInput = file_get_contents('php://input');
         $data = json_decode($rawInput, true);
 
@@ -99,7 +99,7 @@ try {
         throw new Exception(getRateLimitErrorMessage('passkey_' . $action));
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (Server::get('REQUEST_METHOD') === 'POST') {
         switch ($action) {
             case 'log':
                 // Handle JavaScript logging
@@ -285,6 +285,7 @@ try {
                 // logger($userId, 'PasskeyRegChallenge', 'Cleaned authenticatorSelection: ' . json_encode($authenticatorSelection));
                 // logger($userId, 'PasskeyDebugIOS', 'Full response: ' . json_encode($response, JSON_PRETTY_PRINT));
 
+                handleAuthSuccess('passkey_register', $userId);
                 echo json_encode($response);
                 break;
 

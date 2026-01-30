@@ -18,7 +18,7 @@ require_once $abs_us_root.$us_url_root.'users/auth/PasskeyHandler.php';
 
 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (Server::get('REQUEST_METHOD') === 'POST') {
     
     if (isset($_POST['deletePasskey']) && isset($_POST['passkey_id'])) {
         if (!Token::check($_POST['csrf'])) {
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 
 var us_url_root = '<?php echo $us_url_root; ?>';
 var passkeyCSRF = '<?= Token::generate(); ?>'; 

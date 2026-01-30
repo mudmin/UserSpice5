@@ -128,6 +128,21 @@ else {
     <button type="button" onclick="window.location.href = 'admin.php?view=spice';" name="button" class="btn btn-primary">Leave Diagnostic Mode</button>
   <?php } ?>
 </h2>
+<?php
+// Warning for localhost with EXTRA_CURL_SECURITY enabled
+if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) { ?>
+  <div class="alert alert-warning" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Localhost Notice:</strong> You have <code>EXTRA_CURL_SECURITY</code> enabled while running on localhost. If you experience issues downloading or installing addons, you can disable this feature on the <a href="admin.php?view=security">Security Dashboard</a>.
+  </div>
+<?php }
+// Suggestion for non-localhost without EXTRA_CURL_SECURITY
+if (!isLocalhost() && (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) { ?>
+  <div class="alert alert-info" role="alert">
+    <i class="fas fa-shield-alt me-2"></i>
+    <strong>Security Tip:</strong> You can gain extra security by enabling <code>EXTRA_CURL_SECURITY</code> on the <a href="admin.php?view=security">Security Dashboard</a>. This forces SSL certificate verification for outbound connections.
+  </div>
+<?php } ?>
 <?php if ($diag) { ?>
   <br>
   <h3>Please Install/Update the demo plugin and look at the messages above and in your logs to diagnose API issues.</h3><br>
@@ -317,7 +332,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
 }
 ?>
 </div> <!-- end .mt-3 -->
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
   $(".installme").click(function(event) {
     if ($(this).hasClass("warnme")) {
       if (!confirm("WARNING:  Please understand that this is a community provided addon and the UserSpice developers cannot take any responsibility for any harm it may cause.  Please make sure you understand the risks before using community provided addons")) {

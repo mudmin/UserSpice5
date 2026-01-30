@@ -33,7 +33,7 @@ if(file_exists($abs_us_root.$us_url_root.'usersc/includes/footer.php')){
 }
 
 ?>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
 setTimeout(function(){
 $(".errSpan").html("<h4><br></h4>");
 } , "<?=$settings->err_time*1000?>");

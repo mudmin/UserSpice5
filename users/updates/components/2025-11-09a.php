@@ -7,7 +7,7 @@ if(isset($settings->uman_search) && $settings->uman_search == 0){
 }
 $db->query("ALTER TABLE settings DROP COLUMN uman_search");
 
-if (!isset($usespice_nonce)) {
+if (!isset($userspice_nonce)) {
     $file = $abs_us_root . $us_url_root . "users/init.php";
 
     if (file_exists($file)) {
@@ -18,7 +18,7 @@ if (!isset($usespice_nonce)) {
             
  
         $code_to_insert = "\n" .
-          '$usespice_nonce = base64_encode(random_bytes(16));' . "\n" .
+          '$userspice_nonce = base64_encode(random_bytes(16));' . "\n" .
           "// Forces SSL verification in cURL requests to UserSpice API\n" .
           "// Will most likely break on localhost or self-signed certificates\n" .
           "define('EXTRA_CURL_SECURITY', false); \n";

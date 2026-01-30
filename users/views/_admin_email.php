@@ -353,7 +353,7 @@ if($results->email_act == 0){
   }
 }
 ?>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   document.getElementById('set-most-likely-url').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('verify-url').value = document.getElementById('most-likely-url').innerText;

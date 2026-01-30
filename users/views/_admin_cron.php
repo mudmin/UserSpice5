@@ -63,76 +63,78 @@ $count = $query->count();
 } ?>
 <div class="card">
   <div class="card-body">
-    <div class="float-right mb-2">
-      <div class="btn-group"><button class="btn btn-primary" data-toggle="modal" data-bs-toggle="modal" data-target="#addcron" data-bs-target="#addcron"><i class="fa fa-plus"></i> add</button></div>
+    <div class="float-right text-end mb-2">
+      <div class="btn-group"><button class="btn btn-primary" data-toggle="modal" data-bs-toggle="modal" data-target="#addcron" data-bs-target="#addcron"><i class="fa fa-plus"></i> Add New Job</button></div>
     </div>
     <table class="table table-bordered">
       <tr>
-        <th class="text-center">ID</th>
-        <th class="text-center">Status</th>
-        <th class="text-center">Cron Name</th>
-        <th class="text-center">Cron File</th>
-        <th class="text-center">Sort</th>
-        <th class="text-center">Created By</th>
-        <th class="text-center">Last Ran</th>
-        <th class="text-center">Functions</th>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Cron Name</th>
+        <th>Cron File</th>
+        <th>Sort</th>
+        <th>Created By</th>
+        <th>Last Ran</th>
+        <th>Action</th>
       </tr>
       <?php
       if ($count > 0) {
         foreach ($query->results() as $row) { ?>
           <tr <?php if ($row->active == 0) { ?> class="bg-light" <?php } ?>>
-            <td class="text-center"><?= $row->id; ?></td>
-            <td class="text-center">
-              <p data-field="active" id="active" class="cronactive nounderline" data-input="select" data-id="<?= $row->id; ?>"><?php if ($row->active == 0) { ?>Inactive<?php }
-                                                                                                                                                                if ($row->active == 1) { ?>Active <?php } ?></p>
+            <td><?= $row->id; ?></td>
+            <td>
+              <p data-field="active" data-token="<?=$cs?>" class="cronactive nounderline" data-input="select" data-id="<?= $row->id; ?>"><?= $row->active == 1 ? 'Active' : 'Inactive' ?></p>
             </td>
             <td>
-              <p data-field="name" data-token="<?=$cs?>" class="cronname nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Rename Cron ID <?= $row->id; ?>"><?= $row->name; ?></p>
+              <p data-field="name" data-token="<?=$cs?>" class="cronname nounderline txt" data-input="input" data-id="<?= $row->id; ?>" data-title="Rename Cron ID <?= $row->id; ?>"><?= $row->name; ?></p>
             </td>
             <td>
-              <p data-field="file" data-token="<?=$cs?>" class="cronfile nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change File for <?= $row->name; ?>"><?= $row->file; ?></p>
+              <p data-field="file" data-token="<?=$cs?>" class="cronfile nounderline txt" data-input="input" data-id="<?= $row->id; ?>" data-title="Change File for <?= $row->name; ?>"><?= $row->file; ?></p>
             </td>
             <td>
-              <p data-field="sort" data-token="<?=$cs?>" class="cronsort nounderline txt text-center" data-input="input" data-id="<?= $row->id; ?>" data-title="Change sort for <?= $row->name; ?>"><?= $row->sort; ?></p>
+              <p data-field="sort" data-token="<?=$cs?>" class="cronsort nounderline txt" data-input="input" data-id="<?= $row->id; ?>" data-title="Change sort for <?= $row->name; ?>"><?= $row->sort; ?></p>
             </td>
-            <td class="text-center"><?= echousername($row->createdby); ?></td>
-            <td class="text-center">
-              <?php $ranQ = $db->query("SELECT datetime,user_id FROM crons_logs WHERE cron_id = ? ORDER BY datetime DESC", array($row->id));
+            <td><?= echousername($row->createdby); ?></td>
+            <td><?php $ranQ = $db->query("SELECT datetime,user_id FROM crons_logs WHERE cron_id = ? ORDER BY datetime DESC", array($row->id));
               $ranCount = $ranQ->count();
               if ($ranCount > 0) {
                 $ranResult = $ranQ->first(); ?>
                 <?= $ranResult->datetime; ?> (<?= echousername($ranResult->user_id); ?>)<?php } else { ?><i>Never</i><?php } ?></td>
-            <td class="text-center">
-              <button type="button" name="button" id="deleteCron" data-value="<?= $row->id ?>" class="btn btn-danger">Delete</button>
+            <td>
+              <button type="button" name="button" id="deleteCron" data-value="<?= $row->id ?>" class="btn btn-danger btn-sm">Delete</button>
             </td>
           </tr><?php
               }
             } else { ?>
         <tr>
-          <td colspan='7' class="text-center">No Cron Jobs</td>
+          <td colspan="8" class="text-center">No Cron Jobs</td>
         </tr>
       <?php }
       ?>
     </table>
   </div>
 </div>
-<br />
-<?php if ($settings->cron_ip == 'off') { ?>
-  <strong>Note:</strong>
-  A cron job is an automated task which allows you to perform powerful tasks without your interaction. Before implementing cron jobs,
-  you want to do some thinking about security. In almost all circumstances, you do not want someone to be able to type <?php 
+<?php if ($settings->cron_ip == 'off') {
   $scheme = isHTTPSConnection() ? 'https' : 'http';
-  echo $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
-  ?>
-  and run a bunch of commands on your server.<br><br>
+  $cronUrl = $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
+?>
+<div class="card mt-3">
+  <div class="card-header bg-light">
+    <strong>About the Cron Manager</strong>
+  </div>
+  <div class="card-body">
+    <p>This manager lets you run <strong>automated PHP scripts</strong> on a schedule. Add your PHP files to <code>users/cron/</code>, register them here, and they'll execute in <strong>sort order</strong> whenever your server's cron calls the endpoint.</p>
 
-  The recommended way of implementing cron jobs is...<br>
-  Step 1: Go into your server and set your cron job to fire off to <?php 
-  echo $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
-  ?> every few minutes.<br>
-  Step 2: Go into <a href="admin.php?view=logs">the system logs</a> and see which ip address was rejected for trying to do a cron job.<br>
-  Step 3: Then go into <a href="admin.php?view=general">the admin dashboard</a> and set that IP address in the 'Only allow cron jobs from the following IP' box.<br>
-  Step 4: Go back into your server and set your cron job for a more reasonable amount of time. Most server admins don't want you running cron jobs every few minutes. Every hour or even every day is more reasonable.
+    <p class="mb-2"><strong>Setup Steps:</strong></p>
+    <ol class="mb-0">
+      <li>Place your PHP script in <code>users/cron/</code> (e.g., <code>my_task.php</code>).</li>
+      <li>Click <strong>Add</strong> above to register it with a name, filename, and sort order.</li>
+      <li>Configure your server's cron to request <code><?= $cronUrl ?></code> at your desired interval.</li>
+      <li>Check <a href="admin.php?view=logs">the system logs</a> for the <strong>rejected IP address</strong> from your first cron attempt.</li>
+      <li>Go to <a href="admin.php?view=general">the admin dashboard</a> and whitelist that IP in the <strong>"Only allow cron jobs from the following IP"</strong> field.</li>
+    </ol>
+  </div>
+</div>
 <?php } ?>
 
 <div id="addcron" class="modal fade" role="dialog">
@@ -166,8 +168,8 @@ $count = $query->count();
   </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js?v2"></script>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" type="text/javascript">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/oce.js?v2"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
   function messages(data) {
     data = JSON.parse(data);
     $('#messages').removeClass();

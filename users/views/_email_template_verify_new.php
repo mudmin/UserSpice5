@@ -3,7 +3,7 @@ $db = DB::getInstance();
 $query = $db->query("SELECT * FROM email");
 $results = $query->first();
 if(!isset($url)){
-  $url = "users/verify.php?new=1&email=".$email."&vericode=".$vericode;
+  $url = "users/verify.php?new=1&email=".$email."&vericode=".$vericode."&user_id=".$user_id;
 }
 ?>
 <!DOCTYPE html>

@@ -88,6 +88,21 @@ $update_available = false;
           <?php } else { ?>
             <div class="alert alert-success" role="alert">You are on the <b>STABLE</b> update cycle. While we can't promise that any code is error free, the Bleeding Edge update cycle community has helped to test this update before it was released to the public.</div>
           <?php }
+
+          // Warning for localhost with EXTRA_CURL_SECURITY enabled
+          if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) { ?>
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Localhost Notice:</strong> You have <code>EXTRA_CURL_SECURITY</code> enabled while running on localhost. If you experience issues downloading updates, you can disable this feature on the <a href="admin.php?view=security">Security Dashboard</a>.
+            </div>
+          <?php }
+          // Suggestion for non-localhost without EXTRA_CURL_SECURITY
+          if (!isLocalhost() && (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) { ?>
+            <div class="alert alert-info" role="alert">
+              <i class="fas fa-shield-alt me-2"></i>
+              <strong>Security Tip:</strong> You can gain extra security by enabling <code>EXTRA_CURL_SECURITY</code> on the <a href="admin.php?view=security">Security Dashboard</a>. This forces SSL certificate verification for outbound connections.
+            </div>
+          <?php }
           ?>
         </div>
       </div>

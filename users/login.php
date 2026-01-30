@@ -60,12 +60,12 @@ if ($showForgot == true && $settings->registration == 1) {
     $bottomClass = "col-12 col-lg-6";
     $showBottom = true;
     $forgotClass = "";
-    $regClass = "text-end";
+    $regClass = "text-right text-end";
 } elseif ($showForgot == true || $settings->registration == 1) {
     $showBottom = true;
     $bottomClass = "col-12";
     $forgotClass = "text-center";
-    $regClass = "text-end";
+    $regClass = "text-right text-end";
 } else {
     $showBottom = false;
 }
@@ -169,24 +169,20 @@ if (!empty($_POST)) {
                             $hooks = getMyHooks(['page' => 'loginSuccess']);
                             includeHook($hooks, 'body');
 
-                            // Get stored redirect info
-                            $finalDest = $_SESSION[$currentSessionName . '_totp_final_dest'] ?? null;
-                            $inputRedirect = $_SESSION[$currentSessionName . '_totp_input_redirect'] ?? null;
+                            // Get destination from session (set by securePage)
+                            $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
 
                             // Clear TOTP session variables
                             unset($_SESSION[$currentSessionName . '_totp_user_id_to_verify']);
                             unset($_SESSION[$currentSessionName . '_totp_remember_me']);
-                            unset($_SESSION[$currentSessionName . '_totp_final_dest']);
-                            unset($_SESSION[$currentSessionName . '_totp_input_redirect']);
+                            unset($_SESSION[$currentSessionName . '_login_dest']);
                             // logger(1,"cls","case 1");
                             if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                             }
                             // Redirect to destination
-                            if (!empty($inputRedirect)) {
-                                Redirect::to(html_entity_decode($inputRedirect));
-                            } elseif (!empty($finalDest)) {
-                                Redirect::to($finalDest);
+                            if (!empty($dest)) {
+                                Redirect::sanitized($dest);
                             } else {
                                 $default_dest = Config::get('homepage') ?: 'account.php';
                                 Redirect::to($us_url_root . $default_dest);
@@ -196,8 +192,7 @@ if (!empty($_POST)) {
                             // Clear session related to TOTP pending state to reset the flow
                             unset($_SESSION[$currentSessionName . '_totp_user_id_to_verify']);
                             unset($_SESSION[$currentSessionName . '_totp_remember_me']);
-                            unset($_SESSION[$currentSessionName . '_totp_final_dest']);
-                            unset($_SESSION[$currentSessionName . '_totp_input_redirect']);
+                            unset($_SESSION[$currentSessionName . '_login_dest']);
                             $awaitingTOTP = false; // Reset to show regular login form
                         }
                     } else {
@@ -268,27 +263,27 @@ if (!empty($_POST)) {
                                     ]);
 
                                     $user = $tempUser; // Set user object for further processing
-                                    
+
                                     // TOTP verified, complete login immediately
                                     $hooks = getMyHooks(['page' => 'loginSuccess']);
                                     includeHook($hooks, 'body');
-                                    $dest = sanitizedDest('dest');
+                                    // Get destination from session (set by securePage)
+                                    $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                                     $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
                                     $_SESSION[$currentSessionName . '_totp_verified'] = true;
                                     // logger($tempUser->data()->id, "Login", "Successful login with inline TOTP verification.");
-                                   
+
+                                    // Clear login destination from session
+                                    unset($_SESSION[$currentSessionName . '_login_dest']);
                                     // logger(1,"cls","case 2");
                                     if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                         require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                                     }
                                     if (!empty($dest)) {
-                                        $redirect = Input::get('redirect');
-                                        if (!empty($redirect) || $redirect !== '') Redirect::to(html_entity_decode($redirect));
-                                        else Redirect::to($dest);
+                                        Redirect::sanitized($dest);
                                     } else {
-                                        if (($default_dest = Config::get('homepage')) || ($default_dest = 'account.php')) {
-                                            Redirect::to($us_url_root . $default_dest);
-                                        }
+                                        $default_dest = Config::get('homepage') ?: 'account.php';
+                                        Redirect::to($us_url_root . $default_dest);
                                     }
                                 } else {
                                     // Invalid TOTP code
@@ -300,8 +295,7 @@ if (!empty($_POST)) {
                                     $errors[] = lang("2FA_ERR_INVALID_CODE");
                                     unset($_SESSION[$currentSessionName . '_totp_user_id_to_verify']);
                                     unset($_SESSION[$currentSessionName . '_totp_remember_me']);
-                                    unset($_SESSION[$currentSessionName . '_totp_final_dest']);
-                                    unset($_SESSION[$currentSessionName . '_totp_input_redirect']);
+                                    unset($_SESSION[$currentSessionName . '_login_dest']);
                                     $awaitingTOTP = false;
                                 }
                             } else {
@@ -309,10 +303,7 @@ if (!empty($_POST)) {
                                 unset($_SESSION[$currentSessionName]);
                                 $_SESSION[$currentSessionName . '_totp_user_id_to_verify'] = $tempUser->data()->id;
                                 $_SESSION[$currentSessionName . '_totp_remember_me'] = $remember;
-
-                                $dest = sanitizedDest('dest');
-                                $_SESSION[$currentSessionName . '_totp_final_dest'] = $dest;
-                                $_SESSION[$currentSessionName . '_totp_input_redirect'] = Input::get('redirect');
+                                // Note: _login_dest already in session from securePage(), no need to copy
 
                                 // logger($tempUser->data()->id, "Login", "Valid credentials provided. Awaiting TOTP verification.");
 
@@ -332,23 +323,23 @@ if (!empty($_POST)) {
 
                             // No TOTP required - complete normal login
                             $hooks = getMyHooks(['page' => 'loginSuccess']);
-                           
+
                             includeHook($hooks, 'body');
-                            $dest = sanitizedDest('dest');
+                            // Get destination from session (set by securePage)
+                            $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                             $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
                             // logger(1,"cls","case 3");
-                   
+
+                            // Clear login destination from session
+                            unset($_SESSION[$currentSessionName . '_login_dest']);
                             if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
                             }
                             if (!empty($dest)) {
-                                $redirect = Input::get('redirect');
-                                if (!empty($redirect) || $redirect !== '') Redirect::to(html_entity_decode($redirect));
-                                else Redirect::to($dest);
+                                Redirect::sanitized($dest);
                             } else {
-                                if (($default_dest = Config::get('homepage')) || ($default_dest = 'account.php')) {
-                                    Redirect::to($us_url_root . $default_dest);
-                                }
+                                $default_dest = Config::get('homepage') ?: 'account.php';
+                                Redirect::to($us_url_root . $default_dest);
                             }
                         }
                     } else {
@@ -379,9 +370,8 @@ if (!empty($_POST)) {
     sessionValMessages($errors, $successes, NULL);
 }
 
-if (empty($dest = sanitizedDest('dest'))) {
-    $dest = '';
-}
+// Get destination from session (set by securePage) for passkey redirect
+$dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
 
 ?>
 <style media="screen">
@@ -413,22 +403,44 @@ if (empty($dest = sanitizedDest('dest'))) {
                 </div>
                 <div class="modal-body p-3">
 
-                    <div class="usmsgblock">
-                        <?php
-                        $usmsgs = array(
-                            'err',
-                            'msg',
-                            'valSuc',
-                            'valErr',
-                            'genMsg',
-                        );
-                        foreach ($usmsgs as $u) { ?>
-                            <div style="" id="<?= $u ?>UserSpiceMessages" class="show d-none">
-                                <span id="<?= $u ?>UserSpiceMessage"></span>
-                                <button type="button" class="close btn-close" data-dismiss="alert" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <?php } ?>
+                    <?php
+                    // Display inline messages for modal context
+                    // Intercept session messages here so they appear in modal instead of as toasts
+                    $loginInlineMessages = function_exists('parseSessionMessages') ? parseSessionMessages() : [];
+                    $loginHasMessages = !empty($_GET['err']) || !empty($_GET['msg']) ||
+                                        !empty($loginInlineMessages['valErr']) || !empty($loginInlineMessages['valSuc']) ||
+                                        !empty($loginInlineMessages['genMsg']);
+
+                    if ($loginHasMessages):
+                    ?>
+                    <div class="login-inline-messages mb-3">
+                    <?php
+                    // GET params - escape with htmlspecialchars since these are raw user input
+                    if (!empty($_GET['err'])) {
+                        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                        echo htmlspecialchars($_GET['err'], ENT_QUOTES, 'UTF-8');
+                        echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                    }
+                    if (!empty($_GET['msg'])) {
+                        echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
+                        echo htmlspecialchars($_GET['msg'], ENT_QUOTES, 'UTF-8');
+                        echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                    }
+
+                    // Session messages - already sanitized by sanitizeHTML() in sessionValMessages()
+                    // Contains safe HTML like <strong>, <li>, <ul> etc.
+                    $loginAlertTypes = ['valErr' => 'danger', 'valSuc' => 'success', 'genMsg' => 'secondary'];
+                    foreach ($loginAlertTypes as $msgKey => $alertClass) {
+                        if (!empty($loginInlineMessages[$msgKey])) {
+                            echo '<div class="alert alert-' . $alertClass . ' alert-dismissible fade show" role="alert">';
+                            // Content is pre-sanitized, contains allowed HTML formatting
+                            echo $loginInlineMessages[$msgKey];
+                            echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                        }
+                    }
+                    ?>
                     </div>
+                    <?php endif; ?>
 
                     <?php includeHook($hooks, 'body'); ?>
 
@@ -523,7 +535,6 @@ if (empty($dest = sanitizedDest('dest'))) {
                             <?php endif; ?>
 
                             <?php includeHook($hooks, 'form'); ?>
-                            <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
                             <button class="submit col-12 btn btn-primary rounded submit px-3" id="next_button" type="submit">
                                 <i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT") ?>
                             </button>
@@ -567,7 +578,7 @@ if (empty($dest = sanitizedDest('dest'))) {
     </div>
 </div>
 </div>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     $(document).ready(function() {
         $("#loginModal").modal({
             backdrop: 'static',
@@ -648,7 +659,7 @@ if (empty($dest = sanitizedDest('dest'))) {
 </script>
 
 <?php if ($settings->passkeys == 1 && !$awaitingTOTP): ?>
-    <script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+    <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
         function showPasskeyStatus(message, type = 'info') {
             const status = document.getElementById('passkeyStatus');
             if (!status) return;
@@ -699,7 +710,7 @@ if (empty($dest = sanitizedDest('dest'))) {
 async function authenticatePasskeyLogin() {
     showPasskeyStatus('Requesting authentication challenge...');
     try {
-        const dest = '<?= $dest ?>';
+        const dest = <?= json_encode($dest, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         
         // First request - get challenge using POST
         const challengeData = {

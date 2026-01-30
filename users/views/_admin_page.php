@@ -86,6 +86,24 @@ if (Input::exists()) {
       usError(lang('SQL_ERROR'));
     }
   }
+
+  // Changed lang_key for page
+  $newLangKey = Input::get('changeLangKey');
+  $currentLangKey = $pageDetails->lang_key ?? '';
+  if ($newLangKey != $currentLangKey) {
+    $langKeyValue = $newLangKey === '' ? null : $newLangKey;
+    if ($db->query('UPDATE pages SET lang_key = ? WHERE id = ?', [$langKeyValue, $pageDetails->id])) {
+      if ($langKeyValue) {
+        usSuccess("Language key updated to '$langKeyValue'.");
+        logger($user->data()->id, 'Pages Manager', "Set lang_key to '$langKeyValue' for '{$pageDetails->page}'.");
+      } else {
+        usSuccess("Language key removed.");
+        logger($user->data()->id, 'Pages Manager', "Removed lang_key for '{$pageDetails->page}'.");
+      }
+    } else {
+      usError(lang('SQL_ERROR'));
+    }
+  }
   includeHook($hooks, 'post');
   $pageDetails = fetchPageDetails($pageId);
   if (isset($_SESSION['redirect_after_save']) && $_SESSION['redirect_after_save'] == true) {
@@ -127,6 +145,11 @@ $countCountQ = $countQ->count();
         <label for="title">Page Title:</label> <span class="small">(This is the text that's displayed on the browser's titlebar or tab)</span>
 
         <input type="text" class="form-control" name="changeTitle" maxlength="50" value="<?php echo $pageDetails->title; ?>" />
+      </div>
+      <div class="form-group">
+        <label for="langKey">Language Key:</label> <span class="small">(Optional - if set, this lang() key will be used instead of the title above)</span>
+
+        <input type="text" class="form-control" name="changeLangKey" maxlength="100" value="<?php echo htmlspecialchars($pageDetails->lang_key ?? ''); ?>" placeholder="e.g. PAGE_TITLE_HOME" />
       </div>
       <div class="form-group">
         <label for="">Set this page as private?</label>

@@ -159,7 +159,7 @@ class User
         } else {
             $user = $this->find($email, 1);
 
-            if ($user) {
+            if ($user && $this->data()->password !== null) {
                 $strength = substr($this->data()->password, 4, 2);
                 if (!is_numeric($strength)) {
                     $strength = 999;

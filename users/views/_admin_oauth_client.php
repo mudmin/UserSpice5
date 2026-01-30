@@ -115,6 +115,7 @@ if (!empty($_POST)) {
     'login_title' => Input::get('login_title'),
     'client_icon' => Input::get('client_icon'),
     'login_script' => Input::get('login_script'),
+    'response_secret' => Input::get('response_secret'),
   ];
 
   if ($e) {
@@ -142,7 +143,7 @@ $activeClients = $activeClientsQ->results();
 $activeClientCount = $activeClientsQ->count();
 ?>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
       // Success feedback could go here
@@ -398,12 +399,20 @@ $activeClientCount = $activeClientsQ->count();
                   <select class="form-select" id="login_script" name="login_script">
                     <option value="">-- No Script --</option>
                     <?php foreach ($login_scripts as $script): ?>
-                      <option value="<?= hed($script) ?>" 
+                      <option value="<?= hed($script) ?>"
                               <?= $e && $client->login_script == $script ? 'selected' : '' ?>>
                         <?= hed($script) ?>
                       </option>
                     <?php endforeach; ?>
                   </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="response_secret" class="form-label">Response Secret (HMAC Verification)</label>
+                  <small class="form-text text-muted">Optional. If set, the response data from the OAuth server will be verified using HMAC-SHA256. This must match the response_secret configured on the OAuth server for this client. Prevents response tampering during redirect.</small>
+                  <input type="text" class="form-control" id="response_secret" name="response_secret"
+                         value="<?= $e ? hed($client->response_secret ?? '') : '' ?>"
+                         placeholder="Leave empty to disable verification">
                 </div>
 
                 <button type="submit" class="btn btn-primary">
@@ -477,7 +486,7 @@ $activeClientCount = $activeClientsQ->count();
               <h3>Documentation</h3>
             </div>
             <div class="card-body">
-              <p class="mt-2">The purpose of this feature is to allow your UserSpice installation to authenticate users against external OAuth servers. This is the client side of OAuth authentication - it connects to OAuth servers (which could be other UserSpice installations, custom OAuth implementations, or third-party services) to authenticate and potentially synchronize user data.</p>
+              <p class="mt-2">The purpose of this feature is to allow your UserSpice installation to authenticate users against external OAuth servers. This is the client side of OAuth authentication - it connects to OAuth servers (which could be other UserSpice installations, custom OAuth implementations, or third-party services) to authenticate users.</p>
 
               <p class="mt-2"><strong>Client Name:</strong> An internal identifier for the OAuth client configuration. This helps you manage multiple OAuth server connections within your system. This is only visible to administrators and is used for organization purposes.</p>
 
@@ -493,7 +502,7 @@ $activeClientCount = $activeClientsQ->count();
 
               <p class="mt-2"><strong>Login Button Icon:</strong> A visual icon that appears alongside the login button. You can add custom icons by placing image files (PNG, JPG, SVG) in the <span style="color:red;">usersc/oauth_client/assets/</span> directory. This helps users visually identify the OAuth option.</p>
 
-              <p class="mt-2"><strong>Login Script:</strong> An optional script that runs after successful OAuth authentication. <b>These scripts provide powerful post-authentication capabilities.</b> You can create custom scripts to handle user data synchronization, role mapping, welcome messages, or any other post-login logic. Place custom scripts in <span style="color:red;">usersc/oauth_client/login_scripts/</span> and examine the default script for implementation examples.</p>
+              <p class="mt-2"><strong>Login Script:</strong> An optional script that runs after successful OAuth authentication. <b>These scripts provide powerful post-authentication capabilities.</b> You can create custom scripts to handle role mapping, welcome messages, or any other post-login logic. Place custom scripts in <span style="color:red;">usersc/oauth_client/login_scripts/</span> and examine the default script for implementation examples.</p>
 
               <h5 class="mt-4">Multi-Server Authentication</h5>
               <p class="mt-2">This system supports multiple OAuth server configurations simultaneously. Users can choose from multiple authentication options on the login page, allowing for scenarios like:</p>
@@ -510,10 +519,8 @@ $activeClientCount = $activeClientsQ->count();
                 <li>Client secrets are kept confidential</li>
                 <li>Redirect URIs are exactly configured on both ends</li>
                 <li>The OAuth server is maintained and trustworthy</li>
+                <li><strong>Response Secret:</strong> When configured, the response data from the OAuth server is cryptographically signed using HMAC-SHA256. This prevents man-in-the-middle attacks from tampering with user data during the OAuth redirect. <b>Both the server and client must have the same response_secret configured.</b></li>
               </ul>
-
-              <h5 class="mt-4">User Data Synchronization</h5>
-              <p class="mt-2">When users authenticate via OAuth, the system can synchronize user data from the OAuth server, including names, email addresses, and custom attributes. This synchronization happens automatically and helps keep user information up-to-date across multiple systems.</p>
 
               <h5 class="mt-4">Troubleshooting</h5>
               <p class="mt-2">Common issues and solutions:</p>

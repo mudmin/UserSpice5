@@ -397,7 +397,7 @@ if (is_numeric($manage)) {
     includeHook($hooks, 'bottom');
     } 
 ?>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     $(document).ready(function() {
         $('.addAll').on('click', function(e) {
             $('.add').prop('checked', $(e.target).prop('checked'));

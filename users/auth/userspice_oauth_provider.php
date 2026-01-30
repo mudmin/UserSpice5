@@ -138,8 +138,23 @@ public function handleAuthorizationRequest() {
     }
 
     private function verifyClientCredentials($clientId, $clientSecret) {
-        $q = $this->db->query("SELECT * FROM us_oauth_server_clients WHERE client_id = ? AND client_secret = ?", [$clientId, $clientSecret]);
-        return $q->count() > 0;
+        // SECURITY: Fetch client and verify secret using password_verify for timing-safe comparison
+        // Supports both hashed secrets (preferred) and plaintext secrets (deprecated, pending migration)
+        $q = $this->db->query("SELECT client_secret FROM us_oauth_server_clients WHERE client_id = ?", [$clientId]);
+        if ($q->count() === 0) {
+            return false;
+        }
+        $storedSecret = $q->first()->client_secret;
+
+        // Check if it's a bcrypt hash (starts with $2) or plaintext
+        if (strpos($storedSecret, '$2') === 0) {
+            // Hashed secret - use password_verify (preferred)
+            return password_verify($clientSecret, $storedSecret);
+        } else {
+            // Plaintext secret (deprecated) - use timing-safe comparison
+            // Admin UI will show warning and migration option for these clients
+            return hash_equals($storedSecret, $clientSecret);
+        }
     }
 
     private function validateAuthCode($authCode, $clientId) {
@@ -173,45 +188,70 @@ public function handleAuthorizationRequest() {
     }
     
     public function handleTokenRequest() {
-        logger(1, "OAuth Server", "Received token request: " . json_encode($_POST));
-    
+        // SECURITY FIX: Don't log sensitive data like client_secret
+        $safeLogData = [
+            'client_id' => $_POST['client_id'] ?? '[not provided]',
+            'grant_type' => $_POST['grant_type'] ?? '[not provided]',
+            'has_code' => isset($_POST['code']) ? 'yes' : 'no',
+            'has_secret' => isset($_POST['client_secret']) ? 'yes' : 'no'
+        ];
+        logger(1, "OAuth Server", "Received token request: " . json_encode($safeLogData));
+
         $clientId = $_POST['client_id'] ?? '';
         $clientSecret = $_POST['client_secret'] ?? '';
         $grantType = $_POST['grant_type'] ?? '';
         $authCode = $_POST['code'] ?? '';
 
+        // Rate limiting - treat OAuth token requests like login attempts
+        $rateLimit = new RateLimit();
+        $rateLimitIdentifiers = ['ip' => $rateLimit->getRealIP()];
+
+        if (!$rateLimit->check('login_attempt', $rateLimitIdentifiers)) {
+            logger(0, "OAuth Server", "Rate limit exceeded for token request");
+            $this->sendJsonResponse(['error' => 'too_many_requests', 'error_description' => 'Rate limit exceeded'], 429);
+            return;
+        }
+
         // Retrieve redirect_uri from the database based on client_id
         $clientData = $this->db->query("SELECT redirect_uri FROM us_oauth_server_clients WHERE client_id = ?", [$clientId])->first();
         $redirectUri = $clientData->redirect_uri;
-    
+
         if (!$this->verifyClientCredentials($clientId, $clientSecret)) {
             logger(1, "OAuth Server", "Invalid client credentials: $clientId");
+            $rateLimit->record('login_attempt', $rateLimitIdentifiers, false, ['type' => 'oauth_invalid_client']);
             $this->sendJsonResponse(['error' => 'invalid_client'], 401);
             return;
         }
-    
+
         if ($grantType !== 'authorization_code') {
             logger(1, "OAuth Server", "Unsupported grant type: $grantType");
             $this->sendJsonResponse(['error' => 'unsupported_grant_type'], 400);
             return;
         }
-    
+
         $userId = $this->validateAuthCode($authCode, $clientId);
-        
+
         if (!$userId) {
-            logger(1, "OAuth Server", "Invalid auth code: $authCode for client: $clientId");
+            // SECURITY FIX: Don't log the actual auth code
+            logger(1, "OAuth Server", "Invalid auth code for client: $clientId");
+            $rateLimit->record('login_attempt', $rateLimitIdentifiers, false, ['type' => 'oauth_invalid_code']);
             $this->sendJsonResponse(['error' => 'invalid_grant'], 400);
             return;
         }
-    
+
         $accessToken = $this->generateAccessToken($userId, $clientId);
-    
+
+        // Record success and clear failed attempts
+        $rateLimit->record('login_attempt', $rateLimitIdentifiers, true, ['type' => 'oauth_token']);
+        $rateLimit->clearFailed('login_attempt', $rateLimitIdentifiers);
+
         $response = [
             'access_token' => $accessToken,
             'token_type' => 'Bearer',
             'expires_in' => 3600 // 1 hour
         ];
-        logger(1, "OAuth Server", "Sending token response: " . json_encode($response));
+        // SECURITY FIX: Don't log access tokens - log success without sensitive data
+        logger(1, "OAuth Server", "Token issued successfully for user: $userId, client: $clientId");
         $this->sendJsonResponse($response);
     }
 

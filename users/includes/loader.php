@@ -172,12 +172,28 @@ if ($user->isLoggedIn() && !in_array($currentPage, $no_pr) && $user->data()->for
 }
 
 
-$page = currentFile();
-$titleQ = $db->query('SELECT title FROM pages WHERE page = ?', array($page));
-if ($titleQ->count() > 0) {
-	$pageTitle = $titleQ->first()->title;
-} else $pageTitle = '';
-
+// Page title priority:
+// 1. If $pageTitle is set before init, use it as-is
+// 2. If $pageTitleKey is set, use the lang function
+// 3. Otherwise, fall back to database lookup
+if (!isset($pageTitle)) {
+	if (isset($pageTitleKey)) {
+		$pageTitle = lang($pageTitleKey);
+	} else {
+		$page = currentFile();
+		$titleQ = $db->query('SELECT title, lang_key FROM pages WHERE page = ?', array($page));
+		if ($titleQ->count() > 0) {
+			$pageRow = $titleQ->first();
+			if (!empty($pageRow->lang_key)) {
+				$pageTitle = lang($pageRow->lang_key);
+			} else {
+				$pageTitle = $pageRow->title;
+			}
+		} else {
+			$pageTitle = '';
+		}
+	}
+}
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/includes/loader.php")) {
 	require_once $abs_us_root . $us_url_root . "usersc/includes/loader.php";
