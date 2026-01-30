@@ -148,6 +148,9 @@ if (!empty($_POST['save_child_theme'])) {
             $varName = str_replace('--bs-', '', $set['variable']);
             $inputName = 'var_' . $varName;
 
+            // Skip custom CSS - handled separately to preserve CSS selectors
+            if ($inputName === 'var_custom-css') continue;
+
             // Only include fields that exist in the form
             if (isset($_POST[$inputName])) {
               $customizations[$varName] = Input::get($inputName);
@@ -157,12 +160,17 @@ if (!empty($_POST['save_child_theme'])) {
       }
 
       // Handle special case for custom CSS if it exists
-      if (isset($_POST['var_custom_css_code'])) {
-        $customizations['custom_css'] = Input::get('var_custom_css_code');
+      // Use html_entity_decode to preserve CSS selectors like > (child combinator)
+      if (isset($_POST['var_custom-css'])) {
+        $customizations['custom_css'] = html_entity_decode(Input::get('var_custom-css'), ENT_QUOTES, 'UTF-8');
       }
 
       // Save to child theme file
       file_put_contents($customizationFile, "<?php\nreturn " . var_export($customizations, true) . ";\n");
+      // Invalidate OPcache so new values are loaded immediately
+      if (function_exists('opcache_invalidate')) {
+        opcache_invalidate($customizationFile, true);
+      }
 
       usSuccess("Child theme '$themeName' saved successfully");
       $currentChildTheme = $themeName;
@@ -191,6 +199,10 @@ return array (
  */
   if (file_exists($customizationFile)) {
     file_put_contents($customizationFile, "<?php\nreturn array (\n);\n");
+    // Invalidate OPcache so new values are loaded immediately
+    if (function_exists('opcache_invalidate')) {
+      opcache_invalidate($customizationFile, true);
+    }
   }
 
 
@@ -232,6 +244,10 @@ if (!empty($_POST['confirm_overwrite_yes'])) {
 
   // Save to child theme file, overwriting the existing one
   file_put_contents($customizationFile, "<?php\nreturn " . var_export($customizations, true) . ";\n");
+  // Invalidate OPcache so new values are loaded immediately
+  if (function_exists('opcache_invalidate')) {
+    opcache_invalidate($customizationFile, true);
+  }
 
   usSuccess("Child theme '$themeName' has been overwritten successfully");
   $currentChildTheme = $themeName;
@@ -274,8 +290,21 @@ if (!empty($_POST['process_css'])) {
   foreach ($changedFields as $fieldName) {
     if (isset($_POST[$fieldName])) {
       $varName = Input::sanitize(substr($fieldName, 4)); // Remove 'var_' prefix
-      $customizations[$varName] = Input::get($fieldName);
+      // Use html_entity_decode for CSS to preserve selectors like > (child combinator)
+      if ($fieldName === 'var_custom-css') {
+        $customizations['custom_css'] = html_entity_decode(Input::get($fieldName), ENT_QUOTES, 'UTF-8');
+      } else {
+        $customizations[$varName] = Input::get($fieldName);
+      }
     }
+  }
+
+  // Always ensure custom_css is decoded (fixes legacy encoded values and form submissions)
+  if (isset($_POST['var_custom-css'])) {
+    $customizations['custom_css'] = html_entity_decode(Input::get('var_custom-css'), ENT_QUOTES, 'UTF-8');
+  } elseif (isset($customizations['custom_css'])) {
+    // Decode any existing value that might have been loaded with encoding
+    $customizations['custom_css'] = html_entity_decode($customizations['custom_css'], ENT_QUOTES, 'UTF-8');
   }
 
   // Check if we're in child theme mode
@@ -286,12 +315,20 @@ if (!empty($_POST['process_css'])) {
 
     // Save to the child theme file
     file_put_contents($childThemeFile, "<?php\nreturn " . var_export($customizations, true) . ";\n");
+    // Invalidate OPcache so new values are loaded immediately
+    if (function_exists('opcache_invalidate')) {
+      opcache_invalidate($childThemeFile, true);
+    }
 
     $currentChildTheme = $childThemeName;
   } else {
     // Save to the regular customization file when not in child theme mode
     $customizationFile = $abs_us_root . $us_url_root . 'usersc/templates/' . $template_override . '/assets/css/customizations.php';
     file_put_contents($customizationFile, "<?php\nreturn " . var_export($customizations, true) . ";\n");
+    // Invalidate OPcache so new values are loaded immediately
+    if (function_exists('opcache_invalidate')) {
+      opcache_invalidate($customizationFile, true);
+    }
   }
 
   // Generate the CSS file
@@ -355,6 +392,9 @@ foreach ($customizations as $varName => $value) {
     }
     continue;
   }
+
+  // Skip legacy custom_css_code key (now stored as custom_css)
+  if ($varName === 'custom_css_code') continue;
 
   // Find the correct category and variable
   $found = false;
@@ -726,7 +766,7 @@ function renderInputField($name, $set)
 </div>
 </div>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script>
   document.addEventListener('DOMContentLoaded', function() {
     // Accordion handling using Bootstrap's collapse events
 
@@ -896,7 +936,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';</
   }
 </style>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script>
   document.addEventListener('DOMContentLoaded', function() {
     const wideModals = document.querySelectorAll('.modal-dialog.modal-xl');
     
