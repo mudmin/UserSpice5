@@ -84,7 +84,7 @@ $lang = array_merge($lang, array(
 	"ACCT_2FA"					=> "2Faktor-Authentisierung verwalten",
 	"ACCT_SESS"					=> "Sitzungen verwalten",
 	"ACCT_HOME"					=> "Kontoseite",
-	"ACCT_SINCE"				=> "Mitglieder seit",
+	"ACCT_SINCE"				=> "Mitglied seit",
 	"ACCT_LOGINS"				=> "Anzahl der Anmeldungen",
 	"ACCT_SESSIONS"			=> "Anzahl der aktiven Sitzungen",
 	"ACCT_MNG_SES"			=> "Für weitere Informationen, bitte auf - Sitzungen verwalten - links klicken.",
@@ -517,7 +517,7 @@ $lang = array_merge($lang, array(
 	"VER_OOPS" 		=> "Oh je! Etwas ist schiefgegengen, Vielleicht wurde ein abgelaufener Reset-Link geklickt. Bitte unten klicken, um neu zu versuchen",
 	"VER_RESET" 	=> "Ihr Passwort wurde zurückgesetzt!",
 	"VER_INS" 		=> "<li>Emailadresse eingeben und auf zurücksetzen klicken</li> <li>Posteingang prüfen und auf den Reset-Link Klicken.</li> <li>Bildschirmanweisungen folgen</li>",
-	"VER_SENT" 		=> " Einen Link zur Passwortrücksetzung wurde Ihnen per Email gschickt.   Bitte darauf klicken, um Ihr Passwort zurück zu setzen. Prüfen Sie Bitte Ihren Spam-Ordner, falls Sie die Email im Posteingang nicht finden können.  Gültigkeit des Verifizierungslinks: ",
+	"VER_SENT" 		=> " Einen Link zur Passwortrücksetzung wurde Ihnen per Email geschickt.   Bitte darauf klicken, um Ihr Passwort zurück zu setzen. Prüfen Sie Bitte Ihren Spam-Ordner, falls Sie die Email im Posteingang nicht finden können.  Gültigkeit des Verifizierungslinks: ",
 	"VER_PLEASE" => "Bitte setzen Sie Ihr Passwort zurück",
 ));
 
