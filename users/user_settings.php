@@ -292,8 +292,9 @@ if (!empty($_POST)) {
       if (isset($_SESSION['cloak_to'])) { ?>
         <p>
         <form action="" method="post">
+          <?= tokenHere(); ?>
           <input type="hidden" name="uncloak" value="Uncloak!">
-          <button class="btn btn-danger btn-block" type="submit">Uncloak</button>
+          <button class="btn btn-danger" type="submit">Uncloak</button>
         </form>
         </p>
       <?php } // End cloak button 

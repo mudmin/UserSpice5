@@ -41,13 +41,25 @@ if (!empty($_POST) && $settings->spice_api != '') {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   //execute the POST request
   $result = curl_exec($ch);
-
+  $apiResponse = usValidateApiResponse($result, $ch);
   //close cURL resource
   if (PHP_VERSION_ID < 80500) {
        curl_close($ch);
- }
-  $result = json_decode($result);
-  // dnd($result);
+  }
+  if (!$apiResponse['success']) {
+    $httpCode = $apiResponse['httpCode'];
+    if ($httpCode == 401) {
+      usError("Authentication failed. Your API key appears to be invalid or missing.");
+    } elseif ($httpCode == 403) {
+      usError("Access denied. Your IP may have been temporarily blocked.");
+    } elseif ($httpCode == 429) {
+      usError("Rate limit reached. Please try again tomorrow.");
+    } else {
+      usError(safeReturn($apiResponse['error']));
+    }
+    Redirect::to('?view=bugs');
+  }
+  $result = json_decode($apiResponse['result']);
   if ($result->success == true) {
     logger($user->data()->id, "your_api_bugs", $result->issue);
     usSuccess($result->msg);
@@ -73,11 +85,19 @@ if ($settings->spice_api != '') {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   //execute the POST request
   $result = curl_exec($ch);
+  $apiResponse = usValidateApiResponse($result, $ch);
   //close cURL resource
   if (PHP_VERSION_ID < 80500) {
        curl_close($ch);
- }
-  $result = json_decode($result);
+  }
+  if (!$apiResponse['success']) {
+    $bugApiError = $apiResponse['error'];
+    $bugConnectionFailed = $apiResponse['connectionFailed'];
+    $bugHttpCode = $apiResponse['httpCode'];
+    unset($result);
+  } else {
+    $result = json_decode($apiResponse['result']);
+  }
 }
 ?>
 
@@ -124,6 +144,26 @@ if ($settings->spice_api != '') {
     </form>
   </div>
 </div>
+
+<?php if (isset($bugApiError)) { ?>
+  <div class="alert alert-danger mt-3" role="alert">
+    <?php if (isset($bugConnectionFailed) && $bugConnectionFailed) { ?>
+      <strong>Connection Error:</strong> <?= safeReturn($bugApiError) ?>
+    <?php } elseif (isset($bugHttpCode) && $bugHttpCode == 401) { ?>
+      <strong>Authentication Failed:</strong> Your API key appears to be invalid or missing.
+      Please verify your key on the <a href="admin.php?view=general">General Settings</a> page.
+    <?php } elseif (isset($bugHttpCode) && $bugHttpCode == 403) { ?>
+      <strong>Access Denied:</strong> Your IP address may have been temporarily blocked due to too many failed attempts.
+      Please wait and try again later, or contact support.
+    <?php } elseif (isset($bugHttpCode) && $bugHttpCode == 429) { ?>
+      <strong>Rate Limit Reached:</strong> You have exceeded the daily API request limit.
+      Please try again tomorrow.
+    <?php } else { ?>
+      <strong>API Error:</strong> <?= safeReturn($bugApiError) ?><br>
+      The API responded but was not successful. Please check your API key. Please be careful not to keep retrying or you may get banned.
+    <?php } ?>
+  </div>
+<?php } ?>
 
 <?php if (isset($result) && count($result->fetch) > 0) { ?>
   <div class="row">

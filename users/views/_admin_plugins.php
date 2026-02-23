@@ -35,11 +35,12 @@ if (!empty($_POST)) {
   $friendlyPluginName = ucwords(str_replace("_", " ", $plugin));
   if (!empty($_POST['lock'])) {
     $action = Input::get('action');
+    $jump = Input::get('jump');
     $file = $abs_us_root . $us_url_root . "usersc/plugins/" . $plugin . "/.noupdate";
     if ($action == "unlockme") {
       unlink($file);
       usSuccess("$friendlyPluginName unlocked");
-      Redirect::to('admin.php?view=plugins');
+      Redirect::to('admin.php?view=plugins&activation_code=' . uniqid() . $jump);
     }
 
     if ($action == "lockme") {
@@ -47,7 +48,7 @@ if (!empty($_POST)) {
       fwrite($write, "");
       fclose($write);
       usSuccess("$friendlyPluginName has been locked");
-      Redirect::to('admin.php?view=plugins');
+      Redirect::to('admin.php?view=plugins&activation_code=' . uniqid() . $jump);
     }
   }
   $activate = Input::get('activate');
@@ -127,6 +128,10 @@ $token = Token::generate();
   .hov:hover {
     opacity: 0.5;
     transition: .4s ease;
+  }
+  tr.plugin-highlight {
+    outline: 3px solid rgba(0, 123, 255, 0.7);
+    outline-offset: -3px;
   }
 </style>
 
@@ -227,6 +232,7 @@ $token = Token::generate();
                       <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
                       <input type="hidden" name="lock" value="lock">
                       <input type="hidden" name="plugin" value="<?= $t ?>">
+                      <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
                       <?php if (file_exists($abs_us_root . $us_url_root . "usersc/plugins/" . $t . "/.noupdate")) { ?>
                         <button type="submit" name="action" value="unlockme" class="btn" title="Unlock this plugin to allow Spice Shaker to update it.">
                           <i class="fa fa-lock" aria-hidden="true"></i>
@@ -311,8 +317,20 @@ $token = Token::generate();
     });
   });
   <?php } ?>
+
+  // Scroll to and highlight plugin after activate/deactivate
+  if (window.location.hash) {
+    var id = decodeURIComponent(window.location.hash.substring(1));
+    var target = document.getElementById(id);
+    if (target) {
+      setTimeout(function() {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('plugin-highlight');
+      }, 300);
+    }
+  }
   });
- 
+
 </script>
 <?php function pluginStatus($status)
 {

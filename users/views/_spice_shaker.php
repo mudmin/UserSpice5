@@ -60,19 +60,28 @@ if ($settings->spice_api != '') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     //execute the POST request
     $result = curl_exec($ch);
+    $apiResponse = usValidateApiResponse($result, $ch);
     if ($diag) {
-
       echo substr(safeReturn($result), 0, 150) . "<br>";
       $info = curl_getinfo($ch);
       echo 'Took ' . $info['total_time'] . ' seconds to send a request<br>';
-      if (curl_errno($ch)) {
-        echo 'Curl error: ' . curl_error($ch);
+      echo 'HTTP Response Code: ' . $apiResponse['httpCode'] . '<br>';
+      if ($apiResponse['curlErrno']) {
+        echo 'Curl error: ' . safeReturn($apiResponse['curlError']);
       }
     }
     //close cURL resource
     if (PHP_VERSION_ID < 80500) {
        curl_close($ch);
- }
+    }
+    if (!$apiResponse['success']) {
+      $apiError = $apiResponse['error'];
+      $apiConnectionFailed = $apiResponse['connectionFailed'];
+      $apiHttpCode = $apiResponse['httpCode'];
+      unset($result);
+    } else {
+      unset($apiError, $apiConnectionFailed, $apiHttpCode);
+    }
   }
   if (!empty($_POST['goSearch']) || !empty($_GET['search'])) {
     $search = Input::get('search');
@@ -99,18 +108,28 @@ if ($settings->spice_api != '') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     //execute the POST request
     $result = curl_exec($ch);
+    $apiResponse = usValidateApiResponse($result, $ch);
     if ($diag) {
       echo substr(safeReturn($result), 0, 150) . "<br>";
       $info = curl_getinfo($ch);
       echo '<h6>Took ' . $info['total_time'] . ' seconds to send a request</h6><br>';
-      if (curl_errno($ch)) {
-        echo 'Curl error: ' . curl_error($ch);
+      echo 'HTTP Response Code: ' . $apiResponse['httpCode'] . '<br>';
+      if ($apiResponse['curlErrno']) {
+        echo 'Curl error: ' . safeReturn($apiResponse['curlError']);
       }
     }
     //close cURL resource
     if (PHP_VERSION_ID < 80500) {
        curl_close($ch);
- }
+    }
+    if (!$apiResponse['success']) {
+      $apiError = $apiResponse['error'];
+      $apiConnectionFailed = $apiResponse['connectionFailed'];
+      $apiHttpCode = $apiResponse['httpCode'];
+      unset($result);
+    } else {
+      unset($apiError, $apiConnectionFailed, $apiHttpCode);
+    }
   }
 } //end if key check
 else {
@@ -216,9 +235,32 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
     <h2>You must <a href="admin.php?view=general">enter your Free UserSpice API key here</a> in order to use this feature.</h2>
   <?php } ?>
 
+  <?php if (isset($apiError)) { ?>
+    <div class="alert alert-danger" role="alert">
+      <?php if (isset($apiConnectionFailed) && $apiConnectionFailed) { ?>
+        <strong>Connection Error:</strong> <?= safeReturn($apiError) ?>
+      <?php } elseif (isset($apiHttpCode) && $apiHttpCode == 401) { ?>
+        <strong>Authentication Failed:</strong> Your API key appears to be invalid or missing.
+        Please verify your key on the <a href="admin.php?view=general">General Settings</a> page.
+      <?php } elseif (isset($apiHttpCode) && $apiHttpCode == 403) { ?>
+        <strong>Access Denied:</strong> Your IP address may have been temporarily blocked due to too many failed attempts.
+        Please wait and try again later, or contact support.
+      <?php } elseif (isset($apiHttpCode) && $apiHttpCode == 429) { ?>
+        <strong>Rate Limit Reached:</strong> You have exceeded the daily API request limit.
+        Please try again tomorrow.
+      <?php } else { ?>
+        <strong>API Error:</strong> <?= safeReturn($apiError) ?><br>
+        The API responded but was not successful. Please check your API key. Please be careful not to keep retrying or you may get banned.
+      <?php } ?>
+    </div>
+  <?php } ?>
+
   <?php if (isset($result)) {
     echo "<div class='row'>";
     $dev = json_decode($result);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      $dev = null;
+    }
   $counter = 0;
   if (!is_null($dev)) {
     foreach ($dev as $d) {

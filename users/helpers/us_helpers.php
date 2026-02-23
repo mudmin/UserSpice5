@@ -41,8 +41,7 @@ if (!function_exists('ipCheckBan')) {
     if ($ban > 0) {
       $unban = $db->query('SELECT id FROM us_ip_whitelist WHERE ip = ?', [$ip])->count();
       if ($unban == 0) {
-        //on blacklist and not on whitelist
-        logger(0, 'IP Logging', 'Blacklisted ' . $ip . ' attempted visit');
+        //Removed log. If anyone wants to re-add it, you can do it as a hook.
         if ($eventhooks = getMyHooks(['page' => 'hitBanned'])) {
           includeHook($eventhooks, 'body');
         }
@@ -712,15 +711,15 @@ if (!function_exists('adminNotifications')) {
       $id = (int) $id;
       if ($type == 'read') {
         $db->query("UPDATE notifications SET is_read = 1 WHERE id = ?", [$id]);
-        logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id read.");
+        // logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id read.");
       }
       if ($type == 'unread') {
         $db->query("UPDATE notifications SET is_read = 0,is_archived=0 WHERE id = ?", [$id]);
-        logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id unread.");
+        // logger($user_id, 'Notifications - Admin', "Marked Notification ID #$id unread.");
       }
       if ($type == 'delete') {
         $db->query("UPDATE notifications SET is_archived = 1 WHERE id = ?", [$id]);
-        logger($user_id, 'Notifications - Admin', "Deleted Notification ID #$id.");
+        // logger($user_id, 'Notifications - Admin', "Deleted Notification ID #$id.");
       }
       ++$i;
     }
@@ -1550,8 +1549,7 @@ if (!function_exists('UserSpice_getLogs')) {
       // Return the results
       return $db->results();
     } else {
-      // Pretty silly to log an error to a system we can't get the logs for..........but we'll do it anyways!
-      logger($userId, __FUNCTION__, 'Failed to retrieve logs', ['ERROR' => $db->errorString()]);
+
       // Return an array since views/_admin_logs expects this
       return [];
     }
@@ -2032,5 +2030,105 @@ if (!function_exists('is_path_writable')) {
       }
     }
     return true;
+  }
+}
+
+/**
+ * Validate a cURL API response for common failure modes.
+ * Must be called BEFORE curl_close() since it reads curl state.
+ *
+ * Returns an associative array:
+ *   'success'          => bool
+ *   'error'            => string|null  (human-readable error message)
+ *   'connectionFailed' => bool         (true if curl itself failed)
+ *   'httpCode'         => int
+ *   'curlErrno'        => int
+ *   'curlError'        => string|null
+ *   'result'           => string|null  (raw response body, null on failure)
+ */
+function usValidateApiResponse($result, $ch): array
+{
+  $curlErrno = curl_errno($ch);
+  $curlError = $curlErrno ? curl_error($ch) : null;
+  $httpCode  = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+  $response = [
+    'success'          => true,
+    'error'            => null,
+    'connectionFailed' => false,
+    'httpCode'         => $httpCode,
+    'curlErrno'        => $curlErrno,
+    'curlError'        => $curlError,
+    'result'           => $result,
+  ];
+
+  // 1. cURL-level failure (DNS, timeout, connection refused, etc.)
+  if ($result === false || $curlErrno) {
+    $response['success']          = false;
+    $response['connectionFailed'] = true;
+    $response['error']            = "Could not connect to the API"
+      . ($curlError ? ": " . safeReturn($curlError) : "");
+    $response['result']           = null;
+    return $response;
+  }
+
+  // 2. HTTP error status
+  if ($httpCode >= 400) {
+    $response['success'] = false;
+    $response['error']   = "API returned an error (HTTP $httpCode)";
+    $response['result']  = null;
+    return $response;
+  }
+
+  // 3. HTTP 200 but response body contains an API-level error
+  $decoded = json_decode($result);
+
+  if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+    $response['success'] = false;
+    $response['error']   = "Invalid response from the API";
+    $response['result']  = null;
+    return $response;
+  }
+
+  if (is_object($decoded)) {
+    if (isset($decoded->error) || (isset($decoded->success) && !$decoded->success)) {
+      $response['success'] = false;
+      $response['error']   = isset($decoded->error) ? (string) $decoded->error
+        : (isset($decoded->msg) ? (string) $decoded->msg : "API request was not successful");
+      $response['result']  = null;
+      return $response;
+    }
+  }
+
+  return $response;
+}
+
+if (!function_exists('fetchUserName')) {
+  function fetchUserName($username = null, $id = null)
+  {
+    global $db;
+
+    if ($username !== null && trim((string)$username) !== '') {
+      $column = 'username';
+      $data = trim((string)$username);
+    } elseif ($id !== null && (int)$id > 0) {
+      $column = 'id';
+      $data = (int)$id;
+    } else {
+      return 'Unknown';
+    }
+
+    $query = $db->query(
+      "SELECT TRIM(CONCAT(COALESCE(fname,''), ' ', COALESCE(lname,''))) AS name
+       FROM users WHERE `$column` = ? LIMIT 1",
+      [$data]
+    );
+
+    if ($query->count() > 0) {
+      $name = trim((string)$query->first()->name);
+      return ($name !== '') ? $name : 'Unnamed User';
+    }
+
+    return 'Unknown';
   }
 }

@@ -159,7 +159,7 @@ class RateLimit
 			$this->db->delete('us_rate_limits', ['identifier_key' => $identifier, 'action' => $action, 'success' => 0]);
 		}
 
-		logger(0, "RateLimit", "Cleared failed attempts for $action: " . implode(', ', array_keys($identifiers)));
+		// logger(0, "RateLimit", "Cleared failed attempts for $action: " . implode(', ', array_keys($identifiers)));
 		return true;
 	}
 
@@ -279,9 +279,9 @@ class RateLimit
 		$cutoffTime = date('Y-m-d H:i:s', time() - ($olderThanHours * 3600));
 		$this->db->delete('us_rate_limits', ['attempt_time', '<', $cutoffTime]);
 		$count = $this->db->count();
-		if ($count > 0) {
-			logger(0, "RateLimit", "Cleaned up $count old rate limit records");
-		}
+		// if ($count > 0) {
+		// 	logger(0, "RateLimit", "Cleaned up $count old rate limit records");
+		// }
 		return $count;
 	}
 
