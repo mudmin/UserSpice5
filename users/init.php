@@ -36,5 +36,7 @@ require_once $abs_us_root.$us_url_root.'users/helpers/helpers.php';
 // Set config
 $GLOBALS['config'] = array(
 	'mysql'      => array(
+	//options for PDO connection overrides
+	// 'collation'    => 'utf8mb4_general_ci',	
 	'force_utc_mysql' => false,
 	'charset'      => 'utf8mb4',		
