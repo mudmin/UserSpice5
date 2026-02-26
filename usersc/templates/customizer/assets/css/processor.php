@@ -63,15 +63,12 @@ if ($usingChildTheme) {
     }
 }
 
-if(isset($customizations['custom-css'])){
-    $customCSS = $customizations['custom-css'];
-    unset($customizations['custom-css']);
+if(isset($customizations['custom_css'])){
+    $customCSS = $customizations['custom_css'];
+    unset($customizations['custom_css']);
 } else {
     $customCSS = '';
 }
-
-
-
 
 // Start building the CSS output
 $cssOutput = "/* Generated Bootstrap 5 Customizations */\n";
