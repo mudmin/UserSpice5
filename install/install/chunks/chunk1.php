@@ -35,7 +35,8 @@ $user = new User();
 
 //Check to see that user is verified
 if($user->isLoggedIn()){
-	if($user->data()->email_verified == 0 && $currentPage != 'verify.php' && $currentPage != 'logout.php' && $currentPage != 'verify_thankyou.php'){
+	$verifySkipPages = ['verify.php', 'logout.php', 'verify_thankyou.php', 'verify_resend.php'];
+	if($user->data()->email_verified == 0 && !in_array($currentPage, $verifySkipPages)){
 		Redirect::to($us_url_root.'users/verify.php');
 	}
 }
