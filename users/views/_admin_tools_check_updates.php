@@ -421,6 +421,13 @@ $update_available = false;
                   logger($user->data()->id, $result->next_ver, $result->message);
                   logger($user->data()->id, $result->next_ver, 'Running migration script(s)');
 
+                  // Clear OPcache so PHP picks up the newly extracted files
+                  // Without this, cached bytecode may reference old versions of
+                  // helpers/classes causing "undefined function" errors on reload
+                  if (function_exists('opcache_reset')) {
+                    opcache_reset();
+                  }
+
                   Redirect::to($us_url_root . 'users/updates/index.php?auto=1');
                 } else {
                   // Extraction failed

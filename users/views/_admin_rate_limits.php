@@ -184,38 +184,6 @@ $proxy_configs = $db->query("
     ORDER BY priority ASC
 ")->results();
 
-// Calculate rate limiting health score
-function calculateRateLimitHealth($rateLimits, $using_defaults, $proxy_enabled, $proxy_count)
-{
-    $score = 0;
-    $max_score = 100;
-
-    // Not using defaults (40 points)
-    if (!$using_defaults) $score += 40;
-
-    // Key actions have reasonable limits (30 points)
-    $key_actions = ['login_attempt', 'password_reset_request', 'registration_attempt'];
-    foreach ($key_actions as $action) {
-        if (isset($rateLimits[$action]['ip_max']) && $rateLimits[$action]['ip_max'] < 1000) {
-            $score += 10;
-        }
-    }
-
-    // Proxy configuration (20 points)
-    if ($proxy_enabled && $proxy_count > 0) {
-        $score += 20;
-    } elseif (!$proxy_enabled) {
-        $score += 15; // Not behind proxy is also good
-    }
-
-    // Rate limiting enabled (10 points)
-    if (class_exists('RateLimit')) $score += 10;
-
-    return min($score, $max_score);
-}
-
-$rate_limit_health = calculateRateLimitHealth($rateLimits, $using_default_rate_limits, $proxy_enabled, $proxy_config_count);
-$health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60 ? 'warning' : 'danger');
 ?>
 
 <style>
@@ -258,6 +226,17 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
         font-weight: bold;
     }
 
+    #autoConfigModal .list-group-item.active {
+        background-color: transparent;
+        color: inherit;
+        border-color: rgba(13, 110, 253, 0.5);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25), 0 0 10px rgba(13, 110, 253, 0.15);
+    }
+
+    #autoConfigModal .list-group-item.active .badge {
+        color: inherit;
+    }
+
     .autoConfigBtn {
         animation: breathe 5s ease-in-out infinite;
     }
@@ -274,9 +253,11 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
 
 <div class="row">
     <div class="col-12">
-        <h2 class="mb-3">
-            <i class="fas fa-traffic-light me-2"></i>Rate Limiting Control Center
-            <span class="badge bg-<?= $health_color ?> ms-2"><?= $rate_limit_health ?>% Health Score</span>
+        <h2 class="mb-3 d-flex align-items-center flex-wrap">
+            <span><i class="fas fa-traffic-light me-2"></i>Rate Limiting Control Center</span>
+            <a href="<?= $us_url_root ?>users/admin.php?view=security" class="btn btn-sm btn-outline-secondary ms-auto">
+                <i class="fas fa-arrow-left me-1"></i>Security Dashboard
+            </a>
         </h2>
         <p class="mb-4">Configure and monitor your rate limiting system to protect against brute-force attacks and abuse. Rate limiting tracks and restricts repeated actions from the same source.</p>
     </div>
@@ -290,13 +271,7 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
             </div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-6 col-md-3">
-                        <div class="border-end">
-                            <h4 class="mb-1 text-<?= $health_color ?>"><?= $rate_limit_health ?>%</h4>
-                            <small class="text-muted">Health Score</small>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-md-4">
                         <div class="border-end">
                             <h4 class="mb-1 <?= $using_default_rate_limits ? 'status-danger' : 'status-good' ?>">
                                 <?= $using_default_rate_limits ? 'DEFAULT' : 'CUSTOM' ?>
@@ -304,7 +279,7 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
                             <small class="text-muted">Configuration</small>
                         </div>
                     </div>
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-md-4">
                         <div class="border-end">
                             <h4 class="mb-1 <?= $proxy_enabled ? 'status-good' : 'status-warning' ?>">
                                 <?= $proxy_enabled ? 'YES' : 'NO' ?>
@@ -312,7 +287,7 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
                             <small class="text-muted">UserSpice is Behind Proxy</small>
                         </div>
                     </div>
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-md-4">
                         <h4 class="mb-1 text-info"><?= count($recent_activity) ?></h4>
                         <small class="text-muted">Recent Events</small>
                     </div>
@@ -1189,5 +1164,11 @@ $health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60
                 this.querySelector('input[type="radio"]').checked = true;
             });
         });
+
+        // Auto-open the Auto-Configure modal if arriving via ?autoconfig=1
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autoconfig') === '1') {
+            showAutoConfigModal();
+        }
     });
 </script>

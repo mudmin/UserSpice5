@@ -49,17 +49,18 @@ class DB
 	private function __construct($config = [])
 	{
 		// Build PDO options once
+		
+		// Use the new constant if it exists, otherwise fallback to the old one
+		$initCommand = defined('Pdo\Mysql::ATTR_INIT_COMMAND')
+			? \Pdo\Mysql::ATTR_INIT_COMMAND
+			: \PDO::MYSQL_ATTR_INIT_COMMAND;
+
 		$this->opts = Config::get('mysql/options') ?: [
-			PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''",
+			$initCommand => "SET SESSION sql_mode = ''",
 		];
 		$this->opts[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;   // always throw exceptions
 
-		$charset = Config::get('mysql/charset') ?: 'utf8mb4';
-		$allowedCharsets = ['utf8', 'utf8mb4', 'latin1', 'ascii'];
-		$charset = strtolower(trim((string)$charset));
-		if (!in_array($charset, $allowedCharsets, true)) {
-		$charset = 'utf8mb4';
-		}
+		$charset = $this->getValidatedCharset();
 
 		/* Decide which credential/DSN set to use — identical logic to the
 		   original code, but we ALSO cache the outcome so reconnect() is
@@ -118,10 +119,7 @@ class DB
 			if (Config::get('mysql/force_utc_mysql') === true) {
 				$this->_pdo->exec("SET time_zone = '+00:00'");
 			}
-			$charset = Config::get('mysql/charset');
-			if ($charset != false && $charset != null && $charset != '') {
-				$this->_pdo->exec("SET NAMES '" . $charset . "'");
-			}
+			$this->applyCharsetAndCollation();
 		} catch (PDOException $e) {
 			//for debugging comment the line in below
 			//die($e->getMessage());
@@ -809,10 +807,7 @@ class DB
 			if (Config::get('mysql/force_utc_mysql') === true) {
 				$this->_pdo->exec("SET time_zone = '+00:00'");
 			}
-			$charset = Config::get('mysql/charset');
-			if ($charset != false && $charset != null && $charset != '') {
-				$this->_pdo->exec("SET NAMES '" . $charset . "'");
-			}
+			$this->applyCharsetAndCollation();
 			$this->_error = false; // Reset error state on successful reconnect
 			$this->_errorInfo = ['00000', null, null];
 		} catch (PDOException $e) {
@@ -823,6 +818,64 @@ class DB
 		}
 	}
 
+
+	/**
+	 * Validate that a string is a safe MySQL identifier (charset/collation name)
+	 * MySQL charset/collation names are typically letters, numbers, underscore
+	 */
+	private function is_safe_mysql_identifier(string $s): bool
+	{
+		return (bool) preg_match('/\A[a-zA-Z0-9_]+\z/', $s);
+	}
+
+	/**
+	 * Get validated charset from config, with fallback to utf8mb4
+	 */
+	private function getValidatedCharset(): string
+	{
+		$charset = Config::get('mysql/charset') ?: 'utf8mb4';
+		$charset = trim((string)$charset);
+
+		if (!$this->is_safe_mysql_identifier($charset)) {
+			throw new Exception("Invalid charset: must contain only alphanumeric and underscore characters");
+		}
+
+		return $charset;
+	}
+
+	/**
+	 * Apply charset and collation settings to the PDO connection
+	 * Only sets collation if configured in config
+	 */
+	private function applyCharsetAndCollation(): void
+	{
+		$charset = Config::get('mysql/charset');
+		$collation = Config::get('mysql/collation');
+
+		// Only proceed if charset is configured
+		if ($charset !== false && $charset !== null && $charset !== '') {
+			$charset = trim((string)$charset);
+
+			if (!$this->is_safe_mysql_identifier($charset)) {
+				throw new Exception("Invalid charset: must contain only alphanumeric and underscore characters");
+			}
+
+			$sql = "SET NAMES '{$charset}'";
+
+			// Only set collation if configured
+			if ($collation !== null && $collation !== '' && $collation !== false) {
+				$collation = trim((string)$collation);
+
+				if (!$this->is_safe_mysql_identifier($collation)) {
+					throw new Exception("Invalid collation: must contain only alphanumeric and underscore characters");
+				}
+
+				$sql .= " COLLATE '{$collation}'";
+			}
+
+			$this->_pdo->exec($sql);
+		}
+	}
 
 	private function _sanitizeTableName(string $table): string
 	{

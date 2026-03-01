@@ -36,7 +36,7 @@ $verify_success = FALSE;
 $errors = array();
 
 if (Input::exists('get')) {
-    if (is_numeric($user_id)) {
+    if (is_numeric($user_id) && empty($email)) {
         // Passwordless login mode
         $ts = date("Y-m-d H:i:s");
         if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/passwordless_login_overrides.php')) {

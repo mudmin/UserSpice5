@@ -88,6 +88,11 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
     margin: 0.75rem 0.75rem 0 0.75rem;
 }
 
+.toast-body > li {
+    margin-left: 1rem;
+    list-style-position: inside;
+}
+
 .us-toast-left .us-toast-body {
     padding-left: 0.75rem;
 }

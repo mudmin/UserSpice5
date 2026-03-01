@@ -710,23 +710,53 @@ if (!function_exists('fetchAllUsers')) {
     if ($orderBy !== null) {
       $orderBy = trim((string)$orderBy);
 
-      // Defense-in-depth: validate identifier format before any further processing
-      if ($orderBy !== '' && !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $orderBy)) {
-        logger(0, 'fetchAllUsers', "Invalid ORDER BY column format attempted: " . substr($orderBy, 0, 50));
-        $orderBy = ''; // Neutralize invalid input
-      }
-
-      static $whitelist = null;
-      if ($whitelist === null) {
-        $whitelist = [];
-        $columns = $db->query("SHOW COLUMNS FROM users")->results();
-        foreach ($columns as $col) {
-          $whitelist[] = $col->Field;
+      if ($orderBy !== '') {
+        static $whitelist = null;
+        if ($whitelist === null) {
+          $whitelist = [];
+          $columns = $db->query("SHOW COLUMNS FROM users")->results();
+          foreach ($columns as $col) {
+            $whitelist[] = $col->Field;
+          }
         }
-      }
 
-      if ($orderBy !== '' && in_array($orderBy, $whitelist, true)) {
-        $q .= " ORDER BY `{$orderBy}` " . ($desc ? 'DESC' : 'ASC');
+        // Support single column ('id') or multi-column ('permissions DESC,id')
+        $terms = explode(',', $orderBy);
+        $orderClauses = [];
+        $valid = true;
+
+        foreach ($terms as $term) {
+          $parts = preg_split('/\s+/', trim($term));
+          $col = $parts[0] ?? '';
+          $dir = strtoupper($parts[1] ?? '') ?: ($desc ? 'DESC' : 'ASC');
+
+          // Validate column name format
+          if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $col)) {
+            logger(0, 'fetchAllUsers', "Invalid ORDER BY column format attempted: " . substr(Input::sanitize($orderBy), 0, 50));
+            $valid = false;
+            break;
+          }
+
+          // Validate column exists in users table
+          if (!in_array($col, $whitelist, true)) {
+            logger(0, 'fetchAllUsers', "Invalid ORDER BY column format attempted: " . substr(Input::sanitize($orderBy), 0, 50));
+            $valid = false;
+            break;
+          }
+
+          // Validate direction
+          if ($dir !== 'ASC' && $dir !== 'DESC') {
+            logger(0, 'fetchAllUsers', "Invalid ORDER BY column format attempted: " . substr(Input::sanitize($orderBy), 0, 50));
+            $valid = false;
+            break;
+          }
+
+          $orderClauses[] = "`{$col}` {$dir}";
+        }
+
+        if ($valid && !empty($orderClauses)) {
+          $q .= " ORDER BY " . implode(', ', $orderClauses);
+        }
       }
     }
 

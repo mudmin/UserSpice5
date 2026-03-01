@@ -1,6 +1,7 @@
 <?php
-// Load Rate Limits
+// Load Rate Limits and shared health score function
 require_once $abs_us_root . $us_url_root . 'users/includes/rate_limits.php';
+require_once $abs_us_root . $us_url_root . 'users/includes/rate_limit_health.php';
 if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/totp_requirements.php')) {
     include $abs_us_root . $us_url_root . 'usersc/includes/totp_requirements.php';
 } else {
@@ -17,6 +18,12 @@ $using_default_rate_limits = false;
 if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt']['ip_max'] >= 10000) {
     $using_default_rate_limits = true;
 }
+
+// Rate limit health score (shared with rate limits page)
+$rl_proxy_enabled = isset($settings->behind_reverse_proxy) && $settings->behind_reverse_proxy;
+$rl_proxy_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
+$rate_limit_health = calculateRateLimitHealth($rateLimits, $using_default_rate_limits, $rl_proxy_enabled, $rl_proxy_count);
+$rl_health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60 ? 'warning' : 'danger');
 
 // Get current versions and track info
 $versionsQ = $db->query("SELECT * FROM us_versions WHERE id = 1");
@@ -903,8 +910,8 @@ if ($using_default_rate_limits) {
     $recommendations[] = [
         'title' => 'Customize Your Rate Limits',
         'text' => 'Your site is using the default, insecure rate limits. Customizing these is crucial for protecting your site against brute-force attacks and other automated abuse.',
-        'link_text' => 'Review Rate Limits',
-        'link_url' => '#rate-limiting-card'
+        'link_text' => 'Configure Rate Limits',
+        'link_url' => $us_url_root . 'users/admin.php?view=rate_limits&autoconfig=1'
     ];
 }
 
@@ -1789,8 +1796,9 @@ if (file_exists($customLoginScript)) {
 
         <div class="card mb-4" id="rate-limiting-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">
+                <h5 class="card-title mb-0 d-flex align-items-center">
                     <i class="fas fa-traffic-light me-2"></i>Rate Limiting & Protection
+                    <span class="badge bg-<?= $rl_health_color ?> ms-2"><?= $rate_limit_health ?>%</span>
                 </h5>
             </div>
             <div class="card-body">
@@ -1820,7 +1828,7 @@ if (file_exists($customLoginScript)) {
                     <div class="alert alert-danger p-2">
                         <strong>Warning: Default Rate Limits are Insecure!</strong><br>
                         <p class="mb-1">Your current rate limits are set to the default, extremely permissive values. These are not suitable for a production environment and should be customized immediately to protect against brute-force attacks.</p>
-                        <p class="mb-0 small">Please edit <code>usersc/includes/rate_limits.php</code> to lower the values. The comments in the file provide guidance on setting appropriate limits.</p>
+                        <p class="mb-0 small"><a href="<?= $us_url_root ?>users/admin.php?view=rate_limits&autoconfig=1">Use the Auto-Configure tool</a> to quickly set recommended values for your site.</p>
                     </div>
                 <?php else : ?>
                     <div class="alert alert-success p-2">
@@ -1830,7 +1838,7 @@ if (file_exists($customLoginScript)) {
                 <?php endif; ?>
             </div>
             <div class="card-footer">
-                <a href="<?= $us_url_root ?>users/admin.php?view=rate_limits" class="btn btn-sm btn-outline-primary">
+                <a href="<?= $us_url_root ?>users/admin.php?view=rate_limits&autoconfig=1" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-list me-1"></i>Manage Rate Limits
                 </a>
             </div>

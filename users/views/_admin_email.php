@@ -161,6 +161,21 @@ if (!empty($_POST)) {
   $results = $query->first();
 }
 
+// Check for default values that should be changed
+$defaults = [
+  'website_name' => 'User Spice',
+  'email_login'  => 'yourEmail@gmail.com',
+  'email_pass'   => '1234',
+  'from_name'    => 'User Spice',
+  'from_email'   => 'yourEmail@gmail.com',
+  'verify_url'   => 'http://localhost/userspice',
+];
+$glowFields = [];
+foreach ($defaults as $field => $defaultVal) {
+  if ($results->$field === $defaultVal) {
+    $glowFields[$field] = true;
+  }
+}
 ?>
 <form name='update' action='' method='post'>
   <h2 class="mb-3">Email Server Settings</h2>
@@ -180,7 +195,7 @@ if (!empty($_POST)) {
 
           <div class="form-group">
             <label>Website Name:</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='website_name' value='<?= $results->website_name; ?>' />
+            <input size='50' class='form-control<?= isset($glowFields['website_name']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='website_name' name='website_name' value='<?= $results->website_name; ?>' />
           </div>
           <div class="form-group">
             <label>SMTP Server:</label>
@@ -191,18 +206,20 @@ if (!empty($_POST)) {
             <input size='50' class='form-control' type='text' autocomplete="off" name='smtp_port' value='<?= $results->smtp_port; ?>' />
           </div>
           <label>Email Login/Username:</label>
-          <input size='50' class='form-control' type='password' autocomplete="off" name='emx' value='<?= $results->email_login; ?>' />
+          <input size='50' class='form-control<?= isset($glowFields['email_login']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='emx' name='emx' value='<?= $results->email_login; ?>' />
           <div class="form-group">
             <label>Email Password:</label>
-            <input size='50' class='form-control' type='password' autocomplete="off" name='emp' value='<?= $results->email_pass; ?>' />
+            <input size='50' class='form-control<?= isset($glowFields['email_pass']) ? ' default-glow' : '' ?>' type='password' autocomplete="off" id='emp' name='emp' value='<?= $results->email_pass; ?>' />
           </div>
           <div class="form-group">
             <label>From Name (For Sent Emails):</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='from_name' value='<?= $results->from_name; ?>' />
+            <button type="button" id="use-website-name" class="btn tiny-button btn-outline-primary">Use Website Name</button>
+            <input size='50' class='form-control<?= isset($glowFields['from_name']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='from_name' name='from_name' value='<?= $results->from_name; ?>' />
           </div>
           <div class="form-group">
             <label>From Email (For Sent Emails):</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='frome' value='<?= $results->from_email; ?>' />
+            <button type="button" id="use-email-login" class="btn tiny-button btn-outline-primary">Use Email Login</button>
+            <input size='50' class='form-control<?= isset($glowFields['from_email']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='frome' name='frome' value='<?= $results->from_email; ?>' />
           </div>
           <div class="form-group">
             <label>PHPMailer Authtype: (Typically CRAM-MD5, LOGIN, PLAIN, or XOAUTH2)</label>
@@ -311,7 +328,7 @@ if (!empty($_POST)) {
               Put http://yourdomain.com/ with the final / below: <br>
               Example: <span id="most-likely-url" class="fw-bold"><?= $example_root?></span> <button id="set-most-likely-url" class="btn tiny-button btn-outline-primary">Use This</button>
             </small>
-            <input size='50' class='form-control' id="verify-url" type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
+            <input size='50' class='form-control<?= isset($glowFields['verify_url']) ? ' default-glow' : '' ?>' id="verify-url" type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
           </div>
           <div class="form-group">
             <label for="email_act">Require User to Verify Their Email</label>
@@ -357,6 +374,28 @@ if($results->email_act == 0){
   document.getElementById('set-most-likely-url').addEventListener('click', function(e) {
     e.preventDefault();
     document.getElementById('verify-url').value = document.getElementById('most-likely-url').innerText;
+    document.getElementById('verify-url').classList.remove('default-glow');
+  });
+
+  // Use Website Name as From Name
+  document.getElementById('use-website-name').addEventListener('click', function() {
+    var fromName = document.getElementById('from_name');
+    fromName.value = document.getElementById('website_name').value;
+    fromName.classList.remove('default-glow');
+  });
+
+  // Use Email Login as From Email
+  document.getElementById('use-email-login').addEventListener('click', function() {
+    var fromEmail = document.getElementById('frome');
+    fromEmail.value = document.getElementById('emx').value;
+    fromEmail.classList.remove('default-glow');
+  });
+
+  // Remove glow when user changes a field
+  document.querySelectorAll('.default-glow').forEach(function(el) {
+    el.addEventListener('input', function() {
+      this.classList.remove('default-glow');
+    });
   });
 </script>
 <style>
@@ -365,5 +404,9 @@ if($results->email_act == 0){
     font-size: 0.7rem;
     margin-left: 0.5rem;
     margin-bottom: 0.25rem;
+  }
+  .default-glow {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 6px 2px rgba(220, 53, 69, 0.5);
   }
 </style>
