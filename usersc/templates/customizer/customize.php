@@ -698,11 +698,49 @@ function renderInputField($name, $set)
                       <div class="col-md-6 col-lg-4 mb-3">
                         <div class="card">
                           <div class="card-header">
-                            <h5 class="mb-0"><?= ucfirst($componentType) ?></h5>
+                            <h5 class="mb-0"><?= ucwords(str_replace('_', ' ', $componentType)) ?></h5>
                           </div>
                           <div class="card-body">
-                            <p>Includes styles for: <?= implode(', ', $config['colors']) ?></p>
-                            <p>Templates: <?= implode(', ', array_keys($config['templates'])) ?></p>
+                            <?php if ($componentType === 'buttons') : ?>
+                              <div class="d-flex flex-wrap gap-1 mb-2">
+                                <?php foreach ($config['colors'] as $color) : ?>
+                                  <button type="button" class="btn btn-<?= $color ?> btn-sm"><?= ucfirst($color) ?></button>
+                                <?php endforeach; ?>
+                              </div>
+                              <div class="d-flex flex-wrap gap-1">
+                                <?php foreach (array_slice($config['colors'], 0, 4) as $color) : ?>
+                                  <button type="button" class="btn btn-outline-<?= $color ?> btn-sm"><?= ucfirst($color) ?></button>
+                                <?php endforeach; ?>
+                              </div>
+                            <?php elseif ($componentType === 'alerts') : ?>
+                              <?php foreach (array_slice($config['colors'], 0, 4) as $color) : ?>
+                                <div class="alert alert-<?= $color ?> py-1 px-2 mb-1" style="font-size: 0.8rem;">
+                                  <?= ucfirst($color) ?> alert
+                                </div>
+                              <?php endforeach; ?>
+                            <?php elseif ($componentType === 'badges') : ?>
+                              <div class="d-flex flex-wrap gap-1">
+                                <?php foreach ($config['colors'] as $color) : ?>
+                                  <span class="badge bg-<?= $color ?>"><?= ucfirst($color) ?></span>
+                                <?php endforeach; ?>
+                              </div>
+                            <?php elseif ($componentType === 'list_groups') : ?>
+                              <ul class="list-group list-group-flush" style="font-size: 0.8rem;">
+                                <?php foreach (array_slice($config['colors'], 0, 5) as $color) : ?>
+                                  <li class="list-group-item list-group-item-<?= $color ?> py-1 px-2"><?= ucfirst($color) ?></li>
+                                <?php endforeach; ?>
+                              </ul>
+                            <?php elseif ($componentType === 'backgrounds') : ?>
+                              <div class="d-flex flex-wrap gap-1">
+                                <?php foreach ($config['colors'] as $color) : ?>
+                                  <div class="rounded px-2 py-1 bg-<?= $color ?> <?= in_array($color, ['light', 'warning', 'info']) ? 'text-dark' : 'text-white' ?>" style="font-size: 0.75rem;">
+                                    <?= ucfirst($color) ?>
+                                  </div>
+                                <?php endforeach; ?>
+                              </div>
+                            <?php else : ?>
+                              <p class="mb-0 text-muted">Styles for: <?= implode(', ', $config['colors']) ?></p>
+                            <?php endif; ?>
                           </div>
                         </div>
                       </div>
