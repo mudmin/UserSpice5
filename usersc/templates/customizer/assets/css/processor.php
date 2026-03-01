@@ -70,6 +70,9 @@ if(isset($customizations['custom_css'])){
     $customCSS = '';
 }
 
+
+
+
 // Start building the CSS output
 $cssOutput = "/* Generated Bootstrap 5 Customizations */\n";
 $cssOutput .= "/* Generated on: " . date('Y-m-d H:i:s') . " by ". $user->data()->fname . " " . $user->data()->lname ." */\n";

@@ -24,6 +24,8 @@ return [
                     'values' => [
                         'text_color' => [
                             'light' => 'var(--bs-dark)',
+                            'warning' => 'var(--bs-dark)',
+                            'info' => 'var(--bs-dark)',
                             'default' => '#fff'
                         ],
                         'hover_fallback' => [
@@ -48,6 +50,8 @@ return [
                     'values' => [
                         'text_color' => [
                             'light' => 'var(--bs-dark)',
+                            'warning' => 'var(--bs-dark)',
+                            'info' => 'var(--bs-dark)',
                             'default' => '#fff'
                         ]
                     ]
@@ -80,6 +84,8 @@ return [
                     'values' => [
                         'text_color' => [
                             'light' => 'var(--bs-dark)',
+                            'warning' => 'var(--bs-dark)',
+                            'info' => 'var(--bs-dark)',
                             'default' => '#fff'
                         ]
                     ]
@@ -129,6 +135,8 @@ return [
                     'values' => [
                         'text_color' => [
                             'light' => 'var(--bs-dark)',
+                            'warning' => 'var(--bs-dark)',
+                            'info' => 'var(--bs-dark)',
                             'default' => '#fff'
                         ]
                     ]
@@ -142,6 +150,8 @@ return [
                     'values' => [
                         'text_color' => [
                             'light' => 'var(--bs-dark)',
+                            'warning' => 'var(--bs-dark)',
+                            'info' => 'var(--bs-dark)',
                             'default' => '#fff'
                         ]
                     ]

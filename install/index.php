@@ -338,7 +338,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
     <title>UserSpice Installation</title>
     <style>
         :root {
-            --primary: #4e73df;
+            --primary: #0050e6;
             --secondary: #6c757d;
             --success: #1cc88a;
             --danger: #e74a3b;
@@ -400,7 +400,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         }
 
         .header {
-            background: linear-gradient(135deg, var(--primary) 0%, #2a52be 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #0050e6 100%);
             color: var(--white);
             padding: 2rem 0;
             margin-bottom: 2rem;
@@ -502,7 +502,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         .form-control:focus {
             border-color: var(--primary);
             outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 80, 230, 0.25);
         }
 
         .form-control.is-invalid {
@@ -549,8 +549,8 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         }
 
         .btn-primary:hover {
-            background-color: #2653d4;
-            border-color: #244ec9;
+            background-color: #0044c4;
+            border-color: #003fb8;
         }
 
         .btn-success {

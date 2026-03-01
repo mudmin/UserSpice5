@@ -74,7 +74,7 @@ return [
             'label'       => 'Input Focus Box Shadow',
             'type'        => 'shadow',
             'variable'    => '--bs-input-focus-box-shadow',
-            'value'       => '0 0 0 0.25rem rgba(13, 110, 253, 0.25)',
+            'value'       => '0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25)',
             'css_rules'   => [
                 '.form-control:focus, .form-select:focus, .form-check-input:focus' => [
                     'box-shadow' => 'var(--bs-input-focus-box-shadow)'
