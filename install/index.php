@@ -301,30 +301,48 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
 
 // Step 3 cleanup process
 if ($step == 3 && isset($_POST['cleanup'])) {
+    // Buffer any warnings/output so headers can still be sent cleanly
+    ob_start();
+
+    // Update init.php with random strings (do this first, before deleting anything)
+    $str = file_get_contents('../users/init.php');
+    if ($str !== false) {
+        $str = str_replace('pmqesoxiw318374csb', randomString(20), $str);
+        $str = str_replace("'session_name' => 'user'", "'session_name' => '" . randomString(20) . "'", $str);
+        file_put_contents('../users/init.php', $str);
+    }
+
     // Delete installation files
     foreach ($files as $file) {
         if (file_exists($file)) {
-            if (!unlink($file)) {
-                $deleteErrors[] = "Error deleting $file";
-            } else {
-                $deleted[] = "Deleted $file";
-            }
+            @unlink($file);
         }
     }
 
-    // Update init.php with random strings
-    $str = file_get_contents('../users/init.php');
-    $str = str_replace('pmqesoxiw318374csb', randomString(20), $str);
-    $str = str_replace("'session_name' => 'user'", "'session_name' => '" . randomString(20) . "'", $str);
-    file_put_contents('../users/init.php', $str);
+    // Delete license.php
+    if (file_exists('license.php')) {
+        @unlink('license.php');
+    }
 
-    // Remove install directory
+    // Remove install subdirectory (contains settings, sql, chunks)
     if (is_dir("install")) {
         rrmdir("install");
     }
 
-    // Redirect to update.php
-    redirect("../users/update.php?installer=1");
+    // Remove the install folder itself
+    $installDir = __DIR__;
+    // Delete any remaining files in the install folder
+    foreach (glob($installDir . '/*') as $remaining) {
+        if (is_file($remaining)) {
+            @unlink($remaining);
+        }
+    }
+    @rmdir($installDir);
+
+    // Discard any buffered warnings/output and redirect
+    ob_end_clean();
+    header('Location: ../users/update.php?installer=1');
+    exit();
 }
 
 // HTML Output Begins
@@ -338,7 +356,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
     <title>UserSpice Installation</title>
     <style>
         :root {
-            --primary: #0050e6;
+            --primary: #1a3a8f;
             --secondary: #6c757d;
             --success: #1cc88a;
             --danger: #e74a3b;
@@ -400,7 +418,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         }
 
         .header {
-            background: linear-gradient(135deg, var(--primary) 0%, #0050e6 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #102d73 100%);
             color: var(--white);
             padding: 2rem 0;
             margin-bottom: 2rem;
@@ -502,7 +520,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         .form-control:focus {
             border-color: var(--primary);
             outline: 0;
-            box-shadow: 0 0 0 0.2rem rgba(0, 80, 230, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(26, 58, 143, 0.25);
         }
 
         .form-control.is-invalid {
@@ -549,8 +567,8 @@ if ($step == 3 && isset($_POST['cleanup'])) {
         }
 
         .btn-primary:hover {
-            background-color: #0044c4;
-            border-color: #003fb8;
+            background-color: #122d6e;
+            border-color: #0f2860;
         }
 
         .btn-success {
@@ -725,6 +743,28 @@ if ($step == 3 && isset($_POST['cleanup'])) {
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 8px 10px;
+        }
+
+        /* Loading spinner */
+        .btn-loading {
+            pointer-events: none;
+            opacity: 0.75;
+        }
+
+        .btn-loading .spinner {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: -0.125em;
+            margin-right: 0.4em;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Responsive adjustments */
@@ -1010,10 +1050,16 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 </div>
 
                                 <div class="text-center">
-                                    <button type="submit" name="tryToCreate" value="1" class="btn btn-success">Yes, Create it For Me</button>
+                                    <button type="submit" name="tryToCreate" value="1" class="btn btn-success" id="btnCreate">Yes, Create it For Me</button>
                                     <a href="index.php?step=2" class="btn btn-danger ml-2">No, Let Me Change My Info</a>
                                 </div>
                             </form>
+                            <script>
+                            document.getElementById('btnCreate').addEventListener('click', function() {
+                                this.classList.add('btn-loading');
+                                this.innerHTML = '<span class="spinner"></span> Creating database and importing tables...';
+                            });
+                            </script>
                         <?php elseif (isset($dbConnectionPartial) && $dbConnectionPartial && !$success) : ?>
                             <div class="alert alert-warning">
                                 Database server connection <strong>successful</strong>, but could not connect to or create the database. Please check your database name and user permissions.
@@ -1119,9 +1165,15 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                 </div>
 
                                 <div class="text-center mt-4">
-                                    <button type="submit" name="submit" class="btn btn-success btn-lg">Finalize Installation</button>
+                                    <button type="submit" name="submit" class="btn btn-success btn-lg" id="btnFinalize">Finalize Installation</button>
                                 </div>
                             </form>
+                            <script>
+                            document.getElementById('btnFinalize').addEventListener('click', function() {
+                                this.classList.add('btn-loading');
+                                this.innerHTML = '<span class="spinner"></span> Finalizing installation, please wait...';
+                            });
+                            </script>
                         <?php endif; ?>
                     <?php endif; ?>
 
@@ -1204,7 +1256,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                             </div>
 
                             <div class="text-center mt-4">
-                                <button type="submit" name="test" class="btn btn-primary btn-lg">Attempt to Install</button>
+                                <button type="submit" name="test" class="btn btn-primary btn-lg" id="btnInstall">Attempt to Install</button>
                             </div>
                         </form>
 
@@ -1296,6 +1348,10 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                     if (!isValid) {
                                         event.preventDefault();
                                         event.stopPropagation();
+                                    } else {
+                                        var btn = document.getElementById('btnInstall');
+                                        btn.classList.add('btn-loading');
+                                        btn.innerHTML = '<span class="spinner"></span> Attempting to install, please wait...';
                                     }
                                 });
 
@@ -1332,8 +1388,14 @@ if ($step == 3 && isset($_POST['cleanup'])) {
 
                     <form action="" method="post">
                         <input type="hidden" name="step" value="3">
-                        <button type="submit" name="cleanup" class="btn btn-danger btn-lg mt-3">Cleanup Install Files</button>
+                        <button type="submit" name="cleanup" class="btn btn-danger btn-lg mt-3" id="btnCleanup">Cleanup Install Files</button>
                     </form>
+                    <script>
+                    document.getElementById('btnCleanup').addEventListener('click', function() {
+                        this.classList.add('btn-loading');
+                        this.innerHTML = '<span class="spinner"></span> Cleaning up, please wait...';
+                    });
+                    </script>
                 </div>
             </div>
         <?php endif; ?>
