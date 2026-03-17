@@ -545,6 +545,44 @@ if (!empty($_POST) && isset($_POST['dismiss_init_backup'])) {
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Handle fix $_SERVER request for security_headers.php
+if (!empty($_POST) && isset($_POST['fix_server_headers'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.php';
+    $backup_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.php';
+
+    if (fixServerVariableUsageHeaders($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Fixed $_SERVER usage in security_headers.php (backup created)');
+        usSuccess('Successfully replaced $_SERVER with Server::get() in security_headers.php. A backup was created at usersc/includes/security_headers.BACKUP.php');
+    } else {
+        usError('Could not fix the file automatically. The file may not be writable or no changes were needed.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle dismiss backup request for security_headers.php
+if (!empty($_POST) && isset($_POST['dismiss_headers_backup'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $backup_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.php';
+    $save_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.SAVE.php';
+
+    if (file_exists($backup_path) && @rename($backup_path, $save_path)) {
+        logger($user->data()->id, 'Security', 'Dismissed security_headers.BACKUP.php (renamed to .BACKUP.SAVE.php)');
+        usSuccess('Backup dismissed. The file has been renamed to security_headers.BACKUP.SAVE.php');
+    } else {
+        usError('Could not dismiss the backup file.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
 // Function to enable EXTRA_CURL_SECURITY in users/init.php
 function enableExtraCurlSecurity($file_path, $backup_path): bool {
     if (!file_exists($file_path) || !is_writable($file_path)) {
@@ -569,6 +607,13 @@ function enableExtraCurlSecurity($file_path, $backup_path): bool {
     if (preg_match("/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*false\s*\)/", $contents)) {
         $newContents = preg_replace(
             "/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*false\s*\)/",
+            "define('EXTRA_CURL_SECURITY', true)",
+            $contents
+        );
+    } elseif (strpos($contents, 'EXTRA_CURL_SECURITY') !== false) {
+        // Defined with a non-standard value (e.g. TRUE, 1, 0) — replace the entire define statement
+        $newContents = preg_replace(
+            "/define\s*\(\s*['\"]EXTRA_CURL_SECURITY['\"]\s*,\s*[^)]*\)/",
             "define('EXTRA_CURL_SECURITY', true)",
             $contents
         );
@@ -780,16 +825,84 @@ function checkServerVariableUsageRoot($file_path) {
     ];
 }
 
+// Check for raw $_SERVER usage in security_headers.php - only fixable if the exact default line is present
+function checkServerVariableUsageHeaders($file_path) {
+    if (!file_exists($file_path)) {
+        return ['found' => false, 'error' => 'File not found', 'fixable' => false];
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return ['found' => false, 'error' => 'Could not read file', 'fixable' => false];
+    }
+
+    // Check for the exact default line that uses raw $_SERVER
+    $exactMatch = '$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";';
+
+    if (strpos($contents, $exactMatch) !== false) {
+        return ['found' => true, 'error' => null, 'fixable' => true];
+    }
+
+    // Check if there are any $_SERVER usages at all (outside comments)
+    $contentsNoComments = preg_replace('#//.*$#m', '', $contents);
+    $contentsNoComments = preg_replace('#/\*.*?\*/#s', '', $contentsNoComments);
+
+    if (preg_match('/\$_SERVER\s*\[/', $contentsNoComments)) {
+        return ['found' => true, 'error' => null, 'fixable' => false];
+    }
+
+    return ['found' => false, 'error' => null, 'fixable' => false];
+}
+
+// Function to fix $_SERVER usage in security_headers.php
+function fixServerVariableUsageHeaders($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
+    }
+
+    $oldLine = '$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";';
+    $newLine = '$protocol = (Server::get(\'HTTPS\') !== \'\' || Server::get(\'SERVER_PORT\') == 443) ? "https://" : "http://";';
+
+    if (strpos($contents, $oldLine) === false) {
+        return false;
+    }
+
+    // Create backup first
+    if (file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
+
+    $newContents = str_replace($oldLine, $newLine, $contents);
+
+    if ($newContents === $contents) {
+        @unlink($backup_path);
+        return false;
+    }
+
+    $result = file_put_contents($file_path, $newContents) !== false;
+
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+
+    return $result;
+}
+
 $server_var_init = checkServerVariableUsageInit($abs_us_root . $us_url_root . 'users/init.php');
 $server_var_root = checkServerVariableUsageRoot($abs_us_root . $us_url_root . 'z_us_root.php');
+$server_var_headers = checkServerVariableUsageHeaders($abs_us_root . $us_url_root . 'usersc/includes/security_headers.php');
 
 // Check for backup files
 $root_backup_exists = file_exists($abs_us_root . $us_url_root . 'z_us_root.BACKUP.php');
 $init_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.BACKUP.php');
+$headers_backup_exists = file_exists($abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.php');
 $curl_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php');
 
 // Calculate overall security score
-function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root)
+function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers)
 {
     $score = 100; // Start at 100 and deduct for missing items
     $max_score = 100;
@@ -837,12 +950,13 @@ function calculateSecurityScore($settings, $php_status, $rpid_status, $email_con
     // $_SERVER usage in critical files (5 points each)
     if ($server_var_init['found']) $score -= 5;
     if ($server_var_root['found']) $score -= 5;
+    if ($server_var_headers['found']) $score -= 5;
 
     return max($score, 0); // Don't go below 0
 }
 
 $is_updated = version_compare($user_spice_ver, $versions->release_version ?? "", '>=');
-$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root);
+$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers);
 $score_color = $security_score >= 75 ? 'success' : ($security_score >= 60 ? 'warning' : 'danger');
 
 // Build dynamic recommendations
@@ -920,7 +1034,7 @@ if ($settings->totp == 0) {
         'title' => 'Enable Two-Factor Authentication (TOTP)',
         'text' => 'Two-factor authentication adds a critical layer of security to user accounts, requiring a code from an authenticator app to log in.',
         'link_text' => 'Enable TOTP',
-        'link_url' => $us_url_root . 'users/admin.php?view=general#totp'
+        'link_url' => $us_url_root . 'users/admin.php?view=general&highlight=totp'
     ];
 }
 
@@ -929,7 +1043,7 @@ if (!$settings->passkeys) {
         'title' => 'Enable Passkeys',
         'text' => 'Passkeys offer a modern, secure, and passwordless login method that is resistant to phishing. Enable this option for your users.',
         'link_text' => 'Enable Passkeys',
-        'link_url' => $us_url_root . 'users/admin.php?view=general#passkeys'
+        'link_url' => $us_url_root . 'users/admin.php?view=general&highlight=passkeys'
     ];
 }
 
@@ -939,7 +1053,7 @@ if ($settings->debug > 0) {
         'title' => 'Disable Debug Mode',
         'text' => "Debug mode is currently active {$debug_level}. While useful for development, it can expose sensitive information and should be disabled on a live site.",
         'link_text' => 'Disable Debug Mode',
-        'link_url' => $us_url_root . 'users/admin.php?view=general#debug'
+        'link_url' => $us_url_root . 'users/admin.php?view=general&highlight=debug'
     ];
 }
 
@@ -1038,6 +1152,38 @@ if ($root_backup_exists && !$server_var_root['found']) {
         'link_text' => 'Dismiss',
         'link_url' => '#',
         'modal' => 'confirm-dismiss_root_backup',
+        'level' => 'warning',
+        'icon' => 'fa-archive'
+    ];
+}
+
+if ($server_var_headers['found']) {
+    if ($server_var_headers['fixable']) {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from security_headers.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>usersc/includes/security_headers.php</code> for <code>HTTPS</code> and <code>SERVER_PORT</code>. Use <code>Server::get()</code> instead for sanitized access and CLI compatibility.',
+            'link_text' => 'Fix Now',
+            'link_url' => '#',
+            'modal' => 'confirm-fix_server_headers'
+        ];
+    } else {
+        $recommendations[] = [
+            'title' => 'Remove $_SERVER from security_headers.php',
+            'text' => 'Direct use of <code>$_SERVER</code> was detected in <code>usersc/includes/security_headers.php</code>. The file has been modified from its default and cannot be automatically fixed. Please update the file manually to use <code>Server::get()</code>.',
+            'link_text' => 'View Header Status',
+            'link_url' => '#security-headers-card'
+        ];
+    }
+}
+
+// Show recommendation to dismiss backup if it exists and security_headers.php is now clean
+if ($headers_backup_exists && !$server_var_headers['found']) {
+    $recommendations[] = [
+        'title' => 'Dismiss security_headers.php Backup',
+        'text' => 'A backup file <code>usersc/includes/security_headers.BACKUP.php</code> exists from a previous fix. Since your site is working correctly, you can dismiss this backup.',
+        'link_text' => 'Dismiss',
+        'link_url' => '#',
+        'modal' => 'confirm-dismiss_headers_backup',
         'level' => 'warning',
         'icon' => 'fa-archive'
     ];
@@ -1225,7 +1371,7 @@ if (file_exists($customLoginScript)) {
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="<?= $us_url_root ?>users/admin.php?view=general#totp" class="quick-action-btn">
+                        <a href="<?= $us_url_root ?>users/admin.php?view=general&highlight=totp" class="quick-action-btn">
                             <i class="icon fas fa-mobile-alt <?= $settings->totp > 0 ? 'text-success' : 'text-warning' ?>"></i>
                             <span>Two-Factor Auth</span>
                             <span class="status <?= $settings->totp > 0 ? 'text-success' : 'text-warning' ?>">
@@ -1234,7 +1380,7 @@ if (file_exists($customLoginScript)) {
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="<?= $us_url_root ?>users/admin.php?view=general#passkeys" class="quick-action-btn">
+                        <a href="<?= $us_url_root ?>users/admin.php?view=general&highlight=passkeys" class="quick-action-btn">
                             <i class="icon fas fa-fingerprint <?= $settings->passkeys ? 'text-success' : 'text-warning' ?>"></i>
                             <span>Passkeys</span>
                             <span class="status <?= $settings->passkeys ? 'text-success' : 'text-warning' ?>"><?= $settings->passkeys ? 'ENABLED' : 'DISABLED' ?></span>
@@ -1255,7 +1401,7 @@ if (file_exists($customLoginScript)) {
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="<?= $us_url_root ?>users/admin.php?view=general#debug" class="quick-action-btn">
+                        <a href="<?= $us_url_root ?>users/admin.php?view=general&highlight=debug" class="quick-action-btn">
                             <i class="icon fas fa-bug <?= $settings->debug > 0 ? 'text-warning' : 'text-success' ?>"></i>
                             <span>Debug Mode</span>
                             <span class="status <?= $settings->debug > 0 ? 'text-warning' : 'text-success' ?>">
@@ -1408,7 +1554,7 @@ if (file_exists($customLoginScript)) {
                 </div>
             </div>
             <div class="card-footer">
-                <a href="<?= $us_url_root ?>users/admin.php?view=general#passkeys" class="btn btn-sm btn-outline-secondary">
+                <a href="<?= $us_url_root ?>users/admin.php?view=general&highlight=passkeys" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-cog me-1"></i>Configure Passkey Settings
                 </a>
             </div>
@@ -1788,7 +1934,7 @@ if (file_exists($customLoginScript)) {
                 </div>
             </div>
             <div class="card-footer">
-                <a href="<?= $us_url_root ?>users/admin.php?view=general#totp" class="btn btn-sm btn-outline-secondary">
+                <a href="<?= $us_url_root ?>users/admin.php?view=general&highlight=totp" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-cog me-1"></i>Configure TOTP Settings
                 </a>
             </div>
@@ -2126,6 +2272,72 @@ generate_confirmation_modal(
                     <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="dismiss_root_backup" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Dismiss
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($server_var_headers['found'] && $server_var_headers['fixable']) : ?>
+<div class="modal fade" id="confirm-fix_server_headers" tabindex="-1" aria-labelledby="confirm-fix_server_headers-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_server_headers-label">Fix $_SERVER Usage in security_headers.php</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will replace raw <code>$_SERVER['HTTPS']</code> and <code>$_SERVER['SERVER_PORT']</code> access with <code>Server::get('HTTPS')</code> and <code>Server::get('SERVER_PORT')</code>.
+                </div>
+                <p>The <code>Server</code> class provides sanitized access to server variables, helping prevent header injection and ensuring compatibility when running from the CLI.</p>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>usersc/includes/security_headers.BACKUP.php</code> before any changes are made.
+                </div>
+
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_server_headers" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($headers_backup_exists) : ?>
+<div class="modal fade" id="confirm-dismiss_headers_backup" tabindex="-1" aria-labelledby="confirm-dismiss_headers_backup-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-dismiss_headers_backup-label">Dismiss Backup File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Your site is working correctly with the updated <code>security_headers.php</code>.
+                </div>
+                <p>The backup file <code>usersc/includes/security_headers.BACKUP.php</code> will be renamed to <code>security_headers.BACKUP.SAVE.php</code> so it won't appear in future checks.</p>
+                <p><strong>Are you sure you want to dismiss this backup?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="dismiss_headers_backup" class="btn btn-success">
                         <i class="fas fa-check me-1"></i>Dismiss
                     </button>
                 </form>

@@ -139,7 +139,7 @@ $update_available = false;
               $class = "text-bg-success";
             }
           ?>
-            <div class="card text-bg-secondary mb-3 me-3 col">
+            <div class="card mb-3 me-3 col" style="color: #000 !important;">
               <h5>Your Version</h5>
               <h4><?= $user_spice_ver ?></h4>
             </div>

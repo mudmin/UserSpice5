@@ -30,7 +30,11 @@ foreach ($index as $i) {
 $parentOpts = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND `type` = ? ORDER BY label", [$menuId, "dropdown"])->results();
 $switchParent = ["0" => "Top Level"];
 foreach ($parentOpts as $p) {
-  $switchParent[$p->id] = $p->label;
+  $label = $p->label;
+  if (empty(trim(parseMenuLabel($label)))) {
+    $label = "(No Label - Item ID $p->id)";
+  }
+  $switchParent[$p->id] = $label;
 }
 
 
@@ -43,12 +47,26 @@ if ($parentId) {
   }
 }
 $children = [];
+$showSiblings = false;
+$childrenParentId = $itemId;
 if ($itemId !== 'new') {
   $item = $db->query("SELECT * FROM us_menu_items WHERE id = ? AND menu = ?", [$itemId, $menuId])->first();
   $children = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND parent = ? ORDER BY display_order", [$menuId, $itemId])->results();
+  // If editing a child item (not a dropdown) that has a parent, show siblings instead
+  if ($item && $parentId > 0 && count($children) == 0) {
+    $children = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND parent = ? ORDER BY display_order", [$menuId, $parentId])->results();
+    $showSiblings = true;
+    $childrenParentId = $parentId;
+  }
 }
 if($itemId == 'new' && $itemId !== 0) {
   $item = (object)['id' => '', 'menu' => $menuId, 'type' => 'link',  'label' => '', 'link' => '', 'icon_class' => '', 'link_target' => '_self', 'parent' => $parentId, 'display_order' => $lastOrder + 1, 'li_class' => '', 'a_class' => '', 'permissions' => "[0]", 'disabled' => "0"];
+  // When adding a new item to a parent, show the parent's existing children
+  if ($parentId > 0) {
+    $children = $db->query("SELECT * FROM us_menu_items WHERE menu = ? AND parent = ? ORDER BY display_order", [$menuId, $parentId])->results();
+    $showSiblings = true;
+    $childrenParentId = $parentId;
+  }
 }
 if ($item) {
   $item->permissions = json_decode($item->permissions, true);
@@ -421,11 +439,11 @@ if ($_POST) {
         <?php endif; ?>
       </div>
       <div class="col-md-6">
-        <div id="menu_items_wrapper" style="display: <?= $item ? 'none' : 'block' ?>;">
+        <div id="menu_items_wrapper" style="display: <?= ($item && !$showSiblings) ? 'none' : 'block' ?>;">
           <?php if ($menuId != 'new') : ?>
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h3>Items</h3>
-              <a class="btn btn-sm btn-dark" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=new&parent_id=<?= $itemId ?>">Add Item</a>
+              <h3>Submenu Items</h3>
+              <a class="btn btn-sm btn-dark" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=new&parent_id=<?= $childrenParentId ?>">Add Item</a>
             </div>
             <table class="table table-sm">
               <thead>
@@ -556,6 +574,7 @@ if ($_POST) {
     updateDisplayFields(type);
   });
 
+  const showSiblings = <?= $showSiblings ? 'true' : 'false' ?>;
   function updateDisplayFields(type) {
     if (type === 'dropdown') {
       $('#snippet_wrapper').hide();
@@ -564,17 +583,17 @@ if ($_POST) {
       $('#target_wrapper').hide();
     } else if (type === 'link') {
       $('#snippet_wrapper').hide();
-      $('#menu_items_wrapper').hide();
+      $('#menu_items_wrapper').toggle(showSiblings);
       $('#link_wrapper').show();
       $('#target_wrapper').show();
     } else if (type === 'separator') {
       $('#snippet_wrapper').hide();
-      $('#menu_items_wrapper').hide();
+      $('#menu_items_wrapper').toggle(showSiblings);
       $('#link_wrapper').hide();
       $('#target_wrapper').hide();
     } else if (type === 'snippet') {
       $('#snippet_wrapper').show();
-      $('#menu_items_wrapper').hide();
+      $('#menu_items_wrapper').toggle(showSiblings);
       $('#link_wrapper').hide();
       $('#target_wrapper').hide();
     }
@@ -626,7 +645,7 @@ if ($_POST) {
             action: 'sort_menu_items',
             order,
             menu_id: '<?= $menuId ?>',
-            item_id: '<?= $itemId ?>',
+            item_id: '<?= $childrenParentId ?>',
             token: '<?= Token::generate() ?>'
           }
         });

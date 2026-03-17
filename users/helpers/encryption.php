@@ -121,7 +121,8 @@ function totp_generate_key_file(string $totpKeyFile): void
     $never_generate_totp_key_file = $never_generate_totp_key_file ?? false;
 
     if (!totp_is_crypto_available()) {
-        die('Cannot generate TOTP key: no crypto backend available.');
+        totp_disable_and_log('Cannot generate TOTP key: no crypto backend available.');
+        return;
     }
     if ($never_generate_totp_key_file) {
         return; // developer override
@@ -177,7 +178,8 @@ const TOTP_CRYPTO_ENGINE = '{$cryptoEngine}';
 PHP;
 
     if (file_put_contents($totpKeyFile, $php, LOCK_EX) === false) {
-        die('Failed to write totp_key.php – check permissions.');
+        totp_disable_and_log('Failed to write totp_key.php – check directory permissions.');
+        return;
     }
     chmod($totpKeyFile, 0400);
 
@@ -188,6 +190,25 @@ PHP;
     define('TOTP_ENC_KEY', $b64Key);
     define('TOTP_CRYPTO_ENGINE', $cryptoEngine);
 }
+/**
+ * Gracefully disable TOTP when key file generation fails.
+ * Persists to DB so the setting sticks until an admin re-enables it.
+ */
+function totp_disable_and_log(string $reason): void
+{
+    global $settings, $db;
+
+    error_log("TOTP DISABLED: $reason");
+
+    if (isset($settings)) {
+        $settings->totp = 0;
+    }
+
+    if (isset($db)) {
+        $db->update('settings', 1, ['totp' => 0]);
+    }
+}
+
 /**
  * Append the key file to .gitignore (idempotent)
  */

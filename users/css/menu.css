@@ -261,3 +261,34 @@ ul.us_menu.dark .dropdown-divider{
   position: absolute;
   right: 3.0rem;
 }
+
+/* Mobile Menu Animation Fix */
+@media screen and (max-width: 992px) {
+
+    /* Override the default display: none to allow animation */
+    ul.us_menu.horizontal>li {
+        display: block !important;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        /* Ensure overflow is hidden immediately when closing */
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0s;
+    }
+
+    /* When expanded, animate to full height */
+    ul.us_menu.horizontal.expanded>li {
+        display: block !important;
+        max-height: 120px;
+        /* Enough for text, submenus will overflow */
+        opacity: 1;
+        overflow: visible;
+        /* Allow submenus to show */
+        /* Transition max-height/opacity normally, but delay overflow to visible until AFTER animation */
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0.4s;
+    }
+}
+
+/* Change cursor to pointer for the hamburger icon */
+.us_menu_mobile_control {
+    cursor: pointer;
+}

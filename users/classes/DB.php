@@ -884,17 +884,26 @@ class DB
 			throw new InvalidArgumentException("Invalid table name: cannot be empty.");
 		}
 
-		if (strlen($table) > 64) {
-			throw new InvalidArgumentException("Table name too long (max 64 chars).");
+		// Support database.table format for cross-database queries
+		$parts = explode('.', $table);
+		if (count($parts) > 2) {
+			throw new InvalidArgumentException("Invalid table name: '{$table}'. Too many dot-separated parts.");
 		}
 
-		// Table names must start with letter or underscore, followed by alphanumeric/underscore
-		// Reject anything with spaces, dots, backticks, or special chars
-		if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
-			throw new InvalidArgumentException("Invalid table name: '{$table}'. Must start with letter/underscore, contain only alphanumeric/underscore.");
+		$quoted = [];
+		foreach ($parts as $part) {
+			if (strlen($part) > 64) {
+				throw new InvalidArgumentException("Identifier too long (max 64 chars): '{$part}'.");
+			}
+
+			if (!preg_match('/^[A-Za-z0-9_]+$/', $part)) {
+				throw new InvalidArgumentException("Invalid table name: '{$table}'. Each part must contain only alphanumeric characters and underscores.");
+			}
+
+			$quoted[] = "`{$part}`";
 		}
 
-		return "`{$table}`";
+		return implode('.', $quoted);
 	}
 
 	private function _sanitizeColumnName(string $column): string

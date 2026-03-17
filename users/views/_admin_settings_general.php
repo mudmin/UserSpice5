@@ -336,7 +336,7 @@ if (!$totpDisabled) {
         <div class="card-body">
           <!-- Passkeys -->
 
-          <div class="form-group">
+          <div class="form-group" id="setting-passkeys">
             <label>Enable Passkeys <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <?php if ($pkDisabled && isset($pkDisabledReason)) { ?>
@@ -360,7 +360,7 @@ if (!$totpDisabled) {
           </div>
 
           <!-- TOTP -->
-          <div class="form-group">
+          <div class="form-group" id="setting-totp">
             <label>Enable TOTP (Two-Factor Authentication)
               <?php
 
@@ -532,7 +532,7 @@ if (!$totpDisabled) {
         </div>
         <div class="card-body">
 
-          <div class="form-group">
+          <div class="form-group" id="setting-debug">
             <label>Enable Debug Mode <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
               <label class="switch switch-text switch-success"></label>
@@ -654,6 +654,23 @@ if (!$totpDisabled) {
       });
 
 
+
+      // Highlight a setting when linked from another page (e.g. security dashboard)
+      var highlight = new URLSearchParams(window.location.search).get('highlight');
+      if (highlight) {
+        var $el = $('#setting-' + highlight);
+        if ($el.length) {
+          $el.css({
+            'border': '2px solid #0d6efd',
+            'border-radius': '8px',
+            'padding': '12px',
+            'box-shadow': 'inset 0 0 12px rgba(13, 110, 253, 0.15)'
+          });
+          setTimeout(function() {
+            $el[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 200);
+        }
+      }
 
       $('#recapatcha_public_show').hover(function() {
         $('#recap_public').attr('type', 'text');

@@ -9,6 +9,17 @@ if (!empty($_POST)) {
   }
 }
 
+if (isset($_POST['save_api_key'])) {
+  $api_key = trim(Input::get('spice_api'));
+  $db->update('settings', 1, ['spice_api' => $api_key]);
+  if ($api_key != '') {
+    usSuccess("Your API key has been saved successfully");
+  } else {
+    usSuccess("Your API key has been cleared");
+  }
+  Redirect::to($us_url_root . 'users/admin.php?view=spice');
+}
+
 if (empty($_POST)) {
   $_POST['type'] = "featured";
 }
@@ -232,7 +243,30 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
     </div>
 
   <?php } else { ?>
-    <h2>You must <a href="admin.php?view=general">enter your Free UserSpice API key here</a> in order to use this feature.</h2>
+    <div class="card mt-3">
+      <div class="card-header">
+        <h4>API Key Required</h4>
+      </div>
+      <div class="card-body">
+        <p class="text-center mb-3">You cannot use Spice Shaker because you have not entered your free API key.</p>
+        <p class="text-center mb-3">
+          <strong>Get your free API key at:</strong>
+          <a class="text-primary" target="_blank" href="https://api.userspice.com/">https://api.userspice.com/</a>
+        </p>
+        <form action="" method="post" class="row g-3 justify-content-center">
+          <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
+          <div class="col-md-6">
+            <label for="spice_api" class="form-label">Enter your UserSpice API Key:</label>
+            <input type="text" class="form-control" id="spice_api" name="spice_api"
+              value="<?= hed($settings->spice_api ?? '') ?>"
+              placeholder="Enter your API key here">
+          </div>
+          <div class="col-12 text-center">
+            <input type="submit" name="save_api_key" value="Save API Key" class="btn btn-success">
+          </div>
+        </form>
+      </div>
+    </div>
   <?php } ?>
 
   <?php if (isset($apiError)) { ?>

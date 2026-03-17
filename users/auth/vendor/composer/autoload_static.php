@@ -60,6 +60,7 @@ class ComposerStaticInitd4305cd495a6563b3ca240b859dc6544
             'Psr\\Container\\' => 14,
             'Psr\\Clock\\' => 10,
             'PragmaRX\\Google2FA\\' => 19,
+            'ParagonIE\\Sodium\\' => 17,
             'ParagonIE\\ConstantTime\\' => 23,
             'PHPStan\\PhpDocParser\\' => 21,
         ),
@@ -204,6 +205,10 @@ class ComposerStaticInitd4305cd495a6563b3ca240b859dc6544
         'PragmaRX\\Google2FA\\' => 
         array (
             0 => __DIR__ . '/..' . '/pragmarx/google2fa/src',
+        ),
+        'ParagonIE\\Sodium\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/sodium_compat/namespaced',
         ),
         'ParagonIE\\ConstantTime\\' => 
         array (

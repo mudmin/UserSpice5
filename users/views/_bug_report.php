@@ -187,7 +187,7 @@ if ($settings->spice_api != '') {
 
               <td><?= safeReturn(hed($p->Issue_Resolution_Title)) ?></td>
 
-              <td><a class="btn btn-primary" href="https://bugs.userspicet.com/usersc/issue_detail.php?id=<?= (int)$p->kIssueID ?>&source=userspice">View Ticket</a></td>
+              <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= (int)$p->kIssueID ?>&source=userspice">View Ticket</a></td>
             </tr>
           <?php } ?>
         </tbody>

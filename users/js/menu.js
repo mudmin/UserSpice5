@@ -66,19 +66,39 @@ function toggleDropdown(e) {
     parent.classList.add('open');
     closeSiblings(parent); // this line fails on non-dashboard menu
     expandMenuIfMobile(parent.dataset.menu);
-    const zIndex = parseInt(sub.style.zIndex, 10);
+    // reset any previously applied inline positioning
+    sub.style.left = '';
+    sub.style.right = '';
+    sub.style.top = '';
+
     let rect = sub.getBoundingClientRect();
     const windowWidth = window.innerWidth;
-    // check to see if it goes off screen
-    if((rect.x + rect.width) > windowWidth) {
-      sub.style.left = 'unset';
-      sub.style.right = '0';
-    }
-    //rect = sub.getBoundingClientRect();
-    if(rect.x < 0) {
-      sub.style.left = '0';
-      sub.style.right = '0';
-      sub.style.top = '100%';
+    const isDeepSub = sub.classList.contains('us_deep-sub-menu');
+
+    if (isDeepSub) {
+      // deep sub-menus default to left: 100% (right of parent)
+      // if that overflows the right edge, flip to the left side
+      if ((rect.x + rect.width) > windowWidth) {
+        sub.style.left = 'unset';
+        sub.style.right = '100%';
+        rect = sub.getBoundingClientRect();
+      }
+      // if flipping left pushes it off the left edge, drop below instead
+      if (rect.x < 0) {
+        sub.style.left = '0';
+        sub.style.right = 'unset';
+        sub.style.top = '100%';
+      }
+    } else {
+      // first-level sub-menu (drops below parent in horizontal)
+      if ((rect.x + rect.width) > windowWidth) {
+        sub.style.left = 'unset';
+        sub.style.right = '0';
+      }
+      if (rect.x < 0) {
+        sub.style.left = '0';
+        sub.style.right = 'unset';
+      }
     }
     // close menu if clicked outside it (top menu only)
     if (document.querySelector('.us_menu.horizontal')) {
@@ -91,10 +111,13 @@ function toggleDropdown(e) {
 const addOffClick = (e) => {
   const offClick = (evt) => {
     if (e.target !== evt.target) {
+      // don't close if the click was inside the open dropdown (e.g. nested sub-toggle)
+      var open = e.target.closest(".dropdown.open");
+      if (open && open.contains(evt.target)) {
+        return;
+      }
       // if the menu is open and the click came from outside the menu
       document.removeEventListener('click', offClick);
-      // find the open menu parent item and close it
-      var open = e.target.closest(".dropdown.open");
       if (open) {
         // simulate the active item's parent menu link to be clicked, so it will close
         open.firstChild.click();

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 if (class_exists('ParagonIE_Sodium_Core_Curve25519_Fe', false)) {
     return;
@@ -8,115 +9,49 @@ if (class_exists('ParagonIE_Sodium_Core_Curve25519_Fe', false)) {
  * Class ParagonIE_Sodium_Core_Curve25519_Fe
  *
  * This represents a Field Element
+ *
+ * @psalm-suppress MissingTemplateParam
  */
 class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
 {
-    /**
-     * @var int
-     */
-    public $e0 = 0;
-
-    /**
-     * @var int
-     */
-    public $e1 = 0;
-
-    /**
-     * @var int
-     */
-    public $e2 = 0;
-
-    /**
-     * @var int
-     */
-    public $e3 = 0;
-
-    /**
-     * @var int
-     */
-    public $e4 = 0;
-
-    /**
-     * @var int
-     */
-    public $e5 = 0;
-
-    /**
-     * @var int
-     */
-    public $e6 = 0;
-
-    /**
-     * @var int
-     */
-    public $e7 = 0;
-
-    /**
-     * @var int
-     */
-    public $e8 = 0;
-
-    /**
-     * @var int
-     */
-    public $e9 = 0;
-
-    /**
-     * @param int $e0
-     * @param int $e1
-     * @param int $e2
-     * @param int $e3
-     * @param int $e4
-     * @param int $e5
-     * @param int $e6
-     * @param int $e7
-     * @param int $e8
-     * @param int $e9
-     */
     public function __construct(
-        $e0 = 0,
-        $e1 = 0,
-        $e2 = 0,
-        $e3 = 0,
-        $e4 = 0,
-        $e5 = 0,
-        $e6 = 0,
-        $e7 = 0,
-        $e8 = 0,
-        $e9 = 0
-    ) {
-        $this->e0 = $e0;
-        $this->e1 = $e1;
-        $this->e2 = $e2;
-        $this->e3 = $e3;
-        $this->e4 = $e4;
-        $this->e5 = $e5;
-        $this->e6 = $e6;
-        $this->e7 = $e7;
-        $this->e8 = $e8;
-        $this->e9 = $e9;
-    }
+        public int $e0 = 0,
+        public int $e1 = 0,
+        public int $e2 = 0,
+        public int $e3 = 0,
+        public int $e4 = 0,
+        public int $e5 = 0,
+        public int $e6 = 0,
+        public int $e7 = 0,
+        public int $e8 = 0,
+        public int $e9 = 0,
+    ) {}
 
     /**
      * @internal You should not use this directly from another application
      *
-     * @param array $array
+     * @param array<int, int> $array
      * @return self
+     * @throws SodiumException
      */
-    public static function fromArray($array)
+    public static function fromArray(array $array): self
     {
-        $obj = new ParagonIE_Sodium_Core_Curve25519_Fe();
-        $obj->e0 = isset($array[0]) ? (int) $array[0] : 0;
-        $obj->e1 = isset($array[1]) ? (int) $array[1] : 0;
-        $obj->e2 = isset($array[2]) ? (int) $array[2] : 0;
-        $obj->e3 = isset($array[3]) ? (int) $array[3] : 0;
-        $obj->e4 = isset($array[4]) ? (int) $array[4] : 0;
-        $obj->e5 = isset($array[5]) ? (int) $array[5] : 0;
-        $obj->e6 = isset($array[6]) ? (int) $array[6] : 0;
-        $obj->e7 = isset($array[7]) ? (int) $array[7] : 0;
-        $obj->e8 = isset($array[8]) ? (int) $array[8] : 0;
-        $obj->e9 = isset($array[9]) ? (int) $array[9] : 0;
-        return $obj;
+        if (count($array) !== 10) {
+            throw new SodiumException('Fewer than 10 items received');
+        }
+        $values = array_values($array);
+        return new self(
+            $values[0],
+            $values[1],
+            $values[2],
+            $values[3],
+            $values[4],
+            $values[5],
+            $values[6],
+            $values[7],
+            $values[8],
+            $values[9],
+        );
     }
 
     /**
@@ -127,11 +62,8 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
      * @return void
      */
     #[ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
-        if (!is_int($value)) {
-            throw new InvalidArgumentException('Expected an integer');
-        }
         switch ($offset) {
             case 0:
                 $this->e0 = $value;
@@ -164,7 +96,7 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
                 $this->e9 = $value;
                 break;
             default:
-                throw new OutOfBoundsException('Index out of bounds');
+                throw new OutOfBoundsException('Invalid offset.');
         }
     }
 
@@ -175,7 +107,7 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
      * @return bool
      */
     #[ReturnTypeWillChange]
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return $offset >= 0 && $offset < 10;
     }
@@ -187,7 +119,7 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
      * @return void
      */
     #[ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         switch ($offset) {
             case 0:
@@ -221,7 +153,7 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
                 $this->e9 = 0;
                 break;
             default:
-                throw new OutOfBoundsException('Index out of bounds');
+                throw new OutOfBoundsException('Invalid offset.');
         }
     }
 
@@ -230,34 +162,24 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
      *
      * @param int $offset
      * @return int
+     * @psalm-suppress ImplementedReturnTypeMismatch
      */
     #[ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet($offset): int
     {
-        switch ($offset) {
-            case 0:
-                return (int) $this->e0;
-            case 1:
-                return (int) $this->e1;
-            case 2:
-                return (int) $this->e2;
-            case 3:
-                return (int) $this->e3;
-            case 4:
-                return (int) $this->e4;
-            case 5:
-                return (int) $this->e5;
-            case 6:
-                return (int) $this->e6;
-            case 7:
-                return (int) $this->e7;
-            case 8:
-                return (int) $this->e8;
-            case 9:
-                return (int) $this->e9;
-            default:
-                throw new OutOfBoundsException('Index out of bounds');
-        }
+        return match ($offset) {
+            0 => $this->e0,
+            1 => $this->e1,
+            2 => $this->e2,
+            3 => $this->e3,
+            4 => $this->e4,
+            5 => $this->e5,
+            6 => $this->e6,
+            7 => $this->e7,
+            8 => $this->e8,
+            9 => $this->e9,
+            default => throw new OutOfBoundsException('Invalid offset.'),
+        };
     }
 
     /**
@@ -268,10 +190,10 @@ class ParagonIE_Sodium_Core_Curve25519_Fe implements ArrayAccess
     public function __debugInfo()
     {
         return array(
-            implode(', ', array(
+            implode(', ', [
                 $this->e0, $this->e1, $this->e2, $this->e3, $this->e4,
                 $this->e5, $this->e6, $this->e7, $this->e8, $this->e9
-            ))
+            ])
         );
     }
 }

@@ -1,7 +1,7 @@
 <?php
 $db = DB::getInstance();
 $eml_set = $db->query("SELECT * FROM email")->first();
-$settings = $db->query("SELECT * FROM settings")->first();
+$settings = $db->query("SELECT * FROM settings WHERE id = 1")->first();
 
 if($settings->email_login == 1){
   $EML_PASSWORDLESS_BODY = lang("PASS_EMAIL_ONLY_MSG");

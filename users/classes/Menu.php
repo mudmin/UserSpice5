@@ -224,7 +224,7 @@ class Menu {
       
       if($hasDropdown) {
         $toggle = "menu_{$item->menu}{$uniq}_dropdown_{$item->id}";
-        $linkAttrs = "id='{$toggle}' role='button' aria-haspopup='true' aria-expanded='false' data-toggle='dropdown' data-target='#{$toggle}' data-bs-toggle='dropdown' data-bs-target='#{$toggle}'";
+        $linkAttrs = "id='{$toggle}' role='button' aria-haspopup='true' aria-expanded='false'";
       }
 
       if($item->type == "snippet" && file_exists($abs_us_root . $us_url_root . $item->link)){
