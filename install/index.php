@@ -904,6 +904,48 @@ if ($step == 3 && isset($_POST['cleanup'])) {
                                         <?php } ?>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td>Is z_us_root.php writeable?</td>
+                                    <td class="font-weight-bold">
+                                        <?php
+                                        if (@file_exists('../z_us_root.php') && @is_writable('../z_us_root.php')) {
+                                            echo '<span class="text-success">Writeable</span>';
+                                        } else {
+                                            $errors = 1;
+                                        ?>
+                                            <span class="text-danger">Unwriteable</span><br>
+                                            Please chmod this file to 0755 before installing.
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Is users/ folder writeable?</td>
+                                    <td class="font-weight-bold">
+                                        <?php
+                                        if (@is_dir('../users') && @is_writable('../users')) {
+                                            echo '<span class="text-success">Writeable</span>';
+                                        } else {
+                                            $errors = 1;
+                                        ?>
+                                            <span class="text-danger">Unwriteable</span><br>
+                                            Please chmod this folder to 0755 before installing.
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Is usersc/ folder writeable?</td>
+                                    <td class="font-weight-bold">
+                                        <?php
+                                        if (@is_dir('../usersc') && @is_writable('../usersc')) {
+                                            echo '<span class="text-success">Writeable</span>';
+                                        } else {
+                                            $errors = 1;
+                                        ?>
+                                            <span class="text-danger">Unwriteable</span><br>
+                                            Please chmod this folder to 0755 before installing.
+                                        <?php } ?>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
 
