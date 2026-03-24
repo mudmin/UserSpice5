@@ -7,6 +7,10 @@ require_once 'classes/class.autoloader.php';
 
 
 ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+	ini_set('session.cookie_secure', 1);
+}
 session_start();
 // disables the feature that prevents the updater from installing languages you didn't have before the update
 // $disable_language_purge = true;
