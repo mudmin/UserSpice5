@@ -149,8 +149,13 @@ if (isset($_POST['test']) || isset($_POST['submit']) || isset($_POST['tryToCreat
 
                         if ($link) {
                             // Hash the password if provided, otherwise use default hash
+                            // Load Input class so password is sanitized the same way as login
+                            if (!class_exists('Input')) {
+                                require_once __DIR__ . '/../users/classes/Input.php';
+                            }
                             if (!empty($_POST['admin_password'])) {
-                                $password_hash = password_hash($_POST['admin_password'], PASSWORD_BCRYPT, ['cost' => 14]);
+                                $admin_pass = Input::sanitize($_POST['admin_password']);
+                                $password_hash = password_hash($admin_pass, PASSWORD_BCRYPT, ['cost' => 14]);
                             } else {
                                 // Default password 'password' hash for fallback
                                 $password_hash = password_hash('password', PASSWORD_BCRYPT, ['cost' => 14]);
