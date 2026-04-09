@@ -4,7 +4,7 @@ UserSpice is an open-source PHP user management framework designed to get out of
 
 Unlike other PHP frameworks, UserSpice doesn't force you into specific rewriting rules, template engines, or architectural patterns. You use as much or as little as you need. In most cases, you can control access to your existing pages with a single line of code.
 
-Built on Bootstrap, UserSpice provides a rich set of PHP classes and functions while keeping things modular through a plugin system.
+UserSpice provides a rich set of PHP classes and functions while keeping things modular through a plugin system.  It contains many ways to override our core code while still allowing you to get the latest updates and features.
 
 ## Key Features
 
@@ -21,7 +21,7 @@ Built on Bootstrap, UserSpice provides a rich set of PHP classes and functions w
 - **Maintenance Mode** -- Lock down your site while keeping admin access, compatible with passkeys/TOTP/OAuth
 - **One-Click Updates** -- Built-in update system to keep your installation current
 
-## Recent Highlights (2025 - 2026)
+## Recent Highlights
 
 - **6.0.x** -- Security dashboard with auto-detection of config improvements, PHP 8.4/8.5 compatibility, HMAC-encrypted verification codes, WebAuthn CVE mitigation, force password reset, and installer hardening
 - **5.9.x** -- Encryption API, Server class for `$_SERVER` sanitization, nonce support, server-side DataTables processing, transaction support, and system messages converted to toasts
@@ -34,13 +34,13 @@ Built on Bootstrap, UserSpice provides a rich set of PHP classes and functions w
 
 ## Installation
 
-Download the latest release from [UserSpice.com](https://userspice.com) for a properly packaged build, then follow the built-in installer.
+Download the latest release from [github.com](https://github.com/mudmin/releases/raw/master/latest.zip) for a properly packaged build.  Unzip on your webserver.  Visit in a browser, and follow the built-in installer.
 
 ## Links
 
 - [Website](https://userspice.com)
 - [Bug Tracker / Changelog](https://bugs.userspice.com)
-- [Documentation](https://userspice.com/docs)
+- [Documentation](https://userspice.com/kb)
 
 ## License
 
