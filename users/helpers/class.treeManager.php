@@ -87,7 +87,7 @@ class treeManager{
    * @param mixed $weight_key
    * @param mixed $array
    * @access public
-   * @return void
+   * @return array
    */
   function getTree( $array, $id_key = 'id', $parent_id_key = 'parent_id', $weight_key = 'weight' ){
  global $us_url_root;
@@ -113,7 +113,7 @@ class treeManager{
    * @param mixed $weight_key         this is the 'weight' key of the array
    * @param mixed $array              this is the array which will be used as input
    * @access public
-   * @return array                    the children of this parent id
+   * @return array|false               the children of this parent id
    */
   function getChildren( $parent_id_value, $parent_id_key, $id_key, $weight_key, $array ){
     if( !is_array( $array ) ) return false;
@@ -161,7 +161,7 @@ class treeManager{
    * @param string $spacer            how will we do indents? " " or "&nbsp" ?
    * @param mixed $child_key          the key name of array elements which (might) contain children elements
    * @access public
-   * @return void
+   * @return array|false
    */
   function slapTree( $array, $indentSize = 3, $indentKey = "title_menu", $glue = "/", $spacer = " ",$child_key = "children", $firsttime = true )
   {
@@ -171,14 +171,12 @@ class treeManager{
       $array = $this->addIndents( $array, $child_key, $indentSize, $indentKey, $glue, $spacer );
     }
     if( !is_array( $array ) ) return false;
-    if( is_array( $array ) ){
-      foreach( $array as $key => $element ){
-        $children       = $element[ $child_key ];
-        unset( $element[ $child_key ] );
-        $slappedArray[] = $element;
-        if( is_array( $children ) )
-          $this->slapTree( $children, $indentSize, $indentKey, $glue, $spacer, $child_key, false );
-      }
+    foreach( $array as $key => $element ){
+      $children       = $element[ $child_key ];
+      unset( $element[ $child_key ] );
+      $slappedArray[] = $element;
+      if( is_array( $children ) )
+        $this->slapTree( $children, $indentSize, $indentKey, $glue, $spacer, $child_key, false );
     }
     return $slappedArray;
   }
@@ -196,10 +194,9 @@ class treeManager{
    * @param string $indentKey        which key to use as indentation label?
    * @param string $glue             which glue ? (for example "/" )
    * @param string $spacer           how will we do indents? " " or "&nbsp" ?
-   * @param mixed $child_key         the key name of array elements which (might) contain children elements
-   * @param float $level             do not pass this arguments since its a private recursive var
+   * @param float $_level            do not pass this arguments since its a private recursive var
    * @access public
-   * @return void
+   * @return array|false
    */
   function addIndents( $array, $child_key, $indentSize, $indentKey, $glue,  $spacer, $_level = 1 ){
     global $path;
@@ -256,7 +253,7 @@ class treeManager{
         break;
       }
     }
-    $neighbour = ( $i >= 0 || $i < count($brothers) ) && isset( $brothers[$i] ) ? $brothers[$i] : false;
+    $neighbour = ( $i >= 0 && $i < count($brothers) ) && isset( $brothers[$i] ) ? $brothers[$i] : false;
     // lets swap weights
     if( $candidate && $neighbour ){
        $neighbour_weight          = $neighbour[ $weight_key ];

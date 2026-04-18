@@ -13,6 +13,11 @@ if($secondWrite == "true"){
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Ensure $rateLimits is defined (set by rate_limits.php include)
+if (!isset($rateLimits)) {
+    $rateLimits = [];
+}
+
 // Check for default rate limits
 $using_default_rate_limits = false;
 if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt']['ip_max'] >= 10000) {
@@ -74,6 +79,7 @@ if ($defined_rpid === null) {
     $rpid_message = 'Passkeys cannot function until you define PASSKEY_RP_ID.';
     $show_write_button = true;
 } elseif (is_array($defined_rpid)) {
+    /** @var array<mixed> $defined_rpid */
     if (!in_array($expected_rpid, $defined_rpid, true)) {
         $rpid_status  = 'danger';
         $rpid_badge   = '<span class="badge bg-danger ms-2">Mismatch</span>';
@@ -92,6 +98,9 @@ if ($defined_rpid === null) {
         $show_write_button = true;
     }
 }
+
+// Resolve EXTRA_CURL_SECURITY once so PHPStan can reason about the value
+$extra_curl_security_enabled = defined('EXTRA_CURL_SECURITY') && constant('EXTRA_CURL_SECURITY') === true;
 
 // Check OAuth providers
 $oauthProviders = 0;
@@ -292,10 +301,11 @@ if (!empty($_POST) && isset($_POST['generate_totp_key'])) {
         Redirect::to($us_url_root . "users/admin.php?view=security");
     }
     if (!$key_file_exists && $key_dir_writable) {
-        if (totp_init_encryption($totpKeyFile, false)) {
+        try {
+            totp_init_encryption($totpKeyFile, false);
             logger($user->data()->id, 'Security', 'Generated new TOTP encryption key.');
             usSuccess('Successfully generated TOTP encryption key file.');
-        } else {
+        } catch (RuntimeException $e) {
             usError('Could not generate the TOTP key file automatically.');
         }
     } else {
@@ -583,6 +593,99 @@ if (!empty($_POST) && isset($_POST['dismiss_headers_backup'])) {
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Handle adding session.cookie_samesite to init.php
+if (!empty($_POST) && isset($_POST['fix_cookie_samesite'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'users/init.php';
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.BACKUP.php';
+    if (file_exists($file_path) && is_writable($file_path)) {
+        $contents = file_get_contents($file_path);
+        if ($contents !== false && strpos($contents, 'session.cookie_samesite') === false) {
+            // Create backup before making changes
+            if (file_put_contents($backup_path, $contents) === false) {
+                usError('Could not create backup of users/init.php. Aborting.');
+                Redirect::to($us_url_root . "users/admin.php?view=security");
+            }
+            // Insert after require_once 'classes/class.autoloader.php';
+            $anchor = "require_once 'classes/class.autoloader.php';";
+            if (strpos($contents, $anchor) !== false) {
+                $newContents = str_replace(
+                    $anchor,
+                    $anchor . "\nini_set('session.cookie_samesite', 'Lax');",
+                    $contents
+                );
+                if (file_put_contents($file_path, $newContents) !== false) {
+                    if (function_exists('opcache_invalidate')) {
+                        opcache_invalidate($file_path, true);
+                    }
+                    logger($user->data()->id, 'Security', 'Added session.cookie_samesite to users/init.php (backup created)');
+                    usSuccess("Added <code>ini_set('session.cookie_samesite', 'Lax')</code> to users/init.php. A backup was saved to users/init.BACKUP.php");
+                } else {
+                    usError('Could not write to users/init.php. Check file permissions.');
+                }
+            } else {
+                usError('Could not find the expected anchor point in users/init.php. Please add <code>ini_set(\'session.cookie_samesite\', \'Lax\');</code> manually.');
+            }
+        } else {
+            usSuccess('session.cookie_samesite is already set in users/init.php');
+        }
+    } else {
+        usError('users/init.php not found or not writable.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle adding session.cookie_secure to init.php
+if (!empty($_POST) && isset($_POST['fix_cookie_secure'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+
+    $file_path = $abs_us_root . $us_url_root . 'users/init.php';
+    $backup_path = $abs_us_root . $us_url_root . 'users/init.BACKUP.php';
+    if (file_exists($file_path) && is_writable($file_path)) {
+        $contents = file_get_contents($file_path);
+        if ($contents !== false && strpos($contents, 'session.cookie_secure') === false) {
+            // Create backup before making changes
+            if (file_put_contents($backup_path, $contents) === false) {
+                usError('Could not create backup of users/init.php. Aborting.');
+                Redirect::to($us_url_root . "users/admin.php?view=security");
+            }
+            // Insert before session_start();
+            $anchor = "session_start();";
+            $secure_block = "if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {\n\tini_set('session.cookie_secure', 1);\n}\n";
+            if (strpos($contents, $anchor) !== false) {
+                $newContents = str_replace(
+                    $anchor,
+                    $secure_block . $anchor,
+                    $contents
+                );
+                if (file_put_contents($file_path, $newContents) !== false) {
+                    if (function_exists('opcache_invalidate')) {
+                        opcache_invalidate($file_path, true);
+                    }
+                    logger($user->data()->id, 'Security', 'Added session.cookie_secure to users/init.php (backup created)');
+                    usSuccess("Added secure cookie detection to users/init.php. A backup was saved to users/init.BACKUP.php");
+                } else {
+                    usError('Could not write to users/init.php. Check file permissions.');
+                }
+            } else {
+                usError('Could not find <code>session_start();</code> in users/init.php. Please add the secure cookie block manually.');
+            }
+        } else {
+            usSuccess('session.cookie_secure is already set in users/init.php');
+        }
+    } else {
+        usError('users/init.php not found or not writable.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
 // Function to enable EXTRA_CURL_SECURITY in users/init.php
 function enableExtraCurlSecurity($file_path, $backup_path): bool {
     if (!file_exists($file_path) || !is_writable($file_path)) {
@@ -747,6 +850,38 @@ if (!empty($_POST) && isset($_POST['disable_curl_security'])) {
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Handle delete default README.md
+if (!empty($_POST) && isset($_POST['delete_default_readme'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+    $readme_path = $abs_us_root . $us_url_root . 'README.md';
+    if (file_exists($readme_path) && @unlink($readme_path)) {
+        logger($user->data()->id, 'Security', 'Deleted default README.md from site root');
+        usSuccess('README.md has been deleted.');
+    } else {
+        usError('Could not delete README.md. Check file permissions.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
+// Handle delete default SECURITY.md
+if (!empty($_POST) && isset($_POST['delete_default_securitymd'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+    $security_path = $abs_us_root . $us_url_root . 'SECURITY.md';
+    if (file_exists($security_path) && @unlink($security_path)) {
+        logger($user->data()->id, 'Security', 'Deleted default SECURITY.md from site root');
+        usSuccess('SECURITY.md has been deleted.');
+    } else {
+        usError('Could not delete SECURITY.md. Check file permissions.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
 // Check for $_SERVER usage in users/init.php - only fixable if it's exactly DOCUMENT_ROOT and PHP_SELF
 function checkServerVariableUsageInit($file_path) {
     if (!file_exists($file_path)) {
@@ -901,14 +1036,41 @@ $init_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.BACK
 $headers_backup_exists = file_exists($abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.php');
 $curl_backup_exists = file_exists($abs_us_root . $us_url_root . 'users/init.CURL_BACKUP.php');
 
+// Check for default README.md and SECURITY.md in site root
+$default_readme_hash = 'db72debef0da47edfceffb6eadd9b01b';
+$default_security_hash = '41c3422e56e62772dcba551514a5acec';
+$readme_path = $abs_us_root . $us_url_root . 'README.md';
+$security_md_path = $abs_us_root . $us_url_root . 'SECURITY.md';
+$has_default_readme = file_exists($readme_path) && md5_file($readme_path) === $default_readme_hash;
+$has_default_security = file_exists($security_md_path) && md5_file($security_md_path) === $default_security_hash;
+
+// Check for session cookie security settings in init.php
+$init_file_path = $abs_us_root . $us_url_root . 'users/init.php';
+$init_has_samesite = false;
+$init_has_cookie_secure = false;
+$proxy_enabled = isset($settings->behind_reverse_proxy) && $settings->behind_reverse_proxy;
+if (file_exists($init_file_path)) {
+    $init_contents = file_get_contents($init_file_path);
+    if ($init_contents !== false) {
+        $init_has_samesite = (strpos($init_contents, 'session.cookie_samesite') !== false);
+        $init_has_cookie_secure = (strpos($init_contents, 'session.cookie_secure') !== false);
+    }
+}
+
 // Calculate overall security score
-function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers)
+function calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers, $init_has_samesite = true, $init_has_cookie_secure = true)
 {
     $score = 100; // Start at 100 and deduct for missing items
     $max_score = 100;
 
     // HTTPS (15 points) - Deduct if not using HTTPS
     if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') $score -= 15;
+
+    // Session cookie SameSite (3 points) - Deduct if missing
+    if (!$init_has_samesite) $score -= 3;
+
+    // Session cookie Secure flag (3 points) - Deduct if missing (only when not behind proxy)
+    if (!$init_has_cookie_secure) $score -= 3;
 
     // PHP Version (10 points) - Deduct based on PHP status
     if ($php_status === 'danger') $score -= 10;
@@ -945,7 +1107,7 @@ function calculateSecurityScore($settings, $php_status, $rpid_status, $email_con
     $score -= ((5 - $headers_configured) * 2);
 
     // Extra cURL security (3 points) - Deduct if not enabled
-    if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) $score -= 3;
+    if (!$extra_curl_security_enabled) $score -= 3;
 
     // $_SERVER usage in critical files (5 points each)
     if ($server_var_init['found']) $score -= 5;
@@ -956,7 +1118,7 @@ function calculateSecurityScore($settings, $php_status, $rpid_status, $email_con
 }
 
 $is_updated = version_compare($user_spice_ver, $versions->release_version ?? "", '>=');
-$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers);
+$security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers, $init_has_samesite, $init_has_cookie_secure);
 $score_color = $security_score >= 75 ? 'success' : ($security_score >= 60 ? 'warning' : 'danger');
 
 // Build dynamic recommendations
@@ -1057,7 +1219,7 @@ if ($settings->debug > 0) {
     ];
 }
 
-if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) {
+if (!$extra_curl_security_enabled) {
     $recommendations[] = [
         'title' => 'Enable Extra cURL Security',
         'text' => 'Extra cURL security is not enabled. This setting forces SSL certificate verification for all outbound HTTPS connections, protecting against man-in-the-middle attacks. <strong>Note:</strong> This may cause issues on localhost or with self-signed certificates.',
@@ -1068,7 +1230,7 @@ if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) {
 }
 
 // Show recommendation to dismiss CURL backup if it exists and EXTRA_CURL_SECURITY is now enabled
-if ($curl_backup_exists && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) {
+if ($curl_backup_exists && $extra_curl_security_enabled) {
     $recommendations[] = [
         'title' => 'Dismiss cURL Security Backup',
         'text' => 'A backup file <code>users/init.CURL_BACKUP.php</code> exists from enabling extra cURL security. Since your site is working correctly, you can dismiss this backup.',
@@ -1081,7 +1243,7 @@ if ($curl_backup_exists && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY
 }
 
 // Show warning if localhost AND EXTRA_CURL_SECURITY is enabled - may cause connection issues
-if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) {
+if (isLocalhost() && $extra_curl_security_enabled) {
     $recommendations[] = [
         'title' => 'Localhost with Extra cURL Security',
         'text' => 'You are running on localhost with <code>EXTRA_CURL_SECURITY</code> enabled. If you experience issues connecting to download updates, use Spice Shaker, or perform backups, you can disable this feature.',
@@ -1207,6 +1369,58 @@ if (file_exists($customLoginScript)) {
             'icon' => 'fa-lightbulb'
         ];
     }
+}
+
+// Session cookie SameSite recommendation
+if (!$init_has_samesite) {
+    $recommendations[] = [
+        'title' => 'Add SameSite Cookie Attribute',
+        'text' => 'Your <code>users/init.php</code> is missing <code>session.cookie_samesite</code>. Setting this to <code>Lax</code> helps protect against cross-site request forgery (CSRF) attacks.',
+        'link_text' => 'Fix Now',
+        'link_url' => '#',
+        'modal' => 'confirm-fix_cookie_samesite',
+        'level' => 'warning',
+        'icon' => 'fa-cookie-bite'
+    ];
+}
+
+// Session cookie Secure flag recommendation (only when NOT behind a proxy)
+if (!$init_has_cookie_secure && !$proxy_enabled) {
+    $recommendations[] = [
+        'title' => 'Add Secure Cookie Flag',
+        'text' => 'Your <code>users/init.php</code> is missing <code>session.cookie_secure</code>. This flag ensures session cookies are only sent over HTTPS connections, preventing them from being intercepted over plain HTTP.',
+        'link_text' => 'Fix Now',
+        'link_url' => '#',
+        'modal' => 'confirm-fix_cookie_secure',
+        'level' => 'warning',
+        'icon' => 'fa-lock'
+    ];
+}
+
+// Default README.md in site root
+if ($has_default_readme) {
+    $recommendations[] = [
+        'title' => 'Remove or Customize README.md',
+        'text' => 'Your site root contains the default UserSpice <code>README.md</code>. This exposes information about your framework and version to anyone who visits it. Consider deleting or customizing it.',
+        'link_text' => 'Delete Now',
+        'link_url' => '#',
+        'modal' => 'confirm-delete_readme',
+        'level' => 'info',
+        'icon' => 'fa-file-alt'
+    ];
+}
+
+// Default SECURITY.md in site root
+if ($has_default_security) {
+    $recommendations[] = [
+        'title' => 'Remove or Customize SECURITY.md',
+        'text' => 'Your site root contains the default UserSpice <code>SECURITY.md</code>. This exposes information about your framework to anyone who visits it. Consider deleting or customizing it.',
+        'link_text' => 'Delete Now',
+        'link_url' => '#',
+        'modal' => 'confirm-delete_securitymd',
+        'level' => 'info',
+        'icon' => 'fa-file-alt'
+    ];
 }
 
 ?>
@@ -1627,14 +1841,14 @@ if (file_exists($customLoginScript)) {
                         <a class="nounderline no-disable" data-toggle="tooltip" title="When enabled, forces cURL to verify SSL certificates when making outbound HTTPS connections. May break on localhost or with self-signed certificates."><i class="fa fa-question-circle offset-circle font-info"></i></a>
                     </div>
                     <div class="col-sm-6 text-end">
-                        <?php if (defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) : ?>
+                        <?php if ($extra_curl_security_enabled) : ?>
                             <span class="badge bg-success">Enabled</span>
                         <?php else : ?>
                             <span class="badge bg-warning">Disabled</span>
                         <?php endif; ?>
                     </div>
                 </div>
-                <?php if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) : ?>
+                <?php if (!$extra_curl_security_enabled) : ?>
                 <div class="row mt-2">
                     <div class="col-12">
                         <div class="alert alert-info p-2 small mb-0">
@@ -2347,7 +2561,7 @@ generate_confirmation_modal(
 </div>
 <?php endif; ?>
 
-<?php if (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true) : ?>
+<?php if (!$extra_curl_security_enabled) : ?>
 <div class="modal fade" id="confirm-enable_curl_security" tabindex="-1" aria-labelledby="confirm-enable_curl_security-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -2418,7 +2632,7 @@ generate_confirmation_modal(
 </div>
 <?php endif; ?>
 
-<?php if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) : ?>
+<?php if (isLocalhost() && $extra_curl_security_enabled) : ?>
 <div class="modal fade" id="confirm-disable_curl_security" tabindex="-1" aria-labelledby="confirm-disable_curl_security-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -2496,3 +2710,136 @@ generate_confirmation_modal(
         </div>
     </div>
 </div>
+
+<?php if (!$init_has_samesite): ?>
+<div class="modal fade" id="confirm-fix_cookie_samesite" tabindex="-1" aria-labelledby="confirm-fix_cookie_samesite-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_cookie_samesite-label">Add SameSite Cookie Attribute</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will add <code>ini_set('session.cookie_samesite', 'Lax');</code> to your <code>users/init.php</code>.
+                </div>
+                <p>The <code>SameSite=Lax</code> attribute prevents the browser from sending session cookies with cross-site requests, providing protection against CSRF attacks while still allowing normal navigation links to work.</p>
+                <p>This line will be added below <code>require_once 'classes/class.autoloader.php';</code></p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>users/init.BACKUP.php</code> before any changes are made.
+                </div>
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_cookie_samesite" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!$init_has_cookie_secure && !$proxy_enabled): ?>
+<div class="modal fade" id="confirm-fix_cookie_secure" tabindex="-1" aria-labelledby="confirm-fix_cookie_secure-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_cookie_secure-label">Add Secure Cookie Flag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will add HTTPS detection and <code>session.cookie_secure</code> to your <code>users/init.php</code>.
+                </div>
+                <p>The following code will be inserted before <code>session_start();</code>:</p>
+                <pre class="bg-dark text-light p-3 rounded"><code>if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+	ini_set('session.cookie_secure', 1);
+}</code></pre>
+                <p>When the server detects an HTTPS connection, session cookies will be flagged as secure, preventing them from being sent over plain HTTP.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2"></i>
+                    <strong>Backup:</strong> A copy of your current file will be saved as <code>users/init.BACKUP.php</code> before any changes are made.
+                </div>
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_cookie_secure" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($has_default_readme): ?>
+<div class="modal fade" id="confirm-delete_readme" tabindex="-1" aria-labelledby="confirm-delete_readme-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-delete_readme-label">Delete Default README.md</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    The default <code>README.md</code> in your site root identifies your site as running UserSpice, which can help attackers target known vulnerabilities.
+                </div>
+                <p>You can safely delete this file, or replace it with your own content. This action will permanently delete the file.</p>
+                <p><strong>Are you sure you want to delete README.md?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="delete_default_readme" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($has_default_security): ?>
+<div class="modal fade" id="confirm-delete_securitymd" tabindex="-1" aria-labelledby="confirm-delete_securitymd-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-delete_securitymd-label">Delete Default SECURITY.md</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    The default <code>SECURITY.md</code> in your site root identifies your site as running UserSpice and exposes your security reporting process.
+                </div>
+                <p>You can safely delete this file, or replace it with your own content. This action will permanently delete the file.</p>
+                <p><strong>Are you sure you want to delete SECURITY.md?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="delete_default_securitymd" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

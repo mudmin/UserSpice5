@@ -56,13 +56,13 @@ $raw = date_parse($user->data()->join_date);
 $signupdate = $raw['month'] . '/' . $raw['year'];
 if ($hooks['bottom'] == []) { //no plugin hooks present
   $resize = [
-    'cardClass' => 'col-md-4 offset-md-4',
+    'cardClass' => 'col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4',
     'nameSize' => 'style="font-size:3em;"',
     'sinceSize' => 'style="font-size:2.25em;"',
   ];
 } else {
   $resize = [
-    'cardClass' => 'col-md-3',
+    'cardClass' => 'col-lg-4 col-xl-3',
     'nameSize' => '',
     'sinceSize' => '',
   ];
@@ -102,7 +102,7 @@ if ($hooks['bottom'] == []) { //no plugin hooks present
 
       </div>
     </div>
-    <div class="col-12 col-md-9">
+    <div class="col-12 col-lg-8 col-xl-9">
       <?php
       includeHook($hooks, 'bottom');
       ?>

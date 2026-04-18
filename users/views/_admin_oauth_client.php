@@ -279,23 +279,23 @@ $activeClientCount = $activeClientsQ->count();
                               <?php endif; ?>
                             </form>
                           </td>
-                          <td><?= hed($c->client_name) ?></td>
-                          <td class="text-truncate" style="max-width: 200px;"><?= hed($c->server_url) ?></td>
+                          <td><?= safeReturn($c->client_name) ?></td>
+                          <td class="text-truncate" style="max-width: 200px;"><?= safeReturn($c->server_url) ?></td>
                           <td class="client-info">
                             <button class="btn btn-sm btn-outline-info">View Credentials</button>
                             <div class="secret-info">
-                              <b>Client: <?= hed($c->client_name) ?></b><br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= hed($c->client_id) ?>')">Copy</button>
-                              Client ID: <small><?= hed($c->client_id) ?></small>
+                              <b>Client: <?= safeReturn($c->client_name) ?></b><br>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_id) ?>')">Copy</button>
+                              Client ID: <small><?= safeReturn($c->client_id) ?></small>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= hed($c->client_secret) ?>')">Copy</button>
-                              Client Secret: <small><?= hed(substr($c->client_secret, 0, 20)) ?>...</small>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_secret) ?>')">Copy</button>
+                              Client Secret: <small><?= safeReturn(substr($c->client_secret, 0, 20)) ?>...</small>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= hed($c->redirect_uri) ?>')">Copy</button>
-                              Redirect URI: <small><?= hed($c->redirect_uri) ?></small>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= safeReturn($c->redirect_uri) ?>')">Copy</button>
+                              Redirect URI: <small><?= safeReturn($c->redirect_uri) ?></small>
                             </div>
                           </td>
-                          <td><?= hed($c->login_title) ?></td>
+                          <td><?= safeReturn($c->login_title) ?></td>
                           <td>
                             <div class="btn-group" role="group">
                               <a href="<?= $us_url_root ?>users/admin.php?view=oauth_client&client=<?= $c->id ?>" class="btn btn-sm btn-primary">Edit</a>
@@ -329,35 +329,35 @@ $activeClientCount = $activeClientsQ->count();
                   <label for="client_name" class="form-label">Client Name *</label>
                   <small class="form-text text-muted">Internal identifier for this OAuth configuration</small>
                   <input type="text" class="form-control" id="client_name" name="client_name" 
-                         value="<?= $e ? hed($client->client_name) : '' ?>" required>
+                         value="<?= $e ? safeReturn($client->client_name) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="server_url" class="form-label">OAuth Server URL *</label>
                   <small class="form-text text-muted">Full domain URL with trailing slash (e.g., https://auth.example.com/)</small>
                   <input type="url" class="form-control" id="server_url" name="server_url" 
-                         value="<?= $e ? hed($client->server_url) : '' ?>" required>
+                         value="<?= $e ? safeReturn($client->server_url) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="server_target" class="form-label">Server Target Path</label>
                   <small class="form-text text-muted">Path to OAuth endpoints (usually users/auth/)</small>
                   <input type="text" class="form-control" id="server_target" name="server_target" 
-                         value="<?= $e ? hed($client->server_target) : 'users/auth/' ?>">
+                         value="<?= $e ? safeReturn($client->server_target) : 'users/auth/' ?>">
                 </div>
 
                 <div class="mb-3">
                   <label for="client_id" class="form-label">Client ID *</label>
                   <small class="form-text text-muted">Obtain from the OAuth server</small>
                   <input type="text" class="form-control" id="client_id" name="client_id" 
-                         value="<?= $e ? hed($client->client_id) : '' ?>" required>
+                         value="<?= $e ? safeReturn($client->client_id) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="client_secret" class="form-label">Client Secret *</label>
                   <small class="form-text text-muted">Obtain from the OAuth server</small>
                   <input type="password" class="form-control" id="client_secret" name="client_secret" 
-                         value="<?= $e ? hed($client->client_secret) : '' ?>" required>
+                         value="<?= $e ? safeReturn($client->client_secret) : '' ?>" required>
                 </div>
 
                 <?php
@@ -367,16 +367,16 @@ $activeClientCount = $activeClientsQ->count();
 
                 <div class="mb-3">
                   <label for="redirect_uri" class="form-label">Redirect URI *</label>
-                  <small class="form-text text-muted">Example: <?= hed($exampleRedirectUri) ?></small>
+                  <small class="form-text text-muted">Example: <?= safeReturn($exampleRedirectUri) ?></small>
                   <input type="url" class="form-control" id="redirect_uri" name="redirect_uri" 
-                         value="<?= $e ? hed($client->redirect_uri) : $exampleRedirectUri ?>">
+                         value="<?= $e ? safeReturn($client->redirect_uri) : $exampleRedirectUri ?>">
                 </div>
 
                 <div class="mb-3">
                   <label for="login_title" class="form-label">Login Button Title</label>
                   <small class="form-text text-muted">Text displayed on the login button</small>
                   <input type="text" class="form-control" id="login_title" name="login_title" 
-                         value="<?= $e ? hed($client->login_title) : 'UserSpice' ?>">
+                         value="<?= $e ? safeReturn($client->login_title) : 'UserSpice' ?>">
                 </div>
 
                 <div class="mb-3">
@@ -385,9 +385,9 @@ $activeClientCount = $activeClientsQ->count();
                   <select class="form-select" id="client_icon" name="client_icon">
                     <option value="">-- No Icon --</option>
                     <?php foreach ($icons as $icon): ?>
-                      <option value="<?= hed($icon) ?>" 
+                      <option value="<?= safeReturn($icon) ?>" 
                               <?= $e && $client->client_icon == $icon ? 'selected' : '' ?>>
-                        <?= hed($icon) ?>
+                        <?= safeReturn($icon) ?>
                       </option>
                     <?php endforeach; ?>
                   </select>
@@ -399,9 +399,9 @@ $activeClientCount = $activeClientsQ->count();
                   <select class="form-select" id="login_script" name="login_script">
                     <option value="">-- No Script --</option>
                     <?php foreach ($login_scripts as $script): ?>
-                      <option value="<?= hed($script) ?>"
+                      <option value="<?= safeReturn($script) ?>"
                               <?= $e && $client->login_script == $script ? 'selected' : '' ?>>
-                        <?= hed($script) ?>
+                        <?= safeReturn($script) ?>
                       </option>
                     <?php endforeach; ?>
                   </select>
@@ -411,7 +411,7 @@ $activeClientCount = $activeClientsQ->count();
                   <label for="response_secret" class="form-label">Response Secret (HMAC Verification)</label>
                   <small class="form-text text-muted">Optional. If set, the response data from the OAuth server will be verified using HMAC-SHA256. This must match the response_secret configured on the OAuth server for this client. Prevents response tampering during redirect.</small>
                   <input type="text" class="form-control" id="response_secret" name="response_secret"
-                         value="<?= $e ? hed($client->response_secret ?? '') : '' ?>"
+                         value="<?= $e ? safeReturn($client->response_secret ?? '') : '' ?>"
                          placeholder="Leave empty to disable verification">
                 </div>
 
@@ -459,8 +459,8 @@ $activeClientCount = $activeClientsQ->count();
                       <?php foreach ($recentLogins as $login): ?>
                         <tr>
                           <td>
-                            <?= hed($login->fname . ' ' . $login->lname) ?><br>
-                            <small class="text-muted"><?= hed($login->email) ?></small>
+                            <?= safeReturn($login->fname . ' ' . $login->lname) ?><br>
+                            <small class="text-muted"><?= safeReturn($login->email) ?></small>
                           </td>
                           <td>
                             <?php if ($login->new_user == 1): ?>

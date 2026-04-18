@@ -10,11 +10,11 @@
   <br>
   <?php
   if (!empty($_POST)) {
-    $token = $_POST['csrf'];
+    $token = Input::get('csrf');
     if (!Token::check($token)) {
       include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
     }
-    $to = $_POST['test_acct'];
+    $to = Input::get('test_acct');
     $subject = 'Testing Your Email Settings!';
     $body = 'This is the body of your test email';
     $mail_result = email($to, $subject, $body);

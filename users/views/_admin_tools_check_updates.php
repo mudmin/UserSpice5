@@ -89,15 +89,18 @@ $update_available = false;
             <div class="alert alert-success" role="alert">You are on the <b>STABLE</b> update cycle. While we can't promise that any code is error free, the Bleeding Edge update cycle community has helped to test this update before it was released to the public.</div>
           <?php }
 
+          // Resolve once for PHPStan
+          $extra_curl_security_enabled = defined('EXTRA_CURL_SECURITY') && constant('EXTRA_CURL_SECURITY') === true;
+
           // Warning for localhost with EXTRA_CURL_SECURITY enabled
-          if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) { ?>
+          if (isLocalhost() && $extra_curl_security_enabled) { ?>
             <div class="alert alert-warning" role="alert">
               <i class="fas fa-exclamation-triangle me-2"></i>
               <strong>Localhost Notice:</strong> You have <code>EXTRA_CURL_SECURITY</code> enabled while running on localhost. If you experience issues downloading updates, you can disable this feature on the <a href="admin.php?view=security">Security Dashboard</a>.
             </div>
           <?php }
           // Suggestion for non-localhost without EXTRA_CURL_SECURITY
-          if (!isLocalhost() && (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) { ?>
+          if (!isLocalhost() && !$extra_curl_security_enabled) { ?>
             <div class="alert alert-info" role="alert">
               <i class="fas fa-shield-alt me-2"></i>
               <strong>Security Tip:</strong> You can gain extra security by enabling <code>EXTRA_CURL_SECURITY</code> on the <a href="admin.php?view=security">Security Dashboard</a>. This forces SSL certificate verification for outbound connections.
@@ -199,7 +202,7 @@ $update_available = false;
           //return response instead of outputting
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           if (isset($offline_development) && $offline_development == true) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - dev-only offline mode
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
             // Add verbose debug output in dev mode
             curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -207,12 +210,12 @@ $update_available = false;
             curl_setopt($ch, CURLOPT_STDERR, $verbose);
           }
 
-          if (($ip == "::1" || $ip == "127.0.0.1") || (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) {
+          if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
           } else {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
           }
 
           //execute the POST request
@@ -300,17 +303,17 @@ $update_available = false;
               logger($user->data()->id, $result->next_ver, 'Attempting download');
               curl_setopt($ch_start, CURLOPT_URL, $url);
               curl_setopt($ch_start, CURLOPT_FAILONERROR, true);
-              curl_setopt($ch_start, CURLOPT_HEADER, 0);
+              curl_setopt($ch_start, CURLOPT_HEADER, false);
               curl_setopt($ch_start, CURLOPT_FOLLOWLOCATION, true);
               curl_setopt($ch_start, CURLOPT_AUTOREFERER, true);
                          curl_setopt($ch_start, CURLOPT_TIMEOUT, 10);
   
-              if (($ip == "::1" || $ip == "127.0.0.1") || (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) {
+              if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
                 curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
               } else {
                 curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 2);
-                curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 1);
+                curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, true);
               }
               curl_setopt($ch_start, CURLOPT_FILE, $zip_resource);
               $page = curl_exec($ch_start);
@@ -320,9 +323,7 @@ $update_available = false;
                 die;
               }
               if (PHP_VERSION_ID < 80500) {
-                  if (PHP_VERSION_ID < 80500) {
-       curl_close($ch_start);
- }
+                  curl_close($ch_start);
               }
               fclose($zip_resource);
 
@@ -356,7 +357,7 @@ $update_available = false;
               echo '<br>Opening zip file and checking hash.';
               logger($user->data()->id, $result->next_ver, 'Opening zip file and checking hash');
               $newCrc = base64_encode(hash_file('sha256', $zip->filename));
-              if ($newCrc == $hash) {
+              if ($newCrc == $hash) { // nosemgrep: md5-loose-equality - SHA-256 hash comparison via base64, not MD5
                 echo '<br>Hash matches';
                 logger($user->data()->id, $result->next_ver, 'Hash Matches');
 
@@ -375,13 +376,11 @@ $update_available = false;
                 if (!empty($non_writable_paths)) {
                   logger($user->data()->id, $result->next_ver, "Required paths not fully writable: " . implode(', ', $non_writable_paths));
                   echo '<br><span style="color:red;">Error: Some directories or files in the `users` and/or `usersc` folders are not writable. Please check permissions.</span>';
-                  if (!empty($non_writable_paths)) {
-                    echo '<br>The following paths are not writable:<ul>';
-                    foreach ($non_writable_paths as $path) {
-                      echo "<li>$path</li>";
-                    }
-                    echo '</ul>';
+                  echo '<br>The following paths are not writable:<ul>';
+                  foreach ($non_writable_paths as $path) {
+                    echo "<li>$path</li>";
                   }
+                  echo '</ul>';
                   echo '<br>Please ensure these paths are writable (e.g., using `chmod -R 755` on the users/ and usersc/ directories) and try again.';
                   $zip->close();
                   if (file_exists($zipFile)) {
@@ -522,7 +521,7 @@ $update_available = false;
               <div class="col-md-6">
                 <label for="spice_api" class="form-label">Enter your UserSpice API Key:</label>
                 <input type="text" class="form-control" id="spice_api" name="spice_api"
-                  value="<?= hed($settings->spice_api ?? '') ?>"
+                  value="<?= safeReturn($settings->spice_api ?? '') ?>"
                   placeholder="Enter your API key here">
               </div>
               <div class="col-12 text-center">
@@ -547,7 +546,7 @@ $update_available = false;
     <?php
     $plugins = $db->query('SELECT * FROM us_plugins WHERE last_check < ? AND status = ?', [date('Y-m-d H:i:s', strtotime('-3 hours')), 'active'])->results();
     foreach ($plugins as $p) {
-      echo "<br>Checking " . hed($p->plugin) . " ";
+      echo "<br>Checking " . safeReturn($p->plugin) . " ";
 
       $unsafe_path = 'usersc/plugins/' . $p->plugin . '/migrate.php';
       $base_dir = $abs_us_root . $us_url_root;

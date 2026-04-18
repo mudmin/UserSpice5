@@ -12,7 +12,7 @@ class Menu {
 
   public function __construct($id_or_name) {
     if($id_or_name == 0) {
-      return true;
+      return;
     }
     $this->db = DB::getInstance();
     if(is_numeric($id_or_name)) {
@@ -21,7 +21,7 @@ class Menu {
     } else {
       $col = "menu_name";
     }
-    $q = $this->db->query("SELECT * FROM us_menus WHERE $col = ?",[$id_or_name]);
+    $q = $this->db->query("SELECT * FROM us_menus WHERE $col = ?",[$id_or_name]); // nosemgrep: userspice-raw-query-concat - $col is hardcoded to 'id' or 'menu_name', value is parameterized
     $c = $q->count();
     if($c < 1){
       die("Your menu $id_or_name is missing. If you have just upgraded UserSpice,
@@ -33,7 +33,7 @@ class Menu {
       $menu = $q->first();
     }
 
-    if(!$menu) return false;
+    if(!$menu) return;
     $this->menu = $menu;
     $this->id = $menu->id;
     $this->menu_name = $menu->menu_name;
@@ -240,7 +240,7 @@ class Menu {
         $html .= "";
       }else{
         $html .= "<li class='{$liClass}' data-menu='{$item->menu}'>";
-        if(strtolower(substr($item->link,0,5) != "http:") && strtolower(substr($item->link,0,6) != "https:")){
+        if(strtolower(substr($item->link,0,5)) != "http:" && strtolower(substr($item->link,0,6)) != "https:"){
           $item->link = $us_url_root . $item->link;
         }
         $html .= "<a class='{$linkClass}' href='{$item->link}' {$linkAttrs}>";

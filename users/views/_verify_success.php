@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 if(!passwordsAllowed($settings->no_passwords)){
 $user = $verify;
 $user->login();
-$abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+if(file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')){
+  require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+}
 Redirect::to($us_url_root . $settings->redirect_uri_after_login);
 }
 ?>

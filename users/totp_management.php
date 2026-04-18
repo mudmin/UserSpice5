@@ -108,7 +108,7 @@ $anchor = '#totp_management_section_anchor';
 // TOTP Actions Handling - either from POST or from pending action
 $totpAction = null;
 
-if ($totpHandler && !empty($_POST['totp_action'])) {
+if (!empty($_POST['totp_action'])) {
     // Regular POST form submission - validate CSRF
     if (!Token::check($_POST['csrf'])) {
         $_SESSION['totp_error_message'] = lang("CSRF_ERROR");
@@ -305,8 +305,8 @@ if (isset($_SESSION['totp_action_pending'])) {
 }
 
 // Determine current UI state for TOTP section
-$isTOTPActiveForUser = $totpHandler && $totpHandler->isTOTPEnabled($userId);
-$isTOTPSetupMode = $totpHandler && isset($_SESSION['totp_setup_initiated']) && $_SESSION['totp_setup_initiated'] === true && isset($_SESSION['totp_secret']);
+$isTOTPActiveForUser = $totpHandler->isTOTPEnabled($userId);
+$isTOTPSetupMode = isset($_SESSION['totp_setup_initiated']) && $_SESSION['totp_setup_initiated'] === true && isset($_SESSION['totp_secret']);
 
 // If setup was initiated via GET param and page reloaded with error, keep setup mode
 if (!$isTOTPSetupMode && isset($_GET['setup_initiated']) && isset($_SESSION['totp_secret'])) {
@@ -314,7 +314,7 @@ if (!$isTOTPSetupMode && isset($_GET['setup_initiated']) && isset($_SESSION['tot
     $_SESSION['totp_setup_initiated'] = true;
 }
 
-$shouldShowBackupCodes = $totpHandler && isset($_SESSION['totp_backup_codes_to_display']);
+$shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
 
 ?>
 <div class="container">

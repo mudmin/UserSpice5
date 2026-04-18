@@ -17,7 +17,7 @@ if(!$db->error()) {
   $missing = array_diff($migrations,$existing_updates);
 
   $update=Input::get('override');
-  if(!in_array($update,$existing_updates) && $update!='' && !is_null($update)) {
+  if(!in_array($update,$existing_updates) && $update!='') {
     $db->insert('updates',['migration'=>$update,'update_skipped'=>1]);
     if(!$db->error()) {
       if($db->count()>0) {

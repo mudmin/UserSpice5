@@ -419,7 +419,7 @@ if ($_POST) {
 
             <div class="form-group">
               <label for="brand_html">Brand HTML</label>
-              <textarea id="brand_html" name="brand_html" class="form-control" rows="10" onchange="setDirty(true)"><?= trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8')) ?>
+              <textarea id="brand_html" name="brand_html" class="form-control" rows="10" onchange="setDirty(true)"><?= trustedHtml(trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8'))) ?>
                 </textarea>
               <div class="explain">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root. "a" tags are automatically closed.</div>
             </div>

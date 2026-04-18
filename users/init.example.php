@@ -10,6 +10,18 @@ require_once 'classes/class.autoloader.php';
 
 
 ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+
+// Uncomment and configure if behind a reverse proxy (load balancer, CDN, etc.):
+// $trustedProxies = ['10.0.0.1']; // Your proxy's internal IP(s)
+// if (Server::getScheme($trustedProxies) === 'https') {
+//     ini_set('session.cookie_secure', 1);
+// }
+
+// Standard HTTPS detection (use this if NOT behind a reverse proxy):
+if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+	ini_set('session.cookie_secure', 1);
+}
 session_start();
 // disables the feature that prevents the updater from installing languages you didn't have before the update
 // $disable_language_purge = true;

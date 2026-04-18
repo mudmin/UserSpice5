@@ -370,10 +370,8 @@ if (!function_exists('securePage')) {
 
         $pageID = $results->id;
         $ip = ipCheck();
-        //If page does not exist in DB, allow access
-        if (empty($pageDetails)) {
-            return true;
-        } elseif ($pageDetails['private'] == 0) { //If page is public, allow access
+        //If page is public, allow access
+        if ($pageDetails['private'] == 0) {
             return true;
         } elseif (!$user->isLoggedIn()) { //If user is not logged in, deny access
             $fields = [
@@ -510,12 +508,10 @@ if (!function_exists('checkMenu')) {
         //Grant access if master user
         $access = 0;
 
-        if ($access == 0) {
-            $query = $db->query('SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?', [$id, $permission]);
-            $results = $query->count();
-            if ($results > 0) {
-                $access = 1;
-            }
+        $query = $db->query('SELECT id FROM user_permission_matches  WHERE user_id = ? AND permission_id = ?', [$id, $permission]);
+        $results = $query->count();
+        if ($results > 0) {
+            $access = 1;
         }
         if ($access == 1) {
             return true;
@@ -708,7 +704,7 @@ if (!function_exists('checkAccess')) {
             if (!in_array($key, $sanitize)) {
                 return false;
             }
-            $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]);
+            $checkQ = $db->query("SELECT * FROM us_management WHERE $key = ?", [$value]); // nosemgrep: userspice-raw-query-concat - $key validated against whitelist on line 704, value is parameterized
             if (!$db->error()) {
                 $checkC = $checkQ->count();
                 if ($checkC < 1) {

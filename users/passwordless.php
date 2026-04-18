@@ -30,6 +30,8 @@ if ($settings->email_login == 0) {
   usError(lang("EML_FEATURE_DISABLED"));
   Redirect::to($us_url_root . 'users/login.php');
 }
+
+//Note that we strtolower the input when it comes back because ios devices insist on making it a pain to make the first letter lowercase. So be careful changing th
 if(!function_exists('passwordlessCharset')){
   function passwordlessCharset(){
     return 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -369,7 +371,7 @@ if ($method == "check_email") {
                 <?= tokenHere() ?>
                 <div class="form-group">
                   <label for="code" class="h5"><?= lang("PASS_ENTER_CODE"); ?></label>
-                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-z0-9]{5,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
+                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-zA-Z0-9]{4,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
                 </div>
                 <?php includeHook($hooks, 'form'); ?>
                 <button type="submit" class="btn btn-primary btn-lg mt-3"><?= lang("PASS_VER_BUTTON"); ?></button>

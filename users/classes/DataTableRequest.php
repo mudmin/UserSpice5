@@ -155,6 +155,9 @@ class DataTableRequest
      *
      * @return int The draw counter
      */
+    /**
+     * @psalm-taint-escape html — returns sanitized int via sanitizeInt()
+     */
     public function getDraw(): int
     {
         return $this->sanitizeInt($_GET['draw'] ?? 0) ?? 0;

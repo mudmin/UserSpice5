@@ -185,10 +185,10 @@ $usSessionMessageClasses = [
 
   // Emit from PHP
   <?php if (!empty($_GET['err'])): ?>
-    userSpiceMessage(<?php echo json_encode((string)$_GET['err'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>,'<?php echo $usSessionMessageClasses['err']; ?>');
+    userSpiceMessage(<?php echo safeJsonEncodeForJs($_GET['err']); // nosemgrep: userspice-direct-superglobal-access, echoed-request — legacy query-string messaging, sanitized via safeJsonEncodeForJs ?>,'<?php echo $usSessionMessageClasses['err']; ?>');
   <?php endif; ?>
   <?php if (!empty($_GET['msg'])): ?>
-    userSpiceMessage(<?php echo json_encode((string)$_GET['msg'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>,'<?php echo $usSessionMessageClasses['msg']; ?>');
+    userSpiceMessage(<?php echo safeJsonEncodeForJs($_GET['msg']); // nosemgrep: userspice-direct-superglobal-access, echoed-request — legacy query-string messaging, sanitized via safeJsonEncodeForJs ?>,'<?php echo $usSessionMessageClasses['msg']; ?>');
   <?php endif; ?>
   <?php foreach (['genMsg','valSuc','valErr'] as $k): if (!empty($usSessionMessages[$k])): ?>
     userSpiceMessage(<?php echo json_encode((string)$usSessionMessages[$k], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>,'<?php echo $usSessionMessageClasses[$k]; ?>');

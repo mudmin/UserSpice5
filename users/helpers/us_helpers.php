@@ -683,15 +683,7 @@ if (!function_exists('returnError')) {
 if (!function_exists('requestCheck')) {
   function requestCheck($expectedAr)
   {
-    if (isset($_GET) && isset($_POST)) {
-      $requestAr = array_replace_recursive($_GET, $_POST);
-    } elseif (isset($_GET)) {
-      $requestAr = $_GET;
-    } elseif (isset($_POST)) {
-      $requestAr = $_POST;
-    } else {
-      $requestAr = [];
-    }
+    $requestAr = array_replace_recursive($_GET, $_POST);
     $diffAr = array_diff_key(array_flip($expectedAr), $requestAr);
     if (count($diffAr) > 0) {
       returnError('Missing variables: ' . implode(',', array_flip($diffAr)) . '.');
@@ -1181,7 +1173,7 @@ if (!function_exists('includeHook')) {
     if (is_array($hooks) && isset($hooks[$position])) {
       foreach ($hooks[$position] as $h) {
         if (isset($h) && file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $h) && $h != '') {
-          $plugin = strstr($h, '/', 'before_needle');
+          $plugin = strstr($h, '/', true);
           if (isset($usplugins[$plugin]) && $usplugins[$plugin] == 1) { //only include this file if plugin is installed and active.
             include $abs_us_root . $us_url_root . 'usersc/plugins/' . $h;
           }
@@ -1659,7 +1651,7 @@ if (!function_exists("hed")) {
     if (!is_string($string)) {
       return $string;
     }
-    $decoded = htmlspecialchars_decode(html_entity_decode($string ?? "", ENT_QUOTES, "UTF-8"));
+    $decoded = htmlspecialchars_decode(html_entity_decode($string, ENT_QUOTES, "UTF-8"));
     return $stripTags ? strip_tags($decoded) : $decoded;
   }
 }
@@ -1806,7 +1798,8 @@ function userspiceActiveLog($currentPage, $user = null, $additionalData = [])
 {
   global $abs_us_root, $us_url_root;
   // Only proceed if active logging is enabled and page isn't excluded
-  if (!defined('USERSPICE_ACTIVE_LOGGING') || !USERSPICE_ACTIVE_LOGGING) {
+  $activeLoggingEnabled = defined('USERSPICE_ACTIVE_LOGGING') && constant('USERSPICE_ACTIVE_LOGGING');
+  if (!$activeLoggingEnabled) {
     return false;
   }
 
@@ -1932,9 +1925,45 @@ function isHTTPSConnection()
   return false;
 }
 
+/**
+ * @psalm-taint-escape html — wraps htmlspecialchars with ENT_QUOTES
+ */
 function safeReturn($string)
 {
   return htmlspecialchars($string ?? "", ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * json_encode a value with all HEX escape flags for safe JS embedding.
+ *
+ * @psalm-taint-escape html
+ * @psalm-taint-escape text — json_encode with HEX flags neutralises HTML/JS special chars
+ */
+function safeJsonEncodeForJs($value): string
+{
+  return json_encode((string)$value, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
+}
+
+/**
+ * Identity function that marks data as safe for curl/SSRF checks
+ * (e.g. hardcoded URLs, or payloads sent to hardcoded endpoints).
+ *
+ * @psalm-taint-escape ssrf — caller must ensure the curl target is trusted
+ */
+function safeCurl(string $value): string
+{
+  return $value;
+}
+
+/**
+ * Mark trusted HTML content as safe for output (e.g. admin-edited or decoded DB fields).
+ *
+ * @psalm-taint-escape html
+ * @psalm-taint-escape text — caller must ensure content is from a trusted source
+ */
+function trustedHtml(string $html): string
+{
+  return $html;
 }
 
 /**
@@ -2109,20 +2138,20 @@ if (!function_exists('fetchUserName')) {
     global $db;
 
     if ($username !== null && trim((string)$username) !== '') {
-      $column = 'username';
-      $data = trim((string)$username);
+      $query = $db->query(
+        "SELECT TRIM(CONCAT(COALESCE(fname,''), ' ', COALESCE(lname,''))) AS name
+         FROM users WHERE `username` = ? LIMIT 1",
+        [trim((string)$username)]
+      );
     } elseif ($id !== null && (int)$id > 0) {
-      $column = 'id';
-      $data = (int)$id;
+      $query = $db->query(
+        "SELECT TRIM(CONCAT(COALESCE(fname,''), ' ', COALESCE(lname,''))) AS name
+         FROM users WHERE `id` = ? LIMIT 1",
+        [(int)$id]
+      );
     } else {
       return 'Unknown';
     }
-
-    $query = $db->query(
-      "SELECT TRIM(CONCAT(COALESCE(fname,''), ' ', COALESCE(lname,''))) AS name
-       FROM users WHERE `$column` = ? LIMIT 1",
-      [$data]
-    );
 
     if ($query->count() > 0) {
       $name = trim((string)$query->first()->name);

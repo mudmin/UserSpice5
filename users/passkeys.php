@@ -16,7 +16,8 @@ if(isset($user) && $user->isLoggedIn() && Input::get('passkeySuccess') == 'true'
 }
 require_once $abs_us_root.$us_url_root.'users/auth/PasskeyHandler.php';
 
-
+// Ensure $userId is defined for use throughout the page
+$userId = (isset($user) && $user->isLoggedIn()) ? $user->data()->id : null;
 
 if (Server::get('REQUEST_METHOD') === 'POST') {
     
@@ -101,35 +102,39 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
                     <?php endif; ?>
                    
                     <?php if(count($passkeys) > 0): ?>
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th><?=lang("PASSKEY_NOTE_TH")?></th>
-                                    <th><?=lang("PASSKEY_TIMES_USED_TH")?></th>
-                                    <th><?=lang("PASSKEY_LAST_USED_TH")?></th>
-                                    <th><?=lang("PASSKEY_LAST_IP_TH")?></th>
-                                    <th><?=lang("GEN_ACTIONS")?></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($passkeys as $pk): ?>
-                                <tr>
-                                    <td class="text-truncate" style="max-width: 150px;"><?= hed($pk->passkey_note) ?></td>
-                                    <td><?= $pk->times_used ?></td>
-                                    <td><?= $pk->last_used ?></td>
-                                    <td><?= $pk->last_ip ?></td>
-                                    <td>
-                                        <form method="post" onsubmit="return confirm('<?=lang('PASSKEY_CONFIRM_DELETE_JS')?>');" class="d-inline">
-                                            <?=tokenHere();?>
-                                            <input type="hidden" name="passkey_id" value="<?= $pk->id ?>">
-                                            <button type="submit" name="deletePasskey" class="btn btn-danger btn-sm"><?=lang("GEN_DEL")?></button>
-                                        </form>
-                                        <button type="button" class="btn btn-info btn-sm" onclick="showEditForm(<?= $pk->id ?>, '<?= hed($pk->passkey_note, ENT_QUOTES) ?>')"><?=lang("PASSKEY_EDIT_NOTE_BTN")?></button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                        <div class="row">
+                        <?php foreach($passkeys as $pk): ?>
+                            <div class="col-12 col-md-6 col-xl-4 mb-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="fa fa-key me-2"></i><?= safeReturn($pk->passkey_note) ?: '—' ?></h6>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted"><?=lang("PASSKEY_TIMES_USED_TH")?></span>
+                                        <strong><?= $pk->times_used ?></strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted"><?=lang("PASSKEY_LAST_USED_TH")?></span>
+                                        <strong><?= $pk->last_used ?></strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted"><?=lang("PASSKEY_LAST_IP_TH")?></span>
+                                        <strong><?= $pk->last_ip ?></strong>
+                                    </li>
+                                </ul>
+                                <div class="card-footer d-flex gap-2">
+                                    <button type="button" class="btn btn-info btn-sm" onclick="showEditForm(<?= $pk->id ?>, '<?= safeReturn($pk->passkey_note, ENT_QUOTES) ?>')"><?=lang("PASSKEY_EDIT_NOTE_BTN")?></button>
+                                    <form method="post" onsubmit="return confirm('<?=lang('PASSKEY_CONFIRM_DELETE_JS')?>');" class="d-inline ms-auto">
+                                        <?=tokenHere();?>
+                                        <input type="hidden" name="passkey_id" value="<?= $pk->id ?>">
+                                        <button type="submit" name="deletePasskey" class="btn btn-danger btn-sm"><?=lang("GEN_DEL")?></button>
+                                    </form>
+                                </div>
+                            </div>
+                            </div>
+                        <?php endforeach; ?>
+                        </div>
                         
                         <div class="modal fade" id="editPasskeyNoteModal" tabindex="-1" aria-labelledby="editPasskeyNoteModalLabel" aria-hidden="true">
                             <div class="modal-dialog">

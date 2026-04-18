@@ -87,7 +87,7 @@ function prepareItemString($menuItem,$user_id){
 			$itemString.='<li><a href="'.US_URL_ROOT.$menuItem['link'].'"><span class="'.$menuItem['icon_class'].'"></span> '.$menuItem['label'].'</a></li>'; }
 	}
 	elseif($menuItem['link']=='users/join.php' || $menuItem['link']=='usersc/join.php') {
-		$query = $db->query("SELECT * from settings WHERE id = 1");
+		$query = $db->query("SELECT * FROM settings WHERE id = 1");
 		$results = $query->first();
 		$registration=$results->registration;
 		if($registration==1) {
@@ -197,7 +197,7 @@ if(!function_exists("migrateUSMainMenu")){
 	if($o->logged_in == 1 && $newPerms == "[0]"){
 		$newPerms = "[1]";
 	  }
-	  if($newPerms == "" || $newPerms == "[]"){
+	  if($newPerms == "[]"){
 		  $newPerms = "[0]";
 	  }
 

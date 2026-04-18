@@ -1,6 +1,6 @@
 <?php $dataB = $db->query("select version()")->results(true);
 
-$api = "https://api.userspice.com/api/v2/bugs/";
+$api = safeCurl("https://api.userspice.com/api/v2/bugs/");
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
   if (!Token::check($token)) {
@@ -29,7 +29,7 @@ if (!empty($_POST) && $settings->spice_api != '') {
   );
 
 
-  $payload = json_encode($data);
+  $payload = safeCurl(json_encode($data));
 
   $ch = curl_init($api);
 

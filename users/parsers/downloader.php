@@ -156,8 +156,8 @@ function usValidateZipEntries(ZipArchive $zip, string $baseExtractPath): array
       }
     }
 
-    // Best-effort symlink detection
-    if (method_exists($zip, 'getExternalAttributesIndex')) {
+    // Best-effort symlink detection (method_exists check kept for older PHP/libzip)
+    if (method_exists($zip, 'getExternalAttributesIndex')) { // @phpstan-ignore function.alreadyNarrowedType
       $opsys = 0;
       $attr  = 0;
       $ok = @$zip->getExternalAttributesIndex($i, $opsys, $attr);
@@ -248,7 +248,7 @@ usDiag($diag, $user->data()->id, "Attempting CURL request to download file conte
 $ch_start = curl_init();
 curl_setopt($ch_start, CURLOPT_URL, $url);
 curl_setopt($ch_start, CURLOPT_FAILONERROR, true);
-curl_setopt($ch_start, CURLOPT_HEADER, 0);
+curl_setopt($ch_start, CURLOPT_HEADER, false);
 curl_setopt($ch_start, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch_start, CURLOPT_AUTOREFERER, true);
 curl_setopt($ch_start, CURLOPT_TIMEOUT, 10);
@@ -263,12 +263,13 @@ if (defined('CURLOPT_REDIR_PROTOCOLS') && defined('CURLPROTO_HTTPS')) {
 }
 
 $ip = ipCheck();
-if (($ip == "::1" || $ip == "127.0.0.1") || (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) {
+$extra_curl_security_enabled = defined('EXTRA_CURL_SECURITY') && constant('EXTRA_CURL_SECURITY') === true;
+if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
   curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 0);
-  curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
 } else {
   curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 2);
-  curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 1);
+  curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, true);
 }
 
 $page = curl_exec($ch_start);
@@ -324,7 +325,7 @@ $result .= "==";
 // ------------------------------
 // Verify hashes and extract
 // ------------------------------
-if ($newCrc == $hash && $newCrc == $result) {
+if ($newCrc == $hash && $newCrc == $result) { // nosemgrep: md5-loose-equality - SHA-256 hash comparison via base64, not MD5
   usDiag($diag, $user->data()->id, "The security hash matches...validating zip entries");
 
   // Zip Slip / symlink validation BEFORE extract

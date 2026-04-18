@@ -136,6 +136,18 @@ if (!empty($_POST)) {
     }
 }
 
+// Detect if init.php uses the old HTTPS detection pattern vs Server::getScheme
+$init_file = $abs_us_root . $us_url_root . 'users/init.php';
+$init_uses_getscheme = false;
+$init_missing_samesite = false;
+$init_missing_secure = false;
+if (file_exists($init_file)) {
+    $init_contents = file_get_contents($init_file);
+    $init_uses_getscheme = (strpos($init_contents, 'Server::getScheme') !== false);
+    $init_missing_samesite = (strpos($init_contents, 'session.cookie_samesite') === false);
+    $init_missing_secure = (strpos($init_contents, 'session.cookie_secure') === false);
+}
+
 // Get current IP for testing
 $current_ip = Server::get('REMOTE_ADDR', 'unknown');
 $real_ip = $current_ip; // Default fallback
@@ -296,6 +308,69 @@ $proxy_configs = $db->query("
         </div>
     </div>
 </div>
+
+<?php if ($proxy_enabled && !$init_uses_getscheme): ?>
+<?php
+    // Build dynamic trusted proxies array from configured proxies
+    $trusted_proxy_ips = [];
+    if (!empty($proxy_configs)) {
+        foreach ($proxy_configs as $pc) {
+            $trusted_proxy_ips[] = $pc->proxy_ip;
+        }
+    }
+    $proxy_array_str = "[\n";
+    if (!empty($trusted_proxy_ips)) {
+        foreach ($trusted_proxy_ips as $ip) {
+            $proxy_array_str .= "    '" . htmlspecialchars($ip) . "',\n";
+        }
+    } else {
+        $proxy_array_str .= "    // Add your proxy IPs here, e.g.:\n";
+        $proxy_array_str .= "    // '10.0.0.1',\n";
+        $proxy_array_str .= "    // '192.168.1.0/24',\n";
+    }
+    $proxy_array_str .= "]";
+?>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Proxy Session Security - Action Recommended</h5>
+            </div>
+            <div class="card-body">
+                <p>Your site is configured as being <strong>behind a reverse proxy</strong>, but your <code>users/init.php</code> is using the standard HTTPS detection method. This means session cookies may not be marked as secure when your proxy terminates SSL, because the connection between the proxy and PHP is typically plain HTTP.</p>
+
+                <p>Update the session cookie block in your <code>users/init.php</code> to use <code>Server::getScheme()</code> which is proxy-aware and checks <code>X-Forwarded-Proto</code> from trusted sources:</p>
+
+                <pre class="bg-dark text-light p-3 rounded position-relative"><code>// Define your trusted proxy IPs (e.g., your Load Balancer's internal IP)
+$trustedProxies = <?= $proxy_array_str ?>;
+
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+
+// Use the helper method which handles X-Forwarded-Proto for you
+if (Server::getScheme($trustedProxies) === 'https') {
+    ini_set('session.cookie_secure', 1);
+}</code></pre>
+                <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyInitSnippet(this)"><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
+
+                <?php if ($init_missing_samesite || $init_missing_secure): ?>
+                <div class="alert alert-info mt-3 mb-0 p-2 small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Additionally detected:</strong>
+                    <?php if ($init_missing_samesite): ?>
+                        Your <code>init.php</code> is missing <code>session.cookie_samesite</code>.
+                    <?php endif; ?>
+                    <?php if ($init_missing_secure): ?>
+                        Your <code>init.php</code> is missing <code>session.cookie_secure</code>.
+                    <?php endif; ?>
+                    The snippet above includes both of these recommended settings.
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="row mb-4">
     <div class="col-12">
@@ -843,6 +918,21 @@ $proxy_configs = $db->query("
 </div>
 
 <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
+    // Copy init.php snippet to clipboard
+    function copyInitSnippet(btn) {
+        const pre = btn.previousElementSibling;
+        const code = pre?.querySelector('code')?.textContent || pre?.textContent || '';
+        navigator.clipboard.writeText(code).then(() => {
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = origHTML;
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 2000);
+        });
+    }
+
     // Define functions first to avoid reference errors
     function showAddProxyModal() {
         const modal = new bootstrap.Modal(document.getElementById('addProxyModal'));

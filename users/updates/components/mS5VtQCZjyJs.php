@@ -6,11 +6,11 @@
 //Rewrote 2019-03-01 BA
 
 $countE=0;
+$updateCount=0;
 
 $q=$db->query("SELECT * FROM profiles");
 if(!$db->error()) {
   if($db->count()>0) {
-    $updateCount=0;
     foreach($q->results() as $row) {
       $db->update('profiles',$row->id,['bio' => Input::sanitize($row->bio)]);
       if($db->error()) {
@@ -30,7 +30,7 @@ if(!$db->error()) {
 } else {
   $error=$db->errorString();
   $countE++;
-  $errors[]=$errorString;
+  $errors[]=$error;
   logger(1,"System Updates","Unable to select bios, Error: ".$error);
   $errors[] = "Unable to select bios, Error: ".$error;
 }

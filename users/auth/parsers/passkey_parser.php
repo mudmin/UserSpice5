@@ -340,7 +340,7 @@ try {
                     'client_ip' => Server::get('REMOTE_ADDR', 'unknown'),
                     'user_agent' => Server::get('HTTP_USER_AGENT', 'unknown'),
                     'host' => Server::get('HTTP_HOST', 'unknown'),
-                    'protocol' => isset($_SERVER['HTTPS']) ? 'https' : 'http',
+                    'protocol' => Server::getScheme(),
                     'headers' => getallheaders(),
                     'session_active' => session_status() === PHP_SESSION_ACTIVE
                 ];

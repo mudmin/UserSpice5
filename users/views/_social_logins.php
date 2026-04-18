@@ -90,10 +90,10 @@ if ($settings->oauth == 1 && isset($oauthClients)) {
             <span class="userspice-social-parent">
                 <span class="userspice-social-logins-icon">
                     <span class="userspice-social-logins-icon-sized">
-                        <img src="<?= $oauthImage ?>" alt="<?= hed($oauthProvider) ?>">
+                        <img src="<?= $oauthImage ?>" alt="<?= safeReturn($oauthProvider) ?>">
                     </span>
                 </span>
-                <span class="userspice-social-child"><?= hed($oauthProvider) ?></span>
+                <span class="userspice-social-child"><?= safeReturn($oauthProvider) ?></span>
             </span>
         </a>
         <?php

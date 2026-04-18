@@ -191,14 +191,10 @@ function isTotpRequired($settings, $login_method, $totp_requirements, $user_id) 
     
     // If TOTP is optional (setting = 1), check if user has voluntarily set it up
     if ($settings->totp == 1) {
-        // Only require TOTP if:
-        // 1. The login method normally requires it AND
-        // 2. The user has voluntarily set up TOTP
-        if ($login_method_requires_totp) {
-            $totp_record = $db->query("SELECT verified FROM us_totp_secrets WHERE user_id = ?", [$user_id])->first();
-            return $totp_record && $totp_record->verified == 1;
-        }
-        return false;
+        // Login method requires TOTP (guaranteed by early return on line 183)
+        // Only enforce if the user has voluntarily set up TOTP
+        $totp_record = $db->query("SELECT verified FROM us_totp_secrets WHERE user_id = ?", [$user_id])->first();
+        return $totp_record && $totp_record->verified == 1;
     }
     
     return false;

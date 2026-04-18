@@ -6,13 +6,12 @@ declare(strict_types=1);
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 use Webauthn\TrustPath\TrustPathLoader; 
-use Webauthn\PublicKeyCredentialSourceRepository; // Correct interface for v5.x
-use Webauthn\TrustPath\TrustPath; 
-use Webauthn\TrustPath\EmptyTrustPath; 
+use Webauthn\TrustPath\TrustPath;
+use Webauthn\TrustPath\EmptyTrustPath;
 use Symfony\Component\Uid\Uuid;
 
 
-class UserSpicePasskeyCredentialRepository implements PublicKeyCredentialSourceRepository 
+class UserSpicePasskeyCredentialRepository
 {
     private $db;
 

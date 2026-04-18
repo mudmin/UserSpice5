@@ -159,15 +159,16 @@ else {
   <?php } ?>
 </h2>
 <?php
+$extra_curl_security_enabled = defined('EXTRA_CURL_SECURITY') && constant('EXTRA_CURL_SECURITY') === true;
 // Warning for localhost with EXTRA_CURL_SECURITY enabled
-if (isLocalhost() && defined('EXTRA_CURL_SECURITY') && EXTRA_CURL_SECURITY === true) { ?>
+if (isLocalhost() && $extra_curl_security_enabled) { ?>
   <div class="alert alert-warning" role="alert">
     <i class="fas fa-exclamation-triangle me-2"></i>
     <strong>Localhost Notice:</strong> You have <code>EXTRA_CURL_SECURITY</code> enabled while running on localhost. If you experience issues downloading or installing addons, you can disable this feature on the <a href="admin.php?view=security">Security Dashboard</a>.
   </div>
 <?php }
 // Suggestion for non-localhost without EXTRA_CURL_SECURITY
-if (!isLocalhost() && (!defined('EXTRA_CURL_SECURITY') || EXTRA_CURL_SECURITY !== true)) { ?>
+if (!isLocalhost() && !$extra_curl_security_enabled) { ?>
   <div class="alert alert-info" role="alert">
     <i class="fas fa-shield-alt me-2"></i>
     <strong>Security Tip:</strong> You can gain extra security by enabling <code>EXTRA_CURL_SECURITY</code> on the <a href="admin.php?view=security">Security Dashboard</a>. This forces SSL certificate verification for outbound connections.
@@ -258,7 +259,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
           <div class="col-md-6">
             <label for="spice_api" class="form-label">Enter your UserSpice API Key:</label>
             <input type="text" class="form-control" id="spice_api" name="spice_api"
-              value="<?= hed($settings->spice_api ?? '') ?>"
+              value="<?= safeReturn($settings->spice_api ?? '') ?>"
               placeholder="Enter your API key here">
           </div>
           <div class="col-12 text-center">

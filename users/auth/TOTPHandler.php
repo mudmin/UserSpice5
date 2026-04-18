@@ -208,7 +208,7 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
 
             // Also update the users table
             $result = $this->db->update('users', $userId, ['totp_enabled' => 1]);
-            if (!$result || $this->db->error()) {
+            if (!$result) {
                 // logger($userId, "TOTP_Error", "Failed to update users.totp_enabled flag during activation: " . $this->db->errorString());
                 // Don't fail completely, the main TOTP record is activated
             }
@@ -356,7 +356,7 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
 
             // Also update the users table
             $result = $this->db->update('users', $userId, ['totp_enabled' => 0]);
-            if (!$result || $this->db->error()) {
+            if (!$result) {
                 // logger($userId, "TOTP_Error", "Failed to update users.totp_enabled flag during disable: " . $this->db->errorString());
             }
 

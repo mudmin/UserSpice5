@@ -51,7 +51,8 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   <?php if (in_array($user->data()->id, $master_account)) { ?>
     <div class="col-12 col-sm-3">
     File-based logs: 
-    <?php if(defined('USERSPICE_ACTIVE_LOGGING') && USERSPICE_ACTIVE_LOGGING == true) { ?>
+    <?php $activeLoggingEnabled = defined('USERSPICE_ACTIVE_LOGGING') && constant('USERSPICE_ACTIVE_LOGGING') == true; ?>
+    <?php if($activeLoggingEnabled) { ?>
       <span class="badge badge-success">Enabled</span>
       
     <?php } else { ?>

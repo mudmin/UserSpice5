@@ -28,6 +28,11 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+// Ensure $currentSessionName is always defined before use
+if (!isset($currentSessionName)) {
+    $currentSessionName = $config['session']['session_name'];
+}
+
 //if totp active and php >= 8.2.0
 if($settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
     require_once $abs_us_root . $us_url_root . 'users/auth/TOTPHandler.php';

@@ -1,5 +1,4 @@
 <?php
-$debug_mode = false;
 require_once '../users/init.php';
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
 
@@ -93,15 +92,7 @@ if (Input::exists('post')) {
     } // end rate limit check
 }
 
-if ($debug_mode) {
-    echo '<div class="container mt-3"><div class="row"><div class="col-12"><pre>';
-    var_dump($_GET);
-    var_dump($_POST);
-    var_dump($token);
-    if (isset($validation)) { var_dump($validation); }
-    var_dump($errors);
-    echo '</pre></div></div></div>';
-}
+
 
 $verifyCardContent = ($email_sent)
   ? $abs_us_root.$us_url_root.'users/views/_verify_resend_success.php'

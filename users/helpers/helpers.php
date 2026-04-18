@@ -75,7 +75,7 @@ if (!function_exists('size')) {
     $bytes = sprintf('%u', filesize($path));
 
     if ($bytes > 0) {
-      $unit = intval(log($bytes, 1024));
+      $unit = intval(log((float)$bytes, 1024));
       $units = ['B', 'KB', 'MB', 'GB'];
 
       if (array_key_exists($unit, $units) === true) {
@@ -238,9 +238,9 @@ if (!function_exists('email')) {
 }
 
 if (!function_exists('email_body')) {
-  function email_body(string $template, array $options = []): string
+  function email_body(string $template, array $options = [], bool $security_override = false): string
   {
-    global $abs_us_root, $us_url_root, $email_field_whitelist;
+    global $abs_us_root, $us_url_root, $email_field_whitelist, $user;
 
     // 1) Normalize separators, trim
     $template = trim($template);
@@ -285,7 +285,8 @@ if (!function_exists('email_body')) {
     }
 
     // Helper: resolve & ensure inside base
-    $resolveInside = static function (?string $baseReal, string $base, string $rel) {
+    /** @param string|false|null $baseReal */
+    $resolveInside = static function ($baseReal, string $base, string $rel) {
       if ($baseReal === false || $baseReal === null) return false;
 
       $candidate = $base . $rel;
@@ -310,14 +311,26 @@ if (!function_exists('email_body')) {
 
     // Whitelist of allowed variables for email templates
     // Can be overridden globally by setting $email_field_whitelist array
-    if (isset($email_field_whitelist) && is_array($email_field_whitelist)) {
-        $allowed = $email_field_whitelist;
+    // Pass $security_override = true to skip whitelist (requires admin - hasPerm(2))
+    $skip_whitelist = $security_override && isset($user) && $user->isLoggedIn() && hasPerm(2);
+
+    if ($skip_whitelist) {
+        // Admin override: extract all provided options
+        foreach ($data as $key => $value) {
+            if (is_string($key) && $key !== '') {
+                $$key = $value;
+            }
+        }
     } else {
-        $allowed = ['fname', 'lname', 'email', 'vericode', 'user_id', 'reset_vericode_expiry', 'join_vericode_expiry', 'verification_code', 'passwordless_expiry', 'url'];
-    }
-    foreach ($allowed as $key) {
-        if (array_key_exists($key, $data)) {
-            $$key = $data[$key];
+        if (isset($email_field_whitelist) && is_array($email_field_whitelist)) {
+            $allowed = $email_field_whitelist;
+        } else {
+            $allowed = ['fname', 'lname', 'email', 'vericode', 'user_id', 'reset_vericode_expiry', 'join_vericode_expiry', 'verification_code', 'passwordless_expiry', 'url', 'username', 'password', 'sitename', 'force_pr'];
+        }
+        foreach ($allowed as $key) {
+            if (isset($data[$key])) {
+                $$key = $data[$key];
+            }
         }
     }
 
@@ -479,7 +492,7 @@ if (!function_exists('safefilerewrite')) {
         $canWrite = flock($fp, LOCK_EX);
         // If lock not obtained sleep for 0 - 100 milliseconds, to avoid collision and CPU load
         if (!$canWrite) {
-          usleep(round(rand(0, 100) * 1000));
+          usleep((int)round(rand(0, 100) * 1000));
         }
       } while ((!$canWrite) and ((microtime(true) - $startTime) < 5));
 
@@ -504,14 +517,15 @@ function spiceUpdateBegins()
 {
   global $abs_us_root, $us_url_root, $settings, $user, $db, $config;
 
-  // Include external script if it exists
+  // Include external script if it exists (may set $no_language_purge)
+  $no_language_purge = false;
   $beginsScript = $abs_us_root . $us_url_root . 'usersc/scripts/spice_update_begins.php';
   if (file_exists($beginsScript)) {
     include $beginsScript;
   }
 
   // Proceed only if language purge is not disabled
-  if (!isset($no_language_purge) || !$no_language_purge) {
+  if (!$no_language_purge) {
     $langPath = $abs_us_root . $us_url_root . 'users/lang/*.php';
     $langFiles = glob($langPath);
 
@@ -532,14 +546,14 @@ function spiceUpdateSuccess()
 {
   global $abs_us_root, $us_url_root, $settings, $user, $db;
 
-  // Include external script if it exists
+  // Include external script if it exists (may set $no_language_purge)
+  $no_language_purge = false;
   $successScript = $abs_us_root . $us_url_root . 'usersc/scripts/spice_update_success.php';
   if (file_exists($successScript)) {
     include $successScript;
   }
 
-
-  if (!isset($no_language_purge) || !$no_language_purge) {
+  if (!$no_language_purge) {
 
     $storagePath = getLangFilesStoragePath();
 
@@ -723,7 +737,7 @@ echo "=== Example 3: Encrypting sensitive user data ===\n";
 $userData = json_encode([
     'user_id' => 12345,
     'email' => 'user@example.com',
-    'api_key' => 'sk_live_abc123xyz789'
+    'api_key' => ''//your sk_live key here
 ]);
 
 $encryptedData = spiceEncrypt($userData);

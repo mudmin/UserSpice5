@@ -382,7 +382,7 @@ if (!empty($_POST)) {
 
         // Only update if the status is actually changing
         if ($userdetails->protected != $newProtectedStatus) {
-
+          $userProtectedStatus = $userdetails->protected;
 
           if (updateUser('protected', $userId, $newProtectedStatus)) {
             $statusText = $newProtectedStatus ? 'now' : 'no longer';

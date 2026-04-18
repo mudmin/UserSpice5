@@ -88,6 +88,7 @@ if (!empty($_POST)) {
         $newLang = $settings->default_language;
       }
 
+      $force_pr = isset($_POST['forcePasswordReset']) ? 1 : 0;
       try {
         // echo "Trying to create user";
         $fields = [
@@ -100,7 +101,7 @@ if (!empty($_POST)) {
           'join_date' => $join_date,
           'email_verified' => 1,
           'vericode' => $hashedVericode,
-          'force_pr' => $settings->force_pr,
+          'force_pr' => $force_pr,
           'vericode_expiry' => $vericode_expiry,
           'oauth_tos_accepted' => true,
           'language' => $newLang,
@@ -122,7 +123,7 @@ if (!empty($_POST)) {
             'username' => $username,
             'password' => $password,
             'sitename' => $settings->site_name,
-            'force_pr' => $settings->force_pr,
+            'force_pr' => $force_pr,
             'fname' => $fname,
             'email' => rawurlencode($email),
             'vericode' => $vericode,
@@ -131,7 +132,7 @@ if (!empty($_POST)) {
           ];
           $to = rawurlencode($email);
           $subject = html_entity_decode($settings->site_name, ENT_QUOTES);
-          $body = email_body('_email_adminUser.php', $params);
+          $body = email_body('_email_adminUser.php', $params, true);
           email($to, $subject, $body);
         }
 
@@ -147,7 +148,11 @@ if (!empty($_POST)) {
 
 
 // Include custom column configuration
-include $abs_us_root . $us_url_root . 'usersc/includes/user_manager_columns.php';
+if(file_exists($abs_us_root . $us_url_root . 'usersc/includes/user_manager_columns.php')) {
+  include $abs_us_root . $us_url_root . 'usersc/includes/user_manager_columns.php';
+} else {
+include $abs_us_root . $us_url_root . 'users/includes/user_manager_columns.php';
+}
 
 // Get user data using the custom function
 $userData = $user_manager_get_data($settings, $db, $uCount, $maxUsers);
@@ -239,7 +244,7 @@ foreach ($validation->errors() as $error) {
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">New User</h4>
-        <button type="button" class="btn btn-outline-secondary float-right" data-bs-dismiss="modal">&times;</button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <form class="form-signup mb-0" action="" method="POST">
@@ -282,50 +287,13 @@ foreach ($validation->errors() as $error) {
           <div class="form-group">
             <label>
               Password (<?php echo $settings->min_pw; ?>-<?php echo $settings->max_pw; ?> chars)
+              <a href="#" id="togglePasswords" class="ms-2 text-muted" onclick="event.preventDefault(); var pw=document.getElementById('password'), cf=document.getElementById('confirm'), icon=this.querySelector('i'); if(pw.type==='password'){pw.type='text';cf.type='text';icon.classList.replace('fa-eye','fa-eye-slash');}else{pw.type='password';cf.type='password';icon.classList.replace('fa-eye-slash','fa-eye');}"><i class="fa fa-eye"></i></a>
             </label>
-
-            <div class="input-group" data-container="body">
-              <div class="input-group-append">
-                <span class="input-group-text password_view_control" id="addon1">
-                  <span class="fa fa-eye"></span>
-                </span>
-              </div>
-
-              <input class="form-control" type="password" name="password" id="password" <?php if ($settings->force_pr == 1) { ?> value="<?php echo $random_password; ?>" readonly<?php } ?> placeholder="Password" required autocomplete="off" aria-describedby="passwordhelp">
-
-              <?php if ($settings->force_pr == 1) { ?>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="addon2">
-                    <a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-bs-toggle="tooltip" title="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">
-                      <i class="fa fa-question"></i>
-                    </a>
-                  </span>
-                </div>
-              <?php } ?>
-
-            </div>
+            <input class="form-control" type="password" name="password" id="password" placeholder="Password" required autocomplete="off">
           </div>
           <div class="form-group">
             <label>Confirm Password</label>
-            <div class="input-group" data-container="body">
-              <div class="input-group-prepend">
-                <span class="input-group-text password_view_control" id="addon1">
-                  <span class="fa fa-eye"></span>
-                </span>
-              </div>
-
-              <input type="password" id="confirm" name="confirm" <?php if ($settings->force_pr == 1) { ?> value="<?php echo $random_password; ?>" readonly <?php } ?> class="form-control" autocomplete="off" placeholder="Confirm Password" required>
-
-              <?php if ($settings->force_pr == 1) { ?>
-                <div class="input-group-append">
-                  <span class="input-group-text" id="addon2">
-                    <a class="nounderline pwpopover" data-container="body" data-toggle="popover" data-placement="top" title="Why can't I edit this?" data-bs-toggle="tooltip" title="The Administrator has manual creation password resets enabled. If you choose to send an email to this user, it will supply them with the password reset link and let them know they have an account. If you choose to not, you should manually supply them with this password (discouraged).">
-                      <i class="fa fa-question"></i>
-                    </a>
-                  </span>
-                </div>
-              <?php } ?>
-            </div>
+            <input type="password" id="confirm" name="confirm" class="form-control" autocomplete="off" placeholder="Confirm Password" required>
           </div>
 
           <?php
@@ -335,6 +303,10 @@ foreach ($validation->errors() as $error) {
           ?>
           <label>
             <input type="checkbox" name="sendEmail" id="sendEmail" /> Send Email?
+          </label>
+          <br>
+          <label>
+            <input type="checkbox" name="forcePasswordReset" id="forcePasswordReset" /> Force Password Reset on Login?
           </label>
 
         </div>

@@ -79,6 +79,9 @@ final class Server
     /** Simple in-process cache to avoid repeat work per-request. */
     private static array $cache = [];
 
+    /** Whether we're running from the command line (not spoofable). */
+    private static ?bool $isCli = null;
+
     /** Public: typed fetch with sanitization and sensible defaults. */
     public static function get(string $key, $default = '')
     {
@@ -87,6 +90,16 @@ final class Server
         }
 
         $raw = $_SERVER[$key] ?? null;
+        if (self::isCli()) {
+            // In CLI mode, keys like DOCUMENT_ROOT are empty and others
+            // like PHP_SELF contain filesystem paths instead of web paths.
+            // Always consult the fallback — it returns null for keys it
+            // doesn't handle, preserving the original value.
+            $derived = self::cliFallback($key);
+            if ($derived !== null) {
+                $raw = $derived;
+            }
+        }
         if ($raw === null) {
             return $default;
         }
@@ -108,6 +121,90 @@ final class Server
 
         self::$cache[$key] = $out;
         return $out;
+    }
+
+    /** True only when the PHP CLI binary is running (not cli-server, not CGI). */
+    public static function isCli(): bool
+    {
+        if (self::$isCli === null) {
+            self::$isCli = (PHP_SAPI === 'cli');
+        }
+        return self::$isCli;
+    }
+
+    /**
+     * Derive missing $_SERVER values when running from the CLI.
+     * Returns the raw value to be fed through the normal sanitizer, or null.
+     */
+    private static function cliFallback(string $key): ?string
+    {
+        // SCRIPT_FILENAME is set by CLI PHP when running an actual file.
+        // Resolve to absolute path first (CLI may provide a relative path),
+        // then sanitize to strip control chars and validate existence.
+        $raw = $_SERVER['SCRIPT_FILENAME'] ?? '';
+        if ($raw === '') {
+            return null;
+        }
+        $resolved = realpath($raw);
+        if ($resolved === false) {
+            return null;
+        }
+        $scriptFile = self::sanitize_fs_path($resolved, true, false, true);
+        if ($scriptFile === '') {
+            return null;
+        }
+
+        switch ($key) {
+            case 'DOCUMENT_ROOT':
+                return self::cliDocRoot($scriptFile);
+
+            case 'PHP_SELF':
+            case 'SCRIPT_NAME':
+                // Derive the web-relative path: SCRIPT_FILENAME minus DOCUMENT_ROOT.
+                // e.g. /var/www/html/us5/index.php => /index.php
+                $docRoot = self::cliDocRoot($scriptFile);
+                if ($docRoot === null) {
+                    return null;
+                }
+                $relative = substr($scriptFile, strlen($docRoot));
+                // Normalize to forward slashes for URI context (Windows compat)
+                $relative = str_replace('\\', '/', $relative);
+                if ($relative === '') {
+                    return '/';
+                }
+                if ($relative[0] !== '/') {
+                    $relative = '/' . $relative;
+                }
+                return $relative;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Walk up from a script's directory to find the UserSpice root (z_us_root.php marker).
+     * Result is cached since multiple keys may need it in the same request.
+     */
+    private static ?string $cliDocRoot = null;
+    private static bool $cliDocRootResolved = false;
+
+    private static function cliDocRoot(string $scriptFile): ?string
+    {
+        if (self::$cliDocRootResolved) {
+            return self::$cliDocRoot;
+        }
+        self::$cliDocRootResolved = true;
+
+        $dir = dirname($scriptFile);
+        while ($dir && $dir !== dirname($dir)) {
+            if (file_exists($dir . DIRECTORY_SEPARATOR . 'z_us_root.php')) {
+                self::$cliDocRoot = $dir;
+                return $dir;
+            }
+            $dir = dirname($dir);
+        }
+        return null;
     }
 
     /** Public: generic sanitizer entry point (direct use if needed). */

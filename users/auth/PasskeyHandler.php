@@ -325,11 +325,7 @@ class PasskeyHandler
      */
     private function base64urlEncode($data): string
     {
-        if (is_string($data)) {
-            $encoded = base64_encode($data);
-        } else {
-            $encoded = base64_encode($data);
-        }
+        $encoded = base64_encode((string)$data);
         return rtrim(strtr($encoded, '+/', '-_'), '=');
     }
 
@@ -684,7 +680,7 @@ class PasskeyHandler
             $serializer = $serializerFactory->create();
 
             $userHandle = null;
-            if (isset($authData['response']['userHandle']) && $authData['response']['userHandle'] !== null && $authData['response']['userHandle'] !== '') {
+            if (isset($authData['response']['userHandle']) && $authData['response']['userHandle'] !== '') {
                 $userHandle = $this->base64urlEncode($authData['response']['userHandle']);
             }
 

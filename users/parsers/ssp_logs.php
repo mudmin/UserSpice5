@@ -75,8 +75,8 @@ foreach ($logs as $l) {
     $row[] = $l->logdate;
     $row[] = $l->logtype;
     $row[] = strlen($l->lognote) > 80
-        ? '<textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly>' . hed($l->lognote) . '</textarea>'
-        : hed($l->lognote);
+        ? '<textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly>' . safeReturn($l->lognote) . '</textarea>'
+        : safeReturn($l->lognote);
     $row[] = ($l->metadata !== null)
         ? '<i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="generateMetadataModal(' . $l->id . ')" title="View Metadata"></i>'
         : '';

@@ -55,7 +55,7 @@ if (!empty($_GET['search']['value'])) {
 $totalRecords = $db->query("SELECT COUNT(*) as count FROM audit")->first()->count;
 
 // Get filtered records count
-$filteredQuery = $db->query("SELECT COUNT(a.id) as count FROM {$tables} {$where}", $params);
+$filteredQuery = $db->query("SELECT COUNT(a.id) as count FROM {$tables} {$where}", $params); // nosemgrep: userspice-raw-query-concat - $tables is hardcoded, $where uses parameterized placeholders only
 $totalFiltered = $filteredQuery->first()->count;
 
 // Get validated ORDER BY and LIMIT clauses
@@ -63,7 +63,7 @@ $order = $dtRequest->getOrderBy('a.id', 'DESC');
 $limit = $dtRequest->getLimit();
 
 // Final Query
-$logs = $db->query("SELECT a.*, u.username, u.fname, u.lname FROM {$tables} {$where} {$order} {$limit}", $params)->results();
+$logs = $db->query("SELECT a.*, u.username, u.fname, u.lname FROM {$tables} {$where} {$order} {$limit}", $params)->results(); // nosemgrep: userspice-raw-query-concat - $tables is hardcoded, $where/$order/$limit use parameterized placeholders or validated DataTableRequest output
 
 // Format data
 $data = [];

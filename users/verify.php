@@ -154,9 +154,8 @@ if (Input::exists('get')) {
             } elseif (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
             } else {
-                if (($dest = Config::get('homepage')) || ($dest = 'account.php')) {
-                    Redirect::to($dest);
-                }
+                $dest = Config::get('homepage') ?: 'account.php';
+                Redirect::to($dest);
             }
         }
     }

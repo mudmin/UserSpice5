@@ -176,7 +176,6 @@ if (!function_exists("hasTag")) {
         return true;
       }
     }
-    return false;
   }
 }
 
@@ -256,7 +255,6 @@ if (!function_exists("usersWithTag")) {
       }
       return $users;
     }
-    return $users;
   }
 }
 
@@ -346,14 +344,14 @@ if (!function_exists('socialLogin')) {
       if ($hasValidEmail && !empty($idConditions)) {
         // email OR provider_id OR provider_id2 ...
         $whereClause = "email = ? OR " . implode(' OR ', $idConditions);
-        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", array_merge([$email], $idParams));
+        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", array_merge([$email], $idParams)); // nosemgrep: userspice-raw-query-concat - $whereClause built from safe column references with parameterized values
       } elseif ($hasValidEmail) {
         // email only
         $findExistingUS = $db->query("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
       } elseif (!empty($idConditions)) {
         // provider IDs only (no email)
         $whereClause = implode(' OR ', $idConditions);
-        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", $idParams);
+        $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", $idParams); // nosemgrep: userspice-raw-query-concat - $whereClause built from safe column references with parameterized values
       } else {
         $findExistingUS = null;
       }

@@ -339,7 +339,7 @@ if (!$totpDisabled) {
           <div class="form-group" id="setting-passkeys">
             <label>Enable Passkeys <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle"></i></a></label>
             <span class="float-end offset-switch">
-              <?php if ($pkDisabled && isset($pkDisabledReason)) { ?>
+              <?php if ($pkDisabled && $pkDisabledReason !== '') { ?>
                 <span class="text-danger fw-bold"><small><?= $pkDisabledReason ?></small></span>
               <?php } else { ?>
                 <div class="form-check form-switch">

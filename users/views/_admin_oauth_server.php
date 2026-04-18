@@ -233,15 +233,15 @@ if (!empty($_POST)) {
                 <div class="col-md-6">
                   <p class="mb-1"><strong>Client ID:</strong></p>
                   <div class="input-group mb-2">
-                    <input type="text" class="form-control font-monospace" value="<?= hed($oneTimeClientId) ?>" readonly>
-                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= hed($oneTimeClientId) ?>')">Copy</button>
+                    <input type="text" class="form-control font-monospace" value="<?= safeReturn($oneTimeClientId) ?>" readonly>
+                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= safeReturn($oneTimeClientId) ?>')">Copy</button>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <p class="mb-1"><strong>Client Secret:</strong></p>
                   <div class="input-group mb-2">
-                    <input type="text" class="form-control font-monospace" value="<?= hed($oneTimeSecret) ?>" readonly>
-                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= hed($oneTimeSecret) ?>')">Copy</button>
+                    <input type="text" class="form-control font-monospace" value="<?= safeReturn($oneTimeSecret) ?>" readonly>
+                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= safeReturn($oneTimeSecret) ?>')">Copy</button>
                   </div>
                 </div>
               </div>
@@ -278,13 +278,13 @@ if (!empty($_POST)) {
                         $isSecretHashed = strpos($c->client_secret, '$2') === 0;
                       ?>
                         <tr>
-                          <td><?= hed($c->client_name) ?></td>
+                          <td><?= safeReturn($c->client_name) ?></td>
                           <td class="client-info">
                             <span class="btn btn-sm btn-outline-info">View Info</span>
                             <div class="secret-info">
-                              <b>Client: <?= hed($c->client_name) ?></b><br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= hed($c->client_id) ?>')">Copy</button>
-                              Client Id: <?= hed($c->client_id) ?>
+                              <b>Client: <?= safeReturn($c->client_name) ?></b><br>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_id) ?>')">Copy</button>
+                              Client Id: <?= safeReturn($c->client_id) ?>
                               <br>
                               <?php if ($isSecretHashed) { ?>
                                 <span class="text-success">Client Secret: [Securely Hashed]</span>
@@ -293,8 +293,8 @@ if (!empty($_POST)) {
                               <?php } ?>
                               <?php if (!empty($c->response_secret)) { ?>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= hed($c->response_secret) ?>')">Copy</button>
-                              Response Secret: <?= hed($c->response_secret) ?>
+                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= safeReturn($c->response_secret) ?>')">Copy</button>
+                              Response Secret: <?= safeReturn($c->response_secret) ?>
                               <?php } ?>
                             </div>
                           </td>
@@ -312,11 +312,11 @@ if (!empty($_POST)) {
                               </button>
                             </form>
                           </td>
-                          <td><?= hed($c->redirect_uri) ?></td>
-                          <td><?= hed($c->ip_restrict) ?></td>
-                          <td><?= hed($c->login_title) ?></td>
-                          <td><?= hed($c->login_form) ?></td>
-                          <td><?= hed($c->login_script) ?></td>
+                          <td><?= safeReturn($c->redirect_uri) ?></td>
+                          <td><?= safeReturn($c->ip_restrict) ?></td>
+                          <td><?= safeReturn($c->login_title) ?></td>
+                          <td><?= safeReturn($c->login_form) ?></td>
+                          <td><?= safeReturn($c->login_script) ?></td>
                           <td><a href="<?= $us_url_root ?>users/admin.php?view=oauth&client=<?= $c->id ?>" class="btn btn-primary">Edit</a></td>
                           <td>
                             <form class="delete-form" method="post" action="" onclick="return confirm('Are you sure that you want to delete this client? This cannot be undone.');">
@@ -396,7 +396,7 @@ if (!empty($_POST)) {
                 <label for="response_secret">Response Secret (HMAC Signing):</label><br>
                 <small>Optional. If set, the response data sent to the client will be signed with HMAC-SHA256 using this secret. The client must have the same secret configured to verify the signature. This prevents response tampering during redirect. Use a strong random string (32+ characters recommended).</small>
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" id="response_secret" name="response_secret" value="<?= $e ? hed($client->response_secret ?? '') : '' ?>" placeholder="Leave empty to disable signing">
+                  <input type="text" class="form-control" id="response_secret" name="response_secret" value="<?= $e ? safeReturn($client->response_secret ?? '') : '' ?>" placeholder="Leave empty to disable signing">
                   <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('response_secret').value = generateSecret()">Generate</button>
                 </div>
 

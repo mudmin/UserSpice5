@@ -191,7 +191,7 @@ class DB
 						$this->_resultsArray = [];
 					}
 					$this->_count = $this->_query->rowCount();
-					$this->_lastId = $this->_pdo->lastInsertId();
+					$this->_lastId = (int)$this->_pdo->lastInsertId();
 				} else {
 					throw new Exception("db error");
 				}
@@ -618,7 +618,7 @@ class DB
 			$trace[] = [
 				'file' => isset($step['file']) ? $step['file'] : 'unknown',
 				'line' => isset($step['line']) ? $step['line'] : 'unknown',
-				'function' => isset($step['function']) ? $step['function'] : 'unknown',
+				'function' => $step['function'] ?? 'unknown',
 				'class' => isset($step['class']) ? $step['class'] : 'unknown',
 			];
 		}
@@ -744,6 +744,48 @@ class DB
 			}
 		} catch (Exception $e) {
 
+			return false;
+		}
+	}
+
+	/**
+	 * Add an index to a table if the table exists and the index doesn't
+	 * @param string $table The table name
+	 * @param string $name The index name
+	 * @param string $columns The column(s) for the index (e.g., "col1, col2")
+	 * @return bool True if successful or index already exists, false otherwise
+	 */
+	public function addIndex($table, $name, $columns)
+	{
+		try {
+			if (!$this->tableExists($table)) return false;
+			if ($this->indexExists($table, $name)) return true;
+
+			$sanitizedTable = $this->_sanitizeTableName($table);
+			$sanitizedName = $this->_sanitizeColumnName($name);
+			$result = $this->query("ALTER TABLE {$sanitizedTable} ADD INDEX {$sanitizedName} ({$columns})"); // nosemgrep: userspice-raw-query-concat - table and index names are sanitized, $columns is internal
+			return !$result->error();
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Drop an index from a table if it exists
+	 * @param string $table The table name
+	 * @param string $name The index name
+	 * @return bool True if successful or index doesn't exist, false otherwise
+	 */
+	public function dropIndex($table, $name)
+	{
+		try {
+			if (!$this->indexExists($table, $name)) return true;
+
+			$sanitizedTable = $this->_sanitizeTableName($table);
+			$sanitizedName = $this->_sanitizeColumnName($name);
+			$result = $this->query("ALTER TABLE {$sanitizedTable} DROP INDEX {$sanitizedName}"); // nosemgrep: userspice-raw-query-concat - table and index names are sanitized
+			return !$result->error();
+		} catch (Exception $e) {
 			return false;
 		}
 	}

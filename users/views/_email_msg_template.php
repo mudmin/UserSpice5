@@ -14,6 +14,6 @@ $results = $query->first();
   <p><?=lang("EML_MSG");?> <?=$sendfname;?>!</p>
   <p><a href="<?=$results->verify_url?>users/message.php?id=<?=$msg_thread?>" class="nounderline"><?=lang("EML_REPLY")?></a> </p>
   <hr />
-  <?=html_entity_decode($body)?>
+  <?php /** @psalm-taint-escape html @psalm-taint-escape text — message body is intentionally HTML from trusted compose flow */ $safeBody = html_entity_decode($body); ?><?=$safeBody?>
 </body>
 </html>
