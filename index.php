@@ -20,8 +20,12 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 				<a class="btn btn-primary" href="users/account.php" role="button"><span class="fa fa-user-circle-o mr-2 me-2"></span><?= lang("ACCT_HOME"); ?></a>
 			<?php } else { ?>
 				<a class="btn btn-warning mr-3 me-3" href="users/login.php" role="button"><span class="fa fa-sign-in mr-2 me-2"></span><?= lang("SIGNIN_TEXT"); ?></a>
+				<?php if($settings->registration == 1){ ?>
 				<a class="btn btn-info" href="users/join.php" role="button"><span class="fa fa-user-plus mr-2 me-2"></span><?= lang("SIGNUP_TEXT"); ?></a>
-			<?php } ?>
+			<?php 
+				}
+			}
+			?>
 		</p>
 		<p><?= lang("MAINT_PLEASE"); ?></p>
 		<p class="h4"><a href="https://userspice.com/getting-started/">https://userspice.com/getting-started/</a></h4>
