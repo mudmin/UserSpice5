@@ -1,4 +1,5 @@
-<?php //Social media sharing meta tags (delete if you don't want them) ?>
+<?php //Social media sharing meta tags (delete if you don't want them)
+ ?>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <?php 
@@ -15,10 +16,10 @@
 <meta property="og:type" content="website">
 
 <?php //title of site (title of share) ?>
-<meta property="og:title" content="Userspice Site">
+<meta property="og:title" content="<?= $settings->site_name ?>">
 
 <?php //description of site (text which appears when sharing) ?>
-<meta property="og:description" content="Powered by UserSpice">
+<meta property="og:description" content="<?= $settings->copyright ?>">
 
 <?php //URL for preview image ?>
 <meta property="og:image" content="">
