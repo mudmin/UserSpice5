@@ -1025,8 +1025,8 @@ CREATE TABLE `us_menus` (
 --
 
 INSERT INTO `us_menus` (`id`, `menu_name`, `type`, `nav_class`, `theme`, `z_index`, `brand_html`, `disabled`, `justify`, `show_active`, `screen_reader_mode`) VALUES
-(1, 'Main Menu', 'horizontal', '', 'dark', 50, '&lt;a href=&quot;{{root}}&quot; &gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; /&gt;', 0, 'right', 0, 0),
-(2, 'Dashboard Menu', 'horizontal', NULL, 'dark', 55, '&lt;a href=&quot;{{root}}&quot; title=&quot;Home Page&quot;&gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; alt=&quot;Main logo&quot; /&gt;&lt;/a&gt;', 0, 'right', 0, 0);
+(1, 'Main Menu', 'horizontal', '', 'dark', 50, '&lt;a href=&quot;{{root}}&quot; style=&quot;text-decoration:none&quot; &gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; /&gt;', 0, 'right', 0, 0),
+(2, 'Dashboard Menu', 'horizontal', NULL, 'dark', 55, '&lt;a href=&quot;{{root}}&quot; title=&quot;Home Page&quot; style=&quot;text-decoration:none&quot;&gt;\r\n&lt;img src=&quot;{{root}}users/images/logo.png&quot; alt=&quot;Main logo&quot; /&gt;&lt;/a&gt;', 0, 'right', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1108,7 +1108,7 @@ INSERT INTO `us_menu_items` (`id`, `menu`, `type`, `label`, `link`, `icon_class`
 
 CREATE TABLE `us_password_strength` (
   `id` int(11) NOT NULL,
-  `enforce_rules` tinyint(1) DEFAULT 0,
+  `enforce_rules` tinyint(1) DEFAULT 1,
   `meter_active` tinyint(1) DEFAULT 0,
   `min_length` int(11) DEFAULT 8,
   `max_length` int(11) DEFAULT 24,
