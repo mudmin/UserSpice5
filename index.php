@@ -11,7 +11,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
 ?>
 <main>
-	<div class="px-4 py-5 my-5 bg-light text-center">
+	<div class="px-4 py-5 my-5 text-center">
 		<h1><?= lang("JOIN_SUC"); ?> <?php echo $settings->site_name; ?></h1>
 		<p class="text-muted"><?= lang("MAINT_OPEN") ?></p>
 		<p class="my-4">

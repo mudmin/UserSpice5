@@ -21,6 +21,18 @@ body {
 <br><br>
 
 <p align="center"><?=lang("MAINT_TOK");?></p>
-<p align="center"><a href="javascript:history.back(-1)"><?=lang("GEN_BACK");?></a></p>
+<p align="center"><a href="#" id="tokenBackLink"><?=lang("GEN_BACK");?></a></p>
+
+<?php
+if (!isset($GLOBALS['userspice_nonce'])) {
+    $GLOBALS['userspice_nonce'] = base64_encode(random_bytes(16));
+}
+?>
+<script nonce="<?= htmlspecialchars($GLOBALS['userspice_nonce'] ?? '') ?>">
+  document.getElementById('tokenBackLink').addEventListener('click', function (e) {
+    e.preventDefault();
+    history.back();
+  });
+</script>
 
 <?php die(); ?>
