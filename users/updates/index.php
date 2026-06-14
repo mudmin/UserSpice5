@@ -3,6 +3,7 @@ require_once '../init.php';
 $db = DB::getInstance();
 $errors = $successes = [];
 $auto = Input::get('auto');
+$installing = in_array(Input::get('installing'), ['true', '1', 1, true], true);
 
 include($abs_us_root.$us_url_root.'users/includes/migrations.php');
 
@@ -46,6 +47,11 @@ if(!$db->error()) {
       <div class="row">
         <div class="col-sm-12 text-center">
           <?php
+          if($installing){ ?>
+            <h3 class="text-center mt-3 pt-3 mb-3">Making final tweaks...</h3>
+          <?php
+            ob_start(); // suppress per-update output during a clean install
+          }
           foreach($missing as $m) {
             $update = $m;
             if(file_exists($abs_us_root.$us_url_root."users/updates/components/".$m.".php")){
@@ -54,17 +60,20 @@ if(!$db->error()) {
               $errors[] = "Update ".$m." unable to be applied, missing file.";
             }
           }
+          if($installing){ ob_end_clean(); Redirect::to($us_url_root.'users/login.php'); }
           ?>
 
           <?php
           $count = count($successes);
           $eCount = count($errors);
-          if($count == 1){?>
+          if(!$installing){
+            if($count == 1){?>
 
             <h3 class="text-center mt-3 pt-3 mb-3">Finished applying <?=$count?> update (<?=$eCount?> error).</h3>
           <?php }else{ ?>
             <h3 class="text-center mt-3 pt-3 mb-3">Finished applying <?=$count?> updates (<?=$eCount?> errors).</h3>
           <?php }
+          }
           if($auto == 1){
             usSuccess("Update applied");
             Redirect::to($us_url_root."users/admin.php?view=updates&sysup=1");
@@ -78,19 +87,19 @@ if(!$db->error()) {
       </div>
       <div class="row">
         <br>
-        
+
         <div class="col col-md-12">
-        <?php if($count > 0 || $eCount > 0){ ?>
+        <?php if(!$installing && ($count > 0 || $eCount > 0)){ ?>
             <h4 class="text-center">Diagnostic Information for each Update</h4>
-          <?php } 
-          if($count>0) {?>
+          <?php }
+          if(!$installing && $count>0) {?>
               <h1 class="text-center">Success Messages</h1>
               <?php foreach($successes as $s) {?>
                 <p class="text-center"><?=$s?></p>
                 
               <?php } ?>
           <?php }
-          if($eCount>0) {?>
+          if(!$installing && $eCount>0) {?>
               <h1 class="text-center">Error Messages</h1>
               <p class="text-center">These can often be ignored...especially if they mention duplicate columns.  Feel free to check with us in Discord or on the UserSpice.com forums if you have any questions.</p>
               <?php foreach($errors as $e) {?>

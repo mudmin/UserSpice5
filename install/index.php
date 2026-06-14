@@ -346,7 +346,7 @@ if ($step == 3 && isset($_POST['cleanup'])) {
 
     // Discard any buffered warnings/output and redirect
     ob_end_clean();
-    header('Location: ../users/update.php?installer=1');
+    header('Location: ../users/updates/index.php?installing=true');
     exit();
 }
 
