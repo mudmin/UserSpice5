@@ -401,9 +401,10 @@ if (!$totpDisabled) {
             // Show site name warning
             if ($settings->site_name == "UserSpice") { ?>
               <div class="text-primary mt-2"><small><b>Note:</b> TOTP uses your Site Name, which is currently set to <span class="fw-bold">UserSpice</span>. You may want to consider changing that to make your site easier to find in the authenticator app.</small></div>
-            <?php }
+            <?php } ?>
 
-
+            <div class="text-body-secondary mt-2"><small><b>Custom policy:</b> You can dynamically override this setting per request (e.g. require TOTP for admins, disable it for trusted IPs) by editing <b>usersc/includes/custom_totp_policy.php</b>. A commented starter template is provided.</small></div>
+            <?php
             ?>
           </div>
 
@@ -421,7 +422,7 @@ if (!$totpDisabled) {
                         echo "selected='selected'";
                       } ?> value="2">Disabled (except localhost)</option>
             </select>
-            <small class="text-muted">When set to "Disabled (except localhost)", password logins are only allowed from 127.0.0.1 or ::1</small>
+            <small class="text-body-secondary">When set to "Disabled (except localhost)", password logins are only allowed from 127.0.0.1 or ::1</small>
           </div>
 
           <!-- passwordless code length -->
@@ -463,6 +464,16 @@ if (!$totpDisabled) {
             <small>View passwordless debug logs <a href="<?= $us_url_root ?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
           </div>
 
+
+          <!-- ReAuth (step-up authentication) grace window -->
+          <div class="form-group">
+            <label>ReAuth Grace Window (minutes) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="How long a step-up re-authentication (forceReauth) stays valid before the user must confirm their identity again. Used by sensitive actions such as editing account settings. Set to 0 to require re-authentication every time."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <div class="input-group">
+              <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="ReAuth Grace Window" name="reauth_timeout" id="reauth_timeout" value="<?= $settings->reauth_timeout ?? 15; ?>">
+              <span class="input-group-addon input-group-text">minutes</span>
+            </div>
+            <small class="text-body-secondary">Applies to passwords, TOTP, passkeys, email codes, and social re-auth.</small>
+          </div>
 
           <!-- Force Password Reset -->
           <div class="form-group">

@@ -436,6 +436,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_BACKUP_ACK" => "Codes de secours confirmés.",
     "2FA_SUCCESS_SETUP_CANCELLED" => "Configuration annulée.",
     "2FA_ERR_INVALID_BACKUP" => "Code de secours invalide. Veuillez réessayer.",
+    "2FA_ERR_INVALID_CODE"   => "Code d'authentification invalide. Veuillez réessayer.",
     "2FA_ERR_DISABLE_FAILED" => "Échec de la désactivation de l'authentification à deux facteurs.",
     "2FA_ERR_NO_SECRET" => "Impossible de récupérer le secret d'authentification. Veuillez réessayer.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Code de secours vérifié mais échec de l'invalidation. Veuillez contacter le support.",
@@ -520,6 +521,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Vous pourrez changer le PIN la prochaine fois que vous ferez une vérification",
 	"SET_UPDATE"		=> "Mettre à jour vos données d'utilisateur",
 	"SET_NOCHANGE"	=> "L'administrateur a désactivé la capacité de changer de nom d'utilisateur.",
+	"SET_NOCHANGE_EMAIL"	=> "L'administrateur a désactivé la capacité de changer d'adresse e-mail.",
 	"SET_ONECHANGE"	=> "L'administrateur n'a autorisé qu'un changement de nom d'utilisateur et vous avez déjà utilisé cette possibilité.",
 
 	"SET_GRAVITAR" => "<strong>Voulez vous changer votre photo? </strong><br> Visitez <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> et créez votre compte avec le même courriel que vous utilisez sur ce site . Cela fonctionne pour des millions de sites. C'est rapide et facile! utilisée sur ce site",
@@ -600,6 +602,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Confirmez que c'est bien vous",
+	"REAUTH_INTRO"            => "Pour votre sécurité, veuillez vérifier votre identité pour continuer.",
+	"REAUTH_RELOGIN"          => "Veuillez vous reconnecter pour continuer.",
+	"REAUTH_LOCKED"           => "Trop de tentatives échouées. Veuillez vous reconnecter.",
+	"REAUTH_VERIFY"           => "Vérifier",
+	"REAUTH_OR"               => "ou",
+	"REAUTH_PASSWORD_LABEL"   => "Votre mot de passe",
+	"REAUTH_BAD_PASSWORD"     => "Mot de passe incorrect.",
+	"REAUTH_TOTP_BACKUP"      => "Ceci est un code de secours",
+	"REAUTH_EMAIL_BTN"        => "M'envoyer un code à 6 chiffres par e-mail",
+	"REAUTH_EMAIL_CODE_LABEL" => "Saisissez le code à 6 chiffres",
+	"REAUTH_EMAIL_RESEND"     => "Envoyer un nouveau code",
+	"REAUTH_EMAIL_SUBJECT"    => "Code de vérification",
+	"REAUTH_EMAIL_BODY"       => "Votre code de vérification est :",
+	"REAUTH_EMAIL_EXPIRE"     => "Ce code expire dans 10 minutes. Si vous ne l'avez pas demandé, vous pouvez ignorer cet e-mail.",
+	"REAUTH_EMAIL_SENT"       => "Nous vous avons envoyé un code à 6 chiffres par e-mail.",
+	"REAUTH_EMAIL_FAIL"       => "Impossible d'envoyer l'e-mail. Veuillez essayer une autre méthode.",
+	"REAUTH_EMAIL_NONE"       => "Veuillez d'abord demander un code.",
+	"REAUTH_EMAIL_EXPIRED"    => "Ce code a expiré. Veuillez en demander un nouveau.",
+	"REAUTH_EMAIL_TOOMANY"    => "Trop de tentatives. Veuillez demander un nouveau code.",
+	"REAUTH_EMAIL_BAD"        => "Code incorrect.",
+	"REAUTH_PASSKEY_BTN"      => "Utiliser une clé d'accès",
+	"REAUTH_SOCIAL_BTN"       => "Vérifier avec",
+	"REAUTH_SOCIAL_MISMATCH"  => "Ce compte ne correspond pas à votre connexion. Veuillez réessayer.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Vous rencontrez un problème avec votre application d'authentification ?",
+	"2FA_BACKUP_CODE_HELP" => "Saisissez l'un de vos codes de secours enregistrés",
+	"2FA_USE_BACKUP_BTN"   => "Utiliser un code de secours",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

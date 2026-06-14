@@ -63,10 +63,10 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
         if (extension_loaded('gd') &&
             class_exists('\BaconQrCode\Renderer\Image\GDLibRenderer')) {
 
-            $renderer = new \BaconQrCode\Renderer\Image\GDLibRenderer(
+            $renderer = new \BaconQrCode\Renderer\Image\GDLibRenderer( // @phpstan-ignore class.notFound (BaconQrCode renderer version compat: GDLibRenderer exists only in bacon-qr-code 2.x+; the class_exists() guard above ensures it is only instantiated when the bundled version provides it.)
                 new \BaconQrCode\Renderer\RendererStyle\RendererStyle(256)
             );
-            $writer   = new \BaconQrCode\Writer($renderer);
+            $writer   = new \BaconQrCode\Writer($renderer); // @phpstan-ignore argument.type ($renderer is a GDLibRenderer, a version-specific BaconQrCode class PHPStan cannot resolve; see the class.notFound note above.)
             $pngData  = $writer->writeString($uri);
 
             return 'data:image/png;base64,' . base64_encode($pngData);
@@ -74,8 +74,8 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
 
         /* ---------- 3. Bacon 1.x fallback (Image\Png) ------------------- */
         if (class_exists('\BaconQrCode\Renderer\Image\Png')) {
-            $renderer = new \BaconQrCode\Renderer\Image\Png();
-            $writer   = new \BaconQrCode\Writer($renderer);
+            $renderer = new \BaconQrCode\Renderer\Image\Png(); // @phpstan-ignore class.notFound (BaconQrCode renderer version compat: Image\Png exists only in bacon-qr-code 1.x; the class_exists() guard above ensures it is only instantiated when the bundled version provides it.)
+            $writer   = new \BaconQrCode\Writer($renderer); // @phpstan-ignore argument.type ($renderer is a bacon-qr-code 1.x Image\Png renderer, a version-specific class PHPStan cannot resolve; see the class.notFound note above.)
             $pngData  = $writer->writeString($uri);
 
             return 'data:image/png;base64,' . base64_encode($pngData);
@@ -95,13 +95,13 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
     {
         try {
             return $this->google2fa->verifyKey($secret, $code, $window);
-        } catch (\PragmaRX\Google2FA\Exceptions\InsecureKeyException $e) {
+        } catch (\PragmaRX\Google2FA\Exceptions\InsecureKeyException $e) { // @phpstan-ignore class.notFound (pragmarx/google2fa version compat: this exception class exists in the bundled users/auth/vendor build; PHPStan resolves the google2fa namespace against a different version on the scan path.)
             // logger(0, "TOTP_Error", "Insecure key used: " . $e->getMessage());
             return false;
         } catch (\PragmaRX\Google2FA\Exceptions\InvalidCharactersException $e) {
             // logger(0, "TOTP_Error", "Invalid characters in code: " . $e->getMessage());
             return false;
-        } catch (\PragmaRX\Google2FA\Exceptions\WrongKeyLengthException $e) {
+        } catch (\PragmaRX\Google2FA\Exceptions\WrongKeyLengthException $e) { // @phpstan-ignore class.notFound (pragmarx/google2fa version compat: this exception class exists in the bundled users/auth/vendor build; PHPStan resolves the google2fa namespace against a different version on the scan path.)
             // logger(0, "TOTP_Error", "Wrong key length: " . $e->getMessage());
             return false;
         } catch (Exception $e) {
@@ -206,12 +206,8 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
                 return false;
             }
 
-            // Also update the users table
-            $result = $this->db->update('users', $userId, ['totp_enabled' => 1]);
-            if (!$result) {
-                // logger($userId, "TOTP_Error", "Failed to update users.totp_enabled flag during activation: " . $this->db->errorString());
-                // Don't fail completely, the main TOTP record is activated
-            }
+            // TOTP enabled-state is tracked solely by us_totp_secrets.verified
+            // (the authoritative source); no denormalized users-table flag.
 
             // logger($userId, "TOTP_Setup", "TOTP successfully activated.");
             return true;
@@ -354,11 +350,8 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
                 // If no record exists, TOTP is already disabled
             }
 
-            // Also update the users table
-            $result = $this->db->update('users', $userId, ['totp_enabled' => 0]);
-            if (!$result) {
-                // logger($userId, "TOTP_Error", "Failed to update users.totp_enabled flag during disable: " . $this->db->errorString());
-            }
+            // Deleting the us_totp_secrets row above is the source of truth for
+            // disabling TOTP; no denormalized users-table flag to update.
 
             // logger($userId, "TOTP_Setup", "TOTP disabled for user.");
             return true;

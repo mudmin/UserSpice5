@@ -197,6 +197,7 @@ $token = Token::generate();
                   $img_src = $us_url_root . 'users/images/plugin.png';
                 }
                 $buttonTitle = $xml->button != '' ? $xml->button : "Configure Plugin";
+                $isActive = pluginActive($t, true);
                 ?>
                 <tr id="ctrl-<?= $xml->name ?>" data-plugin-name="<?= $xml->name ?>">
                   <td>
@@ -204,18 +205,18 @@ $token = Token::generate();
 
 
                       <div class="pr-3">
-                        <?php if (pluginActive($t, true)) { ?>
+                        <?php if ($isActive) { ?>
                           <a href="<?= $us_url_root . 'users/admin.php?view=plugins_config&plugin=' . $t ?>">
                             <img src="<?= $img_src ?>" class="hov" alt="thumbnail" width="100">
                           </a>
                         <?php } else { ?>
-                          <img src="<?= $img_src ?>" alt="thumbnail" width="100">
+                          <img src="<?= $img_src ?>" alt="thumbnail" width="100" style="filter:grayscale(100%);opacity:0.25;">
                         <?php } ?>
                       </div>
 
-                      <div class="d-flex flex-column ps-3">
+                      <div class="d-flex flex-column ps-3"<?= $isActive ? '' : ' style="color:#9a9a9a;"' ?>>
                         <h4 class="mb-1"><?= $xml->name ?></h4>
-                        <small class="ml-2"><strong>Author: </strong><a class="text-dark" href="<?= $xml->website ?>"><?= $xml->author ?></a></small>
+                        <small class="ml-2"><strong>Author: </strong><a class="text-body" href="<?= $xml->website ?>"><?= $xml->author ?></a></small>
                         <small class="ml-2"><strong>Released: </strong><?= $xml->release ?></small>
                         <small class="ml-2"><strong>Version: </strong><?= $xml->version ?></small>
                         <small class="ml-2"><strong>Tested With: </strong><?= $xml->tested ?></small>
@@ -224,7 +225,7 @@ $token = Token::generate();
                     </div>
                   </td>
                   <td>
-                    <p class="text-dark"><?= $xml->description ?></p>
+                    <p class="<?= $isActive ? 'text-body' : '' ?>"<?= $isActive ? '' : ' style="color:#9a9a9a;"' ?>><?= $xml->description ?></p>
                   </td>
                   <td class="text-center">
                     <h4><?php pluginStatus($usplugins[$t]); ?></h4>
@@ -267,7 +268,7 @@ $token = Token::generate();
                           <button type="submit" name="activate" value="Activate" class="btn btn-outline-success" title="Activate">
                             <i class="fa fa-toggle-on" aria-hidden="true"></i>
                           </button>
-                          <button type="submit" name="delete" value="Delete" class="btn btn-outline-danger" title="Delete" onclick="return confirm('If you continue, the plugin files will be deleted.  The plugin may also choose to delete/clean up the data it created in your database.  To see which actions would be performed, take a look at the delete.php file in the plugin folder (if it exists).  This cannot be undone.');">
+                          <button type="submit" name="delete" value="Delete" class="btn btn-outline-danger" title="Delete" data-us-confirm="If you continue, the plugin files will be deleted.  The plugin may also choose to delete/clean up the data it created in your database.  To see which actions would be performed, take a look at the delete.php file in the plugin folder (if it exists).  This cannot be undone.">
                             <i class="fa fa-trash-o" aria-hidden="true"></i>
                           </button>
                           <?php if ($settings->spice_api != '') { ?>

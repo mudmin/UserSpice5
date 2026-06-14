@@ -153,9 +153,9 @@ else {
 
 <h2>Spice Shaker Auto Installer
   <?php if (!$diag) { ?>
-    <button type="button" onclick="window.location.href = 'admin.php?view=spice&diag=1';" name="button" class="btn btn-primary">Enter Diagnostic Mode</button>
+    <a href="admin.php?view=spice&diag=1" class="btn btn-primary">Enter Diagnostic Mode</a>
   <?php } else { ?>
-    <button type="button" onclick="window.location.href = 'admin.php?view=spice';" name="button" class="btn btn-primary">Leave Diagnostic Mode</button>
+    <a href="admin.php?view=spice" class="btn btn-primary">Leave Diagnostic Mode</a>
   <?php } ?>
 </h2>
 <?php
@@ -314,7 +314,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
       }
   ?>
       <div class="col-12 col-sm-6 col-md-4 pb-3">
-        <div class="card card-custom <?= $class ?> bg-white border-white border-0" style="height: 450px">
+        <div class="card card-custom <?= $class ?> border-0" style="height: 450px">
           <?php
           if ($d->category == "template") {
             $imgClass = "card-template-img";

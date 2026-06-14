@@ -203,7 +203,7 @@ if (!function_exists('email')) {
     }
 
     if (isset($opts['replyTo'])) {
-      $mail->addReplyTo($opts['replyTo']);
+      $mail->addReplyTo($opts['replyTo'], $opts['reply_name'] ?? '');
     }
 
     if (isset($opts['cc'])) {
@@ -441,9 +441,9 @@ if (!function_exists('bold')) {
 if (!function_exists('err')) {
   function err($text)
   {
-    // echo "<text padding='1em' align='center'><span style='color:red'><h4><span class='errSpan'>";
-    // echo $text;
-    // echo '</span></h4></span></text>';
+    // Legacy alias; original inline echo was commented out years ago.
+    // Route to usError() so callers' messages surface as flash on next page.
+    usError($text);
   }
 }
 
@@ -463,7 +463,7 @@ foreach ($usplugins as $k => $v) {
   }
 }
 
-if (!function_exists('write_ini_file')) {
+if (!function_exists('write_php_ini')) {
   function write_php_ini($array, $file)
   {
     $res = [];
@@ -524,7 +524,8 @@ function spiceUpdateBegins()
     include $beginsScript;
   }
 
-  // Proceed only if language purge is not disabled
+  // Proceed only if language purge is not disabled.
+  // @phpstan-ignore booleanNot.alwaysTrue (the conditionally-included script above may set $no_language_purge = true; PHPStan can't see into the include.)
   if (!$no_language_purge) {
     $langPath = $abs_us_root . $us_url_root . 'users/lang/*.php';
     $langFiles = glob($langPath);
@@ -553,6 +554,7 @@ function spiceUpdateSuccess()
     include $successScript;
   }
 
+  // @phpstan-ignore booleanNot.alwaysTrue (the conditionally-included script above may set $no_language_purge = true; PHPStan can't see into the include.)
   if (!$no_language_purge) {
 
     $storagePath = getLangFilesStoragePath();
@@ -891,7 +893,10 @@ if (!function_exists('spiceEncrypt')) {
 }
 
 if (!function_exists('spiceDecrypt')) {
-  function spiceDecrypt($encrypted, $iv, $tag)
+  // $iv and $tag are accepted for signature symmetry with spiceEncrypt's
+  // return shape but are ignored — the values are re-derived from the
+  // base64 blob, which always carries iv|cipher|tag.
+  function spiceDecrypt($encrypted, $iv = null, $tag = null)
   {
     try {
       $key = spiceEncryptionKey();

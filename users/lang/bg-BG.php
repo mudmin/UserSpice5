@@ -681,6 +681,7 @@ $lang = array_merge($lang, array(
     // Error Messages
 
     "2FA_ERR_INVALID_BACKUP"               => "Невалиден резервен код. Моля, опитайте отново.",
+    "2FA_ERR_INVALID_CODE"                 => "Невалиден код за удостоверяване. Моля, опитайте отново.",
 
     "2FA_ERR_DISABLE_FAILED"               => "Неуспешно изключване на двуфакторното удостоверяване.",
 
@@ -782,6 +783,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Може да променяте вашият ПИН при следващото влизане",
 	"SET_UPDATE"		=> "Актуализирайте вашите потребителски настройки",
 	"SET_NOCHANGE"	=> "Промяната на потребителски имена е забранена от администратор.",
+	"SET_NOCHANGE_EMAIL"	=> "Промяната на имейл адреси е забранена от администратор.",
 	"SET_ONECHANGE"	=> "Промяната на потребителски имена е разрешена само веднъж.",
 
 	"SET_GRAVITAR"	=> "Искате да промените вашата профилна снимка?  <br> Посетете <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> и се регистрирайте със същия И-мейл адрес, както в този сайт. Става бързо и лесно!",
@@ -843,6 +845,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Потвърдете, че сте вие",
+	"REAUTH_INTRO"            => "За ваша сигурност, моля потвърдете самоличността си, за да продължите.",
+	"REAUTH_RELOGIN"          => "Моля, влезте отново, за да продължите.",
+	"REAUTH_LOCKED"           => "Твърде много неуспешни опити. Моля, влезте отново.",
+	"REAUTH_VERIFY"           => "Потвърди",
+	"REAUTH_OR"               => "или",
+	"REAUTH_PASSWORD_LABEL"   => "Вашата парола",
+	"REAUTH_BAD_PASSWORD"     => "Грешна парола.",
+	"REAUTH_TOTP_BACKUP"      => "Това е резервен код",
+	"REAUTH_EMAIL_BTN"        => "Изпрати ми 6-цифрен код",
+	"REAUTH_EMAIL_CODE_LABEL" => "Въведете 6-цифрения код",
+	"REAUTH_EMAIL_RESEND"     => "Изпрати нов код",
+	"REAUTH_EMAIL_SUBJECT"    => "Код за потвърждение",
+	"REAUTH_EMAIL_BODY"       => "Вашият код за потвърждение е:",
+	"REAUTH_EMAIL_EXPIRE"     => "Този код изтича след 10 минути. Ако не сте го заявили, можете да пренебрегнете това писмо.",
+	"REAUTH_EMAIL_SENT"       => "Изпратихме ви 6-цифрен код по имейл.",
+	"REAUTH_EMAIL_FAIL"       => "Не можахме да изпратим имейла. Моля, опитайте друг метод.",
+	"REAUTH_EMAIL_NONE"       => "Моля, първо заявете код.",
+	"REAUTH_EMAIL_EXPIRED"    => "Този код изтече. Моля, заявете нов.",
+	"REAUTH_EMAIL_TOOMANY"    => "Твърде много опити. Моля, заявете нов код.",
+	"REAUTH_EMAIL_BAD"        => "Грешен код.",
+	"REAUTH_PASSKEY_BTN"      => "Използвай ключ за достъп",
+	"REAUTH_SOCIAL_BTN"       => "Потвърди с",
+	"REAUTH_SOCIAL_MISMATCH"  => "Този акаунт не съвпада с вашия вход. Моля, опитайте отново.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Имате проблеми с приложението за удостоверяване?",
+	"2FA_BACKUP_CODE_HELP" => "Въведете един от запазените резервни кодове",
+	"2FA_USE_BACKUP_BTN"   => "Използване на резервен код",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

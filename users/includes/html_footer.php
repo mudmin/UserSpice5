@@ -17,7 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/footer.php';
+if(isset($settings->template) && file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/footer.php')){
+  require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/footer.php';
+}
 
 //Plugin hooks
 foreach($usplugins as $k=>$v){

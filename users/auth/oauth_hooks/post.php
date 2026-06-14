@@ -17,7 +17,7 @@ if ($oauthClientData) {
         <?php endif; ?>
         
         <?php if ($oauthClientData->client_description): ?>
-            <small class="text-muted"><?= htmlspecialchars($oauthClientData->client_description) ?></small>
+            <small class="text-body-secondary"><?= htmlspecialchars($oauthClientData->client_description) ?></small>
         <?php endif; ?>
     </div>
     

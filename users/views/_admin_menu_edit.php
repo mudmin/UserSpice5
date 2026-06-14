@@ -81,7 +81,7 @@ if($menuId != 'new'){
 }
 
 if ($menuId == 'new' || !$menu) {
-  $menu = (object)['id' => '', 'menu_name' => '', 'disabled' => 0, 'theme' => 'light', 'show_active' => '1', 'type' => 'horizontal', 'justify' => 'right', 'nav_class' => '', 'z_index' => 50, 'brand_html' => ''];
+  $menu = (object)['id' => '', 'menu_name' => '', 'disabled' => 0, 'theme' => 'light', 'show_active' => '1', 'type' => 'horizontal', 'justify' => 'right', 'nav_class' => '', 'z_index' => 50, 'brand_html' => '', 'sticky' => 0];
 }
 
 $snippets = [];
@@ -145,10 +145,13 @@ if ($_POST) {
     //   'theme' => Input::get('theme'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
     //   'z_index' => Input::get('z_index'), 'brand_html' => $_POST['brand_html'],'justify'=>Input::get('justify')
     // ];
+    $rawType = Input::get('menu_type');
+    $isSticky = ($rawType === 'horizontal_sticky');
     $data = [
       'menu_name' => Input::get('menu_name'), 'disabled' => Input::get('disabled'),
-      'theme' => Input::get('theme'),'screen_reader_mode' => Input::get('screen_reader_mode'), 'show_active' => Input::get('show_active'), 'type' => Input::get('menu_type'), 'nav_class' => Input::get('nav_class'),
-      'z_index' => Input::get('z_index'), 'brand_html' => Input::get('brand_html'), 'justify' => Input::get('justify')
+      'theme' => Input::get('theme'),'screen_reader_mode' => Input::get('screen_reader_mode'), 'show_active' => Input::get('show_active'), 'type' => $isSticky ? 'horizontal' : $rawType, 'nav_class' => Input::get('nav_class'),
+      'z_index' => Input::get('z_index'), 'brand_html' => Input::get('brand_html'), 'justify' => Input::get('justify'),
+      'sticky' => $isSticky ? 1 : 0
     ];
     if ($menuId == 'new') {
       $success = $db->insert('us_menus', $data);
@@ -196,18 +199,18 @@ if ($_POST) {
 <div class="card">
   <div class="card-body">
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-12 col-lg-6">
         <?php if ($item) : ?>
 
           <form method="post">
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
-              <button type="submit" onclick="setDirty(false)" class="btn btn-primary save-button">Save</button>
+              <button type="submit" data-us-dirty="false" class="btn btn-primary save-button">Save</button>
             </div>
             <div class="form-group">
               <label for="menu_name">Label</label>
-              <input id="label" name="label" class="form-control" value="<?= $item->label ?>" onchange="setDirty(true)" />
-              <small class="form-text text-muted">For multilanguage, use any language key in users/lang/en-US.php and wrap the key in {{THIS_LANGUAGE}} and it will be translated. Add your own keys in usersc/lang. </small>
+              <input id="label" name="label" class="form-control" value="<?= $item->label ?>" data-us-dirty="true" />
+              <small class="form-text text-body-secondary">For multilanguage, use any language key in users/lang/en-US.php and wrap the key in {{THIS_LANGUAGE}} and it will be translated. Add your own keys in usersc/lang. </small>
             </div>
 
             <div class="form-group">
@@ -222,7 +225,7 @@ if ($_POST) {
                   <label class="form-check-label" for="permission_<?= $perm->id ?>"><?= $perm->name ?></label>
                 </div>
               <?php endforeach; ?>
-              <br><small class="form-text text-muted">"Public" is for non logged in users. If you want all users to see a menu item, use the permission "<?=$firstPerm?>".</small>
+              <br><small class="form-text text-body-secondary">"Public" is for non logged in users. If you want all users to see a menu item, use the permission "<?=$firstPerm?>".</small>
             </div>
 
             <?php if(pluginActive("usertags",true) && count($tags) > 0){ ?>
@@ -235,26 +238,26 @@ if ($_POST) {
                   <label class="form-check-label" for="tag_<?= $tag->id ?>"><?= $tag->tag ?></label>
                 </div>
               <?php endforeach; ?>
-              <br><small class="form-text text-muted">User Tags are an alternative permission system for UserSpice. If you select a tag and a permission, if the user has any one of them, they will be allowed to see the link.</small>
+              <br><small class="form-text text-body-secondary">User Tags are an alternative permission system for UserSpice. If you select a tag and a permission, if the user has any one of them, they will be allowed to see the link.</small>
             </div>
             <?php } ?>
 
 
             <div class="form-group">
               <label for="li_class">li Class</label>
-              <input id="li_class" name="li_class" class="form-control" value="<?= $item->li_class ?>" onchange="setDirty(true)" />
-              <small class="form-text text-muted">Custom Class to add to the li tag.</small>
+              <input id="li_class" name="li_class" class="form-control" value="<?= $item->li_class ?>" data-us-dirty="true" />
+              <small class="form-text text-body-secondary">Custom Class to add to the li tag.</small>
             </div>
 
             <div class="form-group">
               <label for="icon_class">Icon Class</label>
-              <input id="icon_class" name="icon_class" class="form-control" value="<?= $item->icon_class ?>" onchange="setDirty(true)" />
-              <small class="form-text text-muted">If you add a font awesome icon class the menu item will have an icon before the label. ie "fa fa-home"</small>
+              <input id="icon_class" name="icon_class" class="form-control" value="<?= $item->icon_class ?>" data-us-dirty="true" />
+              <small class="form-text text-body-secondary">If you add a font awesome icon class the menu item will have an icon before the label. ie "fa fa-home"</small>
             </div>
 
             <div class="form-group">
               <label for="type">Type</label>
-              <select name="type" id="type" class="form-control" onchange="setDirty(true)">
+              <select name="type" id="type" class="form-control" data-us-dirty="true">
                 <option value="" <?= $item->type == '' ? 'selected' : '' ?>>Choose Type</option>
                 <option value="link" <?= $item->type == 'link' ? 'selected' : '' ?>>Link</option>
                 <option value="dropdown" <?= $item->type == 'dropdown' ? 'selected' : '' ?>>Dropdown</option>
@@ -265,21 +268,21 @@ if ($_POST) {
             <div id="link_wrapper">
               <div class="form-group">
                 <label for="link">Link</label>
-                <input id="link" name="link" class="form-control" value="<?= $item->link ?>" onchange="setDirty(true)" />
-                <small class="form-text text-muted">This will be placed in the href attribute of the link</small>
+                <input id="link" name="link" class="form-control" value="<?= $item->link ?>" data-us-dirty="true" />
+                <small class="form-text text-body-secondary">This will be placed in the href attribute of the link</small>
               </div>
 
               <div class="form-group">
                 <label for="a_class">A Class</label>
-                <input id="a_class" name="a_class" class="form-control" value="<?= $item->a_class ?>" onchange="setDirty(true)" />
-                <small class="form-text text-muted">Custom Class to add to the a tag.</small>
+                <input id="a_class" name="a_class" class="form-control" value="<?= $item->a_class ?>" data-us-dirty="true" />
+                <small class="form-text text-body-secondary">Custom Class to add to the a tag.</small>
               </div>
             </div>
 
             <div class="form-group" id="snippet_wrapper">
               <label for="snippet">Snippet</label><br>
-              <small class="form-text text-muted">Snippets can be placed in usersc/hooks/menu or can be found in plugins. They are php files that return html. You can use them to add custom html to your menu. <span class="text-danger">Due to the way snippets are rendered, it is VERY important that you minify whitespace in your snippet files.</span></small>
-              <select class="form-control" name="snippet" id="snippet" onchange="setDirty(true)">
+              <small class="form-text text-body-secondary">Snippets can be placed in usersc/hooks/menu or can be found in plugins. They are php files that return html. You can use them to add custom html to your menu. <span class="text-danger">Due to the way snippets are rendered, it is VERY important that you minify whitespace in your snippet files.</span></small>
+              <select class="form-control" name="snippet" id="snippet" data-us-dirty="true">
                 <option value=""></option>
                 <?php foreach ($snippets as $s) {
                   if($us_url_root != "/"){
@@ -296,7 +299,7 @@ if ($_POST) {
             </div>
             <div class="form-group" id="target_wrapper">
               <label for="link_target">Target</label>
-              <select class="form-control" name="link_target" id="link_target" onchange="setDirty(true)">
+              <select class="form-control" name="link_target" id="link_target" data-us-dirty="true">
                 <option
                   <?php if ($item->link_target == '_self') {
                         echo "selected='selected'";
@@ -313,13 +316,13 @@ if ($_POST) {
                       } ?>
                 value="_parent">Parent</option>
               </select>
-              <small class="form-text text-muted">Default behavior is self.</small>
+              <small class="form-text text-body-secondary">Default behavior is self.</small>
             </div>
 
             <div class="form-group" id="parent_wrapper">
               <label for="parent">Parent</label>
-              <select class="form-control" name="parent" id="parent" onchange="setDirty(true)">
-                <option value="<?php if($item){ echo $item->parent; }  ?>"><?php if($item){ echo parseMenuLabel($switchParent[$item->parent]);}  ?> (Current)</option>
+              <select class="form-control" name="parent" id="parent" data-us-dirty="true">
+                <option value="<?php echo $item->parent; ?>"><?php echo parseMenuLabel($switchParent[$item->parent]); ?> (Current)</option>
                 <?php
                 foreach ($switchParent as $k => $v) {
                   if ($k == $item->parent) {
@@ -329,11 +332,11 @@ if ($_POST) {
                   <option value="<?= $k ?>"><?= parseMenuLabel($v); ?></option>
                 <?php } ?>
               </select>
-              <small class="form-text text-muted">Use this to move a menu item (and its children) to a different branch of the menu tree.</small>
+              <small class="form-text text-body-secondary">Use this to move a menu item (and its children) to a different branch of the menu tree.</small>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $item->disabled ? "checked" : "" ?> onchange="setDirty(true)">
+              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $item->disabled ? "checked" : "" ?> data-us-dirty="true">
               <label class="form-check-label" for="disabled">
                 Disabled
               </label>
@@ -341,34 +344,35 @@ if ($_POST) {
 
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
-              <button type="submit" onclick="setDirty(false)" class="btn btn-primary save-button">Save</button>
+              <button type="submit" data-us-dirty="false" class="btn btn-primary save-button">Save</button>
             </div>
           </form>
         <?php else : ?>
           <form method="post">
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
-              <button type="submit" onclick="setDirty(false)" class="btn btn-primary">Save</button>
+              <button type="submit" data-us-dirty="false" class="btn btn-primary">Save</button>
             </div>
             <div class="form-group">
               <label for="menu_name">Menu Name</label>
-              <input id="menu_name" name="menu_name" class="form-control" value="<?= $menu->menu_name ?>" onchange="setDirty(true)" />
+              <input id="menu_name" name="menu_name" class="form-control" value="<?= $menu->menu_name ?>" data-us-dirty="true" />
             </div>
 
             <div class="form-group">
               <label for="menu_type">Menu Type</label>
+              <?php $isHorizSticky = ($menu->type == 'horizontal' && !empty($menu->sticky)); ?>
               <select name="menu_type" id="menu_type" class="form-control">
-                <!-- <option value="">Choose Menu Type</option> -->
-                <option value="horizontal" <?= $menu->type == 'horizontal' ? 'selected' : '' ?>>Horizontal</option>
+                <option value="horizontal" <?= ($menu->type == 'horizontal' && !$isHorizSticky) ? 'selected' : '' ?>>Horizontal</option>
+                <option value="horizontal_sticky" <?= $isHorizSticky ? 'selected' : '' ?>>Horizontal Sticky</option>
                 <option value="vertical" <?= $menu->type == 'vertical' ? 'selected' : '' ?>>Vertical</option>
                 <option value="accordion" <?= $menu->type == 'accordion' ? 'selected' : '' ?>>Accordion</option>
               </select>
+              <div class="explain">You may need to refresh the page to see a sticky change take effect.</div>
             </div>
 
             <div class="form-group" id="justify_wrapper">
-              <label for="menu_type">Horizontal Menu Justification</label>
+              <label for="justify">Horizontal Menu Justification</label>
               <select name="justify" id="justify" class="form-control">
-                <!-- <option value="">Choose Justification</option> -->
                 <option value="right" <?= $menu->justify == 'right' ? 'selected' : '' ?>>Right</option>
                 <option value="left" <?= $menu->justify == 'left' ? 'selected' : '' ?>>Left</option>
               </select>
@@ -376,7 +380,7 @@ if ($_POST) {
 
             <div class="form-group">
               <label for="nav_class">Menu Class</label>
-              <input id="nav_class" name="nav_class" class="form-control" value="<?= $menu->nav_class ?>" onchange="setDirty(true)" />
+              <input id="nav_class" name="nav_class" class="form-control" value="<?= $menu->nav_class ?>" data-us-dirty="true" />
               <div class="explain">Add custom class to the top level UL element. You can often use bg-primary to or bg-danger etc to use one of your template button colors as a menu background to make your menu feel more integrated. In v5.8.2+ the new custom option allows you to set your theme outside of the UltraMenu builder and works with our new customizable themes.</div>
             </div>
 
@@ -410,7 +414,7 @@ if ($_POST) {
 
             <div class="form-group">
               <label for="z_index">Z Index</label>
-              <input id="z_index" name="z_index" type="number" step="5" min="0" class="form-control" value="<?= $menu->z_index ?>" onchange="setDirty(true)" />
+              <input id="z_index" name="z_index" type="number" step="5" min="0" class="form-control" value="<?= $menu->z_index ?>" data-us-dirty="true" />
               Currently used z-indexes: <b><?= oxfordList($indexes); ?></b>
               <div class="explain">If you have multiple menus you most likely will want to set different z-index so that they do not clash. </div>
 
@@ -419,13 +423,13 @@ if ($_POST) {
 
             <div class="form-group">
               <label for="brand_html">Brand HTML</label>
-              <textarea id="brand_html" name="brand_html" class="form-control" rows="10" onchange="setDirty(true)"><?= trustedHtml(trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8'))) ?>
+              <textarea id="brand_html" name="brand_html" class="form-control" rows="10" data-us-dirty="true"><?= trustedHtml(trim(html_entity_decode($menu->brand_html ?? '', ENT_QUOTES, 'UTF-8'))) ?>
                 </textarea>
               <div class="explain">This box accepts html and javascript. For links and other resources that require a path, you can substitute {{root}} where you would normally use $us_url_root. "a" tags are automatically closed.</div>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $menu->disabled ? "checked" : "" ?> onchange="setDirty(true)">
+              <input class="form-check-input" type="checkbox" value="1" id="disabled" name="disabled" <?= $menu->disabled ? "checked" : "" ?> data-us-dirty="true">
               <label class="form-check-label" for="disabled">
                 Disabled
               </label>
@@ -433,12 +437,12 @@ if ($_POST) {
 
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
-              <button type="submit" onclick="setDirty(false)" class="btn btn-primary">Save</button>
+              <button type="submit" data-us-dirty="false" class="btn btn-primary">Save</button>
             </div>
           </form>
         <?php endif; ?>
       </div>
-      <div class="col-md-6">
+      <div class="col-12 col-lg-6">
         <div id="menu_items_wrapper" style="display: <?= ($item && !$showSiblings) ? 'none' : 'block' ?>;">
           <?php if ($menuId != 'new') : ?>
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -461,7 +465,7 @@ if ($_POST) {
                   $parsedLabel = parseMenuLabel($child->label);
                 ?>
                   <tr class="child-sortable" data-id="<?= $child->id ?>">
-                    <td class="text-muted"><i class="fa fa-arrows-v"></i></td>
+                    <td class="text-body-secondary"><i class="fa fa-arrows-v"></i></td>
                     <td>
                       <?php if($parsedLabel != ""){
                         echo $parsedLabel;
@@ -509,7 +513,7 @@ if ($_POST) {
                     </td>
                     <td class="text-end">
                       <a class="btn btn-sm btn-outline-dark mr-1" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=<?= $child->id ?>&parent_id=<?= $child->parent ?>"><i class="fa fa-pencil"></i></a>
-                      <button class="btn btn-sm btn-outline-danger mr-1" onclick="usDeleteMenuItem('<?= $child->id ?>')"><i class="fa fa-trash"></i></button>
+                      <button type="button" class="btn btn-sm btn-outline-danger mr-1" data-us-delete-item="<?= $child->id ?>"><i class="fa fa-trash"></i></button>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -618,7 +622,7 @@ if ($_POST) {
   });
 
   function updateMenuDisplayFields(type) {
-    if (type === 'horizontal') {
+    if (type === 'horizontal' || type === 'horizontal_sticky') {
       $('#justify_wrapper').show();
     } else {
       $('#justify_wrapper').hide();
@@ -658,4 +662,16 @@ if ($_POST) {
       window.location.href = `<?= $us_url_root ?>users/admin.php?view=delete_menu_item&menu_id=<?= $menuId ?>&item_id=${itemId}`;
     }
   }
+
+  // CSP-friendly bindings (replace inline onchange/onclick attributes)
+  document.addEventListener('change', function (e) {
+    var el = e.target.closest && e.target.closest('[data-us-dirty]');
+    if (el) { setDirty(el.getAttribute('data-us-dirty') === 'true'); }
+  }, true);
+  document.addEventListener('click', function (e) {
+    var save = e.target.closest && e.target.closest('[data-us-dirty="false"]');
+    if (save) { setDirty(false); }
+    var del = e.target.closest && e.target.closest('[data-us-delete-item]');
+    if (del) { usDeleteMenuItem(del.getAttribute('data-us-delete-item')); }
+  }, true);
 </script>

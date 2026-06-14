@@ -137,6 +137,7 @@ if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/rate_limits.php')
 
 // Validate configuration
 foreach ($rateLimits as $action => $limits) {
+    // @phpstan-ignore function.alreadyNarrowedType (the usersc/ customization include above may add malformed non-array entries to $rateLimits; PHPStan only sees the well-formed literal, so this validates the customized config.)
     if (!is_array($limits)) {
         throw new Exception("Rate limit configuration for '$action' must be an array");
     }
@@ -144,6 +145,7 @@ foreach ($rateLimits as $action => $limits) {
     // Ensure required keys exist
     $requiredKeys = ['ip_max', 'ip_window'];
     foreach ($requiredKeys as $key) {
+        // @phpstan-ignore isset.offset (the usersc/ customization include above may add entries missing these keys; PHPStan only sees the well-formed literal, so this validates the customized config.)
         if (!isset($limits[$key])) {
             throw new Exception("Rate limit configuration for '$action' missing required key: $key");
         }

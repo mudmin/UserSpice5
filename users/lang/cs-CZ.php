@@ -464,6 +464,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "Nastavení bylo zrušeno.",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "Neplatný záložní kód. Zkuste to prosím znovu.",
+    "2FA_ERR_INVALID_CODE"               => "Neplatný ověřovací kód. Zkuste to prosím znovu.",
     "2FA_ERR_DISABLE_FAILED"             => "Nepodařilo se vypnout dvoufaktorové ověření.",
     "2FA_ERR_NO_SECRET"                  => "Nepodařilo se získat ověřovací tajemství. Zkuste to prosím znovu.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Záložní kód byl ověřen, ale nepodařilo se jej zneplatnit. Kontaktujte prosím podporu.",
@@ -551,6 +552,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Můžete si nastavit nový PIN při příštím vyžádání ověření", //TODO ?
 	"SET_UPDATE"		=> "Aktualizovat uživatelské nastavení",
 	"SET_NOCHANGE"	=> "Administrátor zakázal měnit uživatelská jména.",
+	"SET_NOCHANGE_EMAIL"	=> "Administrátor zakázal měnit e-mailové adresy.",
 	"SET_ONECHANGE"	=> "Administrátor nastavil povolený počet změn uživatelského jména na 1 a tento počet jste již provedli.",
 
 	"SET_GRAVITAR"	=> "Chcete si změnit profilový obrázek?  <br> Navštivte <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> a zařiďtě si účet se stejným emailem, jako jste použili u nás. Funguje to na milionech stránkách. Je to rychlé a snadné!",
@@ -631,6 +633,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Potvrďte, že jste to vy",
+	"REAUTH_INTRO"            => "Z bezpečnostních důvodů prosím ověřte svou totožnost, abyste mohli pokračovat.",
+	"REAUTH_RELOGIN"          => "Pro pokračování se prosím znovu přihlaste.",
+	"REAUTH_LOCKED"           => "Příliš mnoho neúspěšných pokusů. Přihlaste se prosím znovu.",
+	"REAUTH_VERIFY"           => "Ověřit",
+	"REAUTH_OR"               => "nebo",
+	"REAUTH_PASSWORD_LABEL"   => "Vaše heslo",
+	"REAUTH_BAD_PASSWORD"     => "Nesprávné heslo.",
+	"REAUTH_TOTP_BACKUP"      => "Toto je záložní kód",
+	"REAUTH_EMAIL_BTN"        => "Poslat mi 6místný kód e-mailem",
+	"REAUTH_EMAIL_CODE_LABEL" => "Zadejte 6místný kód",
+	"REAUTH_EMAIL_RESEND"     => "Odeslat nový kód",
+	"REAUTH_EMAIL_SUBJECT"    => "Ověřovací kód",
+	"REAUTH_EMAIL_BODY"       => "Váš ověřovací kód je:",
+	"REAUTH_EMAIL_EXPIRE"     => "Platnost tohoto kódu vyprší za 10 minut. Pokud jste o něj nežádali, tento e-mail ignorujte.",
+	"REAUTH_EMAIL_SENT"       => "Poslali jsme vám e-mailem 6místný kód.",
+	"REAUTH_EMAIL_FAIL"       => "E-mail se nepodařilo odeslat. Zkuste prosím jinou metodu.",
+	"REAUTH_EMAIL_NONE"       => "Nejprve si prosím vyžádejte kód.",
+	"REAUTH_EMAIL_EXPIRED"    => "Platnost tohoto kódu vypršela. Vyžádejte si prosím nový.",
+	"REAUTH_EMAIL_TOOMANY"    => "Příliš mnoho pokusů. Vyžádejte si prosím nový kód.",
+	"REAUTH_EMAIL_BAD"        => "Nesprávný kód.",
+	"REAUTH_PASSKEY_BTN"      => "Použít přístupový klíč",
+	"REAUTH_SOCIAL_BTN"       => "Ověřit pomocí",
+	"REAUTH_SOCIAL_MISMATCH"  => "Tento účet neodpovídá vašemu přihlášení. Zkuste to prosím znovu.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Máte potíže s autentizační aplikací?",
+	"2FA_BACKUP_CODE_HELP" => "Zadejte jeden z uložených záložních kódů",
+	"2FA_USE_BACKUP_BTN"   => "Použít záložní kód",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

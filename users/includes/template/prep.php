@@ -1,12 +1,14 @@
 <?php
 if($settings->template == "wp"){$ignoreTemplateFix = true;}else{$ignoreTemplateFix = false;}
 if(isset($template_override)){
+  $template_override = basename($template_override); // strip any path components; prevents traversal in the template paths below
   $settings->template = $template_override;
   if(!file_exists($abs_us_root.$us_url_root."usersc/templates/$template_override/info.xml")){
     die("You have selected a template_override that doesn't exist");
   }
   $ignoreTemplateFix = true;
 }
+$settings->template = basename($settings->template); // defense-in-depth: a template name must never contain path components
 if(file_exists($abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/header.php')){
 require_once  $abs_us_root . $us_url_root . 'usersc/templates/' . $settings->template . '/header.php';
 }else{

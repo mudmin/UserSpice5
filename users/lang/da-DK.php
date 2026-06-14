@@ -446,6 +446,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_BACKUP_ACK"               => "Backup-koder bekræftet.",
     "2FA_SUCCESS_SETUP_CANCELLED"          => "Opsætning annulleret.",
     "2FA_ERR_INVALID_BACKUP"               => "Ugyldig backup-kode. Prøv venligst igen.",
+    "2FA_ERR_INVALID_CODE"                 => "Ugyldig godkendelseskode. Prøv venligst igen.",
     "2FA_ERR_DISABLE_FAILED"               => "Kunne ikke deaktivere to-faktor-godkendelse.",
     "2FA_ERR_NO_SECRET"                    => "Kunne ikke hente godkendelseshemmelighed. Prøv venligst igen.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "Backup-kode verificeret men kunne ikke ugyldiggøre. Kontakt venligst support.",
@@ -531,6 +532,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Du kan indstille en ny pinkode, næste gang du skal bekræftes",
 	"SET_UPDATE"		=> "Opdater dine brugerindstillinger",
 	"SET_NOCHANGE"	=> "Administratoren har deaktiveret muligheden for ændring af brugernavne.",
+	"SET_NOCHANGE_EMAIL"	=> "Administratoren har deaktiveret muligheden for ændring af e-mailadresser.",
 	"SET_ONECHANGE"	=> "Administratoren indstillede brugernavnsændringer til kun at kunne ske én gang, og du har allerede gjort det.",
 
 	"SET_GRAVITAR"	=> "Vil du ændre dit profilbillede?  <br> Besøg <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> og opsæt en konto med den samme e-mail, som du brugte på dette websted. Det fungerer på tværs af millioner af websteder. Det er hurtigt og nemt!",
@@ -612,6 +614,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Bekræft, at det er dig",
+	"REAUTH_INTRO"            => "Af sikkerhedshensyn bedes du bekræfte din identitet for at fortsætte.",
+	"REAUTH_RELOGIN"          => "Log venligst ind igen for at fortsætte.",
+	"REAUTH_LOCKED"           => "For mange mislykkede forsøg. Log venligst ind igen.",
+	"REAUTH_VERIFY"           => "Bekræft",
+	"REAUTH_OR"               => "eller",
+	"REAUTH_PASSWORD_LABEL"   => "Din adgangskode",
+	"REAUTH_BAD_PASSWORD"     => "Forkert adgangskode.",
+	"REAUTH_TOTP_BACKUP"      => "Dette er en backup-kode",
+	"REAUTH_EMAIL_BTN"        => "Send mig en 6-cifret kode på e-mail",
+	"REAUTH_EMAIL_CODE_LABEL" => "Indtast den 6-cifrede kode",
+	"REAUTH_EMAIL_RESEND"     => "Send en ny kode",
+	"REAUTH_EMAIL_SUBJECT"    => "Bekræftelseskode",
+	"REAUTH_EMAIL_BODY"       => "Din bekræftelseskode er:",
+	"REAUTH_EMAIL_EXPIRE"     => "Denne kode udløber om 10 minutter. Hvis du ikke har bedt om den, kan du ignorere denne e-mail.",
+	"REAUTH_EMAIL_SENT"       => "Vi har sendt dig en 6-cifret kode på e-mail.",
+	"REAUTH_EMAIL_FAIL"       => "Vi kunne ikke sende e-mailen. Prøv venligst en anden metode.",
+	"REAUTH_EMAIL_NONE"       => "Anmod venligst om en kode først.",
+	"REAUTH_EMAIL_EXPIRED"    => "Koden er udløbet. Anmod venligst om en ny.",
+	"REAUTH_EMAIL_TOOMANY"    => "For mange forsøg. Anmod venligst om en ny kode.",
+	"REAUTH_EMAIL_BAD"        => "Forkert kode.",
+	"REAUTH_PASSKEY_BTN"      => "Brug en adgangsnøgle",
+	"REAUTH_SOCIAL_BTN"       => "Bekræft med",
+	"REAUTH_SOCIAL_MISMATCH"  => "Den konto matchede ikke dit login. Prøv venligst igen.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Har du problemer med din godkendelsesapp?",
+	"2FA_BACKUP_CODE_HELP" => "Indtast en af dine gemte sikkerhedskoder",
+	"2FA_USE_BACKUP_BTN"   => "Brug sikkerhedskode",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

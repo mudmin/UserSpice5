@@ -202,7 +202,7 @@ class treeManager{
     global $path;
     if( !is_array( $array ) ) return false;
     foreach( $array as $key => $element ){
-      if( isset( $element['indent'] ) ) return;
+      if( isset( $element['indent'] ) ) return $array; // already indented; return unchanged
       if( $_level == 1 ){
         $array[ $key ]['indent'] = 0;
         $array[ $key ][ "{$indentKey}_indent" ]   = $glue . $element[ $indentKey ];

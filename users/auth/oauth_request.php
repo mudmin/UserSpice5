@@ -61,6 +61,16 @@ if (session_status() == PHP_SESSION_NONE) {
 $_SESSION['oauth_state'] = $state;
 $_SESSION['oauth_client_id'] = $oSettings->id; // Store which client was used
 
+// Step-up re-authentication mode (see users/reauth.php). When set, the
+// callback confirms the returned identity matches the already-logged-in user
+// instead of starting a fresh login session.
+if (Input::get('reauth') == 1 && isset($user) && $user->isLoggedIn()) {
+    $_SESSION['oauth_reauth'] = 1;
+    $_SESSION['oauth_reauth_uid'] = $user->data()->id;
+} else {
+    unset($_SESSION['oauth_reauth'], $_SESSION['oauth_reauth_uid']);
+}
+
 // Build the authorization URL
 $authParams = [
     'response_type' => 'code',

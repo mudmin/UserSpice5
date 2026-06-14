@@ -48,7 +48,7 @@ if ($dashboard_sidebar_menu == true && $hide_top_navigation == true) {
     require_once $abs_us_root . $us_url_root . "usersc/views/_admin_sidebar_fallback_menu.php";
   }else{
 ?>
-  <div class="col-12 sidebar-fallback w-100 border-bottom bg-light mb-4">
+  <div class="col-12 sidebar-fallback w-100 border-bottom bg-body-tertiary mb-4">
     <nav>
       <ul class="nav">
         <li class="nav-link mx-2"><a href="<?= $us_url_root ?>"><?= $lang["MENU_HOME"]; ?></a></li>

@@ -33,16 +33,12 @@ if ($hooks['bottom'] == []) {
 includeHook($hooks, 'pre');
 
 if (!empty($_POST['uncloak'])) {
+  if (!Token::check(Input::get('csrf'))) {
+    include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
+  }
   logger($user->data()->id, 'Cloaking', 'Attempting Uncloak');
-  if (isset($_SESSION['cloak_to'])) {
-    $to = $_SESSION['cloak_to'];
-    $from = $_SESSION['cloak_from'];
-    unset($_SESSION['cloak_to']);
-    $_SESSION[Config::get('session/session_name')] = $_SESSION['cloak_from'];
-    unset($_SESSION['cloak_from']);
-    logger($from, 'Cloaking', 'uncloaked from ' . $to);
-    $cloakHook =  getMyHooks(['page' => 'cloakEnd']);
-    includeHook($cloakHook, 'body');
+  $res = endCloak();
+  if ($res['ok']) {
     usSuccess("You are now you");
     Redirect::to($us_url_root . 'users/admin.php?view=users');
   } else {
@@ -74,10 +70,10 @@ if ($hooks['bottom'] == []) { //no plugin hooks present
     <div class="col-12 <?= $resize['cardClass'] ?> mt-2 mb-4 p-3 d-flex justify-content-center">
       <div class="card p-4 alternate-background" style="width:100%">
         <div class="image text-center">
-          <img src="<?= $grav; ?>" width="60%" alt="profile thumbnail" class="profile-replacer">
-          <p class="mt-3" <?= $resize['nameSize'] ?>><span id="fname" class="font-weight-bold fw-bold"><?= $user->data()->fname . ' ' . $user->data()->lname; ?> </span>
+          <img src="<?= safeReturn($grav, true); ?>" width="60%" alt="profile thumbnail" class="profile-replacer">
+          <p class="mt-3" <?= $resize['nameSize'] ?>><span id="fname" class="font-weight-bold fw-bold"><?= safeReturn($user->data()->fname, true) . ' ' . safeReturn($user->data()->lname, true); ?> </span>
             <br />
-            <span class="idd">@<?= $user->data()->username ?></span>
+            <span class="idd">@<?= safeReturn($user->data()->username, true) ?></span>
           </p>
           <p><a href="<?= $us_url_root ?>users/user_settings.php" class="btn btn-primary btn-block mt-3"><?= lang('ACCT_EDIT'); ?></a></p>
           <?php if($settings->passkeys > 0){ ?>
@@ -87,9 +83,10 @@ if ($hooks['bottom'] == []) { //no plugin hooks present
              <p><a href="<?= $us_url_root ?>users/totp_management.php" class="btn btn-primary btn-block mt-3"><?= lang('ACCT_2FA'); ?></a></p>
           <?php } ?>
 
-          <?php if (isset($_SESSION['cloak_to'])) { ?>
+          <?php if (isCloaked()) { ?>
             <p>
             <form class="" action="" method="post">
+              <?= tokenHere(); ?>
               <input type="hidden" name="uncloak" value="Uncloak!">
               <button class="btn btn-danger btn-block" role="submit">Uncloak</button>
             </form>

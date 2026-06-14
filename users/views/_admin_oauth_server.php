@@ -148,6 +148,18 @@ if (!empty($_POST)) {
     crypto.getRandomValues(array);
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
+
+  // CSP-friendly bindings (replace inline on* attributes)
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-us-copy]');
+    if (el) { copyToClipboard(el.getAttribute('data-us-copy')); }
+  });
+  var genSecretBtn = document.getElementById('generateSecretBtn');
+  if (genSecretBtn) {
+    genSecretBtn.addEventListener('click', function () {
+      document.getElementById('response_secret').value = generateSecret();
+    });
+  }
 </script>
 
 <style>
@@ -203,7 +215,7 @@ if (!empty($_POST)) {
       <h1>Configure the UserSpice OAuth Server
         <?= $statusBadge ?>
         <form method="post" action="" class="d-inline"
-          onsubmit="return confirm('<?= $toggleSubmitWarning ?>');">
+          data-us-confirm="<?= safeReturn($toggleSubmitWarning) ?>">
           <?= tokenHere(); ?>
           <input type="hidden" name="toggleServer" value="<?= $toggleServer ?>">
           <input type="submit" class="btn <?= $toggleServerClass ?> btn-sm" value="<?= $toggleServerText ?>">
@@ -234,14 +246,14 @@ if (!empty($_POST)) {
                   <p class="mb-1"><strong>Client ID:</strong></p>
                   <div class="input-group mb-2">
                     <input type="text" class="form-control font-monospace" value="<?= safeReturn($oneTimeClientId) ?>" readonly>
-                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= safeReturn($oneTimeClientId) ?>')">Copy</button>
+                    <button type="button" class="btn btn-outline-dark" data-us-copy="<?= safeReturn($oneTimeClientId) ?>">Copy</button>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <p class="mb-1"><strong>Client Secret:</strong></p>
                   <div class="input-group mb-2">
                     <input type="text" class="form-control font-monospace" value="<?= safeReturn($oneTimeSecret) ?>" readonly>
-                    <button class="btn btn-outline-dark" onclick="copyToClipboard('<?= safeReturn($oneTimeSecret) ?>')">Copy</button>
+                    <button type="button" class="btn btn-outline-dark" data-us-copy="<?= safeReturn($oneTimeSecret) ?>">Copy</button>
                   </div>
                 </div>
               </div>
@@ -283,7 +295,7 @@ if (!empty($_POST)) {
                             <span class="btn btn-sm btn-outline-info">View Info</span>
                             <div class="secret-info">
                               <b>Client: <?= safeReturn($c->client_name) ?></b><br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_id) ?>')">Copy</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary copy-btn mb-2" data-us-copy="<?= safeReturn($c->client_id) ?>">Copy</button>
                               Client Id: <?= safeReturn($c->client_id) ?>
                               <br>
                               <?php if ($isSecretHashed) { ?>
@@ -293,7 +305,7 @@ if (!empty($_POST)) {
                               <?php } ?>
                               <?php if (!empty($c->response_secret)) { ?>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= safeReturn($c->response_secret) ?>')">Copy</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" data-us-copy="<?= safeReturn($c->response_secret) ?>">Copy</button>
                               Response Secret: <?= safeReturn($c->response_secret) ?>
                               <?php } ?>
                             </div>
@@ -304,7 +316,7 @@ if (!empty($_POST)) {
                             <?php } else { ?>
                               <span class="badge bg-danger" title="Secret is stored in plaintext - regenerate to fix">Insecure</span>
                             <?php } ?>
-                            <form method="post" action="" class="d-inline" onsubmit="return confirm('WARNING: This will generate a new client secret.\n\nThe old secret will stop working IMMEDIATELY.\n\nYou will need to update your client application with the new secret.\n\nAre you sure you want to continue?');">
+                            <form method="post" action="" class="d-inline" data-us-confirm="WARNING: This will generate a new client secret.\n\nThe old secret will stop working IMMEDIATELY.\n\nYou will need to update your client application with the new secret.\n\nAre you sure you want to continue?">
                               <?= tokenHere(); ?>
                               <input type="hidden" name="regenerate_secret" value="<?= $c->id ?>">
                               <button type="submit" class="btn btn-sm <?= $isSecretHashed ? 'btn-outline-secondary' : 'btn-warning' ?>" title="Generate a new client secret">
@@ -319,7 +331,7 @@ if (!empty($_POST)) {
                           <td><?= safeReturn($c->login_script) ?></td>
                           <td><a href="<?= $us_url_root ?>users/admin.php?view=oauth&client=<?= $c->id ?>" class="btn btn-primary">Edit</a></td>
                           <td>
-                            <form class="delete-form" method="post" action="" onclick="return confirm('Are you sure that you want to delete this client? This cannot be undone.');">
+                            <form class="delete-form" method="post" action="" data-us-confirm="Are you sure that you want to delete this client? This cannot be undone.">
                               <?= tokenHere(); ?>
                               <input type="hidden" name="delete_client" value="<?= $c->id ?>">
                               <input type="submit" class="btn btn-danger" value="Delete">
@@ -397,7 +409,7 @@ if (!empty($_POST)) {
                 <small>Optional. If set, the response data sent to the client will be signed with HMAC-SHA256 using this secret. The client must have the same secret configured to verify the signature. This prevents response tampering during redirect. Use a strong random string (32+ characters recommended).</small>
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" id="response_secret" name="response_secret" value="<?= $e ? safeReturn($client->response_secret ?? '') : '' ?>" placeholder="Leave empty to disable signing">
-                  <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('response_secret').value = generateSecret()">Generate</button>
+                  <button class="btn btn-outline-secondary" type="button" id="generateSecretBtn">Generate</button>
                 </div>
 
                 <input type="submit" value="<?= $e ? 'Update Client' : 'Create Client' ?>" class="btn btn-outline-primary">

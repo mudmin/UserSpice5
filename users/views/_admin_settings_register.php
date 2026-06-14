@@ -38,22 +38,23 @@
           </div>
 
           <div class="form-group">
-            <label for="change_un">Allow users to change their Usernames
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Does as it says. Default: Disabled.">
+            <label for="change_un">Allow users to change their Usernames and Emails
+              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Controls whether users can change their own username and email on the account settings page. Default: Cannot change username but can change email.">
                 <i class="fa fa-question-circle offset-circle"></i>
               </a>
             </label>
-            <select id="change_un" class="form-control ajxnum" data-desc="Allow users to change their Usernames" name="change_un">
-              <option value="0" <?php if ($settings->change_un == 0) echo 'selected="selected"'; ?>>Disabled</option>
-              <option value="1" <?php if ($settings->change_un == 1) echo 'selected="selected"'; ?>>Enabled</option>
-              <option value="2" <?php if ($settings->change_un == 2) echo 'selected="selected"'; ?>>Only once</option>
+            <select id="change_un" class="form-control ajxnum" data-desc="Allow users to change their Usernames and Emails" name="change_un">
+              <option value="0" <?php if ($settings->change_un == 0) echo 'selected="selected"'; ?>>Cannot change username but can change email</option>
+              <option value="1" <?php if ($settings->change_un == 1) echo 'selected="selected"'; ?>>Can change both username and email</option>
+              <option value="2" <?php if ($settings->change_un == 2) echo 'selected="selected"'; ?>>Can change username only once and can change email</option>
+              <option value="3" <?php if ($settings->change_un == 3) echo 'selected="selected"'; ?>>Cannot change email or username</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="change_un">Force users to validate their emails after registering</label>
             <br>
-            <span class="text-muted">
+            <span class="text-body-secondary">
               This setting is a part of the <a href="admin.php?view=email" style="color:blue;">email settings</a> as it requires your email to be properly configured and testing in order to function.
             </span>
           </div>
@@ -118,7 +119,7 @@
               </span>
             </div>
 
-            <div class="form-group d-flex justify-content-between align-items-center">
+            <div class="form-group d-flex justify-content-between align-items-center" id="setting-enforce_rules">
               <label for="enforce_rules" class="mb-0">Enforce Password Rules?</label>
               <span class="offset-switch">
                 <label class="switch switch-text switch-success">
@@ -342,6 +343,22 @@
                     $("#meterActiveWarning").hide();
                   }
 
+                  // Highlight a setting when linked from another page (e.g. security dashboard)
+                  var highlight = new URLSearchParams(window.location.search).get('highlight');
+                  if (highlight) {
+                    var $el = $('#setting-' + highlight);
+                    if ($el.length) {
+                      $el.css({
+                        'border': '2px solid #0d6efd',
+                        'border-radius': '8px',
+                        'padding': '12px',
+                        'box-shadow': 'inset 0 0 12px rgba(13, 110, 253, 0.15)'
+                      });
+                      setTimeout(function() {
+                        $el[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 200);
+                    }
+                  }
                 });
               </script>
 

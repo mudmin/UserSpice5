@@ -24,6 +24,13 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 if (!securePage(Server::get('PHP_SELF'))) {
   die();
 }
+
+// Step-up authentication: re-verify the user's identity before account
+// settings (email, password, etc.) can be viewed or changed. This is a no-op
+// while inside the reauth grace window, so a user editing their settings is
+// only prompted once per window — not on every save.
+forceReauth('', 'user_settings');
+
 $hooks = getMyHooks();
 includeHook($hooks, 'pre');
 
@@ -58,15 +65,8 @@ if (!empty($_POST)) {
     includeHook($hooks, 'post');
     if (!empty($_POST['uncloak'])) {
       logger($user->data()->id, 'Cloaking', 'Attempting Uncloak');
-      if (isset($_SESSION['cloak_to'])) {
-        $to = $_SESSION['cloak_to'];
-        $from = $_SESSION['cloak_from'];
-        unset($_SESSION['cloak_to']);
-        $_SESSION[Config::get('session/session_name')] = $_SESSION['cloak_from'];
-        unset($_SESSION['cloak_from']);
-        logger($from, 'Cloaking', 'uncloaked from ' . $to);
-        $cloakHook =  getMyHooks(['page' => 'cloakEnd']);
-        includeHook($cloakHook, 'body');
+      $res = endCloak();
+      if ($res['ok']) {
         usSuccess("You are now you");
         Redirect::to($us_url_root . 'users/admin.php?view=users');
       } else {
@@ -153,12 +153,12 @@ if (!empty($_POST)) {
         }
       }
     }
-    if (!empty($_POST['password']) || $userdetails->email != $_POST['email'] || !empty($_POST['resetPin'])) {
+    if (!empty($_POST['password']) || $userdetails->email != $_POST['email']) {
       //Check password for email or pw update
 
       //Update email
       $email = Input::get('email');
-      if ($userdetails->email != $email) {
+      if ($userdetails->email != $email && $settings->change_un != 3) {
 
         $fields = ['email' => $email];
         $validation->check($_POST, [
@@ -257,12 +257,6 @@ if (!empty($_POST)) {
           }
         }
       }
-      if (!empty($_POST['resetPin']) && Input::get('resetPin') == 1) {
-        $user->update(['pin' => null]);
-        logger($user->data()->id, 'User', 'Reset PIN');
-        $successes[] = lang('SET_PIN');
-        $successes[] = lang('SET_PIN_NEXT');
-      }
     }
   }
 
@@ -289,7 +283,7 @@ if (!empty($_POST)) {
         display_successes($successes);
       }
       includeHook($hooks, 'body');
-      if (isset($_SESSION['cloak_to'])) { ?>
+      if (isCloaked()) { ?>
         <p>
         <form action="" method="post">
           <?= tokenHere(); ?>
@@ -299,20 +293,22 @@ if (!empty($_POST)) {
         </p>
       <?php } // End cloak button 
       ?>
-      <div class="border bg-light p-4 alternate-background">
+      <div class="border bg-body-tertiary p-4 alternate-background">
         <form name="updateAccount" action="" method="post">
           <!-- Username -->
           <?php
-          $readonly_username = ($settings->change_un == 0 || ($settings->change_un == 2 && $userdetails->un_changed == 1));
+          $readonly_username = ($settings->change_un == 0 || $settings->change_un == 3 || ($settings->change_un == 2 && $userdetails->un_changed == 1));
           $input_class = $readonly_username ? "form-control-plaintext" : "form-control";
+          $readonly_email = ($settings->change_un == 3);
+          $email_input_class = $readonly_email ? "form-control-plaintext" : "form-control";
           ?>
           <div class="row mb-3" id="username-group">
             <label for="username" class="col-form-label col-12 col-md-3text-end"><?= lang('GEN_UNAME'); ?></label>
             <div class="col-12 <?= $secondCol ?>">
-              <input class="<?= $input_class; ?>" type="text" id="username" name="username" value="<?= $userdetails->username; ?>" autocomplete="off" <?= $readonly_username ? 'readonly' : ''; ?>>
+              <input class="<?= $input_class; ?>" type="text" id="username" name="username" value="<?= safeReturn($userdetails->username, true); ?>" autocomplete="off" <?= $readonly_username ? 'readonly' : ''; ?>>
               <?php if ($readonly_username) { ?>
                 <sup>
-                  <span class="input-group-addon" data-toggle="tooltip" title="<?= lang($settings->change_un == 0 ? 'SET_NOCHANGE' : 'SET_ONECHANGE'); ?>"><?= lang('SET_WHY'); ?></span>
+                  <span class="input-group-addon" data-toggle="tooltip" title="<?= lang(($settings->change_un == 0 || $settings->change_un == 3) ? 'SET_NOCHANGE' : 'SET_ONECHANGE'); ?>"><?= lang('SET_WHY'); ?></span>
                 </sup>
               <?php } ?>
             </div>
@@ -321,13 +317,13 @@ if (!empty($_POST)) {
           <div class="row mb-3" id="fname-group">
             <label for="fname" class="col-form-label col-12 col-md-3text-end"><?= lang('GEN_FNAME'); ?></label>
             <div class="col-12 <?= $secondCol ?>">
-              <input class="form-control" type="text" id="fname" name="fname" value="<?= $userdetails->fname; ?>" autocomplete="off" />
+              <input class="form-control" type="text" id="fname" name="fname" value="<?= safeReturn($userdetails->fname, true); ?>" autocomplete="off" />
             </div>
           </div>
           <div class="row mb-3" id="lname-group">
             <label for="lname" class="col-form-label col-12 col-md-3text-end"><?= lang('GEN_LNAME'); ?></label>
             <div class="col-12 <?= $secondCol ?>">
-              <input class="form-control" type="text" id="lname" name="lname" value="<?= $userdetails->lname; ?>" autocomplete="off" />
+              <input class="form-control" type="text" id="lname" name="lname" value="<?= safeReturn($userdetails->lname, true); ?>" autocomplete="off" />
             </div>
           </div>
 
@@ -335,7 +331,12 @@ if (!empty($_POST)) {
           <div class="row mb-3" id="email-group">
             <label for="email" class="col-form-label col-12 col-md-3text-end"><?= lang('GEN_EMAIL'); ?></label>
             <div class="col-12 <?= $secondCol ?>">
-              <input class="form-control" type="email" id="email" name="email" value="<?= $userdetails->email; ?>" autocomplete="off" />
+              <input class="<?= $email_input_class; ?>" type="email" id="email" name="email" value="<?= safeReturn($userdetails->email, true); ?>" autocomplete="off" <?= $readonly_email ? 'readonly' : ''; ?> />
+              <?php if ($readonly_email) { ?>
+                <sup>
+                  <span class="input-group-addon" data-toggle="tooltip" title="<?= lang('SET_NOCHANGE_EMAIL'); ?>"><?= lang('SET_WHY'); ?></span>
+                </sup>
+              <?php } ?>
             </div>
           </div>
 

@@ -24,7 +24,6 @@ class User
     private $_sessionName;
     private $_isLoggedIn;
     private $_cookieName;
-    private $_isNewAccount;
     public $tableName = 'users';
 
     public function __construct($user = null, $loginHandler = null)
@@ -50,6 +49,44 @@ class User
 
     public function create($fields = [])
     {
+        // Hard requirement: email must be provided. Everything else can
+        // be defaulted, but a user with no email is unusable.
+        if (!array_key_exists('email', $fields) || $fields['email'] === null || $fields['email'] === '') {
+            throw new Exception('Email is required to create a user.');
+        }
+
+        // Default username to email if the caller didn't supply one.
+        if (!array_key_exists('username', $fields) || $fields['username'] === null || $fields['username'] === '') {
+            $fields['username'] = $fields['email'];
+        }
+
+        // Default password: generate a strong random secret and bcrypt it.
+        // Hash::unique() is bin2hex(random_bytes(32)) so it should always
+        // be 64 chars; if something goes sideways and it comes back short,
+        // fall back to randomString(20) so we never bcrypt a weak value.
+        if (!array_key_exists('password', $fields) || $fields['password'] === null || $fields['password'] === '') {
+            $secret = Hash::unique();
+            if (!is_string($secret) || strlen($secret) < 32) {
+                $secret = randomString(20);
+            }
+            $fields['password'] = password_hash($secret, PASSWORD_BCRYPT, ['cost' => 14]);
+        }
+
+        // Sanity checks: refuse to create a user whose username or email
+        // collides with anyone else's username OR email. Callers like
+        // join.php already validate this, but every other entry point
+        // (OAuth, custom code, plugins) gets the same protection here.
+        $u = $fields['username'];
+        $check = $this->_db->query('SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1', [$u, $u]);
+        if ($check->count() > 0) {
+            throw new Exception('Username is already in use.');
+        }
+        $e = $fields['email'];
+        $check = $this->_db->query('SELECT id FROM users WHERE email = ? OR username = ? LIMIT 1', [$e, $e]);
+        if ($check->count() > 0) {
+            throw new Exception('Email is already in use.');
+        }
+
         if (!$this->_db->insert('users', $fields)) {
             throw new Exception($this->_db->errorString());
         } else {
@@ -62,7 +99,14 @@ class User
 
     public function find($user = null, $loginHandler = null)
     {
-        if (isset($_SESSION['cloak_to'])) {
+        // Cloaking: when an admin is cloaked into another user, load that user
+        // instead. Prefer the instance-namespaced key; fall back to the legacy
+        // un-namespaced key so older sessions / custom code keep working.
+        // (Uses $this->_sessionName because find() runs during init.php, before
+        // loader.php defines the INSTANCE constant.)
+        if (isset($_SESSION[$this->_sessionName . '_cloak_to'])) {
+            $user = $_SESSION[$this->_sessionName . '_cloak_to'];
+        } elseif (isset($_SESSION['cloak_to'])) {
             $user = $_SESSION['cloak_to'];
         }
 
@@ -103,7 +147,7 @@ class User
             Session::put($this->_sessionName, $this->data()->id);
             $date = date('Y-m-d H:i:s');
             $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
-            $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+            reauthMarkConfirmed();
         } else {
             $user = $this->find($username);
             if ($user) {
@@ -123,7 +167,7 @@ class User
                     }
                     $date = date('Y-m-d H:i:s');
                     $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
-                    $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+                    reauthMarkConfirmed();
                     $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
                     $ip = ipCheck();
                     $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
@@ -197,7 +241,7 @@ class User
                     }
                     $date = date('Y-m-d H:i:s');
                     $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
-                    $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
+                    reauthMarkConfirmed();
                     $ip = ipCheck();
                     $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $ip]);
 
@@ -227,38 +271,132 @@ class User
     }
 
     //Google oAuth Login Stuff
+    //
+    // Used by the legacy google_login plugin (usplugins/src/google_login_legacy).
+    // Returns a user row with `->id` and `->isNewAccount`, or null if the
+    // lookup/insert ultimately produced nothing.
+    //
+    // $gender and $locale are part of the historical signature and are
+    // retained for backward compatibility; they are intentionally unused.
     public function checkUser($oauth_provider, $oauth_uid, $fname, $lname, $email, $gender, $locale, $link, $picture)
     {
         $this->_db = DB::getInstance();
         $this->_sessionName = Config::get('session/session_name');
         $this->_cookieName = Config::get('remember/cookie_name');
-        $fakeUN = $email;
-        $active = 1;
-        $prevQuery = $this->_db->query("SELECT * FROM users WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid]);
-        if ($prevQuery->count() > 0) {
-            $update = $this->_db->query("UPDATE users SET oauth_provider = ?, oauth_uid = ?, fname = ?, lname = ?, email = ?, username = ?, permissions = ?, email_verfied = ?, active = ?, picture = ?, gpluslink = ?, modified = ? WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid, $fname, $lname, $email, $fakeUN, $active, $active, $active, $picture, $link, date('Y-m-d H:i:s'), $oauth_provider, $oauth_uid]);
-        } else {
-            $findExistingUS = $this->_db->query('SELECT * FROM users WHERE email = ?', [$email]);
-            $foundUS = $findExistingUS->count();
-            $found = $findExistingUS->count();
-            if ($foundUS == 1) {
-            } else {
-                $settings = $this->_db->query('SELECT * FROM settings')->first();
-                $username = $email;
-                $insert = $this->_db->query("INSERT INTO users (`password`, username, active, oauth_provider, oauth_uid, permissions, email_verified, fname, lname, email, picture, gpluslink, join_date, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [NULL, $username, $active, $oauth_provider, $oauth_uid, $active, $active, $fname, $lname, $email, $picture, $link, date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), date('Y-m-d H:i:s')]);
-                $lastID = $insert->lastId();
-                $insert2 = $this->_db->query("INSERT INTO user_permission_matches (user_id, permission_id) VALUES (?, ?)", [$lastID, 1]);
-                $this->_isNewAccount = true;
+        $now = date('Y-m-d H:i:s');
+
+        // Case A: user is already linked to this oauth provider+uid.
+        // Refresh only the profile fields the provider legitimately owns —
+        // historically this method also clobbered username/email/active/
+        // permissions on every login, which was a bug (and was silently
+        // suppressed by a typo in the column list).
+        $linked = $this->_db->query(
+            'SELECT * FROM users WHERE oauth_provider = ? AND oauth_uid = ? LIMIT 1',
+            [$oauth_provider, $oauth_uid]
+        );
+        if ($linked->count() > 0) {
+            $existing = $linked->first();
+            $this->_db->update('users', $existing->id, [
+                'fname'     => $fname,
+                'lname'     => $lname,
+                'picture'   => $picture,
+                'gpluslink' => $link,
+                'modified'  => $now,
+            ]);
+            $result = $this->_db->query('SELECT * FROM users WHERE id = ? LIMIT 1', [$existing->id])->first();
+            if ($result) {
+                $result->isNewAccount = false;
             }
+            return $result;
         }
-        $query = $this->_db->query("SELECT * FROM users WHERE oauth_provider = ? AND oauth_uid = ?", [$oauth_provider, $oauth_uid]);
-        $result = $query->first();
-        if ($this->_isNewAccount) {
+
+        // Case B: a local user with this email exists but isn't oauth-linked
+        // yet — link them. The legacy plugin links these itself before
+        // calling us, so in practice this branch only fires for other
+        // callers; previously it was an empty `if` and the trailing lookup
+        // returned nothing, which crashed the caller.
+        $byEmail = $this->_db->query('SELECT * FROM users WHERE email = ? LIMIT 1', [$email]);
+        if ($byEmail->count() > 0) {
+            $existing = $byEmail->first();
+            $this->_db->update('users', $existing->id, [
+                'oauth_provider' => $oauth_provider,
+                'oauth_uid'      => $oauth_uid,
+                'picture'        => $picture,
+                'gpluslink'      => $link,
+                'modified'       => $now,
+            ]);
+            $result = $this->_db->query('SELECT * FROM users WHERE id = ? LIMIT 1', [$existing->id])->first();
+            if ($result) {
+                $result->isNewAccount = false;
+            }
+            return $result;
+        }
+
+        // Case C: brand new account. Generate a username that doesn't
+        // collide with any existing username OR email, then route through
+        // create() so it picks up the same sanity checks as every other
+        // user creation path.
+        $username = $this->_uniqueOauthUsername($email);
+
+        $newId = $this->create([
+            'password'       => null,
+            'username'       => $username,
+            'active'         => 1,
+            'oauth_provider' => $oauth_provider,
+            'oauth_uid'      => $oauth_uid,
+            'permissions'    => 1,
+            'email_verified' => 1,
+            'fname'          => $fname,
+            'lname'          => $lname,
+            'email'          => $email,
+            'picture'        => $picture,
+            'gpluslink'      => $link,
+            'join_date'      => $now,
+            'created'        => $now,
+            'modified'       => $now,
+        ]);
+
+        $result = $this->_db->query('SELECT * FROM users WHERE id = ? LIMIT 1', [$newId])->first();
+        if ($result) {
+            // NOTE: $result->isNewAccount is a contract consumed by OAuth plugins
+            // (e.g. usplugins/src/google_login_legacy/assets/google_oauth.php) to
+            // detect first-time accounts. It is set dynamically on the returned
+            // record, so static analysers can't see the read. Do not remove.
             $result->isNewAccount = true;
-        } else {
-            $result->isNewAccount = false;
         }
         return $result;
+    }
+
+    private function _uniqueOauthUsername($email)
+    {
+        // Default to email-as-username (legacy behavior) when nothing else
+        // is using it as either a username or an email.
+        $taken = $this->_db->query(
+            'SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1',
+            [$email, $email]
+        )->count();
+        if ($taken === 0) {
+            return $email;
+        }
+        $base = strstr((string)$email, '@', true);
+        if ($base === false || $base === '') {
+            $base = 'user';
+        }
+        $base = preg_replace('/[^A-Za-z0-9._-]/', '', $base);
+        if ($base === '') {
+            $base = 'user';
+        }
+        for ($i = 1; $i <= 1000; $i++) {
+            $candidate = $base . $i;
+            $hit = $this->_db->query(
+                'SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1',
+                [$candidate, $candidate]
+            )->count();
+            if ($hit === 0) {
+                return $candidate;
+            }
+        }
+        throw new Exception('Unable to generate a unique username for OAuth user.');
     }
 
     // End of Google Section
@@ -302,6 +440,34 @@ class User
     {
         if (!$id && $this->isLoggedIn()) {
             $id = $this->data()->id;
+        }
+
+        if (!$id) {
+            throw new Exception('No user id supplied for update.');
+        }
+
+        // Sanity checks: only run when the caller is actually changing
+        // username or email. Password / pin / vericode / etc. updates
+        // (the vast majority of update() callers) skip this entirely.
+        if (array_key_exists('username', $fields) && $fields['username'] !== null && $fields['username'] !== '') {
+            $u = $fields['username'];
+            $check = $this->_db->query(
+                'SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ? LIMIT 1',
+                [$u, $u, $id]
+            );
+            if ($check->count() > 0) {
+                throw new Exception('Username is already in use.');
+            }
+        }
+        if (array_key_exists('email', $fields) && $fields['email'] !== null && $fields['email'] !== '') {
+            $e = $fields['email'];
+            $check = $this->_db->query(
+                'SELECT id FROM users WHERE (email = ? OR username = ?) AND id != ? LIMIT 1',
+                [$e, $e, $id]
+            );
+            if ($check->count() > 0) {
+                throw new Exception('Email is already in use.');
+            }
         }
 
         if (!$this->_db->update('users', $id, $fields)) {

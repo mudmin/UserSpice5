@@ -430,6 +430,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_BACKUP_ACK" => "Codurile de rezervă au fost confirmate.",
     "2FA_SUCCESS_SETUP_CANCELLED" => "Configurarea a fost anulată.",
     "2FA_ERR_INVALID_BACKUP" => "Cod de rezervă invalid. Te rugăm să încerci din nou.",
+    "2FA_ERR_INVALID_CODE"   => "Cod de autentificare invalid. Te rugăm să încerci din nou.",
     "2FA_ERR_DISABLE_FAILED" => "Nu s-a putut dezactiva autentificarea cu doi factori.",
     "2FA_ERR_NO_SECRET" => "Nu s-a putut recupera secretul de autentificare. Te rugăm să încerci din nou.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Codul de rezervă a fost verificat, dar nu s-a putut invalida. Te rugăm să contactezi suportul.",
@@ -516,6 +517,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Puteți stabili un nou cod PIN la următoarea solicitare de verificare",
 	"SET_UPDATE"		=> "Actualizați setările de utilizator",
 	"SET_NOCHANGE"	=> "Administratorul a dezactivat utilizator.",
+	"SET_NOCHANGE_EMAIL"	=> "Administratorul a dezactivat schimbarea adreselor de e-mail.",
 	"SET_ONECHANGE"	=> "Administratorul a setat modificările numelui de utilizator să apară o singură dată și ați făcut deja acest lucru.",
 
 	"SET_GRAVITAR"	=> "Doriți să modificați imaginea de profil?  <br> Vizita <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> și configurați un cont cu aceleași adrese de e-mail pe care le-ați utilizat pe acest site. Lucrează pe milioane de site-uri. Este rapid și ușor!",
@@ -555,6 +557,41 @@ $lang = array_merge($lang, array(
 ));
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Confirmă că ești tu",
+	"REAUTH_INTRO"            => "Pentru siguranța ta, verifică-ți identitatea pentru a continua.",
+	"REAUTH_RELOGIN"          => "Autentifică-te din nou pentru a continua.",
+	"REAUTH_LOCKED"           => "Prea multe încercări eșuate. Autentifică-te din nou.",
+	"REAUTH_VERIFY"           => "Verifică",
+	"REAUTH_OR"               => "sau",
+	"REAUTH_PASSWORD_LABEL"   => "Parola ta",
+	"REAUTH_BAD_PASSWORD"     => "Parolă incorectă.",
+	"REAUTH_TOTP_BACKUP"      => "Acesta este un cod de rezervă",
+	"REAUTH_EMAIL_BTN"        => "Trimite-mi un cod din 6 cifre pe e-mail",
+	"REAUTH_EMAIL_CODE_LABEL" => "Introdu codul din 6 cifre",
+	"REAUTH_EMAIL_RESEND"     => "Trimite un cod nou",
+	"REAUTH_EMAIL_SUBJECT"    => "Cod de verificare",
+	"REAUTH_EMAIL_BODY"       => "Codul tău de verificare este:",
+	"REAUTH_EMAIL_EXPIRE"     => "Acest cod expiră în 10 minute. Dacă nu l-ai solicitat, poți ignora acest e-mail.",
+	"REAUTH_EMAIL_SENT"       => "Ți-am trimis un cod din 6 cifre pe e-mail.",
+	"REAUTH_EMAIL_FAIL"       => "Nu am putut trimite e-mailul. Încearcă altă metodă.",
+	"REAUTH_EMAIL_NONE"       => "Solicită mai întâi un cod.",
+	"REAUTH_EMAIL_EXPIRED"    => "Acest cod a expirat. Solicită unul nou.",
+	"REAUTH_EMAIL_TOOMANY"    => "Prea multe încercări. Solicită un cod nou.",
+	"REAUTH_EMAIL_BAD"        => "Cod incorect.",
+	"REAUTH_PASSKEY_BTN"      => "Folosește o cheie de acces",
+	"REAUTH_SOCIAL_BTN"       => "Verifică cu",
+	"REAUTH_SOCIAL_MISMATCH"  => "Acel cont nu corespunde cu autentificarea ta. Încearcă din nou.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Aveți probleme cu aplicația de autentificare?",
+	"2FA_BACKUP_CODE_HELP" => "Introduceți unul dintre codurile de rezervă salvate",
+	"2FA_USE_BACKUP_BTN"   => "Folosiți cod de rezervă",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

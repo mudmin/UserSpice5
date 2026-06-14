@@ -190,7 +190,7 @@ foreach ($validation->errors() as $error) {
           <?=tokenHere();?>
           <div class="input-group">
             <input type="text" name="searchTerm" value="" class="form-control" placeholder="Search for users to manage. Enter % for all users">
-            <input type="submit" name="search" value="Search" class="btn btn-outline-primary" onclick="setTimeout(function() { $('#dt-search-0').val(''); }, 100);">
+            <input type="submit" name="search" value="Search" class="btn btn-outline-primary" id="userSearchSubmit">
           </div>
 
           <small>Search by first name, last name, username, or email</small>
@@ -287,7 +287,7 @@ foreach ($validation->errors() as $error) {
           <div class="form-group">
             <label>
               Password (<?php echo $settings->min_pw; ?>-<?php echo $settings->max_pw; ?> chars)
-              <a href="#" id="togglePasswords" class="ms-2 text-muted" onclick="event.preventDefault(); var pw=document.getElementById('password'), cf=document.getElementById('confirm'), icon=this.querySelector('i'); if(pw.type==='password'){pw.type='text';cf.type='text';icon.classList.replace('fa-eye','fa-eye-slash');}else{pw.type='password';cf.type='password';icon.classList.replace('fa-eye-slash','fa-eye');}"><i class="fa fa-eye"></i></a>
+              <a href="#" id="togglePasswords" class="ms-2 text-body-secondary"><i class="fa fa-eye"></i></a>
             </label>
             <input class="form-control" type="password" name="password" id="password" placeholder="Password" required autocomplete="off">
           </div>
@@ -356,4 +356,28 @@ foreach ($validation->errors() as $error) {
       $('.pwpopover').popover('hide');
     });
   });
+
+  // CSP-friendly bindings (replace inline onclick attributes)
+  var userSearchSubmit = document.getElementById('userSearchSubmit');
+  if (userSearchSubmit) {
+    userSearchSubmit.addEventListener('click', function () {
+      setTimeout(function () { $('#dt-search-0').val(''); }, 100);
+    });
+  }
+  var togglePasswords = document.getElementById('togglePasswords');
+  if (togglePasswords) {
+    togglePasswords.addEventListener('click', function (e) {
+      e.preventDefault();
+      var pw = document.getElementById('password'),
+          cf = document.getElementById('confirm'),
+          icon = this.querySelector('i');
+      if (pw.type === 'password') {
+        pw.type = 'text'; cf.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        pw.type = 'password'; cf.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    });
+  }
 </script>

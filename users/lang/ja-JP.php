@@ -463,6 +463,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "設定がキャンセルされました。",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "無効なバックアップコードです。もう一度お試しください。",
+    "2FA_ERR_INVALID_CODE"               => "無効な認証コードです。もう一度お試しください。",
     "2FA_ERR_DISABLE_FAILED"             => "二要素認証の無効化に失敗しました。",
     "2FA_ERR_NO_SECRET"                  => "認証シークレットを取得できませんでした。もう一度お試しください。",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "バックアップコードは検証されましたが、無効化に失敗しました。サポートにお問い合わせください。",
@@ -545,6 +546,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"      => "次に認証が必要な際に新しいPINを設定できます",
 	"SET_UPDATE"        => "ユーザー設定を更新してください",
 	"SET_NOCHANGE"      => "管理者はユーザー名の変更を無効にしました。",
+	"SET_NOCHANGE_EMAIL" => "管理者はメールアドレスの変更を無効にしました。",
 	"SET_ONECHANGE"     => "管理者はユーザー名の変更を一度だけ許可し、既に変更されています。",
 	"SET_GRAVITAR"      => "<strong>プロフィール画像を変更したいですか？ </strong><br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> を訪れ、このサイトで使用したメールと同じメールでアカウントを設定してください。数百万のサイトで動作します。速くて簡単です！",
 	"SET_NOTE1"         => "<p><strong>注意：</strong> メールを更新するための保留中のリクエストがあります",
@@ -619,6 +621,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "本人確認",
+	"REAUTH_INTRO"            => "セキュリティのため、続行するには本人確認を行ってください。",
+	"REAUTH_RELOGIN"          => "続行するには再度ログインしてください。",
+	"REAUTH_LOCKED"           => "失敗回数が多すぎます。再度ログインしてください。",
+	"REAUTH_VERIFY"           => "確認",
+	"REAUTH_OR"               => "または",
+	"REAUTH_PASSWORD_LABEL"   => "パスワード",
+	"REAUTH_BAD_PASSWORD"     => "パスワードが正しくありません。",
+	"REAUTH_TOTP_BACKUP"      => "これはバックアップコードです",
+	"REAUTH_EMAIL_BTN"        => "6桁のコードをメールで送信",
+	"REAUTH_EMAIL_CODE_LABEL" => "6桁のコードを入力してください",
+	"REAUTH_EMAIL_RESEND"     => "新しいコードを送信",
+	"REAUTH_EMAIL_SUBJECT"    => "確認コード",
+	"REAUTH_EMAIL_BODY"       => "確認コードは次のとおりです:",
+	"REAUTH_EMAIL_EXPIRE"     => "このコードは10分で期限切れになります。心当たりがない場合は、このメールを無視してください。",
+	"REAUTH_EMAIL_SENT"       => "6桁のコードをメールで送信しました。",
+	"REAUTH_EMAIL_FAIL"       => "メールを送信できませんでした。別の方法をお試しください。",
+	"REAUTH_EMAIL_NONE"       => "先にコードをリクエストしてください。",
+	"REAUTH_EMAIL_EXPIRED"    => "このコードは期限切れです。新しいコードをリクエストしてください。",
+	"REAUTH_EMAIL_TOOMANY"    => "試行回数が多すぎます。新しいコードをリクエストしてください。",
+	"REAUTH_EMAIL_BAD"        => "コードが正しくありません。",
+	"REAUTH_PASSKEY_BTN"      => "パスキーを使用",
+	"REAUTH_SOCIAL_BTN"       => "次で確認:",
+	"REAUTH_SOCIAL_MISMATCH"  => "そのアカウントはログイン情報と一致しません。もう一度お試しください。",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "認証アプリで問題が発生していますか？",
+	"2FA_BACKUP_CODE_HELP" => "保存したバックアップコードのいずれかを入力してください",
+	"2FA_USE_BACKUP_BTN"   => "バックアップコードを使用",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

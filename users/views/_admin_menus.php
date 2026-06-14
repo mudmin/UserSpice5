@@ -70,7 +70,7 @@ $codeUsage = '<?php
               <tr>
                 <td><?= $menu->id ?></td>
                 <td><?= $menu->menu_name ?></td>
-                <td><?= ucfirst($menu->type) ?></td>
+                <td><?= ($menu->type == 'horizontal' && !empty($menu->sticky)) ? 'Horizontal Sticky' : ucfirst($menu->type) ?></td>
                 <td>
                   <?php if (in_array($menu->z_index, $dupes)) {
                     $color = "red";
@@ -88,7 +88,7 @@ $codeUsage = '<?php
                 <td class="text-end">
                   <a class="btn btn-sm btn-outline-dark mr-1" href="admin.php?view=edit_menu&menu_id=<?= $menu->id ?>" title="edit"><i class="fa fa-pencil"></i></a>
                   <?php if ($menu->id != 1 && $menu->id != 2) { ?>
-                    <button class="btn btn-sm btn-outline-danger" onclick="usDeleteMenu('<?= $menu->id ?>')" title="delete"><i class="fa fa-close"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-us-delete-menu="<?= $menu->id ?>" title="delete"><i class="fa fa-close"></i></button>
                   <?php } else {  ?>
                     <button disabled class="btn btn-sm btn-outline-secondary"><i class="fa fa-close"></i></button>
                   <?php } ?>
@@ -147,4 +147,10 @@ $codeUsage = '<?php
     }
 
   }
+
+  // CSP-friendly binding for [data-us-delete-menu] (replaces inline delete handler)
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-us-delete-menu]');
+    if (el) { usDeleteMenu(el.getAttribute('data-us-delete-menu')); }
+  });
 </script>

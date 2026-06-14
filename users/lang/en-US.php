@@ -507,6 +507,7 @@ $lang = array_merge($lang, array(
 
 	// Error Messages
 	"2FA_ERR_INVALID_BACKUP"               => "Invalid backup code. Please try again.",
+	"2FA_ERR_INVALID_CODE"                 => "Invalid authentication code. Please try again.",
 	"2FA_ERR_DISABLE_FAILED"               => "Failed to disable two-factor authentication.",
 	"2FA_ERR_NO_SECRET"                    => "Could not retrieve authentication secret. Please try again.",
 	"2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "Backup code verified but failed to invalidate. Please contact support.",
@@ -593,6 +594,7 @@ $lang = array_merge($lang, array(
 	"SET_UPDATE"		=> "Update your user settings",
 	"SET_NOCHANGE"	=> "The Administrator has disabled changing usernames.",
 	"SET_ONECHANGE"	=> "The Administrator set username changes to occur only once and you have done so already.",
+	"SET_NOCHANGE_EMAIL"	=> "The Administrator has disabled changing email addresses.",
 
 	"SET_GRAVITAR"	=> "Want to change your profile picture?  <br> Visit <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> and setup an account with the same email you used on this site. It works across millions of sites. It's fast and easy!",
 
@@ -669,9 +671,45 @@ $lang = array_merge($lang, array(
 	"BE_IP"				  	=> "IP Manager",
 ));
 
+// Core ReAuth (step-up authentication) — added 2026-05-17. Other language
+// files fall back to the English defaults baked into users/reauth.php.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Confirm it's you",
+	"REAUTH_INTRO"            => "For your security, please verify your identity to continue.",
+	"REAUTH_RELOGIN"          => "Please log in again to continue.",
+	"REAUTH_LOCKED"           => "Too many failed attempts. Please log in again.",
+	"REAUTH_VERIFY"           => "Verify",
+	"REAUTH_OR"               => "or",
+	"REAUTH_PASSWORD_LABEL"   => "Your password",
+	"REAUTH_BAD_PASSWORD"     => "Incorrect password.",
+	"REAUTH_TOTP_BACKUP"      => "This is a backup code",
+	"REAUTH_EMAIL_BTN"        => "Email me a 6-digit code",
+	"REAUTH_EMAIL_CODE_LABEL" => "Enter the 6-digit code",
+	"REAUTH_EMAIL_RESEND"     => "Send a new code",
+	"REAUTH_EMAIL_SUBJECT"    => "Verification code",
+	"REAUTH_EMAIL_BODY"       => "Your verification code is:",
+	"REAUTH_EMAIL_EXPIRE"     => "This code expires in 10 minutes. If you did not request it, you can ignore this email.",
+	"REAUTH_EMAIL_SENT"       => "We emailed you a 6-digit code.",
+	"REAUTH_EMAIL_FAIL"       => "We could not send the email. Please try another method.",
+	"REAUTH_EMAIL_NONE"       => "Please request a code first.",
+	"REAUTH_EMAIL_EXPIRED"    => "That code has expired. Please request a new one.",
+	"REAUTH_EMAIL_TOOMANY"    => "Too many attempts. Please request a new code.",
+	"REAUTH_EMAIL_BAD"        => "Incorrect code.",
+	"REAUTH_PASSKEY_BTN"      => "Use a passkey",
+	"REAUTH_SOCIAL_BTN"       => "Verify with",
+	"REAUTH_SOCIAL_MISMATCH"  => "That account did not match your login. Please try again.",
+));
+
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Having trouble with your authenticator?",
+	"2FA_BACKUP_CODE_HELP" => "Enter one of your saved backup codes",
+	"2FA_USE_BACKUP_BTN"   => "Use Backup Code",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

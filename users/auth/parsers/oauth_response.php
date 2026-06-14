@@ -116,6 +116,46 @@ if (empty($userData['email'])) {
     exit;
 }
 
+// Step-up re-authentication: do not log anyone in or create an account —
+// only confirm the returned OAuth identity belongs to the already-logged-in
+// user, then send them back to where forceReauth() interrupted them.
+if (!empty($_SESSION['oauth_reauth'])) {
+    $reauthUid = $_SESSION['oauth_reauth_uid'] ?? null;
+    unset($_SESSION['oauth_reauth'], $_SESSION['oauth_reauth_uid']);
+
+    $rk            = Config::get('session/session_name') . '_reauth';
+    $reauthPurpose = $_SESSION[$rk]['purpose'] ?? '';
+    $reauthDest    = $_SESSION[$rk]['dest'] ?? '';
+
+    $matchQ = $db->query(
+        "SELECT id FROM users WHERE email = ? AND id = ?",
+        [$userData['email'], $reauthUid]
+    );
+    if ($matchQ->count() === 1 && isset($user) && $user->isLoggedIn()
+        && (int) $user->data()->id === (int) $reauthUid) {
+        reauthMarkConfirmed();
+        recordReauth($reauthUid, 'social', $reauthPurpose, 1);
+        unset(
+            $_SESSION[$rk]['dest'], $_SESSION[$rk]['purpose'],
+            $_SESSION[$rk]['timeout'], $_SESSION[$rk]['email'], $_SESSION[$rk]['fails']
+        );
+        if (!empty($reauthDest)) {
+            Redirect::sanitized($reauthDest);
+        }
+        Redirect::to($us_url_root . ($settings->redirect_uri_after_login ?: 'users/account.php'));
+        exit;
+    }
+
+    if ($reauthUid) {
+        recordReauth($reauthUid, 'social', $reauthPurpose, 0);
+    }
+    logger((int) $reauthUid, "ReAuth", "Social reauth identity mismatch.");
+    usError(lang('REAUTH_SOCIAL_MISMATCH')
+        ?: 'That account did not match your login. Please try again.');
+    Redirect::to($us_url_root . 'users/reauth.php');
+    exit;
+}
+
 // Check if user exists
 $user = new User();
 $existingUserQ = $db->query("SELECT * FROM users WHERE email = ?", [$userData['email']]);

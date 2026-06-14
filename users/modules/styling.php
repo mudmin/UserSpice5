@@ -28,9 +28,17 @@
     display: block;
     width: 100%;
     text-align: center;
-    margin-top: 0.3rem; 
+    margin-top: 0.3rem;
     padding: 0;
 }
+
+  /* Widget icon links (plugin/tool tiles) should not be underlined */
+  .dash-card a:has(.icon-link),
+  .dash-card a:has(.icon-link):hover,
+  .dash-card .icon-link,
+  .dash-card .dashboard-icon-label {
+    text-decoration: none;
+  }
 
   .collapseCard {
     cursor: pointer;

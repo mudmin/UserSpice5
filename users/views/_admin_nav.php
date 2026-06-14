@@ -141,11 +141,11 @@ if($navCheck->navigation_type == 0){
                 <td class="text-nowrap"><?= (($item->indent) ? '>>> ' : '') . $item->label ?></td>
                 <td class="text-nowrap"><?= $parentsSelect[$item->parent] ?></td>
                 <td>
-                  <p class="oce text-dark" data-id="<?= $item->id ?>" data-field="link" data-input="input"><?= $item->link ?></p>
+                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="link" data-input="input"><?= $item->link ?></p>
                 </td>
 
                 <td>
-                  <p class="oce text-dark" data-id="<?= $item->id ?>" data-field="dropdown" data-input="select"><?= ($item->dropdown) ? 'Yes' : 'No'; ?></p>
+                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="dropdown" data-input="select"><?= ($item->dropdown) ? 'Yes' : 'No'; ?></p>
                 </td>
                 <td>
                   <?php
@@ -168,16 +168,16 @@ if($navCheck->navigation_type == 0){
                   ?>
                 </td>
                 <td>
-                  <p class="oce text-dark" data-id="<?= $item->id ?>" data-field="logged_in" data-input="select"><?= ($item->logged_in) ? 'Yes' : 'No'; ?></p>
+                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="logged_in" data-input="select"><?= ($item->logged_in) ? 'Yes' : 'No'; ?></p>
                 </td>
                 <td>
-                  <p class="oce text-dark" data-id="<?= $item->id ?>" data-field="display_order" data-input="input"><?= $item->display_order ?></p< /td>
+                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="display_order" data-input="input"><?= $item->display_order ?></p< /td>
 
 
                 <td><?= $item->icon_class ?></td>
                 <td>
-                  <a class="text-dark" href="admin.php?view=nav_item&id=<?= $item->id ?>&action=edit"><span class="fa fa-cog fa-lg"></span></a> /
-                  <a class="text-dark" href="admin.php?view=nav&id=<?= $item->id ?>&action=delete"><span class="fa fa-remove fa-lg"></span></a>
+                  <a class="text-body" href="admin.php?view=nav_item&id=<?= $item->id ?>&action=edit"><span class="fa fa-cog fa-lg"></span></a> /
+                  <a class="text-body" href="admin.php?view=nav&id=<?= $item->id ?>&action=delete"><span class="fa fa-remove fa-lg"></span></a>
                 </td>
               </tr>
             <?php

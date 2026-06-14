@@ -138,20 +138,16 @@ final class Server
      */
     private static function cliFallback(string $key): ?string
     {
-        // SCRIPT_FILENAME is set by CLI PHP when running an actual file.
-        // Resolve to absolute path first (CLI may provide a relative path),
-        // then sanitize to strip control chars and validate existence.
+        // SCRIPT_FILENAME is set by CLI PHP when running an actual file
+        // (`php /path/to/script.php`) but is empty for `php -r "..."`.
+        // We try it first; cliDocRoot() falls back to self-location when absent.
+        $scriptFile = '';
         $raw = $_SERVER['SCRIPT_FILENAME'] ?? '';
-        if ($raw === '') {
-            return null;
-        }
-        $resolved = realpath($raw);
-        if ($resolved === false) {
-            return null;
-        }
-        $scriptFile = self::sanitize_fs_path($resolved, true, false, true);
-        if ($scriptFile === '') {
-            return null;
+        if ($raw !== '') {
+            $resolved = realpath($raw);
+            if ($resolved !== false) {
+                $scriptFile = self::sanitize_fs_path($resolved, true, false, true);
+            }
         }
 
         switch ($key) {
@@ -160,12 +156,18 @@ final class Server
 
             case 'PHP_SELF':
             case 'SCRIPT_NAME':
-                // Derive the web-relative path: SCRIPT_FILENAME minus DOCUMENT_ROOT.
-                // e.g. /var/www/html/us5/index.php => /index.php
                 $docRoot = self::cliDocRoot($scriptFile);
                 if ($docRoot === null) {
                     return null;
                 }
+                // Without a real script file (e.g. `php -r`), there's no
+                // meaningful web path — return '/' so init.php's path-walk
+                // resolves at the docroot.
+                if ($scriptFile === '') {
+                    return '/';
+                }
+                // Derive the web-relative path: SCRIPT_FILENAME minus DOCUMENT_ROOT.
+                // e.g. /var/www/html/us5/index.php => /index.php
                 $relative = substr($scriptFile, strlen($docRoot));
                 // Normalize to forward slashes for URI context (Windows compat)
                 $relative = str_replace('\\', '/', $relative);
@@ -189,20 +191,31 @@ final class Server
     private static ?string $cliDocRoot = null;
     private static bool $cliDocRootResolved = false;
 
-    private static function cliDocRoot(string $scriptFile): ?string
+    private static function cliDocRoot(string $scriptFile = ''): ?string
     {
         if (self::$cliDocRootResolved) {
             return self::$cliDocRoot;
         }
         self::$cliDocRootResolved = true;
 
-        $dir = dirname($scriptFile);
-        while ($dir && $dir !== dirname($dir)) {
-            if (file_exists($dir . DIRECTORY_SEPARATOR . 'z_us_root.php')) {
-                self::$cliDocRoot = $dir;
-                return $dir;
+        // Try the script directory first (works for `php /path/to/file.php`),
+        // then fall back to this class file's own location — which handles
+        // `php -r` where SCRIPT_FILENAME is empty. Server.php lives inside
+        // the UserSpice tree, so walking up from __DIR__ always finds the marker.
+        $startDirs = [];
+        if ($scriptFile !== '') {
+            $startDirs[] = dirname($scriptFile);
+        }
+        $startDirs[] = __DIR__;
+
+        foreach ($startDirs as $dir) {
+            while ($dir && $dir !== dirname($dir)) {
+                if (file_exists($dir . DIRECTORY_SEPARATOR . 'z_us_root.php')) {
+                    self::$cliDocRoot = $dir;
+                    return $dir;
+                }
+                $dir = dirname($dir);
             }
-            $dir = dirname($dir);
         }
         return null;
     }
@@ -489,9 +502,10 @@ final class Server
         $scheme = strtolower($m[1]);
         $rest   = $m[2];
 
-        // Split off port if present
+        // Split off port if present.
+        // $rest is guaranteed non-empty here: the (.+) group above matched it.
         $host = $rest;
-        if ($rest !== '' && $rest[0] === '[') {
+        if ($rest[0] === '[') {
             // [IPv6]:port?
             $end = strpos($rest, ']');
             if ($end === false) return '';

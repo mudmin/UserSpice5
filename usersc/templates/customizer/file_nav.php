@@ -1,3 +1,4 @@
+<!-- if you use this feature, copy this file to file_nav_custom.php so it doesn't get overwritten during updates. -->
 <!-- This is just an example for doing your own file-based menu. You have access to all the UserSpice functions to build something  as simple or as complicated as you want.  -->
 <ul class='us_menu horizontal dark'  style=' z-index: 50;' id='us_menu_1_638b71f2ed026'>
   <div class='us_brand full_screen'>

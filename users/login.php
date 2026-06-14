@@ -73,6 +73,11 @@ if ($showForgot == true && $settings->registration == 1) {
     $regClass = "text-right text-end";
 } else {
     $showBottom = false;
+    // These are only read when $showBottom is true, but define them anyway so
+    // the variables are always set regardless of which branch was taken.
+    $bottomClass = "";
+    $forgotClass = "";
+    $regClass = "";
 }
 
 $errors = $successes = [];
@@ -161,7 +166,7 @@ if (!empty($_POST)) {
                             $_SESSION[$currentSessionName] = $tempUserId;
                             $_SESSION[$currentSessionName . '_user'] = $tempUserId;
                             $_SESSION[$currentSessionName . '_user_last_login'] = date("Y-m-d H:i:s");
-                            $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
+                            reauthMarkConfirmed();
                             $_SESSION[$currentSessionName . '_totp_verified'] = true;
 
                             // Update last login in database
@@ -274,7 +279,7 @@ if (!empty($_POST)) {
                                     includeHook($hooks, 'body');
                                     // Get destination from session (set by securePage)
                                     $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
-                                    $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
+                                    reauthMarkConfirmed();
                                     $_SESSION[$currentSessionName . '_totp_verified'] = true;
                                     // logger($tempUser->data()->id, "Login", "Successful login with inline TOTP verification.");
 
@@ -332,7 +337,7 @@ if (!empty($_POST)) {
                             includeHook($hooks, 'body');
                             // Get destination from session (set by securePage)
                             $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
-                            $_SESSION[$currentSessionName . '_last_confirm'] = date("Y-m-d H:i:s");
+                            reauthMarkConfirmed();
                             // logger(1,"cls","case 3");
 
                             // Clear login destination from session
@@ -463,7 +468,7 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                         <div class="text-center mb-3">
                             <i class="fa fa-shield-alt fa-2x text-primary"></i>
                             <h5 class="mt-2"><?= lang("2FA_VERIFY_TITLE") ?></h5>
-                            <p class="text-muted"><?= lang("2FA_VERIFY_INFO") ?></p>
+                            <p class="text-body-secondary"><?= lang("2FA_VERIFY_INFO") ?></p>
                         </div>
 
                         <form name="totp-verify" method="post" id="totp-form" action="">
@@ -509,7 +514,7 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                             <div class="form-outline mb-4">
                                 <label class="form-label" for="username"><?= lang("SIGNIN_UORE") ?></label>
                                 <input type="text" id="username" name="username" class="form-control form-control-lg"
-                                    value="<?= isset($_POST['username']) ? safeReturn(Input::get('username')) : '' ?>"
+                                    value="<?= isset($_POST['username']) ? safeReturn(Input::get('username')) : '' /* nosemgrep: userspice-echoed-request - output is HTML-escaped via safeReturn() before being placed in the attribute */ ?>"
                                     required autocomplete="username">
                             </div>
 

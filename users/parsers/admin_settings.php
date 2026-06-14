@@ -104,6 +104,22 @@ if($field == "spice_api"){
    $msg['api'] = checkAPIkey($value);
 }
 
+// Keep us_menu_items.disabled in sync with settings.registration / settings.no_passwords
+if($msg['success'] === "true" && $table === "settings"){
+  if($field === "registration"){
+    $joinDisabled = ($value == 1) ? 0 : 1;
+    $db->query(
+      "UPDATE us_menu_items SET disabled = ? WHERE link IN ('users/join.php','usersc/join.php')",
+      [$joinDisabled]
+    );
+  } elseif($field === "no_passwords"){
+    $forgotPwDisabled = ($value > 0) ? 1 : 0;
+    $db->query(
+      "UPDATE us_menu_items SET disabled = ? WHERE link IN ('users/forgot_password.php','usersc/forgot_password.php')",
+      [$forgotPwDisabled]
+    );
+  }
+}
 
 includeHook($hooks,'bottom');
 echo json_encode($msg); die;

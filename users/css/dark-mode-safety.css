@@ -1,0 +1,32 @@
+/*
+ * Dark-mode safety net for Bootstrap 5.3 hardcoded utility classes.
+ *
+ * Bootstrap's [data-bs-theme="dark"] block flips the body/emphasis/secondary
+ * vars but leaves --bs-light, --bs-dark, --bs-white, --bs-black alone. That
+ * means utilities like .bg-light, .bg-white, .text-dark, .text-light,
+ * .text-muted render unreadable (white-on-white, dark-on-dark, gray-on-gray)
+ * under data-bs-theme="dark".
+ *
+ * These overrides remap those utilities to the theme-flipping vars whenever
+ * the page is in dark mode. Loaded site-wide from header1_must_include.php so
+ * every install benefits, including ones without a paired customizer dark theme.
+ *
+ * See _plans/dark-mode-utility-migration.md (Phase 1).
+ */
+
+[data-bs-theme="dark"] .bg-light      { background-color: var(--bs-secondary-bg) !important; color: var(--bs-body-color); }
+[data-bs-theme="dark"] .bg-white      { background-color: var(--bs-body-bg)      !important; color: var(--bs-body-color); }
+[data-bs-theme="dark"] .text-dark     { color: var(--bs-body-color)      !important; }
+[data-bs-theme="dark"] .text-light    { color: var(--bs-emphasis-color)  !important; }
+[data-bs-theme="dark"] .text-muted    { color: var(--bs-secondary-color) !important; }
+[data-bs-theme="dark"] .text-black    { color: var(--bs-body-color)      !important; }
+[data-bs-theme="dark"] .text-white-50 { color: rgba(255, 255, 255, 0.5)  !important; }
+
+/*
+ * Bootstrap's .toast sets color: var(--bs-toast-color), but the dark theme
+ * block doesn't redefine --bs-toast-color — so toast text doesn't flip with
+ * data-bs-theme. Force it explicitly here. No !important: template overrides
+ * (e.g. the_doktor preset) that use !important should still win.
+ */
+[data-bs-theme="dark"] .toast,
+[data-bs-theme="dark"] .toast-body { color: var(--bs-body-color); }

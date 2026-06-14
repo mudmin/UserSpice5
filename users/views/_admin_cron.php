@@ -59,7 +59,7 @@ $count = $query->count();
 <?= resultBlock($errors, $successes); ?>
 <h2>Cron Manager</h2>
 <?php if ($settings->cron_ip == 'off') {
-  echo "<p class='text-dark'><b>Your cron jobs are currently disabled by the system. With great power, comes the need for great responsibility. Please see the note at the bottom of this page.</b></p>";
+  echo "<p class='text-body'><b>Your cron jobs are currently disabled by the system. With great power, comes the need for great responsibility. Please see the note at the bottom of this page.</b></p>";
 } ?>
 <div class="card">
   <div class="card-body">
@@ -80,7 +80,7 @@ $count = $query->count();
       <?php
       if ($count > 0) {
         foreach ($query->results() as $row) { ?>
-          <tr <?php if ($row->active == 0) { ?> class="bg-light" <?php } ?>>
+          <tr <?php if ($row->active == 0) { ?> class="bg-body-tertiary" <?php } ?>>
             <td><?= $row->id; ?></td>
             <td>
               <p data-field="active" data-token="<?=$cs?>" class="cronactive nounderline" data-input="select" data-id="<?= $row->id; ?>"><?= $row->active == 1 ? 'Active' : 'Inactive' ?></p>
@@ -119,7 +119,7 @@ $count = $query->count();
   $cronUrl = $scheme . '://' . Server::get('HTTP_HOST') . $us_url_root . 'users/cron/cron.php';
 ?>
 <div class="card mt-3">
-  <div class="card-header bg-light">
+  <div class="card-header bg-body-tertiary">
     <strong>About the Cron Manager</strong>
   </div>
   <div class="card-body">

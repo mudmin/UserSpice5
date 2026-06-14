@@ -103,9 +103,23 @@ if ($method == "verify_code") {
         Redirect::to($us_url_root . 'users/passwordless.php');
       }
 
-      // Verify the code (try hashed first, then plaintext fallback)
-      $codeMatches = hashVericode($code) === $login->verification_code || $code === $login->verification_code;
+      // Verify the code (hashed lookup only, timing-safe)
+      $codeMatches = !empty($login->verification_code)
+        && hash_equals((string)$login->verification_code, hashVericode((string)$code));
       if ($codeMatches) {
+        // Atomically claim the one-time code BEFORE establishing the session.
+        // The conditional UPDATE only touches the row while expired = 0, so a
+        // concurrent request that already consumed the code sees count() == 0
+        // and is rejected — closing the replay race.
+        $db->query(
+          "UPDATE us_email_logins SET expired = 1 WHERE id = ? AND expired = 0",
+          [$login->id]
+        );
+        if ($db->count() < 1) {
+          usError("Verification code has expired. Please request a new one.");
+          Redirect::to($us_url_root . 'users/passwordless.php');
+        }
+
         // Record successful login
         handleAuthSuccess('login_attempt', $user_id, $email, [], [
           'method' => 'passwordless_code',
@@ -114,7 +128,6 @@ if ($method == "verify_code") {
 
         $user = new User($user_id);
         $user->login();
-        $db->update('us_email_logins', $login->id, ['expired' => 1]);
 
         // Execute login success hooks
         $successHooks = getMyHooks(['page' => 'loginSuccess']);
@@ -126,7 +139,7 @@ if ($method == "verify_code") {
         $dest = sanitizedDest('dest');
         if (!empty($dest)) {
           $redirect = Input::get('redirect');
-          if (!empty($redirect)) Redirect::to(html_entity_decode($redirect));
+          if (!empty($redirect)) Redirect::sanitized($redirect);
           else Redirect::to($dest);
         } else {
           Redirect::to($us_url_root . $settings->redirect_uri_after_login);

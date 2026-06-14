@@ -62,19 +62,19 @@ $data = [];
 foreach ($userData as $v1) {
     $row = [];
     // Column 0: ID
-    $row[] = '<a class="nounderline text-dark" href="admin.php?view=user&id='.$v1->id.'">'.$v1->id.'</a>';
+    $row[] = '<a class="nounderline text-body" href="admin.php?view=user&id='.$v1->id.'">'.$v1->id.'</a>';
     
     // Column 1: Force PR Icon
     $row[] = '<a class="nounderline text-danger" href="admin.php?view=user&id='.$v1->id.'">'.($v1->force_pr == 1 ? '<i class="fa fa-lock"></i>' : '').'</a>';
 
     // Column 2: Username
-    $row[] = '<a class="nounderline text-dark" href="admin.php?view=user&id='.$v1->id.'">'.$v1->username.'</a>';
+    $row[] = '<a class="nounderline text-body" href="admin.php?view=user&id='.$v1->id.'">'.$v1->username.'</a>';
     
     // Column 3: Name
-    $row[] = '<a class="nounderline text-dark" href="admin.php?view=user&id='.$v1->id.'">'.$v1->fname.' '.$v1->lname.'</a>';
+    $row[] = '<a class="nounderline text-body" href="admin.php?view=user&id='.$v1->id.'">'.$v1->fname.' '.$v1->lname.'</a>';
     
     // Column 4: Email
-    $row[] = '<a class="nounderline text-dark" href="admin.php?view=user&id='.$v1->id.'">'.$v1->email.'</a>';
+    $row[] = '<a class="nounderline text-body" href="admin.php?view=user&id='.$v1->id.'">'.$v1->email.'</a>';
 
     // Column 5: Last Sign In
     $row[] = ($v1->last_login != "0000-00-00 00:00:00") ? $v1->last_login : '<i>Never</i>';

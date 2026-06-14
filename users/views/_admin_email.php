@@ -118,6 +118,11 @@ if (!empty($_POST)) {
     $db->update('email', 1, $fields);
     $successes[] = 'Updated email_act';
     logger($user->data()->id, 'Email Settings', "Updated email_act from $results->email_act to $email_act.");
+    $verifyResendDisabled = ($email_act == 1) ? 0 : 1;
+    $db->query(
+      "UPDATE us_menu_items SET disabled = ? WHERE link IN ('users/verify_resend.php','usersc/verify_resend.php')",
+      [$verifyResendDisabled]
+    );
   } else {
   }
   if ($results->debug_level != $_POST['debug_level']) {
@@ -179,12 +184,12 @@ foreach ($defaults as $field => $defaultVal) {
 ?>
 <form name='update' action='' method='post'>
   <h2 class="mb-3">Email Server Settings</h2>
-  <p class="text-dark">
+  <p class="text-body">
     These settings control all things email-related for the server including emailing your users and verifying the user's email address.
     You must obtain and verify all settings below for YOUR email server or hosting provider. Encryption with TLS is STRONGLY recommended,
     followed by SSL. No encryption is like shouting your login credentials out into a crowded field and is not supported for now.
   </p>
-  <p class="text-dark">It is <strong>HIGHLY</strong> recommended that you test your email settings before turning on the feature to require new users to verify their email</p>
+  <p class="text-body">It is <strong>HIGHLY</strong> recommended that you test your email settings before turning on the feature to require new users to verify their email</p>
 
   <?= resultBlock($errors, $successes); ?>
   <div class="row">
@@ -324,7 +329,7 @@ foreach ($defaults as $field => $defaultVal) {
               <i class="fa fa-question-circle offset-circle"></i>
             </a>
           </label>
-            <small class="form-text text-muted">
+            <small class="form-text text-body-secondary">
               Put http://yourdomain.com/ with the final / below: <br>
               Example: <span id="most-likely-url" class="fw-bold"><?= $example_root?></span> <button id="set-most-likely-url" class="btn tiny-button btn-outline-primary">Use This</button>
             </small>
@@ -357,7 +362,7 @@ if($results->email_act == 0){
   if($check > 0){
     ?>
           <form action="" method="post"
-        onsubmit="return confirm('Are you sure you want to mark all users as verified? This cannot be undone.')"
+        data-us-confirm="Are you sure you want to mark all users as verified? This cannot be undone."
         >
     <div class='alert alert-warning mt-3'>You have <?=$check?> unverified <?=$term?> but your system is not currently requiring users to verify their email.  Would you like to mark all users as verified?
 

@@ -86,7 +86,10 @@ class Menu {
 
   public function generate() {
     $html = $this->_generateHtml($this->tree, false);
-    return "<nav>" . $html . "</nav>";
+    // Sticky lives on the <nav> wrapper, not the <ul>: the ul's containing
+    // block is the nav, so position:sticky on the ul has no scroll room.
+    $navClass = !empty($this->menu->sticky) ? " class='us_sticky'" : "";
+    return "<nav{$navClass}>" . $html . "</nav>";
   }
 
   public function recursivelyDeleteMenuItem($itemId) {

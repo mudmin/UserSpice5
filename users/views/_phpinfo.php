@@ -13,7 +13,7 @@ if (in_array($user->data()->id, $master_account) && hasPerm(2)) {
             <!-- jump to phpinfo -->
             <a href="#phpinfo" class="btn btn-primary mb-3">Jump to PHP Info</a>
             <?php include($abs_us_root . $us_url_root . 'users/includes/system_requirements.php'); ?>
-            <small class="text-muted">You can set <code>$noPHPInfo = true;</code> in users/init.php to disable this feature.</small>
+            <small class="text-body-secondary">You can set <code>$noPHPInfo = true;</code> in users/init.php to disable this feature.</small>
 
         </div>
         <div class="col-12" id="phpinfo">

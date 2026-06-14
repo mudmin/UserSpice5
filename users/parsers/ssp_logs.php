@@ -78,7 +78,7 @@ foreach ($logs as $l) {
         ? '<textarea style="padding-top:0px; padding-left:5px;" rows="1" class="form-control" readonly>' . safeReturn($l->lognote) . '</textarea>'
         : safeReturn($l->lognote);
     $row[] = ($l->metadata !== null)
-        ? '<i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="generateMetadataModal(' . $l->id . ')" title="View Metadata"></i>'
+        ? '<i class="fa fa-fw fa-eye" style="cursor:pointer" data-log-metadata="' . (int) $l->id . '" title="View Metadata"></i>'
         : '';
     $data[] = $row;
 }

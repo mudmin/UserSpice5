@@ -24,15 +24,6 @@ $results = $query->first();
 //Value of email_act used to determine whether to display the Resend Verification link
 $email_act=$results->email_act;
 
-// Set up notifications button/modal
-if ($user->isLoggedIn()) {
-    if ($dayLimitQ = $db->query('SELECT notif_daylimit FROM settings', array())) $dayLimit = $dayLimitQ->results()[0]->notif_daylimit;
-    else $dayLimit = 7;
-
-    // 2nd parameter- true/false for all notifications or only current
-	$notifications = new Notification($user->data()->id, false, $dayLimit);
-}
-
 ?>
 <!-- Navigation -->
 <nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
@@ -52,13 +43,8 @@ if ($user->isLoggedIn()) {
 
 				<?php if($user->isLoggedIn()){ //anyone is logged in?>
 					<li><a href="<?=$us_url_root?>users/account.php"><i class="fa fa-fw fa-user"></i> <?php echo echousername($user->data()->id);?></a></li> <!-- Common for Hamburger and Regular menus link -->
-					<?php if($settings->notifications==1) {?>
-            <?php /*<li><a href="portal/'.PAGE_PATH.'#" id="notificationsTrigger" data-toggle="modal" data-target="#notificationsModal"><i class="fa fa-bell"></i> <span id="notifCount" class="badge" style="margin-top: -5px"><?= (($notifications->getUnreadCount() > 0) ? $notifications->getUnreadCount() : ''); ?></span></a></li>*/?>
-
-			<li><a href="#" onclick="displayNotifications('new')" id="notificationsTrigger" data-toggle="modal" data-target="#notificationsModal"  ><i class="fa fa-bell"></i> <span id="notifCount" class="badge" style="margin-top: -5px"><?= (int)$notifications->getUnreadCount(); ?></span></a></li>
-          <?php } ?>
 					<?php if($settings->messaging == 1){ ?>
-						<li><a href="<?=$us_url_root?>users/messages.php"><i class="fa fa-envelope"></i> <span id="msgCount" class="badge" style="margin-top: -5px"><?php if($msgC > 0){ echo $msgC;}?></span></a></li>
+						<li><a href="<?=$us_url_root?>users/messages.php"><i class="fa fa-envelope"></i> <span id="msgCount" class="badge" style="margin-top: -5px"><?php if(isset($msgC) && $msgC > 0){ echo $msgC;}?></span></a></li>
 					<?php } ?>
 
 <?php //require_once $abs_us_root.$us_url_root.'usersc/includes/navigation_right_side.php'; ?>

@@ -28,7 +28,7 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
     switch($column) {
         case 'id':
             return '<span class="hideMe">' . sprintf('%08d', $user->id) . '</span>
-                <a class="nounderline text-dark" href="admin.php?view=user&id=' . $user->id . '">' . $user->id . '</a>';
+                <a class="nounderline text-body" href="admin.php?view=user&id=' . $user->id . '">' . $user->id . '</a>';
 
         case 'force_pr':
             if ($user->force_pr == 1) {
@@ -37,7 +37,7 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
             return '';
 
         case 'name':
-            return '<a class="nounderline text-dark" href="admin.php?view=user&id=' . $user->id . '">' . $user->fname . ' ' . $user->lname . '</a>';
+            return '<a class="nounderline text-body" href="admin.php?view=user&id=' . $user->id . '">' . $user->fname . ' ' . $user->lname . '</a>';
 
         case 'last_login':
             if ($user->last_login != "0000-00-00 00:00:00") {

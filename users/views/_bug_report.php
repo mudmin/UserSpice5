@@ -25,6 +25,7 @@ if (!empty($_POST) && $settings->spice_api != '') {
     'brief' => Input::get('brief'),
     'bt' => Input::get('bugtype'),
     'problem' => Input::get('problem'),
+    'sec' => !empty($_POST['is_security_report']) ? 1 : 0,
     'call' => "bugreport"
   );
 
@@ -63,14 +64,14 @@ if (!empty($_POST) && $settings->spice_api != '') {
   if ($result->success == true) {
     logger($user->data()->id, "your_api_bugs", $result->issue);
     usSuccess($result->msg);
-    Redirect::to('?view=bugs');
+    Redirect::to('?view=bugs&showreports=1');
     // err($result->msg); //maybe a different alert later
   } else {
     usError($result->msg);
     Redirect::to('?view=bugs');
   }
 }
-if ($settings->spice_api != '') {
+if ($settings->spice_api != '' && !empty($_GET['showreports'])) {
   $data = array(
     'key' => $settings->spice_api,
     'call' => "fetch"
@@ -138,6 +139,15 @@ if ($settings->spice_api != '') {
       </select>
       <label for="">Please give as much detail about how to recreate your problem as possible.</label>
       <textarea class="form-control" name="problem" rows="8" cols="80" required></textarea><br>
+
+      <div class="form-check mt-2 mb-2">
+        <input class="form-check-input" type="checkbox" value="1" id="is_security_report" name="is_security_report">
+        <label class="form-check-label" for="is_security_report">
+          This is a <strong>security vulnerability</strong>. Security reports are kept private &mdash;
+          hidden from the public bug tracker, visible only to UserSpice administrators and you.
+        </label>
+      </div>
+
       <?php if ($settings->spice_api != '') { ?>
         <input type="submit" name="submit" value="Submit Bug Report" class="btn btn-danger text-end">
       <?php } ?>
@@ -165,6 +175,21 @@ if ($settings->spice_api != '') {
   </div>
 <?php } ?>
 
+<?php if ($settings->spice_api != '') { ?>
+  <div class="row mt-3 mb-2">
+    <div class="col">
+      <?php if (empty($_GET['showreports'])) { ?>
+        <a href="?view=bugs&showreports=1" class="btn btn-primary">Load My Previous Reports</a>
+      <?php } else { ?>
+        <a href="?view=bugs&showreports=1" class="btn btn-outline-secondary">Refresh Reports</a>
+        <?php if (!isset($result) || count($result->fetch) == 0) { ?>
+          <span class="ms-2 text-body-secondary">No reports found for this API key.</span>
+        <?php } ?>
+      <?php } ?>
+    </div>
+  </div>
+<?php } ?>
+
 <?php if (isset($result) && count($result->fetch) > 0) { ?>
   <div class="row">
     <div class="col">
@@ -173,21 +198,33 @@ if ($settings->spice_api != '') {
         <thead>
           <tr>
             <th>Issue ID</th>
-            <th>Issue Title</th>
-            <th width="45%">Resolution</th>
+            <th>Summary</th>
+            <th>Status</th>
+            <th>Category</th>
+            <th>Submitted</th>
+            <th>Resolution</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($result->fetch as $p) { ?>
             <tr>
-              <td><span class="hideMe"><?= sprintf('%08d', (int)$p->kIssueID) ?></span> Issue #<?= (int)$p->kIssueID ?></td>
-
-              <td><?= safeReturn(hed($p->Issue_Title)) ?></td>
-
-              <td><?= safeReturn(hed($p->Issue_Resolution_Title)) ?></td>
-
-              <td><a class="btn btn-primary" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= (int)$p->kIssueID ?>&source=userspice">View Ticket</a></td>
+              <td>
+                <span class="hideMe"><?= sprintf('%08d', (int)$p->kIssueID) ?></span>
+                Issue #<?= (int)$p->kIssueID ?>
+                <?php if (!empty($p->is_security_report)) { ?>
+                  <span class="badge bg-danger">Security</span>
+                <?php } ?>
+                <?php if (!empty($p->is_hidden)) { ?>
+                  <span class="badge bg-secondary">Hidden</span>
+                <?php } ?>
+              </td>
+              <td><?= safeReturn(hed($p->Issue_Title ?? '')) ?></td>
+              <td><?= safeReturn(hed($p->Status_Text ?? '')) ?></td>
+              <td><?= safeReturn(hed($p->IssueCategory ?? '')) ?></td>
+              <td><?= safeReturn(hed($p->Issue_Submitted ?? '')) ?></td>
+              <td><?= safeReturn(hed($p->Issue_Resolution_Title ?? '')) ?></td>
+              <td><a class="btn btn-primary" target="_blank" href="https://bugs.userspice.com/usersc/issue_detail.php?id=<?= (int)$p->kIssueID ?>&source=userspice">View Ticket</a></td>
             </tr>
           <?php } ?>
         </tbody>

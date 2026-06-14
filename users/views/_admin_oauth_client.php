@@ -151,6 +151,12 @@ $activeClientCount = $activeClientsQ->count();
       console.error('Could not copy text: ', err);
     });
   }
+
+  // CSP-friendly binding for [data-us-copy] copy buttons
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-us-copy]');
+    if (el) { copyToClipboard(el.getAttribute('data-us-copy')); }
+  });
 </script>
 
 <style>
@@ -269,11 +275,11 @@ $activeClientCount = $activeClientsQ->count();
                               <input type="hidden" name="toggle_client" value="<?= $c->id ?>">
                               <input type="hidden" name="current_status" value="<?= $c->oauth ?>">
                               <?php if ($c->oauth == 1): ?>
-                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Disable this OAuth client?')">
+                                <button type="submit" class="btn btn-sm btn-success" data-us-confirm="Disable this OAuth client?">
                                   <i class="fa fa-toggle-on"></i> Enabled
                                 </button>
                               <?php else: ?>
-                                <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Enable this OAuth client?')">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" data-us-confirm="Enable this OAuth client?">
                                   <i class="fa fa-toggle-off"></i> Disabled
                                 </button>
                               <?php endif; ?>
@@ -285,13 +291,13 @@ $activeClientCount = $activeClientsQ->count();
                             <button class="btn btn-sm btn-outline-info">View Credentials</button>
                             <div class="secret-info">
                               <b>Client: <?= safeReturn($c->client_name) ?></b><br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_id) ?>')">Copy</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary copy-btn mb-2" data-us-copy="<?= safeReturn($c->client_id) ?>">Copy</button>
                               Client ID: <small><?= safeReturn($c->client_id) ?></small>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn mb-2" onclick="copyToClipboard('<?= safeReturn($c->client_secret) ?>')">Copy</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary copy-btn mb-2" data-us-copy="<?= safeReturn($c->client_secret) ?>">Copy</button>
                               Client Secret: <small><?= safeReturn(substr($c->client_secret, 0, 20)) ?>...</small>
                               <br>
-                              <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyToClipboard('<?= safeReturn($c->redirect_uri) ?>')">Copy</button>
+                              <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" data-us-copy="<?= safeReturn($c->redirect_uri) ?>">Copy</button>
                               Redirect URI: <small><?= safeReturn($c->redirect_uri) ?></small>
                             </div>
                           </td>
@@ -299,7 +305,7 @@ $activeClientCount = $activeClientsQ->count();
                           <td>
                             <div class="btn-group" role="group">
                               <a href="<?= $us_url_root ?>users/admin.php?view=oauth_client&client=<?= $c->id ?>" class="btn btn-sm btn-primary">Edit</a>
-                              <form class="d-inline" method="post" onsubmit="return confirm('Are you sure you want to delete this OAuth client? This cannot be undone.');">
+                              <form class="d-inline" method="post" data-us-confirm="Are you sure you want to delete this OAuth client? This cannot be undone.">
                                 <?= tokenHere(); ?>
                                 <input type="hidden" name="delete_client" value="<?= $c->id ?>">
                                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -327,35 +333,35 @@ $activeClientCount = $activeClientsQ->count();
 
                 <div class="mb-3">
                   <label for="client_name" class="form-label">Client Name *</label>
-                  <small class="form-text text-muted">Internal identifier for this OAuth configuration</small>
+                  <small class="form-text text-body-secondary">Internal identifier for this OAuth configuration</small>
                   <input type="text" class="form-control" id="client_name" name="client_name" 
                          value="<?= $e ? safeReturn($client->client_name) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="server_url" class="form-label">OAuth Server URL *</label>
-                  <small class="form-text text-muted">Full domain URL with trailing slash (e.g., https://auth.example.com/)</small>
+                  <small class="form-text text-body-secondary">Full domain URL with trailing slash (e.g., https://auth.example.com/)</small>
                   <input type="url" class="form-control" id="server_url" name="server_url" 
                          value="<?= $e ? safeReturn($client->server_url) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="server_target" class="form-label">Server Target Path</label>
-                  <small class="form-text text-muted">Path to OAuth endpoints (usually users/auth/)</small>
+                  <small class="form-text text-body-secondary">Path to OAuth endpoints (usually users/auth/)</small>
                   <input type="text" class="form-control" id="server_target" name="server_target" 
                          value="<?= $e ? safeReturn($client->server_target) : 'users/auth/' ?>">
                 </div>
 
                 <div class="mb-3">
                   <label for="client_id" class="form-label">Client ID *</label>
-                  <small class="form-text text-muted">Obtain from the OAuth server</small>
+                  <small class="form-text text-body-secondary">Obtain from the OAuth server</small>
                   <input type="text" class="form-control" id="client_id" name="client_id" 
                          value="<?= $e ? safeReturn($client->client_id) : '' ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="client_secret" class="form-label">Client Secret *</label>
-                  <small class="form-text text-muted">Obtain from the OAuth server</small>
+                  <small class="form-text text-body-secondary">Obtain from the OAuth server</small>
                   <input type="password" class="form-control" id="client_secret" name="client_secret" 
                          value="<?= $e ? safeReturn($client->client_secret) : '' ?>" required>
                 </div>
@@ -367,21 +373,21 @@ $activeClientCount = $activeClientsQ->count();
 
                 <div class="mb-3">
                   <label for="redirect_uri" class="form-label">Redirect URI *</label>
-                  <small class="form-text text-muted">Example: <?= safeReturn($exampleRedirectUri) ?></small>
+                  <small class="form-text text-body-secondary">Example: <?= safeReturn($exampleRedirectUri) ?></small>
                   <input type="url" class="form-control" id="redirect_uri" name="redirect_uri" 
                          value="<?= $e ? safeReturn($client->redirect_uri) : $exampleRedirectUri ?>">
                 </div>
 
                 <div class="mb-3">
                   <label for="login_title" class="form-label">Login Button Title</label>
-                  <small class="form-text text-muted">Text displayed on the login button</small>
+                  <small class="form-text text-body-secondary">Text displayed on the login button</small>
                   <input type="text" class="form-control" id="login_title" name="login_title" 
                          value="<?= $e ? safeReturn($client->login_title) : 'UserSpice' ?>">
                 </div>
 
                 <div class="mb-3">
                   <label for="client_icon" class="form-label">Login Button Icon</label>
-                  <small class="form-text text-muted">Icon for the login button</small>
+                  <small class="form-text text-body-secondary">Icon for the login button</small>
                   <select class="form-select" id="client_icon" name="client_icon">
                     <option value="">-- No Icon --</option>
                     <?php foreach ($icons as $icon): ?>
@@ -395,7 +401,7 @@ $activeClientCount = $activeClientsQ->count();
 
                 <div class="mb-3">
                   <label for="login_script" class="form-label">Login Script</label>
-                  <small class="form-text text-muted">Optional script to run after successful login</small>
+                  <small class="form-text text-body-secondary">Optional script to run after successful login</small>
                   <select class="form-select" id="login_script" name="login_script">
                     <option value="">-- No Script --</option>
                     <?php foreach ($login_scripts as $script): ?>
@@ -409,7 +415,7 @@ $activeClientCount = $activeClientsQ->count();
 
                 <div class="mb-3">
                   <label for="response_secret" class="form-label">Response Secret (HMAC Verification)</label>
-                  <small class="form-text text-muted">Optional. If set, the response data from the OAuth server will be verified using HMAC-SHA256. This must match the response_secret configured on the OAuth server for this client. Prevents response tampering during redirect.</small>
+                  <small class="form-text text-body-secondary">Optional. If set, the response data from the OAuth server will be verified using HMAC-SHA256. This must match the response_secret configured on the OAuth server for this client. Prevents response tampering during redirect.</small>
                   <input type="text" class="form-control" id="response_secret" name="response_secret"
                          value="<?= $e ? safeReturn($client->response_secret ?? '') : '' ?>"
                          placeholder="Leave empty to disable verification">
@@ -460,7 +466,7 @@ $activeClientCount = $activeClientsQ->count();
                         <tr>
                           <td>
                             <?= safeReturn($login->fname . ' ' . $login->lname) ?><br>
-                            <small class="text-muted"><?= safeReturn($login->email) ?></small>
+                            <small class="text-body-secondary"><?= safeReturn($login->email) ?></small>
                           </td>
                           <td>
                             <?php if ($login->new_user == 1): ?>
@@ -476,7 +482,7 @@ $activeClientCount = $activeClientsQ->count();
                   </table>
                 </div>
               <?php else: ?>
-                <p class="text-muted">No OAuth logins recorded yet.</p>
+                <p class="text-body-secondary">No OAuth logins recorded yet.</p>
               <?php endif; ?>
             </div>
           </div>

@@ -12,7 +12,8 @@ function initializeCustomizerTheme() {
     $css_dir = $template_dir . '/assets/css';
     $child_themes_dir = $template_dir . '/assets/child_themes';
     $defaults_dir = $template_dir . '/assets/defaults';
-    
+    $presets_dir = $template_dir . '/assets/presets';
+
     // Create directories if they don't exist
     if (!is_dir($css_dir)) {
         mkdir($css_dir, 0755, true);
@@ -64,4 +65,35 @@ function initializeCustomizerTheme() {
     
     file_put_contents($revision_file, $revision_content);
     chmod($revision_file, 0644);
+
+    // Seed the presets shipped with the theme into child_themes/ on first setup.
+    syncCustomizerPresets($presets_dir, $child_themes_dir);
+}
+
+/**
+ * Copy any preset shipped in assets/presets/ into assets/child_themes/ when it
+ * is not already installed. Never overwrites — a preset the user has edited (or
+ * any child theme already present) is left untouched. Safe to call on every
+ * customizer load; returns the count of presets newly installed.
+ *
+ * This is how preset packs ship WITH the theme: .php files placed in
+ * assets/presets/ appear for users on the next customizer load. A theme update
+ * that adds new presets is picked up automatically; nothing is ever deleted.
+ */
+function syncCustomizerPresets($presets_dir, $child_themes_dir) {
+    if (!is_dir($presets_dir)) {
+        return 0;
+    }
+    if (!is_dir($child_themes_dir) && !mkdir($child_themes_dir, 0755, true)) {
+        return 0;
+    }
+    $installed = 0;
+    foreach (glob($presets_dir . '/*.php') as $preset) {
+        $dest = $child_themes_dir . '/' . basename($preset);
+        if (!file_exists($dest) && copy($preset, $dest)) {
+            chmod($dest, 0644);
+            $installed++;
+        }
+    }
+    return $installed;
 }

@@ -288,7 +288,7 @@ $proxy_configs = $db->query("
                             <h4 class="mb-1 <?= $using_default_rate_limits ? 'status-danger' : 'status-good' ?>">
                                 <?= $using_default_rate_limits ? 'DEFAULT' : 'CUSTOM' ?>
                             </h4>
-                            <small class="text-muted">Configuration</small>
+                            <small class="text-body-secondary">Configuration</small>
                         </div>
                     </div>
                     <div class="col-6 col-md-4">
@@ -296,12 +296,12 @@ $proxy_configs = $db->query("
                             <h4 class="mb-1 <?= $proxy_enabled ? 'status-good' : 'status-warning' ?>">
                                 <?= $proxy_enabled ? 'YES' : 'NO' ?>
                             </h4>
-                            <small class="text-muted">UserSpice is Behind Proxy</small>
+                            <small class="text-body-secondary">UserSpice is Behind Proxy</small>
                         </div>
                     </div>
                     <div class="col-6 col-md-4">
                         <h4 class="mb-1 text-info"><?= count($recent_activity) ?></h4>
-                        <small class="text-muted">Recent Events</small>
+                        <small class="text-body-secondary">Recent Events</small>
                     </div>
                 </div>
             </div>
@@ -351,7 +351,7 @@ ini_set('session.cookie_samesite', 'Lax');
 if (Server::getScheme($trustedProxies) === 'https') {
     ini_set('session.cookie_secure', 1);
 }</code></pre>
-                <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyInitSnippet(this)"><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-us-copy-init><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
 
                 <?php if ($init_missing_samesite || $init_missing_secure): ?>
                 <div class="alert alert-info mt-3 mb-0 p-2 small">
@@ -445,7 +445,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
                         <div class="action-header p-3 mb-3 rounded">
                             <h6 class="mb-3 text-primary">
                                 <i class="fas fa-cog me-2"></i><?= ucwords(str_replace('_', ' ', $action)) ?>
-                                <small class="text-muted ms-2">(<?= $action ?>)</small>
+                                <small class="text-body-secondary ms-2">(<?= $action ?>)</small>
                             </h6>
 
                             <div class="row g-3">
@@ -531,7 +531,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
 
                                 <?php if (isset($limits['total_max'])): ?>
                                     <div class="col-12">
-                                        <div class="bg-light p-2 rounded">
+                                        <div class="bg-body-tertiary p-2 rounded">
                                             <label class="form-label fw-bold text-warning">
                                                 <i class="fas fa-exclamation-triangle me-1"></i>Circuit Breaker (Total Attempts)
                                             </label>
@@ -551,7 +551,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <small class="text-muted">Blocks ALL attempts (successful + failed) for this action when exceeded</small>
+                                            <small class="text-body-secondary">Blocks ALL attempts (successful + failed) for this action when exceeded</small>
                                         </div>
                                     </div>
                                 <?php endif; ?>
@@ -633,7 +633,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
                     <strong>Trusted Sources:</strong>
                     <span class="badge bg-info"><?= $proxy_config_count ?> configured</span>
                 </div>
-                <small class="text-muted">Enable this if UserSpice sits behind a load balancer, CDN, or reverse proxy that forwards client IPs via headers.</small>
+                <small class="text-body-secondary">Enable this if UserSpice sits behind a load balancer, CDN, or reverse proxy that forwards client IPs via headers.</small>
 
                 <?php if ($proxy_enabled && empty($proxy_configs)): ?>
                     <div class="alert alert-warning p-2 small mt-2">
@@ -654,13 +654,13 @@ if (Server::getScheme($trustedProxies) === 'https') {
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <strong><?= htmlspecialchars($conf->proxy_ip) ?></strong>
-                                    <br><small class="text-muted">Header: <?= htmlspecialchars($conf->header_name) ?></small>
-                                    <br><small class="text-muted">Priority: <?= $conf->priority ?></small>
+                                    <br><small class="text-body-secondary">Header: <?= htmlspecialchars($conf->header_name) ?></small>
+                                    <br><small class="text-body-secondary">Priority: <?= $conf->priority ?></small>
                                 </div>
                                 <form method="post" class="d-inline">
                                     <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
                                     <input type="hidden" name="proxy_id" value="<?= $conf->id ?>">
-                                    <button type="submit" name="delete_proxy" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this proxy configuration?')">
+                                    <button type="submit" name="delete_proxy" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this proxy configuration?">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -677,7 +677,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
             </div>
             <div class="card-body">
                 <?php if (empty($recent_activity)): ?>
-                    <div class="text-center text-muted p-3">
+                    <div class="text-center text-body-secondary p-3">
                         <i class="fas fa-check-circle fa-2x mb-2"></i>
                         <p class="mb-0">No recent rate limiting activity</p>
                     </div>
@@ -687,7 +687,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
                             <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                                 <div>
                                     <strong><?= ucwords(str_replace('_', ' ', $activity->action)) ?></strong>
-                                    <br><small class="text-muted"><?= date('H:i:s', strtotime($activity->last_attempt)) ?></small>
+                                    <br><small class="text-body-secondary"><?= date('H:i:s', strtotime($activity->last_attempt)) ?></small>
                                 </div>
                                 <div class="text-end">
                                     <span class="badge bg-<?= $activity->success ? 'success' : 'danger' ?>">
@@ -830,7 +830,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
 
                     <div class="mb-3">
                         <label for="header_name" class="form-label">Header Name</label>
-                        <select class="form-select" id="header_name" name="header_name" required onchange="toggleCustomHeader()">
+                        <select class="form-select" id="header_name" name="header_name" required>
                             <option value="X-Forwarded-For">X-Forwarded-For</option>
                             <option value="X-Real-IP">X-Real-IP</option>
                             <option value="CF-Connecting-IP">CF-Connecting-IP (Cloudflare)</option>
@@ -932,6 +932,14 @@ if (Server::getScheme($trustedProxies) === 'https') {
             }, 2000);
         });
     }
+
+    // CSP-friendly bindings (replace inline onclick/onchange attributes)
+    document.addEventListener('click', function (e) {
+        var initBtn = e.target.closest && e.target.closest('[data-us-copy-init]');
+        if (initBtn) { copyInitSnippet(initBtn); }
+    });
+    var headerSel = document.getElementById('header_name');
+    if (headerSel) { headerSel.addEventListener('change', toggleCustomHeader); }
 
     // Define functions first to avoid reference errors
     function showAddProxyModal() {

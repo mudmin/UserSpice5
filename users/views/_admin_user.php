@@ -45,6 +45,29 @@ if ($isProtectedProfile) {
   $protectedMsg = '';
   $buttonClass = "";
 }
+
+// Resume a cloak that was interrupted by a forceReauth() round-trip started in
+// usersc/scripts/cloak_attempt.php. Guarded by the one-time nonce stashed in
+// cloakKey('pending') when the cloak was first initiated, so this GET can only
+// finish a cloak the admin genuinely started (and only after step-up succeeds,
+// since cloakUser() re-runs the seam — forceReauth then no-ops in its grace
+// window, otherwise it bounces back to reauth).
+$cloakConfirm = Input::get('cloak_confirm');
+if ($cloakConfirm) {
+  $pend = isset($_SESSION[cloakKey('pending')]) ? $_SESSION[cloakKey('pending')] : null;
+  if (is_array($pend)
+      && isset($pend['nonce'], $pend['id'], $pend['ts'])
+      && hash_equals((string) $pend['nonce'], (string) $cloakConfirm)
+      && (int) $pend['id'] === $userId
+      && (time() - (int) $pend['ts']) < 900) {
+    $res = cloakUser($userId);
+    if (!$res['ok']) {
+      usError($res['error']);
+      Redirect::to($us_url_root . 'users/admin.php?view=users');
+    }
+  }
+}
+
 //Forms posted
 if (!empty($_POST)) {
 
@@ -158,35 +181,13 @@ if (!empty($_POST)) {
       }
 
       if (!empty($_POST['cloak'])) {
-        if ($user->data()->cloak_allowed != 1 && !in_array($user->data()->id, $master_account) && !isset($_SESSION['cloak_to'])) {
-          logger($user->data()->id, 'Cloaking', 'User attempted to cloak User ID #' . $userId);
-          usError("You do not have permission to cloak");
+        // cloakUser() fires the cloakAttempt seam, checks permissions, and on
+        // success redirects to account.php. It only returns here when the
+        // attempt was blocked or denied.
+        $res = cloakUser($userId);
+        if (!$res['ok']) {
+          usError($res['error']);
           Redirect::to($us_url_root . 'users/admin.php?view=users');
-        } else {
-          if (in_array($userId, $master_account) && !in_array($user->data()->id, $master_account)) {
-            logger($user->data()->id, 'Cloaking', "User attempted to cloak User ID #$userId who belongs to the Master Account Array.");
-            usError("You cannot cloak into a master account");
-            Redirect::to($us_url_root . 'users/admin.php?view=users');
-          } elseif ($userId == $user->data()->id) {
-            logger($user->data()->id, 'Cloaking', 'User attempted to cloak themself.');
-            usError("Cloaking into yourself would open up a black hole");
-            Redirect::to($us_url_root . 'users/admin.php?view=users');
-          } else {
-            $check = $db->query('SELECT id FROM users WHERE id = ?', [$userId]);
-            $count = $check->count();
-            if ($count < 1) {
-              usError("You broke it! User not found");
-              Redirect::to($us_url_root . 'users/admin.php?view=users');
-            } else {
-              $_SESSION['cloak_from'] = $user->data()->id;
-              $_SESSION['cloak_to'] = $userId;
-              logger($user->data()->id, 'Cloaking', 'Cloaked into ' . $userId);
-              $cloakHook =  getMyHooks(['page' => 'cloakBegin']);
-              includeHook($cloakHook, 'body');
-              usSuccess("You are now cloaked!");
-              Redirect::to('account.php');
-            }
-          }
         }
       }
 
@@ -507,7 +508,7 @@ if ((!in_array($user->data()->id, $master_account) && (in_array($userId, $master
 }
 
 $rsn = '';
-if (isset($_SESSION['cloak_to'])) {
+if (isCloaked()) {
   $rsn = 'You are already cloaked';
 }
 if (in_array($userId, $master_account)) {
@@ -540,10 +541,10 @@ includeHook($hooks, 'body'); ?>
   <div class="col-4 col-sm-5">
 
     <h3>
-      <span id="fname"><?= $userdetails->fname; ?></span>
-      <span id="lname"><?= $userdetails->lname; ?></span>
+      <span id="fname"><?= safeReturn($userdetails->fname, true); ?></span>
+      <span id="lname"><?= safeReturn($userdetails->lname, true); ?></span>
       <span id="slash"> - </span>
-      <span id="ud-username"><?= $userdetails->username; ?></span>
+      <span id="ud-username"><?= safeReturn($userdetails->username, true); ?></span>
     </h3>
 
     <p><label>User ID: <?= $userdetails->id; ?>
@@ -574,7 +575,7 @@ includeHook($hooks, 'body'); ?>
   <div class="col-6">
     <div class="row">
       <div class="col-12 col-sm-6 col-md-3 mt-2">
-        <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
+        <form class="" action="" method="post" data-us-confirm="Do you really want to do this? It cannot be undone.">
           <?= tokenHere(); ?>
           <input type="submit" name="delete" id="delete" class="btn btn-danger col-12 <?= $buttonClass ?>" value="Delete User">
         </form>
@@ -582,13 +583,13 @@ includeHook($hooks, 'body'); ?>
 
       <div class="col-12 col-sm-6 col-md-3 mt-2">
         <?php if ($userdetails->permissions == 1) { ?>
-          <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? The user will immediately be blocked from the site.');">
+          <form class="" action="" method="post" data-us-confirm="Do you really want to do this? The user will immediately be blocked from the site.">
             <?= tokenHere(); ?>
             <input type="hidden" name="active" value="0">
             <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Block User">
           </form>
         <?php } else { ?>
-          <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? The user will immediately have their access to the site restored.');">
+          <form class="" action="" method="post" data-us-confirm="Do you really want to do this? The user will immediately have their access to the site restored.">
             <?= tokenHere(); ?>
             <input type="hidden" name="active" value="1">
             <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Unblock User">
@@ -607,7 +608,7 @@ includeHook($hooks, 'body'); ?>
         }
 
         ?>
-        <form class="" action="" method="post" onsubmit="return confirm('You are about to cloak into another user.  To return to your own account, visit the Account page and hit the uncloak button.');">
+        <form class="" action="" method="post" data-us-confirm="You are about to cloak into another user.  To return to your own account, visit the Account page and hit the uncloak button.">
           <?= tokenHere(); ?>
 
           <input type="submit" name="cloak" id="cloak" class="btn <?= $cloakClass ?> <?= $buttonClass ?> col-12" value="Cloak Into User" <?= $disabled ?>>
@@ -616,7 +617,7 @@ includeHook($hooks, 'body'); ?>
       </div>
 
       <div class="col-12 col-sm-6 col-md-3 mt-2">
-        <form class="" action="" method="post" onsubmit="return confirm('If you continue, the user will be forced to change their password on the next login.');">
+        <form class="" action="" method="post" data-us-confirm="If you continue, the user will be forced to change their password on the next login.">
           <?= tokenHere(); ?>
           <input type="hidden" name="force_pr" value="1">
           <input type="submit" name="force_the_pr" id="force_the_pr" class="btn btn-secondary col-12 <?= $buttonClass ?>" value="Force PW Reset">
@@ -638,12 +639,12 @@ includeHook($hooks, 'body'); ?>
     <div class="col-12 col-sm-6">
       <div class="form-group" id="username-group">
         <label>Username:</label>
-        <input class='form-control' type='search' name='username' value='<?= $userdetails->username; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='username' value='<?= safeReturn($userdetails->username, true); ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="email-group">
         <label>Email:</label>
-        <input class='form-control' type='search' name='email' value='<?= $userdetails->email; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='email' value='<?= safeReturn($userdetails->email, true); ?>' autocomplete="off" />
 
         <?php if ($userdetails->email_verified == 0) { ?>
           <div class="alert alert-warning mt-2">
@@ -656,12 +657,12 @@ includeHook($hooks, 'body'); ?>
 
       <div class="form-group" id="fname-group">
         <label>First Name:</label>
-        <input class='form-control' type='search' name='fnx' value='<?= $userdetails->fname; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='fnx' value='<?= safeReturn($userdetails->fname, true); ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="lname-group">
         <label>Last Name:</label>
-        <input class='form-control' type='search' name='lnx' value='<?= $userdetails->lname; ?>' autocomplete="off" />
+        <input class='form-control' type='search' name='lnx' value='<?= safeReturn($userdetails->lname, true); ?>' autocomplete="off" />
       </div>
 
 
@@ -828,7 +829,7 @@ includeHook($hooks, 'body'); ?>
               include($abs_us_root . $us_url_root . 'users/includes/password_meter.php');
             }
             ?>
-            <small class="text-muted">These rules are not enforced</small>
+            <small class="text-body-secondary">These rules are not enforced</small>
           </div>
         <?php } ?>
       </div>
@@ -848,12 +849,6 @@ includeHook($hooks, 'body'); ?>
                               if (!in_array($user->data()->id, $master_account)) {  ?>disabled<?php }
                                                                                           } ?>>No</option>
         </select>
-      </div>
-
-      <div class="form-group">
-        <?php if (!is_null($userdetails->pin)) { ?>
-          <label><input type="checkbox" id="resetPin" name="resetPin" value="1" /> Reset PIN</label>
-        <?php } ?>
       </div>
 
       <div class="form-group">

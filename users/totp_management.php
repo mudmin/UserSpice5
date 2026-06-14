@@ -321,7 +321,7 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
     <div class="row">
         <div class="col-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2">
             <h1 class="text-center mt-4"><?= lang("ACCT_2FA") ?></h1>
-            <div id="totp_management_section_anchor" class="mt-2 border bg-light p-3 p-md-4">
+            <div id="totp_management_section_anchor" class="mt-2 border bg-body-tertiary p-3 p-md-4">
                 <?php
 
                 if (isset($_SESSION['totp_success_message'])) {
@@ -358,11 +358,11 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
                         <p><strong><?= lang("2FA_SECRET_KEY_LABEL") ?></strong></p>
                         <div class="input-group">
                             <input type="text" class="form-control" value="<?= safeReturn($secret); ?>" readonly id="totp-secret">
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('totp-secret')">
+                            <button class="btn btn-outline-secondary" type="button" data-copy-target="totp-secret">
                                 <i class="fa fa-copy"></i> Copy
                             </button>
                         </div>
-                        <small class="text-muted"><?= lang("2FA_SK_ALT"); ?></small>
+                        <small class="text-body-secondary"><?= lang("2FA_SK_ALT"); ?></small>
                     </div>
                     <form method="POST" class="totp-setup-form">
                         <?= tokenHere(); ?>
@@ -390,7 +390,7 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
                             <?php
                             $str = lang("2FA_INVALIDATE_WARNING");
                             ?>
-                            <button type="submit" class="btn btn-warning" onclick="return confirm('<?= $str ?>')">
+                            <button type="submit" class="btn btn-warning" data-us-confirm="<?= safeReturn($str) ?>">
                                 <i class="fa fa-refresh"></i> <?= lang("2FA_REGEN_CODES_BTN") ?>
                             </button>
                         </form>
@@ -400,7 +400,7 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
                             $str = lang("2FA_CONF");
                             ?>
                             <input type="hidden" name="totp_action" value="disable">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('<?= $str ?>')">
+                            <button type="submit" class="btn btn-danger" data-us-confirm="<?= safeReturn($str) ?>">
                                 <i class="fa fa-times-circle"></i> <?= lang("2FA_DISABLE_BTN") ?>
                             </button>
                         </form>
@@ -408,9 +408,9 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
 
                 <?php else: ?>
                     <div class="text-center">
-                        <i class="fa fa-mobile-alt fa-3x text-muted mb-3"></i>
+                        <i class="fa fa-mobile-alt fa-3x text-body-secondary mb-3"></i>
                         <h4><?= lang("2FA_NOT_ENABLED_INFO") ?></h4>
-                        <p class="text-muted"><?= lang("2FA_NOT_ENABLED_EXPLAIN") ?></p>
+                        <p class="text-body-secondary"><?= lang("2FA_NOT_ENABLED_EXPLAIN") ?></p>
 
                     </div>
                     <form method="POST" class="text-center">
@@ -525,6 +525,17 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
             });
         }
     });
+
+    // CSP-friendly bindings (replace inline onclick attributes)
+    document.addEventListener('click', function (e) {
+        var copyBtn = e.target.closest && e.target.closest('[data-copy-target]');
+        if (copyBtn) { copyToClipboard(copyBtn.getAttribute('data-copy-target')); }
+        var confirmEl = e.target.closest && e.target.closest('[data-us-confirm]');
+        if (confirmEl &&
+            !window.confirm((confirmEl.getAttribute('data-us-confirm') || '').replace(/\\n/g, '\n'))) {
+            e.preventDefault();
+        }
+    }, true);
 </script>
 
 <style>

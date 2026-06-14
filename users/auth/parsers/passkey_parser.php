@@ -64,6 +64,10 @@ function handlePasskeyError($e, $userId = null, $context = 'unknown')
     }
 }
 
+// Initialized before the try so the catch block can always reference it,
+// even if an exception is thrown before the in-try assignment is reached.
+$userId = null;
+
 try {
     // Get action early for security validation
     $action = null;
@@ -167,7 +171,9 @@ try {
 
                 $expectedUserId = null;
                 if (isset($user) && $user->isLoggedIn()) {
-                    $expectedUserId = $user->data()->id;
+                    // Cloaked admins reauth as themselves (cloak_from): validate
+                    // the passkey against the admin, not the impersonated user.
+                    $expectedUserId = function_exists('realUserId') ? realUserId() : $user->data()->id;
                 }
 
                 $result = $passkeyHandler->validateAuthentication($authData, $expectedUserId);
@@ -187,9 +193,22 @@ try {
                         }
 
                         $userToLogin->login();
-                        $_SESSION['last_confirm'] = date("Y-m-d H:i:s");
+                        reauthMarkConfirmed();
                         setLoginMethod('passkeys');
                         // logger($result['user_id'], 'PasskeyLogin', 'User logged in via passkey. Credential ID: ' . $result['credentialId']);
+                    } elseif ((int)$result['user_id'] === (int)(function_exists('realUserId') ? realUserId() : $user->data()->id)) {
+                        // Already logged in and the passkey belongs to the real
+                        // operator (the admin when cloaked): treat this as a
+                        // step-up re-authentication (reauth.php).
+                        $realId = function_exists('realUserId') ? realUserId() : $user->data()->id;
+                        if (function_exists('reauthMarkConfirmed')) {
+                            reauthMarkConfirmed();
+                        }
+                        if (function_exists('recordReauth')) {
+                            $rk = Config::get('session/session_name') . '_reauth';
+                            $reauthPurpose = $_SESSION[$rk]['purpose'] ?? '';
+                            recordReauth($realId, 'passkey', $reauthPurpose, 1);
+                        }
                     }
 
 
@@ -294,7 +313,9 @@ try {
 
                 $userId = null;
                 if (isset($user) && $user->isLoggedIn()) {
-                    $userId = $user->data()->id;
+                    // Cloaked admins reauth as themselves (cloak_from), so offer
+                    // the admin's credentials — not the impersonated user's.
+                    $userId = function_exists('realUserId') ? realUserId() : $user->data()->id;
                 }
 
                 $publicKeyCredentialRequestOptions = $passkeyHandler->generateAuthenticationOptions($userId);

@@ -485,6 +485,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "সেটআপ বাতিল করা হয়েছে।",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "অবৈধ ব্যাকআপ কোড। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "2FA_ERR_INVALID_CODE"               => "অবৈধ প্রমাণীকরণ কোড। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "2FA_ERR_DISABLE_FAILED"             => "টু-ফ্যাক্টর অথেনটিকেশন নিষ্ক্রিয় করতে ব্যর্থ হয়েছে।",
     "2FA_ERR_NO_SECRET"                  => "অথেনটিকেশন গোপন কী পুনরুদ্ধার করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "ব্যাকআপ কোড যাচাই করা হয়েছে কিন্তু এটি অকার্যকর করতে ব্যর্থ হয়েছে। অনুগ্রহ করে সহায়তার সাথে যোগাযোগ করুন।",
@@ -570,6 +571,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "আপনি নতুন করে পিন বসাতে পারবেন পরবর্তীতে যখন আপনার যাচাইকরণ প্রয়োজন হবে",
 	"SET_UPDATE"		=> "আপনার ব্যাবহারকারী সেটিং পরিবর্তন করুন",
 	"SET_NOCHANGE"	=> "পরিচালক উজারনেম পরিবর্তন করার পদ্ধতি বন্ধ করে দিয়েছে",
+	"SET_NOCHANGE_EMAIL"	=> "পরিচালক ইমেইল ঠিকানা পরিবর্তন করার পদ্ধতি বন্ধ করে দিয়েছে",
 	"SET_ONECHANGE"	=> "পরিচালক শুধু একবার ব্যাবহারকারীর নাম। পরিবর্তন করার অনুমিত দিয়েছেন, আর সেটা আপনি একবার ব্যাবহারকারী করেও ফেলেছেন।",
 
 	"SET_GRAVITAR"	=> "আপনার প্রোফাইল ছবি পরিবর্তন করতে চান?  <br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> উক্ত লিংকে যান এবং আপনার ইমেইল এড্রেস ব্যবহার করে ছবি পরিবর্তন করুন যেই ইমেইলটা আপনি এইখানে ব্যবহার করেছেন। এইটা খুবই দ্রুত কাজ করে এবং একইসাথে লাখ লাখ সাইটে কাজ করে!",
@@ -632,6 +634,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "এটি আপনি তা নিশ্চিত করুন",
+	"REAUTH_INTRO"            => "আপনার নিরাপত্তার জন্য, চালিয়ে যেতে অনুগ্রহ করে আপনার পরিচয় যাচাই করুন।",
+	"REAUTH_RELOGIN"          => "চালিয়ে যেতে অনুগ্রহ করে আবার লগ ইন করুন।",
+	"REAUTH_LOCKED"           => "অনেকবার ব্যর্থ হয়েছে। অনুগ্রহ করে আবার লগ ইন করুন।",
+	"REAUTH_VERIFY"           => "যাচাই করুন",
+	"REAUTH_OR"               => "অথবা",
+	"REAUTH_PASSWORD_LABEL"   => "আপনার পাসওয়ার্ড",
+	"REAUTH_BAD_PASSWORD"     => "ভুল পাসওয়ার্ড।",
+	"REAUTH_TOTP_BACKUP"      => "এটি একটি ব্যাকআপ কোড",
+	"REAUTH_EMAIL_BTN"        => "আমাকে ৬-সংখ্যার কোড ইমেল করুন",
+	"REAUTH_EMAIL_CODE_LABEL" => "৬-সংখ্যার কোডটি লিখুন",
+	"REAUTH_EMAIL_RESEND"     => "নতুন কোড পাঠান",
+	"REAUTH_EMAIL_SUBJECT"    => "যাচাইকরণ কোড",
+	"REAUTH_EMAIL_BODY"       => "আপনার যাচাইকরণ কোড হলো:",
+	"REAUTH_EMAIL_EXPIRE"     => "এই কোডটির মেয়াদ ১০ মিনিটে শেষ হবে। আপনি অনুরোধ না করলে এই ইমেলটি উপেক্ষা করতে পারেন।",
+	"REAUTH_EMAIL_SENT"       => "আমরা আপনাকে একটি ৬-সংখ্যার কোড ইমেল করেছি।",
+	"REAUTH_EMAIL_FAIL"       => "আমরা ইমেলটি পাঠাতে পারিনি। অনুগ্রহ করে অন্য পদ্ধতি চেষ্টা করুন।",
+	"REAUTH_EMAIL_NONE"       => "অনুগ্রহ করে প্রথমে একটি কোড অনুরোধ করুন।",
+	"REAUTH_EMAIL_EXPIRED"    => "কোডটির মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে নতুন একটি অনুরোধ করুন।",
+	"REAUTH_EMAIL_TOOMANY"    => "অনেকবার চেষ্টা হয়েছে। অনুগ্রহ করে নতুন কোড অনুরোধ করুন।",
+	"REAUTH_EMAIL_BAD"        => "ভুল কোড।",
+	"REAUTH_PASSKEY_BTN"      => "একটি পাসকি ব্যবহার করুন",
+	"REAUTH_SOCIAL_BTN"       => "যাচাই করুন",
+	"REAUTH_SOCIAL_MISMATCH"  => "ওই অ্যাকাউন্টটি আপনার লগইনের সাথে মেলেনি। অনুগ্রহ করে আবার চেষ্টা করুন।",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "আপনার অথেন্টিকেটর নিয়ে সমস্যা হচ্ছে?",
+	"2FA_BACKUP_CODE_HELP" => "আপনার সংরক্ষিত ব্যাকআপ কোডগুলির একটি লিখুন",
+	"2FA_USE_BACKUP_BTN"   => "ব্যাকআপ কোড ব্যবহার করুন",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

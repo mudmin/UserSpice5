@@ -432,6 +432,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_BACKUP_ACK" => "Codici di backup confermati.",
     "2FA_SUCCESS_SETUP_CANCELLED" => "Configurazione annullata.",
     "2FA_ERR_INVALID_BACKUP" => "Codice di backup non valido. Riprova.",
+    "2FA_ERR_INVALID_CODE"   => "Codice di autenticazione non valido. Riprova.",
     "2FA_ERR_DISABLE_FAILED" => "Impossibile disabilitare l'autenticazione a due fattori.",
     "2FA_ERR_NO_SECRET" => "Impossibile recuperare il segreto di autenticazione. Riprova.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Codice di backup verificato ma impossibile invalidarlo. Contatta il supporto.",
@@ -514,6 +515,7 @@ $lang = array_merge($lang, array(
     "SET_PIN_NEXT"         => "&Egrave; possibile impostare un nuovo PIN la prossima volta che viene richiesta la verifica.",
     "SET_UPDATE"         => "Aggiorna la tua configurazione utente",
     "SET_NOCHANGE"         => "L'amministratore ha disattivato la modifica dei nomi utente.",
+    "SET_NOCHANGE_EMAIL"   => "L'amministratore ha disattivato la modifica degli indirizzi email.",
     "SET_ONECHANGE"     => "L'amministratore ha stabilito che le modifiche al nome utente possono essere apportate una sola volta e l'hai gi&agrave; fatto.",
     "SET_GRAVITAR"         => "Vuoi cambiare la foto del tuo profilo?  <br> Visita <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a>e crea un account con la stessa email che hai usato su questo sito. Sono presenti in milioni di siti. &Egrave; veloce e semplice!",
     "SET_NOTE1"         => " Attenzione prego,  C'&egrave; una richiesta in sospeso per aggiornare la tua email a",
@@ -571,6 +573,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM. It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Conferma che sei tu",
+	"REAUTH_INTRO"            => "Per la tua sicurezza, verifica la tua identità per continuare.",
+	"REAUTH_RELOGIN"          => "Accedi di nuovo per continuare.",
+	"REAUTH_LOCKED"           => "Troppi tentativi falliti. Accedi di nuovo.",
+	"REAUTH_VERIFY"           => "Verifica",
+	"REAUTH_OR"               => "oppure",
+	"REAUTH_PASSWORD_LABEL"   => "La tua password",
+	"REAUTH_BAD_PASSWORD"     => "Password errata.",
+	"REAUTH_TOTP_BACKUP"      => "Questo è un codice di backup",
+	"REAUTH_EMAIL_BTN"        => "Inviami un codice di 6 cifre via e-mail",
+	"REAUTH_EMAIL_CODE_LABEL" => "Inserisci il codice di 6 cifre",
+	"REAUTH_EMAIL_RESEND"     => "Invia un nuovo codice",
+	"REAUTH_EMAIL_SUBJECT"    => "Codice di verifica",
+	"REAUTH_EMAIL_BODY"       => "Il tuo codice di verifica è:",
+	"REAUTH_EMAIL_EXPIRE"     => "Questo codice scade tra 10 minuti. Se non l'hai richiesto, puoi ignorare questa e-mail.",
+	"REAUTH_EMAIL_SENT"       => "Ti abbiamo inviato un codice di 6 cifre via e-mail.",
+	"REAUTH_EMAIL_FAIL"       => "Impossibile inviare l'e-mail. Prova un altro metodo.",
+	"REAUTH_EMAIL_NONE"       => "Richiedi prima un codice.",
+	"REAUTH_EMAIL_EXPIRED"    => "Questo codice è scaduto. Richiedine uno nuovo.",
+	"REAUTH_EMAIL_TOOMANY"    => "Troppi tentativi. Richiedi un nuovo codice.",
+	"REAUTH_EMAIL_BAD"        => "Codice errato.",
+	"REAUTH_PASSKEY_BTN"      => "Usa una passkey",
+	"REAUTH_SOCIAL_BTN"       => "Verifica con",
+	"REAUTH_SOCIAL_MISMATCH"  => "Quell'account non corrisponde al tuo accesso. Riprova.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Problemi con la tua app di autenticazione?",
+	"2FA_BACKUP_CODE_HELP" => "Inserisci uno dei tuoi codici di backup salvati",
+	"2FA_USE_BACKUP_BTN"   => "Usa codice di backup",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
     include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

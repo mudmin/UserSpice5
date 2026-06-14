@@ -140,7 +140,7 @@ if (!function_exists('hashVericode')) {
 }
 
 /**
- * Find a user by vericode, trying hashed first then falling back to plaintext.
+ * Find a user by vericode (hashed lookup only).
  * Returns the user data or null if not found.
  */
 if (!function_exists('findUserByVericode')) {
@@ -152,36 +152,14 @@ if (!function_exists('findUserByVericode')) {
 
     // Build query with optional user_id constraint
     if ($user_id !== null) {
-      // Try hashed first
       $result = $db->query(
         "SELECT * FROM users WHERE vericode = ? AND id = ?",
         [$hashedVericode, $user_id]
       );
-
-      if ($result->count() > 0) {
-        return $result->first();
-      }
-
-      // Fall back to plaintext
-      $result = $db->query(
-        "SELECT * FROM users WHERE vericode = ? AND id = ?",
-        [$vericode, $user_id]
-      );
     } else {
-      // Try hashed first (no user_id)
       $result = $db->query(
         "SELECT * FROM users WHERE vericode = ?",
         [$hashedVericode]
-      );
-
-      if ($result->count() > 0) {
-        return $result->first();
-      }
-
-      // Fall back to plaintext
-      $result = $db->query(
-        "SELECT * FROM users WHERE vericode = ?",
-        [$vericode]
       );
     }
 
@@ -190,7 +168,7 @@ if (!function_exists('findUserByVericode')) {
 }
 
 /**
- * Find an email login record by vericode, trying hashed first then falling back to plaintext.
+ * Find an email login record by vericode (hashed lookup only).
  * Returns the login data or null if not found.
  */
 if (!function_exists('findEmailLoginByVericode')) {
@@ -207,26 +185,9 @@ if (!function_exists('findEmailLoginByVericode')) {
 
     if ($user_id !== null) {
       $baseQuery .= " AND l.user_id = ?";
-
-      // Try hashed first
       $result = $db->query($baseQuery, [$hashedVericode, $user_id]);
-
-      if ($result->count() > 0) {
-        return $result->first();
-      }
-
-      // Fall back to plaintext
-      $result = $db->query($baseQuery, [$vericode, $user_id]);
     } else {
-      // Try hashed first
       $result = $db->query($baseQuery, [$hashedVericode]);
-
-      if ($result->count() > 0) {
-        return $result->first();
-      }
-
-      // Fall back to plaintext
-      $result = $db->query($baseQuery, [$vericode]);
     }
 
     return $result->count() > 0 ? $result->first() : null;
@@ -510,8 +471,8 @@ if (!function_exists('logger')) {
       'metadata' => $metadata,
     ];
 
-    if (isset($_SESSION['cloak_from']) && $_SESSION['cloak_from'] > 0) {
-      $fields['cloak_from'] = (int) $_SESSION['cloak_from'];
+    if (cloakFrom() > 0) {
+      $fields['cloak_from'] = cloakFrom();
     }
 
     $db->insert('logs', $fields);
@@ -661,9 +622,18 @@ if (!function_exists('checkBan')) {
 if (!function_exists('random_password')) {
   function random_password($length = 16)
   {
+    if ($length <= 0) {
+      return '';
+    }
+    // CSPRNG sampling over the password alphabet. The legacy str_shuffle
+    // implementation used Mersenne Twister, capped output at 80 chars, and
+    // produced unique-char-only strings — none acceptable for passwords.
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?';
-    $password = substr(str_shuffle($chars), 0, $length);
-
+    $max = strlen($chars) - 1;
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+      $password .= $chars[random_int(0, $max)];
+    }
     return $password;
   }
 }
@@ -728,6 +698,7 @@ if (!function_exists('lognote')) {
     $logQ = $db->query('SELECT * FROM logs WHERE id = ?', [$logid]);
     if ($logQ->count() > 0) {
       $log = $logQ->first();
+      // @phpstan-ignore equal.alwaysFalse (intentional always-false placeholder; this is the documented extension point where integrators add their own elseif log hooks - see the comment block below.)
       if (1 == 2) {
         return 'This is a placeholder';
       }
@@ -1279,31 +1250,487 @@ function spiceShakerBadge($shaker, $installed)
 }
 
 
-if (!function_exists('verifyadmin')) {
-  function verifyadmin($page)
+/* ============================================================
+   Core ReAuth — step-up (re-)authentication
+   Added 2026-05-17. The verification UI lives in users/reauth.php.
+   "Logging in counts as a reauth" — every successful login calls
+   reauthMarkConfirmed(), so a fresh login satisfies the grace window.
+   ============================================================ */
+
+// Isolated session bucket key holding all reauth state for this session.
+if (!function_exists('reauthSessionKey')) {
+  function reauthSessionKey()
   {
-    global $db, $user, $us_url_root, $settings;
-    $fullUrl = Server::getOrigin() . Server::get('REQUEST_URI');
-    $actual_link = encodeURIComponent($fullUrl);
-    $null = $settings->admin_verify_timeout - 1;
-    if (isset($_SESSION['last_confirm']) && $_SESSION['last_confirm'] != '' && !is_null($_SESSION['last_confirm'])) {
-      $last_confirm = $_SESSION['last_confirm'];
-    } else {
-      $last_confirm = date('Y-m-d H:i:s', strtotime('-' . $null . ' day', strtotime(date('Y-m-d H:i:s'))));
+    return Config::get('session/session_name') . '_reauth';
+  }
+}
+
+// Stamp the session as freshly authenticated. Called on every successful
+// login AND on every successful reauth.
+if (!function_exists('reauthMarkConfirmed')) {
+  function reauthMarkConfirmed()
+  {
+    $k = reauthSessionKey();
+    if (!isset($_SESSION[$k]) || !is_array($_SESSION[$k])) {
+      $_SESSION[$k] = [];
     }
-    $current = date('Y-m-d H:i:s');
-    $ctFormatted = date('Y-m-d H:i:s', strtotime($current));
-    $dbPlus = date('Y-m-d H:i:s', strtotime('+' . $settings->admin_verify_timeout . ' minutes', strtotime($last_confirm)));
-    if (strtotime($ctFormatted) > strtotime($dbPlus)) {
-      $q = $db->query('SELECT pin FROM users WHERE id = ?', [$user->data()->id]);
-      if (is_null($q->first()->pin)) {
-        Redirect::to($us_url_root . 'users/admin_pin.php?actual_link=' . $actual_link . '&page=' . $page);
-      } else {
-        Redirect::to($us_url_root . 'users/admin_verify.php?actual_link=' . $actual_link . '&page=' . $page);
+    $_SESSION[$k]['last_confirm'] = date('Y-m-d H:i:s');
+  }
+}
+
+// Most recent successful auth timestamp. Tolerates the pre-consolidation
+// keys so sessions established before this upgrade still count.
+if (!function_exists('reauthLastConfirm')) {
+  function reauthLastConfirm()
+  {
+    $k = reauthSessionKey();
+    if (!empty($_SESSION[$k]['last_confirm'])) {
+      return $_SESSION[$k]['last_confirm'];
+    }
+    $sn = Config::get('session/session_name');
+    if (!empty($_SESSION[$sn . '_last_confirm'])) {
+      return $_SESSION[$sn . '_last_confirm'];
+    }
+    if (!empty($_SESSION['last_confirm'])) {
+      return $_SESSION['last_confirm'];
+    }
+    return null;
+  }
+}
+
+// True when the session was confirmed within the timeout window (minutes).
+// Falls back to settings.reauth_timeout, then a 15-minute default.
+if (!function_exists('reauthConfirmed')) {
+  function reauthConfirmed($timeoutMinutes = null)
+  {
+    global $settings;
+    if ($timeoutMinutes === null) {
+      $timeoutMinutes = (isset($settings->reauth_timeout) && (int) $settings->reauth_timeout > 0)
+        ? (int) $settings->reauth_timeout : 15;
+    }
+    $lc = reauthLastConfirm();
+    if ($lc === null) {
+      return false;
+    }
+    return (strtotime($lc) + ((int) $timeoutMinutes * 60)) > time();
+  }
+}
+
+// Write one row to the us_reauth_log audit trail.
+if (!function_exists('recordReauth')) {
+  function recordReauth($userId, $method, $purpose = '', $success = 1)
+  {
+    global $db;
+    $ua = Server::get('HTTP_USER_AGENT');
+    $db->insert('us_reauth_log', [
+      'user_id'    => (int) $userId,
+      'purpose'    => ($purpose !== '' && $purpose !== null) ? substr($purpose, 0, 64) : null,
+      'method'     => ($method !== '' && $method !== null) ? substr($method, 0, 32) : null,
+      'success'    => $success ? 1 : 0,
+      'ip'         => ipCheck(),
+      'user_agent' => $ua ? substr($ua, 0, 255) : null,
+    ]);
+  }
+}
+
+// Is outbound email actually configured? Mirrors the placeholder check used on
+// login.php / forgot_password.php: if the SMTP account is still the shipped
+// defaults (or blank) we can't send mail, so email-code options should be
+// hidden rather than offered and then silently failing.
+if (!function_exists('emailSendingConfigured')) {
+  function emailSendingConfigured()
+  {
+    global $db;
+    $e = $db->query("SELECT email_login, email_pass FROM email")->first();
+    if (!$e) {
+      return false;
+    }
+    if ($e->email_login === '' || $e->email_login === 'yourEmail@gmail.com') {
+      return false;
+    }
+    if ($e->email_pass === '1234') {
+      return false;
+    }
+    return true;
+  }
+}
+
+// Is a single reauth method usable by this user right now? Centralizes the
+// per-method capability checks so reauthMethods() and any forced-method path
+// agree. $relaxTotp loosens the TOTP gate for the case where a caller has
+// explicitly *forced* TOTP (see forceReauth()'s 'methods' option): normally
+// TOTP is only offered for reauth when it is Required site-wide, but if an admin
+// forces it we honor any user who actually has TOTP set up, as long as the
+// feature is not fully disabled.
+if (!function_exists('reauthMethodAvailable')) {
+  function reauthMethodAvailable($userId, $method, $u = null, $relaxTotp = false)
+  {
+    global $db, $settings;
+    if ($u === null) {
+      $u = $db->query("SELECT * FROM users WHERE id = ?", [(int) $userId])->first();
+    }
+    if (!$u) {
+      return false;
+    }
+    // OAuth-only accounts get a random password they never see, so password
+    // reauth would be a dead end for them.
+    $isOauthOnly = !empty($u->oauth_provider) && !empty($u->oauth_uid);
+
+    switch ($method) {
+      case 'password':
+        $noPw = isset($settings->no_passwords) ? $settings->no_passwords : 0;
+        return function_exists('passwordsAllowed') && passwordsAllowed($noPw)
+          && !empty($u->password) && !$isOauthOnly;
+
+      case 'totp':
+        if (version_compare(PHP_VERSION, '8.2.0', '<')) {
+          return false;
+        }
+        // TOTP is "set up" when the user has a VERIFIED secret. Read the
+        // authoritative us_totp_secrets table directly; do not rely on any
+        // denormalized per-user flag, which can be missing or stale.
+        $tr = $db->query(
+          "SELECT id FROM us_totp_secrets WHERE user_id = ? AND verified = 1",
+          [(int) $userId]
+        )->first();
+        if (!$tr) {
+          return false;
+        }
+        // Forced TOTP honors any user who has it set up; natural reauth only
+        // offers TOTP when it is Required site-wide.
+        return $relaxTotp ? true : (isset($settings->totp) && $settings->totp > 1);
+
+      case 'passkey':
+        if (!isset($settings->passkeys) || $settings->passkeys != 1) {
+          return false;
+        }
+        $pc = $db->query("SELECT COUNT(*) AS c FROM us_passkeys WHERE user_id = ?", [(int) $userId])->first();
+        return $pc && $pc->c > 0;
+
+      case 'email':
+        // Email code — for reauth this is ALWAYS a 6-digit code, never the
+        // magic link, regardless of which email_login mode the site uses. Only
+        // offer it if the site can actually send mail.
+        return isset($settings->email_login) && $settings->email_login > 0
+          && !empty($u->email) && emailSendingConfigured();
+
+      case 'social':
+        if (!isset($settings->oauth) || $settings->oauth != 1 || empty($u->oauth_provider)) {
+          return false;
+        }
+        $oc = $db->query("SELECT COUNT(*) AS c FROM us_oauth_client_login_options WHERE oauth = 1")->first();
+        return $oc && $oc->c > 0;
+    }
+    return false;
+  }
+}
+
+// Decide which verification methods are valid for a given user, mirroring the
+// login.php decision tree. Returns a subset of:
+// ['password','totp','passkey','email','social'].
+// $only restricts the result to a caller-supplied set (used by forceReauth()'s
+// 'methods' option); when set, the TOTP gate is relaxed (see
+// reauthMethodAvailable()) and the result follows $only's order.
+if (!function_exists('reauthMethods')) {
+  function reauthMethods($userId, $only = [])
+  {
+    global $db;
+    $u = $db->query("SELECT * FROM users WHERE id = ?", [(int) $userId])->first();
+    if (!$u) {
+      return [];
+    }
+    $only = array_values(array_intersect(
+      (array) $only,
+      ['password', 'totp', 'passkey', 'email', 'social']
+    ));
+    $candidates = !empty($only) ? $only : ['password', 'totp', 'passkey', 'email', 'social'];
+    $relaxTotp  = !empty($only);
+
+    $methods = [];
+    foreach ($candidates as $m) {
+      if (reauthMethodAvailable($userId, $m, $u, $relaxTotp)) {
+        $methods[] = $m;
       }
-    } else {
-      $_SESSION['last_confirm'] = $current;
     }
+    return $methods;
+  }
+}
+
+// Guard: require a fresh re-authentication before continuing. Drop this at
+// the top of any page (after init.php). If the session is still within the
+// grace window it returns immediately; otherwise it redirects to reauth.php
+// and, on success, returns the user to $returnTo (defaults to the current URL).
+//   $opts['timeout'] — override the grace window, in minutes.
+//   $opts['methods'] — restrict to specific verification method(s): a single
+//                      name or an array, e.g. 'totp' or ['totp','passkey'].
+//                      If none are set up for the user, reauth.php shows an
+//                      explanatory message instead of falling back.
+if (!function_exists('forceReauth')) {
+  function forceReauth($returnTo = '', $purpose = '', $opts = [])
+  {
+    global $user, $us_url_root;
+    if (!isset($user) || !$user->isLoggedIn()) {
+      return; // Not logged in — the page's own securePage guard handles this.
+    }
+    $timeout = isset($opts['timeout']) ? (int) $opts['timeout'] : null;
+    if (reauthConfirmed($timeout)) {
+      return;
+    }
+    $k = reauthSessionKey();
+    if (!isset($_SESSION[$k]) || !is_array($_SESSION[$k])) {
+      $_SESSION[$k] = [];
+    }
+    $_SESSION[$k]['dest']    = ($returnTo !== '') ? $returnTo : Server::get('REQUEST_URI');
+    $_SESSION[$k]['purpose'] = $purpose;
+    if ($timeout !== null) {
+      $_SESSION[$k]['timeout'] = $timeout;
+    } else {
+      unset($_SESSION[$k]['timeout']);
+    }
+    // Restrict which verification methods reauth.php may offer (string or array).
+    if (!empty($opts['methods'])) {
+      $_SESSION[$k]['methods'] = array_values((array) $opts['methods']);
+    } else {
+      unset($_SESSION[$k]['methods']);
+    }
+    Redirect::to($us_url_root . 'users/reauth.php');
+  }
+}
+
+// Legacy admin step-up guard. Retained for backward compatibility — it is now
+// a thin wrapper over forceReauth() using the admin_verify_timeout window.
+// The old numeric-PIN flow (admin_pin.php) has been retired.
+if (!function_exists('verifyadmin')) {
+  function verifyadmin($page = '')
+  {
+    global $settings;
+    $timeout = (isset($settings->admin_verify_timeout) && (int) $settings->admin_verify_timeout > 0)
+      ? (int) $settings->admin_verify_timeout : 15;
+    forceReauth('', 'admin', ['timeout' => $timeout]);
+  }
+}
+
+/* ============================================================================
+ * Cloaking  (admin "log in as" / impersonation)
+ * ----------------------------------------------------------------------------
+ * Cloak state lives under instance-namespaced session keys so two UserSpice
+ * installs sharing one domain don't stomp on each other:
+ *     {session_name}_cloak_to    - id of the user being impersonated
+ *     {session_name}_cloak_from  - the admin's real id
+ * The legacy un-namespaced $_SESSION['cloak_to'] / ['cloak_from'] are STILL
+ * written and read (as a fallback) so older custom code keeps working. Always
+ * go through these helpers rather than touching $_SESSION directly.
+ * ==========================================================================*/
+
+// Internal: the namespaced session key for a cloak field ('to'|'from'|'pending').
+if (!function_exists('cloakKey')) {
+  function cloakKey($which)
+  {
+    return Config::get('session/session_name') . '_cloak_' . $which;
+  }
+}
+
+// Is a cloak currently active? (checks namespaced key, then legacy)
+if (!function_exists('isCloaked')) {
+  function isCloaked()
+  {
+    return isset($_SESSION[cloakKey('to')]) || isset($_SESSION['cloak_to']);
+  }
+}
+
+// The user id being impersonated, or null.
+if (!function_exists('cloakTo')) {
+  function cloakTo()
+  {
+    if (isset($_SESSION[cloakKey('to')])) {
+      return (int) $_SESSION[cloakKey('to')];
+    }
+    if (isset($_SESSION['cloak_to'])) {
+      return (int) $_SESSION['cloak_to'];
+    }
+    return null;
+  }
+}
+
+// The admin's real user id behind an active cloak, or null.
+if (!function_exists('cloakFrom')) {
+  function cloakFrom()
+  {
+    if (isset($_SESSION[cloakKey('from')])) {
+      return (int) $_SESSION[cloakKey('from')];
+    }
+    if (isset($_SESSION['cloak_from'])) {
+      return (int) $_SESSION['cloak_from'];
+    }
+    return null;
+  }
+}
+
+// Low-level: write the cloak into the session. Sets BOTH the namespaced keys
+// (preferred) and the legacy keys (backward compatibility) so nothing breaks.
+if (!function_exists('setCloakSession')) {
+  function setCloakSession($fromId, $toId)
+  {
+    $fromId = (int) $fromId;
+    $toId   = (int) $toId;
+    $_SESSION[cloakKey('from')] = $fromId;
+    $_SESSION[cloakKey('to')]   = $toId;
+    $_SESSION['cloak_from']     = $fromId;  // legacy
+    $_SESSION['cloak_to']       = $toId;    // legacy
+  }
+}
+
+// Decide whether the current admin may cloak into $targetId. Returns bool;
+// on false, $reason is filled with a user-facing message. Mirrors the checks
+// that previously lived inline in views/_admin_user.php.
+if (!function_exists('canCloak')) {
+  function canCloak($targetId, &$reason = null)
+  {
+    global $user, $db, $master_account;
+    $targetId = (int) $targetId;
+    $meId     = (int) $user->data()->id;
+
+    // Base permission: cloak_allowed, OR a master account, OR already mid-cloak
+    // (so an admin can hop between users without re-enabling the flag).
+    if ($user->data()->cloak_allowed != 1
+        && !in_array($meId, $master_account)
+        && !isCloaked()) {
+      $reason = 'You do not have permission to cloak';
+      return false;
+    }
+    // Never cloak into a master account unless you are one yourself.
+    if (in_array($targetId, $master_account) && !in_array($meId, $master_account)) {
+      $reason = 'You cannot cloak into a master account';
+      return false;
+    }
+    // No self-cloak.
+    if ($targetId === $meId) {
+      $reason = 'Cloaking into yourself would open up a black hole';
+      return false;
+    }
+    // Target must exist.
+    if ($db->query('SELECT id FROM users WHERE id = ?', [$targetId])->count() < 1) {
+      $reason = 'You broke it! User not found';
+      return false;
+    }
+    return true;
+  }
+}
+
+// Full cloak entry point. Fires the cloakAttempt seam (event hook + the
+// usersc/scripts/cloak_attempt.php script) BEFORE any permission check so
+// custom code can intercept the whole process — typically to require step-up
+// auth via forceReauth($cloak_resume_url,'cloak'), or to block outright by
+// setting $cloak_attempt_block = true. Then validates perms and, on success,
+// establishes the cloak and redirects to the account page.
+//
+// Returns ['ok'=>bool, 'error'=>string]. On a successful cloak it redirects
+// and never returns (unless $opts['noRedirect'] is set).
+if (!function_exists('cloakUser')) {
+  function cloakUser($targetId, $opts = [])
+  {
+    global $user, $abs_us_root, $us_url_root;
+    $targetId = (int) $targetId;
+    $meId     = (int) $user->data()->id;
+
+    // ---- cloakAttempt seam (runs before perm checks) --------------------
+    // Exposed to the hook and the script:
+    //   $cloak_target_id     int     who the admin is trying to cloak into
+    //   $cloak_resume_url    string  one-time GET URL that resumes & finishes
+    //                                this cloak after a forceReauth() round-trip
+    //   $cloak_attempt_block bool    set true to deny the attempt
+    //   $cloak_attempt_error string  optional message shown when blocking
+    $nonce = bin2hex(random_bytes(16));
+    $_SESSION[cloakKey('pending')] = ['id' => $targetId, 'nonce' => $nonce, 'ts' => time()];
+
+    $cloak_target_id     = $targetId;
+    $cloak_resume_url    = $us_url_root . 'users/admin.php?view=user&id=' . $targetId . '&cloak_confirm=' . $nonce;
+    $cloak_attempt_block = false;
+    $cloak_attempt_error = '';
+
+    $attemptHooks = getMyHooks(['page' => 'cloakAttempt']);
+    includeHook($attemptHooks, 'body');
+
+    $cloakAttemptScript = $abs_us_root . $us_url_root . 'usersc/scripts/cloak_attempt.php';
+    if (file_exists($cloakAttemptScript)) {
+      include $cloakAttemptScript;
+    }
+
+    // @phpstan-ignore if.alwaysFalse ($cloak_attempt_block is set true by the cloakAttempt hook / usersc/scripts/cloak_attempt.php included above; PHPStan cannot analyse into those seams so it treats it as still false.)
+    if ($cloak_attempt_block) {
+      unset($_SESSION[cloakKey('pending')]);
+      logger($meId, 'Cloaking', 'Cloak attempt into ' . $targetId . ' was blocked by custom code.');
+      // @phpstan-ignore ternary.alwaysFalse ($cloak_attempt_error is populated by the same cloak_attempt seam above; PHPStan cannot analyse into the include so it treats it as still '' and the fallback as always taken.)
+      return ['ok' => false, 'error' => $cloak_attempt_error ?: 'Cloaking was blocked.'];
+    }
+
+    // ---- permission checks ----------------------------------------------
+    if (!canCloak($targetId, $reason)) {
+      unset($_SESSION[cloakKey('pending')]);
+      logger($meId, 'Cloaking', 'User attempted to cloak User ID #' . $targetId . ' - denied: ' . $reason);
+      return ['ok' => false, 'error' => $reason];
+    }
+
+    // ---- establish the cloak --------------------------------------------
+    unset($_SESSION[cloakKey('pending')]);
+    setCloakSession($meId, $targetId);
+    logger($meId, 'Cloaking', 'Cloaked into ' . $targetId);
+
+    $cloakHook = getMyHooks(['page' => 'cloakBegin']);
+    includeHook($cloakHook, 'body');
+
+    if (empty($opts['noRedirect'])) {
+      usSuccess('You are now cloaked!');
+      Redirect::to($us_url_root . 'users/account.php');
+    }
+    return ['ok' => true, 'error' => ''];
+  }
+}
+
+// Tear down an active cloak: restore the admin's real session, clear both the
+// namespaced and legacy keys, log, and fire the cloakEnd hook. Returns
+// ['ok'=>bool, 'from'=>?int, 'to'=>?int]. The caller handles messaging/redirect.
+if (!function_exists('endCloak')) {
+  function endCloak()
+  {
+    if (!isCloaked()) {
+      return ['ok' => false, 'from' => null, 'to' => null];
+    }
+    $to   = cloakTo();
+    $from = cloakFrom();
+
+    // Restore the real (admin) user into the logged-in session slot.
+    $_SESSION[Config::get('session/session_name')] = $from;
+
+    unset(
+      $_SESSION[cloakKey('to')],
+      $_SESSION[cloakKey('from')],
+      $_SESSION[cloakKey('pending')]
+    );
+    unset($_SESSION['cloak_to'], $_SESSION['cloak_from']); // legacy
+
+    logger($from, 'Cloaking', 'uncloaked from ' . $to);
+    $cloakHook = getMyHooks(['page' => 'cloakEnd']);
+    includeHook($cloakHook, 'body');
+
+    return ['ok' => true, 'from' => $from, 'to' => $to];
+  }
+}
+
+// The id of the real human operating this session: the admin behind a cloak
+// (cloak_from) when cloaked, otherwise the logged-in user. Use this for
+// security decisions that must apply to the actual person — above all re-auth,
+// which must verify the ADMIN's credentials, not the impersonated account's.
+// Returns null if nobody is logged in.
+if (!function_exists('realUserId')) {
+  function realUserId()
+  {
+    global $user;
+    $from = cloakFrom();
+    if ($from) {
+      return (int) $from;
+    }
+    return (isset($user) && $user->isLoggedIn()) ? (int) $user->data()->id : null;
   }
 }
 
@@ -1424,6 +1851,15 @@ if (!function_exists("usError")) {
   function usError($msg)
   {
     sessionValMessages($msg);
+  }
+}
+
+//Alias for passing warning messages. Can be a message or array of messsages.
+
+if (!function_exists("usWarning")) {
+  function usWarning($msg)
+  {
+    sessionValMessages("", "", $msg);
   }
 }
 
@@ -1803,25 +2239,23 @@ function userspiceActiveLog($currentPage, $user = null, $additionalData = [])
     return false;
   }
 
+  // Defaults — the optional custom file included below is the canonical place
+  // to override any of these. Declaring them up front means the rest of the
+  // function can use them unconditionally (and keeps static analysis happy).
+  $do_not_log_files  = ["heartbeat.php", "fetchMessages.php"];
+  $do_not_log_fields = ["password", "password_confirm", "confirm"];
+  $filename          = null;
+
   if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php')) {
-
     include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';
-  }
-
-  if (!isset($do_not_log_files)) {
-    $do_not_log_files = ["heartbeat.php", "fetchMessages.php"];
   }
 
   if (in_array($currentPage, $do_not_log_files)) {
     return false;
   }
 
-  // Fields that should not be logged
-  if (!isset($do_not_log_fields)) {
-    $do_not_log_fields = ["password", "password_confirm", "confirm"];
-  }
-
   // Check if this page should be excluded from logging
+  // @phpstan-ignore booleanAnd.rightAlwaysTrue (USERSPICE_DO_NOT_LOG is defined by user pages before init.php and may be false; PHPStan only sees the single true define call in users/logs/index.php.)
   if (defined('USERSPICE_DO_NOT_LOG') && USERSPICE_DO_NOT_LOG) {
     return false;
   }
@@ -1879,6 +2313,22 @@ function userspiceActiveLog($currentPage, $user = null, $additionalData = [])
   // Convert to JSON and append to file
   $jsonEntry = json_encode($logEntry) . "\n";
 
+  // $filename is normally set by active_logging_custom.php (included above).
+  // Fall back to a default — mirroring that file's logic — when the custom
+  // file has been removed, so logging never writes to an empty path.
+  // @phpstan-ignore booleanNot.alwaysTrue ($filename is populated by usersc/includes/active_logging_custom.php, included above; PHPStan cannot analyse into that include so it treats $filename as still null.)
+  if (!$filename) {
+    $logDir = $abs_us_root . $us_url_root . 'users/logs';
+    if (!is_dir($logDir)) {
+      mkdir($logDir, 0755, true);
+    }
+    $logUid   = ($user && isset($user->data()->id)) ? $user->data()->id : 0;
+    $filename = $logDir . '/' . date('Ymd_H') . '_' . $logUid . '.log.php';
+    if (!file_exists($filename)) {
+      file_put_contents($filename, ";<?php die(); ?>\n");
+    }
+  }
+
   // Append log entry to file
   return file_put_contents($filename, $jsonEntry, FILE_APPEND | LOCK_EX);
 }
@@ -1928,9 +2378,13 @@ function isHTTPSConnection()
 /**
  * @psalm-taint-escape html — wraps htmlspecialchars with ENT_QUOTES
  */
-function safeReturn($string)
+function safeReturn($string, $hed = false)
 {
-  return htmlspecialchars($string ?? "", ENT_QUOTES, 'UTF-8');
+  $value = $string ?? "";
+  if ($hed) {
+    $value = hed($value);
+  }
+  return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
 /**
@@ -2160,4 +2614,38 @@ if (!function_exists('fetchUserName')) {
 
     return 'Unknown';
   }
+}
+
+function usguid($trim = true)
+{
+  // Windows
+  if (function_exists('com_create_guid') === true) {
+    if ($trim === true)
+      return trim(com_create_guid(), '{}');
+    else
+      return com_create_guid();
+  }
+
+  // OSX/Linux
+  if (function_exists('openssl_random_pseudo_bytes') === true) {
+    $data = openssl_random_pseudo_bytes(16);
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);    // set version to 0100
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);    // set bits 6-7 to 10
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+  }
+
+  // Fallback (PHP 4.2+)
+  mt_srand((int)((float)microtime() * 10000));
+  $charid = strtolower(md5(uniqid((string)rand(), true)));
+  $hyphen = chr(45);                  // "-"
+  $lbrace = $trim ? "" : chr(123);    // "{"
+  $rbrace = $trim ? "" : chr(125);    // "}"
+  $guidv4 = $lbrace .
+    substr($charid,  0,  8) . $hyphen .
+    substr($charid,  8,  4) . $hyphen .
+    substr($charid, 12,  4) . $hyphen .
+    substr($charid, 16,  4) . $hyphen .
+    substr($charid, 20, 12) .
+    $rbrace;
+  return $guidv4;
 }

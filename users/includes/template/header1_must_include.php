@@ -63,5 +63,6 @@ if(!file_exists($abs_us_root.$us_url_root."usersc/templates/".$settings->templat
 	</style>
 <?php } //end v2 template check
 ?>
+	<link rel="stylesheet" href="<?=$us_url_root?>users/css/dark-mode-safety.css">
 	<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" defer src="<?=$us_url_root?>users/js/messages.js"></script>
 	<title><?= (($pageTitle != '') ? $pageTitle : ''); ?> <?=$settings->site_name?></title>

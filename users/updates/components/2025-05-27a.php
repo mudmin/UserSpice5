@@ -16,12 +16,16 @@ $db->query("CREATE TABLE IF NOT EXISTS `us_totp_secrets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;);
     ");
 
-$db->query("ALTER TABLE `users`
-ADD COLUMN IF NOT EXISTS `passkey_enabled` BOOLEAN DEFAULT 0,
-ADD COLUMN IF NOT EXISTS `totp_enabled` BOOLEAN DEFAULT 0;");
+// users.passkey_enabled / users.totp_enabled columns intentionally NOT added.
+// Passkey and TOTP "enabled" state are read from the authoritative tables
+// (us_passkeys and us_totp_secrets.verified), so these denormalized flags are
+// unused — and dropped outright by migration 2026-05-25a. Previously this was:
+//   $db->query("ALTER TABLE `users`
+//   ADD COLUMN `passkey_enabled` BOOLEAN DEFAULT 0,
+//   ADD COLUMN `totp_enabled` BOOLEAN DEFAULT 0;");
 
 $db->query("ALTER TABLE `settings`
-ADD COLUMN IF NOT EXISTS `totp` BOOLEAN DEFAULT 0;");
+ADD COLUMN `totp` BOOLEAN DEFAULT 0;");
 
 
 

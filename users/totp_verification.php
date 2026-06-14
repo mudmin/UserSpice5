@@ -76,7 +76,7 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
         $useBackup = !empty($_POST['use_backup_code']);
         
         if (empty($totpCode)) {
-            $errors[] = "Please enter a verification code.";
+            $errors[] = lang("2FA_ERR_NO_CODE_PROVIDED");
             handleAuthFailure('totp_verify', $userId);
         } else {
             $verified = false;
@@ -110,7 +110,7 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
 if ($verified) {
     handleAuthSuccess('totp_verify', $userId);
     markTotpVerified($userId);
-    $successes[] = "Verification successful! Redirecting...";
+    $successes[] = lang("PASSKEY_SUCCESS_REDIRECTING");
 
     $nonce = htmlspecialchars($userspice_nonce ?? '', ENT_QUOTES, 'UTF-8');
     $redirect = htmlspecialchars(getTotpReturnUrl(), ENT_QUOTES, 'UTF-8');
@@ -144,7 +144,7 @@ if (isset($_SESSION['totp_success_message'])) {
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="mb-0">
-                        <i class="fa fa-shield-alt"></i> Two-Factor Authentication Required
+                        <i class="fa fa-shield-alt"></i> <?= lang("2FA_VERIFY_TITLE") ?>
                     </h3>
                 </div>
                 <div class="card-body">
@@ -169,8 +169,8 @@ if (isset($_SESSION['totp_success_message'])) {
                     
                     <div class="text-center mb-4">
                         <i class="fa fa-mobile-alt fa-2x text-primary mb-3"></i>
-                        <p class="lead">Please verify your identity to continue</p>
-                        <p class="text-muted">Enter the 6-digit code from your authenticator app or use a backup code.</p>
+                        <p class="lead"><?= lang("REAUTH_INTRO") ?></p>
+                        <p class="text-body-secondary"><?= lang("2FA_VERIFY_INFO") ?></p>
                     </div>
                     
                     <!-- Main TOTP Form -->
@@ -178,7 +178,7 @@ if (isset($_SESSION['totp_success_message'])) {
                         <?= tokenHere(); ?>
                         <div class="form-group mb-3">
                             <label for="totp_code" class="form-label">
-                                <i class="fa fa-key"></i> Authentication Code
+                                <i class="fa fa-key"></i> <?= lang("2FA_CODE_LABEL") ?>
                             </label>
                             <input type="text" 
                                    class="form-control form-control-lg text-center" 
@@ -190,25 +190,25 @@ if (isset($_SESSION['totp_success_message'])) {
                                    maxlength="6" 
                                    placeholder="000000"
                                    autofocus>
-                            <div class="form-text">Enter the 6-digit code from your authenticator app</div>
+                            <div class="form-text"><?= lang("2FA_VERIFY_INFO") ?></div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 mb-3">
-                            <i class="fa fa-check"></i> Verify Code
+                            <i class="fa fa-check"></i> <?= lang("2FA_VERIFY_BTN") ?>
                         </button>
                     </form>
                     
                     <!-- Backup Code Section -->
                     <div class="border-top pt-3">
-                        <h6 class="mb-3">Having trouble with your authenticator?</h6>
-                        <button type="button" class="btn btn-outline-secondary w-100 mb-3" onclick="toggleBackupForm()">
-                            <i class="fa fa-key"></i> Use Backup Code Instead
+                        <h6 class="mb-3"><?= lang("2FA_VERIFY_TROUBLE") ?></h6>
+                        <button type="button" class="btn btn-outline-secondary w-100 mb-3" id="toggleBackupBtn">
+                            <i class="fa fa-key"></i> <?= lang("2FA_USE_BACKUP_BTN") ?>
                         </button>
                         
                         <div id="backup-form" style="display: none;">
                             <form method="POST">
                                 <?= tokenHere(); ?>
                                 <div class="form-group mb-3">
-                                    <label for="backup_code" class="form-label">Backup Code</label>
+                                    <label for="backup_code" class="form-label"><?= lang("2FA_BACKUP_CODE_LABEL") ?></label>
                                     <input type="text" 
                                            class="form-control" 
                                            id="backup_code" 
@@ -218,10 +218,10 @@ if (isset($_SESSION['totp_success_message'])) {
                                            maxlength="11"
                                            style="text-transform: uppercase;">
                                     <input type="hidden" name="use_backup_code" value="1">
-                                    <div class="form-text">Enter one of your saved backup codes</div>
+                                    <div class="form-text"><?= lang("2FA_BACKUP_CODE_HELP") ?></div>
                                 </div>
                                 <button type="submit" class="btn btn-warning w-100">
-                                    <i class="fa fa-unlock"></i> Use Backup Code
+                                    <i class="fa fa-unlock"></i> <?= lang("2FA_USE_BACKUP_BTN") ?>
                                 </button>
                             </form>
                         </div>
@@ -229,13 +229,13 @@ if (isset($_SESSION['totp_success_message'])) {
                     
                     <!-- Help Links -->
                     <div class="text-center mt-4 pt-3 border-top">
-                        <p class="text-muted mb-2">Need help?</p>
+                        <p class="text-body-secondary mb-2"><?= lang("MENU_HELP") ?></p>
                         <a href="<?= $us_url_root ?>users/totp_management.php" class="btn btn-link btn-sm">
-                            <i class="fa fa-cog"></i> Manage Two-Factor Authentication
+                            <i class="fa fa-cog"></i> <?= lang("ACCT_2FA") ?>
                         </a>
                         <br>
                         <a href="<?= $us_url_root ?>users/logout.php" class="btn btn-link btn-sm text-danger">
-                            <i class="fa fa-sign-out-alt"></i> Sign Out
+                            <i class="fa fa-sign-out-alt"></i> <?= lang("SIGNOUT_TEXT") ?>
                         </a>
                     </div>
                 </div>
@@ -281,13 +281,17 @@ function toggleBackupForm() {
     const form = document.getElementById('backup-form');
     const isVisible = form.style.display !== 'none';
     form.style.display = isVisible ? 'none' : 'block';
-    
+
     if (!isVisible) {
         setTimeout(() => {
             document.getElementById('backup_code').focus();
         }, 100);
     }
 }
+
+// CSP-friendly binding (replaces inline onclick attribute)
+var toggleBackupBtn = document.getElementById('toggleBackupBtn');
+if (toggleBackupBtn) { toggleBackupBtn.addEventListener('click', toggleBackupForm); }
 </script>
 
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

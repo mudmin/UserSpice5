@@ -120,7 +120,7 @@ if (!function_exists('echousername')) {
 if (!function_exists('isAdmin')) {
   function isAdmin()
   {
-    if (hasPerm(2) || (isset($_SESSION['cloak_from']) && hasPerm(2, $_SESSION['cloak_from']))) {
+    if (hasPerm(2) || (cloakFrom() && hasPerm(2, cloakFrom()))) {
       return true;
     } else {
       return false;
@@ -333,7 +333,7 @@ if (!function_exists('socialLogin')) {
         $providerValue = $sanitizedIdArray[$providerKey];
       }
 
-      $providerCheck = $db->query("SELECT * FROM users WHERE `$providerKey` = ? LIMIT 1", [$providerValue]);
+      $providerCheck = $db->query("SELECT * FROM users WHERE `$providerKey` = ? LIMIT 1", [$providerValue]); // nosemgrep: userspice-raw-query-concat - $providerKey is a sanitizedIdArray key, regex-validated and confirmed to be a real users column (lines 274-280); value is parameterized
       if ($providerCheck->count() > 0) {
         $existingUser = $providerCheck->first();
       }
@@ -650,7 +650,7 @@ if (!function_exists('fetchUserDetails')) {
       $term = (int)$term;
     }
 
-    $query = $db->query("SELECT * FROM users WHERE `$column` = ? LIMIT 1", [$term]);
+    $query = $db->query("SELECT * FROM users WHERE `$column` = ? LIMIT 1", [$term]); // nosemgrep: userspice-raw-query-concat - $column is regex-validated and whitelisted against SHOW COLUMNS FROM users (lines 632-647); value is parameterized
     return ($query->count() === 1) ? $query->first() : false;
   }
 }
@@ -688,7 +688,7 @@ if (!function_exists('updateUser')) {
       return false;
     }
 
-    return $db->query(
+    return $db->query( // nosemgrep: userspice-raw-query-concat - $sanitizedColumn must be a key in $cols, built from SHOW COLUMNS FROM users (lines 672-683); values are parameterized
       "UPDATE users SET `$sanitizedColumn` = ? WHERE id = ? LIMIT 1",
       [$value, $id]
     );

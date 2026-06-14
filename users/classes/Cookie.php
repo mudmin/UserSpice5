@@ -44,6 +44,9 @@ class Cookie {
 	}
 
 	public static function delete($name){
-		self::put($name, '', time() - 1);
+		// Cookie::put adds time() to $expiry internally, so pass a negative
+		// offset to land in the past. time()-1 looked like "1 second ago"
+		// but actually doubled the current epoch ≈ year 2080, renewing the cookie.
+		self::put($name, '', -3600);
 	}
 }

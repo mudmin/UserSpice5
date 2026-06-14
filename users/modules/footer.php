@@ -12,7 +12,7 @@ if (isset($use_template_footer) && $use_template_footer == true) {
 } else {
   require_once $abs_us_root . $us_url_root . 'users/includes/page_footer.php';
 ?>
-  <footer id="footer" class="footer mt-auto border-top bg-light py-3">
+  <footer id="footer" class="footer mt-auto border-top bg-body-tertiary py-3">
     <div class="container">
       <p class="text-center">&copy; <?php echo date("Y"); ?> <?= $settings->copyright; ?></p>
     </div>

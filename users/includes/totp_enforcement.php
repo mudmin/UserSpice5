@@ -13,7 +13,16 @@ if (count(get_included_files()) == 1) die(); // Direct access not permitted
  */
 function handleTotpEnforcement($user, $settings, $currentPage) {
     global $abs_us_root, $us_url_root, $db;
-    
+
+    // Custom site policy hook: allow usersc to dynamically adjust $settings->totp
+    // (e.g. force required for admins via hasPerm(), disable for trusted IPs via
+    // ipCheck()). Loader.php only invokes this function when $settings->totp > 0,
+    // so the policy file can demote to 0, promote 1->2, or leave it alone.
+    // $user, $settings, $currentPage, and $db are in scope inside the include.
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/custom_totp_policy.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/includes/custom_totp_policy.php';
+    }
+
     // Early exit conditions - API/programmatic access
     if (shouldBypassTotp()) {
         return;
@@ -238,8 +247,10 @@ function handleTotpRedirects($totp_status, $user_id, $currentPage) {
         // User has TOTP set up but hasn't verified this session
         logger($user_id, "TOTP_Enforcement", "User redirected to TOTP verification - session not verified");
         
-        // Store the page they were trying to access (but NOT if it's an API endpoint)
-        if ($currentPage != 'totp_verification.php' && !isAjaxRequest()) {
+        // Store the page they were trying to access (but NOT if it's an API endpoint).
+        // AJAX requests already returned early via the isAjaxRequest() guard above,
+        // so no need to re-check it here; isApiUrl() below handles API endpoints.
+        if ($currentPage != 'totp_verification.php') {
             $current_url = Server::get('REQUEST_URI');
             
             // Validate it's not an API endpoint before storing

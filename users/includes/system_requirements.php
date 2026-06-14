@@ -119,7 +119,7 @@ if($searchC > 0){
                                 $errors = 1;
                                 ?>
                                 <span class="text-danger">Unwriteable</span><br>
-                                <small class="text-muted">It is really important that you be able to write to the init file! If you don't know
+                                <small class="text-body-secondary">It is really important that you be able to write to the init file! If you don't know
                                 how to chmod your init file, <a href="//userspice.com/installation-issues/" target="_blank">please read this guide
                                     at UserSpice.com.</a></small>
                             <?php } ?>

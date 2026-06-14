@@ -172,6 +172,12 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     });
   }
 
+  // CSP-friendly binding for the AJAX-injected metadata icons (replaces inline onclick)
+  document.addEventListener('click', function (e) {
+    var icon = e.target.closest && e.target.closest('[data-log-metadata]');
+    if (icon) { generateMetadataModal(icon.getAttribute('data-log-metadata')); }
+  });
+
  $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const modeFilter = urlParams.get('mode') || '';

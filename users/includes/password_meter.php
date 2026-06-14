@@ -16,7 +16,7 @@ if ($pw_settings->meter_active == 1) {
                 <span id='{$id}_met_icon' class='password-requirement-icon'>{$met_icon}</span>
                 {$iconHtml}
             </td>
-            <td><span id='{$id}' class='text-muted'>{$tooltipText}</span></td>
+            <td><span id='{$id}' class='text-body-secondary'>{$tooltipText}</span></td>
         </tr>";
     }
 
@@ -218,11 +218,11 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
     if (conditionMet) {
       iconMet.css('display', 'inline-block');
       iconUnmet.hide();
-      text.addClass("text-success").removeClass("text-muted");
+      text.addClass("text-success").removeClass("text-body-secondary");
     } else {
       iconMet.hide();
       iconUnmet.css('display', 'inline-block');
-      text.removeClass("text-success").addClass("text-muted");
+      text.removeClass("text-success").addClass("text-body-secondary");
     }
   }
 

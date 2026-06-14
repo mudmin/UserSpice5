@@ -13,6 +13,38 @@ if (!pageIdExists($pageId)) {
 
 $pageDetails = fetchPageDetails($pageId); // Fetch information specific to page
 
+/**
+ * Decode the JSON permission list stored on us_menu_items into an array of string IDs.
+ */
+function adminPageDecodeMenuPerms($json) {
+  $decoded = json_decode($json ?? '', true);
+  if (!is_array($decoded)) return [];
+  return array_values(array_map('strval', $decoded));
+}
+
+/**
+ * Page perm IDs as strings. For a public page, treat as ["0"] so it lines up with menu "Public".
+ */
+function adminPagePerms($pagePermissions, $pageDetails) {
+  if ($pageDetails->private == 0) return ["0"];
+  $out = [];
+  foreach ($pagePermissions as $p) { $out[] = (string)$p->permission_id; }
+  sort($out);
+  return $out;
+}
+
+/**
+ * Strip {{}} wrapper from a lang-key style label, return null if not in that form.
+ */
+function adminPageExtractLangKey($label) {
+  if ($label === null) return null;
+  $trim = trim($label);
+  if (strlen($trim) > 4 && substr($trim, 0, 2) === '{{' && substr($trim, -2) === '}}') {
+    return substr($trim, 2, -2);
+  }
+  return null;
+}
+
 // Forms posted
 if (Input::exists()) {
   $token = Input::get('csrf');
@@ -104,6 +136,69 @@ if (Input::exists()) {
       usError(lang('SQL_ERROR'));
     }
   }
+
+  // UltraMenu integration actions. The button name encodes "action:targetId".
+  $menuAction = Input::get('menu_action');
+  if ($menuAction !== '' && strpos($menuAction, ':') !== false) {
+    list($mAct, $mTarget) = explode(':', $menuAction, 2);
+    $mTarget = (int)$mTarget;
+    $refreshedPagePerms = fetchPagePermissions($pageId);
+    $pagePermIds = adminPagePerms($refreshedPagePerms, fetchPageDetails($pageId));
+    $pageDetailsForMenu = fetchPageDetails($pageId);
+    $insertLabel = !empty($pageDetailsForMenu->lang_key)
+      ? '{{' . $pageDetailsForMenu->lang_key . '}}'
+      : ($pageDetailsForMenu->title ?: $pageDetailsForMenu->page);
+
+    if ($mAct === 'insert' || $mAct === 'goto') {
+      $menuRow = $db->query('SELECT id FROM us_menus WHERE id = ?', [$mTarget])->first();
+      $existing = $menuRow
+        ? $db->query('SELECT id FROM us_menu_items WHERE menu = ? AND link = ?', [$mTarget, $pageDetailsForMenu->page])->first()
+        : null;
+      if ($menuRow && !$existing && $mAct === 'insert') {
+        $lastOrderRow = $db->query('SELECT COALESCE(MAX(display_order),0) AS mo FROM us_menu_items WHERE menu = ?', [$mTarget])->first();
+        $nextOrder = ($lastOrderRow ? (int)$lastOrderRow->mo : 0) + 1;
+        $db->query(
+          'INSERT INTO us_menu_items (menu, type, label, link, parent, display_order, disabled, permissions) VALUES (?, ?, ?, ?, 0, ?, 0, ?)',
+          [$mTarget, 'link', $insertLabel, $pageDetailsForMenu->page, $nextOrder, json_encode($pagePermIds)]
+        );
+        usSuccess("Inserted into menu.");
+        logger($user->data()->id, 'Pages Manager', "Inserted '{$pageDetailsForMenu->page}' into menu #$mTarget.");
+      } elseif ($menuRow && $mAct === 'goto') {
+        // If not in menu yet, insert first so we have an item to land on.
+        if (!$existing) {
+          $lastOrderRow = $db->query('SELECT COALESCE(MAX(display_order),0) AS mo FROM us_menu_items WHERE menu = ?', [$mTarget])->first();
+          $nextOrder = ($lastOrderRow ? (int)$lastOrderRow->mo : 0) + 1;
+          $db->query(
+            'INSERT INTO us_menu_items (menu, type, label, link, parent, display_order, disabled, permissions) VALUES (?, ?, ?, ?, 0, ?, 0, ?)',
+            [$mTarget, 'link', $insertLabel, $pageDetailsForMenu->page, $nextOrder, json_encode($pagePermIds)]
+          );
+          logger($user->data()->id, 'Pages Manager', "Inserted '{$pageDetailsForMenu->page}' into menu #$mTarget (via Update & Go).");
+          $existing = $db->query('SELECT id, parent FROM us_menu_items WHERE menu = ? AND link = ?', [$mTarget, $pageDetailsForMenu->page])->first();
+        } else {
+          $existing = $db->query('SELECT id, parent FROM us_menu_items WHERE menu = ? AND link = ?', [$mTarget, $pageDetailsForMenu->page])->first();
+        }
+        if ($existing) {
+          $_SESSION['redirect_after_save'] = true;
+          $_SESSION['redirect_after_uri'] = $us_url_root . 'users/admin.php?view=edit_menu&menu_id=' . $mTarget . '&item_id=' . $existing->id . '&parent_id=' . (int)$existing->parent;
+        }
+      }
+    } elseif ($mAct === 'sync_perms') {
+      $itemRow = $db->query('SELECT id, menu FROM us_menu_items WHERE id = ?', [$mTarget])->first();
+      if ($itemRow) {
+        $db->query('UPDATE us_menu_items SET permissions = ? WHERE id = ?', [json_encode($pagePermIds), $mTarget]);
+        usSuccess("Synced menu item permissions.");
+        logger($user->data()->id, 'Pages Manager', "Synced perms to menu item #$mTarget for '{$pageDetailsForMenu->page}'.");
+      }
+    } elseif ($mAct === 'sync_label') {
+      $itemRow = $db->query('SELECT id FROM us_menu_items WHERE id = ?', [$mTarget])->first();
+      if ($itemRow) {
+        $db->query('UPDATE us_menu_items SET label = ? WHERE id = ?', [$insertLabel, $mTarget]);
+        usSuccess("Synced menu item label.");
+        logger($user->data()->id, 'Pages Manager', "Synced label to '$insertLabel' on menu item #$mTarget.");
+      }
+    }
+  }
+
   includeHook($hooks, 'post');
   $pageDetails = fetchPageDetails($pageId);
   if (isset($_SESSION['redirect_after_save']) && $_SESSION['redirect_after_save'] == true) {
@@ -114,7 +209,7 @@ if (Input::exists()) {
       Redirect::to(html_entity_decode($redirect_uri));
     }
   }
-  if (Input::get('return') != '' && $errors == []) {
+  if (Input::get('return') != '') {
     Redirect::to('admin.php?view=pages');
   }
 }
@@ -122,6 +217,19 @@ $pagePermissions = fetchPagePermissions($pageId);
 $permissionData = fetchAllPermissions();
 $countQ = $db->query('SELECT id, permission_id FROM permission_page_matches WHERE page_id = ? ', [$pageId]);
 $countCountQ = $countQ->count();
+
+// UltraMenu integration: per-menu lookup of items linking to this page.
+$ultraMenus = $db->query('SELECT id, menu_name FROM us_menus ORDER BY id')->results();
+$ultraItemsByMenu = [];
+foreach ($ultraMenus as $um) {
+  $row = $db->query('SELECT id, label, permissions, parent FROM us_menu_items WHERE menu = ? AND link = ? LIMIT 1', [$um->id, $pageDetails->page])->first();
+  $ultraItemsByMenu[$um->id] = $row ?: null;
+}
+$permNameLookup = ["0" => "Public"];
+foreach ($permissionData as $pn) { $permNameLookup[(string)$pn->id] = $pn->name; }
+$pagePermIdsForCompare = adminPagePerms($pagePermissions, $pageDetails);
+$pageLangKey = $pageDetails->lang_key ?? null;
+$desiredLabel = !empty($pageLangKey) ? '{{' . $pageLangKey . '}}' : ($pageDetails->title ?: $pageDetails->page);
 ?>
 <form action='' method='post'>
   <?= tokenHere(); ?>
@@ -140,7 +248,7 @@ $countCountQ = $countQ->count();
     </div>
   </div>
   <div class="row">
-    <div class="col-12 col-sm-6">
+    <div class="col-12 col-md-6">
       <div class="form-group">
         <label for="title">Page Title:</label> <span class="small">(This is the text that's displayed on the browser's titlebar or tab)</span>
 
@@ -168,40 +276,129 @@ $countCountQ = $countQ->count();
       ?>
 
     </div>
-    <div class="col-12 col-md-3">
-      <label for="">Remove Permission</label>
-      <div class="form-group">
-        <?php
-        // Display list of permission levels with access
-        $perm_ids = [];
-        foreach ($pagePermissions as $perm) {
-          $perm_ids[] = $perm->permission_id;
-        }
-        foreach ($permissionData as $v1) {
-          if (in_array($v1->id, $perm_ids)) { ?>
-            <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br />
-        <?php }
-        } ?>
+    <div class="col-12 col-md-6">
+      <div class="card mb-3">
+        <div class="card-header py-2">
+          <strong>UltraMenu Integration</strong>
+          <span class="small text-body-secondary">— how this page is wired into each menu</span>
+        </div>
+        <div class="card-body p-2">
+          <?php if (empty($ultraMenus)) { ?>
+            <p class="small text-body-secondary mb-0">No UltraMenus defined yet. Create one at <a href="<?= $us_url_root ?>users/admin.php?view=menus">UltraMenu</a>.</p>
+          <?php } else { ?>
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th class="small">Menu</th>
+                  <th class="small">Status / Label</th>
+                  <th class="small">Perms</th>
+                  <th class="small text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($ultraMenus as $um) {
+                  $item = $ultraItemsByMenu[$um->id];
+                  $inMenu = $item !== null;
+                  $resolvedLabel = $inMenu ? parseMenuLabel($item->label) : '';
+                  $rawLabel = $inMenu ? $item->label : '';
+                  $itemLangKey = $inMenu ? adminPageExtractLangKey($rawLabel) : null;
+                  $labelInSync = false;
+                  if ($inMenu) {
+                    if (!empty($pageLangKey)) {
+                      $labelInSync = ($itemLangKey === $pageLangKey);
+                    } else {
+                      $labelInSync = ($rawLabel === ($pageDetails->title ?: $pageDetails->page));
+                    }
+                  }
+                  $itemPerms = $inMenu ? adminPageDecodeMenuPerms($item->permissions) : [];
+                  $itemPermsSorted = $itemPerms; sort($itemPermsSorted);
+                  $permsInSync = $inMenu && ($itemPermsSorted === $pagePermIdsForCompare);
+                ?>
+                  <tr>
+                    <td class="small align-middle"><?= htmlspecialchars($um->menu_name) ?></td>
+                    <td class="small align-middle">
+                      <?php if ($inMenu) { ?>
+                        <span class="badge bg-success">In menu</span>
+                        <div><?= htmlspecialchars($resolvedLabel) ?></div>
+                        <?php if ($itemLangKey !== null) { ?>
+                          <div class="text-body-secondary" style="font-size:0.75rem;">lang: <?= htmlspecialchars($itemLangKey) ?></div>
+                        <?php } ?>
+                        <?php if (!$labelInSync) { ?>
+                          <div class="text-warning" style="font-size:0.75rem;">label differs from page</div>
+                        <?php } ?>
+                      <?php } else { ?>
+                        <span class="badge bg-secondary">Not in menu</span>
+                      <?php } ?>
+                    </td>
+                    <td class="small align-middle">
+                      <?php if ($inMenu) {
+                        $names = [];
+                        foreach ($itemPerms as $pid) { $names[] = $permNameLookup[$pid] ?? ('#' . $pid); }
+                        echo htmlspecialchars($names ? implode(', ', $names) : '(none)');
+                        if ($permsInSync) {
+                          echo ' <span class="text-success">&#10003;</span>';
+                        } else {
+                          echo ' <span class="text-warning" title="differs from page">&#9888;</span>';
+                        }
+                      } else { echo '<span class="text-body-secondary">&mdash;</span>'; } ?>
+                    </td>
+                    <td class="small align-middle text-end">
+                      <?php if (!$inMenu) { ?>
+                        <button type="submit" name="menu_action" value="insert:<?= (int)$um->id ?>" class="btn btn-sm btn-success">Insert</button>
+                      <?php } else { ?>
+                        <?php if (!$permsInSync) { ?>
+                          <button type="submit" name="menu_action" value="sync_perms:<?= (int)$item->id ?>" class="btn btn-sm btn-outline-warning" title="Push page perms to this menu item">Sync Perms</button>
+                        <?php } ?>
+                        <?php if (!$labelInSync) { ?>
+                          <button type="submit" name="menu_action" value="sync_label:<?= (int)$item->id ?>" class="btn btn-sm btn-outline-warning" title="Push page title/lang key to this menu item">Sync Label</button>
+                        <?php } ?>
+                        <a class="btn btn-sm btn-outline-dark" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= (int)$um->id ?>&item_id=<?= (int)$item->id ?>&parent_id=<?= (int)$item->parent ?>" title="Open in UltraMenu editor">Edit &rarr;</a>
+                      <?php } ?>
+                      <button type="submit" name="menu_action" value="goto:<?= (int)$um->id ?>" class="btn btn-sm btn-primary" title="Save page then jump to this menu item">Update &amp; Go</button>
+                    </td>
+                  </tr>
+                <?php } ?>
+              </tbody>
+            </table>
+          <?php } ?>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <label for="">Remove Permission</label>
+          <div class="form-group">
+            <?php
+            // Display list of permission levels with access
+            $perm_ids = [];
+            foreach ($pagePermissions as $perm) {
+              $perm_ids[] = $perm->permission_id;
+            }
+            foreach ($permissionData as $v1) {
+              if (in_array($v1->id, $perm_ids)) { ?>
+                <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br />
+            <?php }
+            } ?>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="">Add Permissions</label>
+          <div class="form-group">
+            <?php
+            // Display list of permission levels without access
+            foreach ($permissionData as $v1) {
+              if (!in_array($v1->id, $perm_ids)) { ?>
+                <?php if ($settings->page_permission_restriction == 0) { ?><label class="normal"><input type='checkbox' name='addPermission[]' id='addPermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br /><?php } ?>
+
+                <?php if ($settings->page_permission_restriction == 1) { ?><label class="normal"><input type="radio" name="addPermission[]" id="addPermission[]" value="<?php echo $v1->id; ?>" <?php if ($countCountQ > 0 || $pageDetails->private == 0) { ?> disabled <?php } ?>>
+                    <?php echo $v1->name; ?></label><br />
+            <?php }
+              }
+            }
+            ?>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="col-12 col-md-3">
-      <label for="">Add Permissions</label>
-      <div class="form-group">
-        <?php
-        // Display list of permission levels without access
-        foreach ($permissionData as $v1) {
-          if (!in_array($v1->id, $perm_ids)) { ?>
-            <?php if ($settings->page_permission_restriction == 0) { ?><label class="normal"><input type='checkbox' name='addPermission[]' id='addPermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br /><?php } ?>
-
-            <?php if ($settings->page_permission_restriction == 1) { ?><label class="normal"><input type="radio" name="addPermission[]" id="addPermission[]" value="<?php echo $v1->id; ?>" <?php if ($countCountQ > 0 || $pageDetails->private == 0) { ?> disabled <?php } ?>>
-                <?php echo $v1->name; ?></label><br />
-        <?php }
-          }
-        }
-        ?>
-      </div>
-    </div>
-  </div>
   </div>
 </form>

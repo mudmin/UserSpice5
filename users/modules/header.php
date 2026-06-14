@@ -1,3 +1,5 @@
+    <!-- CSP-friendly admin event handlers (replaces inline on* attributes) -->
+    <script nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>" type="text/javascript" src="<?= $us_url_root ?>users/js/us_csp_admin.js"></script>
     <!-- admin messages -->
     <div id="messages" class="sufee-alert alert with-close alert-primary alert-dismissible fade show d-none">
       <span id="message"></span>

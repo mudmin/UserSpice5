@@ -38,9 +38,9 @@ if(!$db->error()) {
   }
   ?>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="<?=$us_url_root?>users/css/bootstrap.min.css" rel="stylesheet">
 
-<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" src="<?=$us_url_root?>users/js/bootstrap.bundle.min.js"></script>
   <div id="page-wrapper">
     <div class="container">
       <div class="row">

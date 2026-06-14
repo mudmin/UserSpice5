@@ -1,8 +1,15 @@
 <?php
-define('USERSPICE_DO_NOT_LOG', true);
+if (!defined('USERSPICE_DO_NOT_LOG')) {
+    define('USERSPICE_DO_NOT_LOG', true);
+}
 $menu_override = 2;
 require_once '../init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
+
+// Default log directory. active_logging_custom.php (included next) sets the
+// same value; declaring it here means this page still works, and static
+// analysis stays clean, even if that custom file is ever absent.
+$logDir = $abs_us_root . $us_url_root . 'users/logs';
 include $abs_us_root . $us_url_root . 'usersc/includes/active_logging_custom.php';
 
 if (!in_array($user->data()->id, $master_account)) {
@@ -194,7 +201,7 @@ if (!empty($_POST)) {
                         </tbody>
                     </table>
                 </div>
-                <p class="text-muted">Found <?= count($searchResults) ?> entries</p>
+                <p class="text-body-secondary">Found <?= count($searchResults) ?> entries</p>
             <?php } elseif (!empty($_POST)) { ?>
                 <div class="alert alert-info">No results found</div>
             <?php } ?>
@@ -238,13 +245,13 @@ if (!empty($_POST)) {
                 <h6 class="text-primary">Enabling/Disabling Logging</h6>
                 <div class="mb-3">
                     <strong>Global Enable:</strong>
-                    <pre class="bg-light p-2">// In users/init.php define('USERSPICE_ACTIVE_LOGGING', true);</pre>
+                    <pre class="bg-body-tertiary p-2">// In users/init.php define('USERSPICE_ACTIVE_LOGGING', true);</pre>
                 </div>
 
                 <div class="mb-3">
                     <strong>Disable Per Page:</strong>
-                    <pre class="bg-light p-2">// Add at top of page before init.php define('USERSPICE_DO_NOT_LOG', true);</pre>
-                    <small class="text-muted">Or add the page name to $do_not_log_files array in usersc/includes/active_logging_custom.php</small>
+                    <pre class="bg-body-tertiary p-2">// Add at top of page before init.php define('USERSPICE_DO_NOT_LOG', true);</pre>
+                    <small class="text-body-secondary">Or add the page name to $do_not_log_files array in usersc/includes/active_logging_custom.php</small>
                 </div>
 
                 <h6 class="text-primary mt-4">File Structure</h6>

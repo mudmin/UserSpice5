@@ -442,6 +442,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "Nastavitev preklicana.",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "Neveljavna varnostna koda. Poskusite znova.",
+    "2FA_ERR_INVALID_CODE"               => "Neveljavna koda za preverjanje pristnosti. Poskusite znova.",
     "2FA_ERR_DISABLE_FAILED"             => "Onemogočanje dvofaktorske avtentikacije ni uspelo.",
     "2FA_ERR_NO_SECRET"                  => "Skrivnega ključa za avtentikacijo ni bilo mogoče pridobiti. Poskusite znova.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Varnostna koda je bila preverjena, vendar je razveljavitev spodletela. Obrnite se na podporo.",
@@ -520,6 +521,7 @@ $lang = array_merge($lang, array(
 		"SET_PIN_NEXT"	=> "Naslednjič, ko boste potrebovali preverjanje, lahko nastavite nov PIN",
 		"SET_UPDATE"	=> "Posodobite nastavitve svojega uporabnika",
 		"SET_NOCHANGE"	=> "Administrator je onemogočil spreminjanje uporabniških imen.",
+		"SET_NOCHANGE_EMAIL"	=> "Administrator je onemogočil spreminjanje e-poštnih naslovov.",
 		"SET_ONECHANGE"	=> "Administrator je nastavil, da se lahko uporabniška imena spremenijo samo enkrat, vi pa ste to že storili.",
 
 		"SET_GRAVITAR"	=> "<strong>Želite spremeniti svojo profilno sliko? </strong><br> Obiščite <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a> in ustvarite račun z istim e-poštnim naslovom, ki ste ga uporabili na tej strani. Deluje na milijonih strani. Hitro in enostavno!",
@@ -598,6 +600,41 @@ $lang = array_merge($lang,array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Potrdite, da ste to vi",
+	"REAUTH_INTRO"            => "Zaradi vaše varnosti potrdite svojo identiteto za nadaljevanje.",
+	"REAUTH_RELOGIN"          => "Za nadaljevanje se znova prijavite.",
+	"REAUTH_LOCKED"           => "Preveč neuspešnih poskusov. Znova se prijavite.",
+	"REAUTH_VERIFY"           => "Potrdi",
+	"REAUTH_OR"               => "ali",
+	"REAUTH_PASSWORD_LABEL"   => "Vaše geslo",
+	"REAUTH_BAD_PASSWORD"     => "Napačno geslo.",
+	"REAUTH_TOTP_BACKUP"      => "To je rezervna koda",
+	"REAUTH_EMAIL_BTN"        => "Pošlji mi 6-mestno kodo po e-pošti",
+	"REAUTH_EMAIL_CODE_LABEL" => "Vnesite 6-mestno kodo",
+	"REAUTH_EMAIL_RESEND"     => "Pošlji novo kodo",
+	"REAUTH_EMAIL_SUBJECT"    => "Potrditvena koda",
+	"REAUTH_EMAIL_BODY"       => "Vaša potrditvena koda je:",
+	"REAUTH_EMAIL_EXPIRE"     => "Ta koda poteče čez 10 minut. Če je niste zahtevali, lahko to e-pošto prezrete.",
+	"REAUTH_EMAIL_SENT"       => "Po e-pošti smo vam poslali 6-mestno kodo.",
+	"REAUTH_EMAIL_FAIL"       => "E-pošte ni bilo mogoče poslati. Poskusite drug način.",
+	"REAUTH_EMAIL_NONE"       => "Najprej zahtevajte kodo.",
+	"REAUTH_EMAIL_EXPIRED"    => "Ta koda je potekla. Zahtevajte novo.",
+	"REAUTH_EMAIL_TOOMANY"    => "Preveč poskusov. Zahtevajte novo kodo.",
+	"REAUTH_EMAIL_BAD"        => "Napačna koda.",
+	"REAUTH_PASSKEY_BTN"      => "Uporabi ključ za dostop",
+	"REAUTH_SOCIAL_BTN"       => "Potrdi z",
+	"REAUTH_SOCIAL_MISMATCH"  => "Ta račun se ne ujema z vašo prijavo. Poskusite znova.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Imate težave z aplikacijo za preverjanje pristnosti?",
+	"2FA_BACKUP_CODE_HELP" => "Vnesite eno od shranjenih varnostnih kod",
+	"2FA_USE_BACKUP_BTN"   => "Uporabi varnostno kodo",
+));
+
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){
 	include($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php");
 }

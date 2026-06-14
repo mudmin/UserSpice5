@@ -60,8 +60,8 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 		$vericode_valid = true;
 	} else {
 		$ruser = new User($email);
-		// Check if plaintext vericode matches (legacy)
-		$vericode_valid = $ruser->exists() && $ruser->data()->vericode == $vericode;
+		// Hashed lookup failed; plaintext vericodes are no longer accepted.
+		$vericode_valid = false;
 	}
 
 	$eventhooks =  getMyHooks(['page' => 'forgotPasswordResponse']);
@@ -71,7 +71,7 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 		$vericode_valid = true; // Trust hook override
 	}
 
-	if (Input::get('resetPassword')) {
+	if (Input::get('resetPassword') && Server::get('REQUEST_METHOD') === 'POST') {
 		// Check rate limit before processing
 		if (!checkRateLimit('password_reset_submit', null, $email, ['token' => $vericode])) {
 			$errors[] = getRateLimitErrorMessage('password_reset_submit');

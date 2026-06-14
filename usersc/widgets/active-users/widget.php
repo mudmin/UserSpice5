@@ -13,20 +13,23 @@
 <?php
 global $chartsLoaded;
 if($chartsLoaded !="true"){ ?>
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<?= $GLOBALS['us_url_root'] ?>users/js/chart.umd.min.js"></script>
 <?php }
 $top = $db->query("SELECT id, fname, lname, logins FROM users ORDER BY logins DESC LIMIT 6")->results(true);
 shuffle($top);
 $labels = "";
 $data = "";
 foreach($top as $t){
-  $labels .= "'".substr($t['fname'],0,1).". ".$t['lname']."',";
+  $labels .= "'".substr($t['fname'] ?? '',0,1).". ".($t['lname'] ?? '')."',";
   $data .= "'".$t['logins']."',";
 }
 
+if (!isset($GLOBALS['userspice_nonce'])) {
+    $GLOBALS['userspice_nonce'] = base64_encode(random_bytes(16));
+}
 ?>
 
-<script nonce="<?=htmlspecialchars($usespice_nonce ?? '')?>">
+<script nonce="<?= htmlspecialchars($GLOBALS['userspice_nonce'] ?? '') ?>">
   const ctx = document.getElementById('myChart');
   ctx.height = 100;
   new Chart(ctx, {

@@ -115,7 +115,7 @@ includeHook($hooks, 'body');
 <div class="col-6 text-end">
         <?php
             if (isset($manage) && is_numeric($manage)) { ?>
-            <form class="" action="" method="post" onsubmit="return confirm('Do you really want to do this? It cannot be undone.');">
+            <form class="" action="" method="post" data-us-confirm="Do you really want to do this? It cannot be undone.">
                 <?= tokenHere(); ?>
                 <p class=" text-xs-center text-sm-end">
                     <input type="hidden" name="delete" value="<?= $manage ?>">

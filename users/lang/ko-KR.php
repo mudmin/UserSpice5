@@ -442,6 +442,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_BACKUP_ACK"               => "백업 코드가 확인되었습니다.",
     "2FA_SUCCESS_SETUP_CANCELLED"          => "설정이 취소되었습니다.",
     "2FA_ERR_INVALID_BACKUP"               => "잘못된 백업 코드. 다시 시도해주세요.",
+    "2FA_ERR_INVALID_CODE"                 => "잘못된 인증 코드. 다시 시도해주세요.",
     "2FA_ERR_DISABLE_FAILED"               => "2단계 인증 비활성화에 실패했습니다.",
     "2FA_ERR_NO_SECRET"                    => "인증 비밀을 검색할 수 없습니다. 다시 시도해주세요.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "백업 코드는 확인되었지만 무효화에 실패했습니다. 지원팀에 문의하세요.",
@@ -527,6 +528,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"		=> "다음에 확인이 필요할 때 새 PIN을 설정할 수 있습니다.",
 	"SET_UPDATE"		=> "사용자 설정을 업데이트합니다.",
 	"SET_NOCHANGE"		=> "관리자가 사용자 이름 변경을 사용 불가능으로 설정했습니다.",
+	"SET_NOCHANGE_EMAIL"	=> "관리자가 이메일 주소 변경을 사용 불가능으로 설정했습니다.",
 	"SET_ONECHANGE"		=> "관리자가 사용자 이름 변경을 한 번만 수행하도록 설정했으며 사용자가 이미 변경했습니다.",
 
 	"SET_GRAVITAR"		=> "프로필 사진을 바꾸고 싶으신가요?  <br> <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a>을 방문하여 이 사이트에서 사용한 것과 동일한 전자 메일로 계정을 설정하십시오. 수백만 개의 사이트에서 작동합니다. 그것은 빠르고 쉽습니다!",
@@ -605,6 +607,41 @@ $lang = array_merge($lang, array(
 ));
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "본인 확인",
+	"REAUTH_INTRO"            => "보안을 위해 계속하려면 본인 확인을 해주세요.",
+	"REAUTH_RELOGIN"          => "계속하려면 다시 로그인해 주세요.",
+	"REAUTH_LOCKED"           => "실패 횟수가 너무 많습니다. 다시 로그인해 주세요.",
+	"REAUTH_VERIFY"           => "확인",
+	"REAUTH_OR"               => "또는",
+	"REAUTH_PASSWORD_LABEL"   => "비밀번호",
+	"REAUTH_BAD_PASSWORD"     => "비밀번호가 올바르지 않습니다.",
+	"REAUTH_TOTP_BACKUP"      => "백업 코드입니다",
+	"REAUTH_EMAIL_BTN"        => "6자리 코드를 이메일로 보내기",
+	"REAUTH_EMAIL_CODE_LABEL" => "6자리 코드를 입력하세요",
+	"REAUTH_EMAIL_RESEND"     => "새 코드 보내기",
+	"REAUTH_EMAIL_SUBJECT"    => "인증 코드",
+	"REAUTH_EMAIL_BODY"       => "인증 코드는 다음과 같습니다:",
+	"REAUTH_EMAIL_EXPIRE"     => "이 코드는 10분 후에 만료됩니다. 요청하지 않으셨다면 이 이메일을 무시하셔도 됩니다.",
+	"REAUTH_EMAIL_SENT"       => "6자리 코드를 이메일로 보냈습니다.",
+	"REAUTH_EMAIL_FAIL"       => "이메일을 보낼 수 없습니다. 다른 방법을 시도해 주세요.",
+	"REAUTH_EMAIL_NONE"       => "먼저 코드를 요청해 주세요.",
+	"REAUTH_EMAIL_EXPIRED"    => "이 코드는 만료되었습니다. 새 코드를 요청해 주세요.",
+	"REAUTH_EMAIL_TOOMANY"    => "시도 횟수가 너무 많습니다. 새 코드를 요청해 주세요.",
+	"REAUTH_EMAIL_BAD"        => "코드가 올바르지 않습니다.",
+	"REAUTH_PASSKEY_BTN"      => "패스키 사용",
+	"REAUTH_SOCIAL_BTN"       => "다음으로 확인:",
+	"REAUTH_SOCIAL_MISMATCH"  => "해당 계정이 로그인 정보와 일치하지 않습니다. 다시 시도해 주세요.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "인증 앱에 문제가 있나요?",
+	"2FA_BACKUP_CODE_HELP" => "저장된 백업 코드 중 하나를 입력하세요",
+	"2FA_USE_BACKUP_BTN"   => "백업 코드 사용",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

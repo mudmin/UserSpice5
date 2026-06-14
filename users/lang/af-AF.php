@@ -461,6 +461,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "Opstelling gekanselleer.",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "Ongeldige rugsteunkode. Probeer asseblief weer.",
+    "2FA_ERR_INVALID_CODE"               => "Ongeldige verifikasiekode. Probeer asseblief weer.",
     "2FA_ERR_DISABLE_FAILED"             => "Kon nie twee-faktor-verifikasie deaktiveer nie.",
     "2FA_ERR_NO_SECRET"                  => "Kon nie stawinggeheim herwin nie. Probeer asseblief weer.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Rugsteunkode geverifieer, maar kon dit nie ongeldig maak nie. Kontak asseblief ondersteuning.",
@@ -550,6 +551,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "U kan 'n nuwe PIN instel die volgende keer as u verifikasie benodig",
 	"SET_UPDATE"	=> "Dateer u gebruikersinstellings op",
 	"SET_NOCHANGE"	=> "Die administrateur het veranderende gebruikersname uitgeskakel.",
+	"SET_NOCHANGE_EMAIL"	=> "Die administrateur het die verandering van e-posadresse uitgeskakel.",
 	"SET_ONECHANGE"	=> "Die administrateur het ingestel dat gebruikersnaamveranderings slegs een keer plaasvind en u het dit al gedoen.",
 	"SET_GRAVITAR"	=> " Wil u profielfoto verander?   <br>Besoek <a href='https://af.gravatar.com/'>https://en.gravatar.com/</a> en stel 'n rekening op met dieselfde e-pos as wat u op hierdie webwerf gebruik het. Dit werk op miljoene webwerwe. Dit is vinnig en maklik! ",
 	"SET_NOTE1"	=> "   Let wel   daar is 'n hangende versoek om u e-pos op te dateer na",
@@ -625,6 +627,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Bevestig dis jy",
+	"REAUTH_INTRO"            => "Vir jou sekuriteit, bevestig asseblief jou identiteit om voort te gaan.",
+	"REAUTH_RELOGIN"          => "Meld asseblief weer aan om voort te gaan.",
+	"REAUTH_LOCKED"           => "Te veel mislukte pogings. Meld asseblief weer aan.",
+	"REAUTH_VERIFY"           => "Bevestig",
+	"REAUTH_OR"               => "of",
+	"REAUTH_PASSWORD_LABEL"   => "Jou wagwoord",
+	"REAUTH_BAD_PASSWORD"     => "Verkeerde wagwoord.",
+	"REAUTH_TOTP_BACKUP"      => "Dit is 'n rugsteunkode",
+	"REAUTH_EMAIL_BTN"        => "E-pos vir my 'n 6-syfer-kode",
+	"REAUTH_EMAIL_CODE_LABEL" => "Voer die 6-syfer-kode in",
+	"REAUTH_EMAIL_RESEND"     => "Stuur 'n nuwe kode",
+	"REAUTH_EMAIL_SUBJECT"    => "Verifikasiekode",
+	"REAUTH_EMAIL_BODY"       => "Jou verifikasiekode is:",
+	"REAUTH_EMAIL_EXPIRE"     => "Hierdie kode verval oor 10 minute. As jy dit nie aangevra het nie, kan jy hierdie e-pos ignoreer.",
+	"REAUTH_EMAIL_SENT"       => "Ons het vir jou 'n 6-syfer-kode gestuur.",
+	"REAUTH_EMAIL_FAIL"       => "Ons kon nie die e-pos stuur nie. Probeer asseblief 'n ander metode.",
+	"REAUTH_EMAIL_NONE"       => "Versoek asseblief eers 'n kode.",
+	"REAUTH_EMAIL_EXPIRED"    => "Daardie kode het verval. Versoek asseblief 'n nuwe een.",
+	"REAUTH_EMAIL_TOOMANY"    => "Te veel pogings. Versoek asseblief 'n nuwe kode.",
+	"REAUTH_EMAIL_BAD"        => "Verkeerde kode.",
+	"REAUTH_PASSKEY_BTN"      => "Gebruik 'n toegangsleutel",
+	"REAUTH_SOCIAL_BTN"       => "Verifieer met",
+	"REAUTH_SOCIAL_MISMATCH"  => "Daardie rekening stem nie met jou aanmelding ooreen nie. Probeer asseblief weer.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Sukkel jy met jou verifikasie-app?",
+	"2FA_BACKUP_CODE_HELP" => "Voer een van jou gestoorde rugsteunkodes in",
+	"2FA_USE_BACKUP_BTN"   => "Gebruik rugsteunkode",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

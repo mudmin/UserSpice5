@@ -182,12 +182,12 @@ $csrf = Token::generate();
 
 <h2>Manage Page Access
   <?php if ($c) { ?>
-    <button type="button" onclick="window.location.href = 'admin.php?view=pages';" name="button" class="btn btn-primary">Show All Pages</button>
+    <a href="admin.php?view=pages" class="btn btn-primary">Show All Pages</a>
   <?php } else { ?>
-    <button type="button" onclick="window.location.href = 'admin.php?view=pages&hide=core';" name="button" class="btn btn-primary">Hide Default Pages</button>
+    <a href="admin.php?view=pages&hide=core" class="btn btn-primary">Hide Default Pages</a>
   <?php } ?>
 </h2>
-<p class="text-dark pt-2">UserSpice is currently monitoring the following folders: <strong>
+<p class="text-body pt-2">UserSpice is currently monitoring the following folders: <strong>
 
 
     <?php
@@ -229,8 +229,8 @@ $csrf = Token::generate();
           <tr>
             <td><span class="hideMe"><?= sprintf('%08d', $dbpages[$count]->id) ?></span>
               <?= $dbpages[$count]->id; ?></td>
-            <td><a class="nounderline text-dark" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->page; ?></a></td>
-            <td><a class="nounderline text-dark" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title; ?></a></td>
+            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->page; ?></a></td>
+            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title; ?></a></td>
             <td><?= htmlspecialchars($dbpages[$count]->lang_key ?? ''); ?></td>
             <td>
               <a class="nounderline" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'>

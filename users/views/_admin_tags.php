@@ -84,7 +84,7 @@ $usersWith = $usersWithQ->results();
       </form>
       <br>
       <h5>Delete the <?= $tag->tag ?> Tag</h5>
-      <form class="" action="" method="post" onsubmit="return confirm('Are you sure? This will delete the tag and untag all users who had it! It cannot be undone!');">
+      <form class="" action="" method="post" data-us-confirm="Are you sure? This will delete the tag and untag all users who had it! It cannot be undone!">
          <?=tokenHere();?>
         <div class="input-group">
           <select class="form-control" name="tag">

@@ -463,6 +463,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "تم إلغاء الإعداد.",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "رمز احتياطي غير صالح. يرجى المحاولة مرة أخرى.",
+    "2FA_ERR_INVALID_CODE"               => "رمز المصادقة غير صالح. يرجى المحاولة مرة أخرى.",
     "2FA_ERR_DISABLE_FAILED"             => "فشل تعطيل المصادقة الثنائية.",
     "2FA_ERR_NO_SECRET"                  => "تعذر استرداد سر المصادقة. يرجى المحاولة مرة أخرى.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "تم التحقق من الرمز الاحتياطي ولكن فشل إبطاله. يرجى الاتصال بالدعم.",
@@ -547,6 +548,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "المرة المقبلة التي تطلب فيها رابط تحقق PIN يمكنك اعادة ضبط الـ",
 	"SET_UPDATE"		=> "تحديث اعدادات الحساب",
 	"SET_NOCHANGE"	=> "تغيير اسم المستخدم معطل",
+	"SET_NOCHANGE_EMAIL"	=> "تغيير عنوان البريد الإلكتروني معطل",
 	"SET_ONECHANGE"	=> "عفواً!...لا يمكنك تغيير اسم المستخدم اكثر من مرة",
 
 	"SET_GRAVITAR"	=> "هل تريد تغيير الصورة الرمزية؟ <br>توجه لـ <a href='https://en.gravatar.com/'>https://en.gravatar.com/</a>وقم بفتح حساب بنفس الايميل المستخدم هنا هذه الخدمة مدعومة من ملايين المواقع تتميز بالسهولة والسرعة",
@@ -626,6 +628,41 @@ $lang = array_merge($lang, array(
 
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "تأكيد هويتك",
+	"REAUTH_INTRO"            => "من أجل أمانك، يرجى تأكيد هويتك للمتابعة.",
+	"REAUTH_RELOGIN"          => "يرجى تسجيل الدخول مرة أخرى للمتابعة.",
+	"REAUTH_LOCKED"           => "محاولات فاشلة كثيرة. يرجى تسجيل الدخول مرة أخرى.",
+	"REAUTH_VERIFY"           => "تأكيد",
+	"REAUTH_OR"               => "أو",
+	"REAUTH_PASSWORD_LABEL"   => "كلمة المرور الخاصة بك",
+	"REAUTH_BAD_PASSWORD"     => "كلمة المرور غير صحيحة.",
+	"REAUTH_TOTP_BACKUP"      => "هذا رمز احتياطي",
+	"REAUTH_EMAIL_BTN"        => "أرسل لي رمزًا من 6 أرقام",
+	"REAUTH_EMAIL_CODE_LABEL" => "أدخل الرمز المكون من 6 أرقام",
+	"REAUTH_EMAIL_RESEND"     => "إرسال رمز جديد",
+	"REAUTH_EMAIL_SUBJECT"    => "رمز التحقق",
+	"REAUTH_EMAIL_BODY"       => "رمز التحقق الخاص بك هو:",
+	"REAUTH_EMAIL_EXPIRE"     => "تنتهي صلاحية هذا الرمز خلال 10 دقائق. إذا لم تطلبه، يمكنك تجاهل هذا البريد.",
+	"REAUTH_EMAIL_SENT"       => "أرسلنا إليك رمزًا من 6 أرقام عبر البريد.",
+	"REAUTH_EMAIL_FAIL"       => "تعذّر إرسال البريد. يرجى تجربة طريقة أخرى.",
+	"REAUTH_EMAIL_NONE"       => "يرجى طلب رمز أولًا.",
+	"REAUTH_EMAIL_EXPIRED"    => "انتهت صلاحية هذا الرمز. يرجى طلب رمز جديد.",
+	"REAUTH_EMAIL_TOOMANY"    => "محاولات كثيرة. يرجى طلب رمز جديد.",
+	"REAUTH_EMAIL_BAD"        => "الرمز غير صحيح.",
+	"REAUTH_PASSKEY_BTN"      => "استخدام مفتاح مرور",
+	"REAUTH_SOCIAL_BTN"       => "التحقق عبر",
+	"REAUTH_SOCIAL_MISMATCH"  => "هذا الحساب لا يطابق تسجيل دخولك. يرجى المحاولة مرة أخرى.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "هل تواجه مشكلة مع تطبيق المصادقة؟",
+	"2FA_BACKUP_CODE_HELP" => "أدخل أحد رموز النسخ الاحتياطي المحفوظة",
+	"2FA_USE_BACKUP_BTN"   => "استخدام رمز النسخ الاحتياطي",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

@@ -116,6 +116,23 @@ if (Input::exists('get')) {
             }
 
             // Process the login (if confirmation already submitted)
+            // Atomically claim the one-time code BEFORE establishing the session.
+            // The conditional UPDATE only touches the row while expired = 0, so a
+            // concurrent request that already consumed the code sees count() == 0
+            // and is rejected — closing the replay race.
+            if (!isset($do_not_auto_expire) || $do_not_auto_expire != true) {
+                $db->query(
+                    "UPDATE us_email_logins SET expired = 1 WHERE id = ? AND expired = 0",
+                    [$search->id]
+                );
+                if ($db->count() < 1) {
+                    $eventhooks = getMyHooks(['page' => 'loginFail']);
+                    includeHook($eventhooks, 'body');
+                    usError(lang("VER_FAIL"));
+                    Redirect::to($us_url_root . 'users/passwordless.php');
+                }
+            }
+
             $user = new User($user_id);
             $user->login();
             $hooks = getMyHooks(['page' => 'loginSuccess']);
@@ -127,10 +144,6 @@ if (Input::exists('get')) {
                 "login_date"=> date("Y-m-d H:i:s"),
             ];
 
-            if (!isset($do_not_auto_expire) || $do_not_auto_expire != true) {
-                $fields['expired'] = 1;
-            }
-
             $db->update("us_email_logins", $search->id, $fields);
 
             if (isset($passwordlessDebug) && $passwordlessDebug == true) {
@@ -138,7 +151,7 @@ if (Input::exists('get')) {
             }
 
             $dest = sanitizedDest('dest');
-            $_SESSION['last_confirm'] = date("Y-m-d H:i:s");
+            reauthMarkConfirmed();
 
             if ($search->email_verified == 0) {
                 $db->update("users", $user_id, ["email_verified" => 1]);
@@ -146,8 +159,8 @@ if (Input::exists('get')) {
             setLoginMethod("email");
             if (!empty($dest)) {
                 $redirect = Input::get('redirect');
-                if (!empty($redirect) || $redirect !== '') {
-                    Redirect::to(html_entity_decode($redirect));
+                if (!empty($redirect)) {
+                    Redirect::sanitized($redirect);
                 } else {
                     Redirect::to($dest);
                 }
@@ -192,16 +205,15 @@ if (Input::exists('get')) {
                     $vericode_valid = true;
                 } else {
                     $verify = new User($email);
-                    // Check plaintext for legacy tokens
-                    $vericode_valid = $verify->exists() && $verify->data()->vericode == $vericode;
+                    // Hashed lookup failed; plaintext vericodes are no longer accepted.
+                    $vericode_valid = false;
                 }
             }
         }
 
-        // Check if already verified with matching vericode
-        $hashedMatch = $verify->exists() && $verify->data()->vericode == hashVericode($vericode);
-        $plaintextMatch = $verify->exists() && $verify->data()->vericode == $vericode;
-        $codeMatches = $hashedMatch || $plaintextMatch;
+        // Check if already verified with matching vericode (hashed only, timing-safe)
+        $codeMatches = $verify->exists() && !empty($verify->data()->vericode)
+            && hash_equals((string)$verify->data()->vericode, hashVericode((string)$vericode));
 
         if ($verify->data()->email_verified == 1 && $codeMatches && $verify->data()->email_new == "") {
             $eventhooks = getMyHooks(['page' => 'verifySuccess']);

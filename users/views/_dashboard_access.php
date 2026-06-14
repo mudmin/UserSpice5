@@ -89,12 +89,12 @@ $token = Token::generate();
 ?>
 
 <h2>Grant Dashboard Access</h2>
-<p class="text-dark mt-2">Please Note: Allowing users other than trusted admins should not be taken lightly. You are giving these users the opportunity to do some very powerful things to your site.</p>
+<p class="text-body mt-2">Please Note: Allowing users other than trusted admins should not be taken lightly. You are giving these users the opportunity to do some very powerful things to your site.</p>
 
-<p class="text-dark mt-2">This is a TWO step process. You must go into Page Management and allow the other access level(s) that you want to give access to access the admin.php page. Then you can come in here and grant that access level permission to a particular section of the dashboard.
+<p class="text-body mt-2">This is a TWO step process. You must go into Page Management and allow the other access level(s) that you want to give access to access the admin.php page. Then you can come in here and grant that access level permission to a particular section of the dashboard.
 </p>
 
-<p class="text-dark mt-2">
+<p class="text-body mt-2">
   Please note, some actions are limited by default to users of the master account or admins (permission level 2) and cannot be overriden on this
   page.</p>
 

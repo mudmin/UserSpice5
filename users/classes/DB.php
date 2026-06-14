@@ -50,10 +50,14 @@ class DB
 	{
 		// Build PDO options once
 		
-		// Use the new constant if it exists, otherwise fallback to the old one
+		// Prefer the PHP 8.4+ namespaced constant; fall back to the classic
+		// PDO::MYSQL_ATTR_INIT_COMMAND. The final 1002 literal guards against the
+		// case where neither constant is defined (pdo_mysql extension not loaded)
+		// so we fail later at connect time with a clear "could not find driver"
+		// rather than a fatal "undefined constant" here.
 		$initCommand = defined('Pdo\Mysql::ATTR_INIT_COMMAND')
 			? \Pdo\Mysql::ATTR_INIT_COMMAND
-			: \PDO::MYSQL_ATTR_INIT_COMMAND;
+			: (defined('PDO::MYSQL_ATTR_INIT_COMMAND') ? \PDO::MYSQL_ATTR_INIT_COMMAND : 1002);
 
 		$this->opts = Config::get('mysql/options') ?: [
 			$initCommand => "SET SESSION sql_mode = ''",
@@ -321,7 +325,7 @@ class DB
 					$op1 = strtoupper(trim((string)$w[1]));
 					$op2 = strtoupper(trim((string)$w[2]));
 					// Fix precedence: ($wcount == 5) || (($wcount == 6) && is_array($w[5]))
-					if (($wcount == 5 || ($wcount == 6 && is_array($w[5]))) && in_array($op1, $valid_ops, true) && in_array($op2, $nested_arg, true)) {
+					if (($wcount == 5 || is_array($w[5])) && in_array($op1, $valid_ops, true) && in_array($op2, $nested_arg, true)) {
 						$whereArg = $wcount == 6 ? $w[5] : [];
 						return $this->_sanitizeColumnName($w[0]) . " {$op1} {$op2}" . $this->get_subquery_sql($w[4], $w[3], $whereArg, $vals, $is_ok);
 					} elseif (($wcount == 5 && is_array($w[4])) && in_array($op1, $nestedIN, true)) {
@@ -579,11 +583,19 @@ class DB
 	{
 		global $database_logging, $database_logging_tables_only, $user;
 
-		if (!isset($database_logging) || !$database_logging) {
+		// Logging can be enabled either via setLogging() (instance properties)
+		// or the legacy global $database_logging flag. Honor whichever is set.
+		$loggingEnabled = $this->database_logging
+			|| (isset($database_logging) && $database_logging);
+		if (!$loggingEnabled) {
 			return;
 		}
 
-		if (!empty($database_logging_tables_only) && !in_array($table, $database_logging_tables_only)) {
+		// Table allow-list: prefer the instance setting, fall back to the global.
+		$tablesOnly = !empty($this->database_logging_tables_only)
+			? $this->database_logging_tables_only
+			: ($database_logging_tables_only ?? []);
+		if (!empty($tablesOnly) && !in_array($table, $tablesOnly)) {
 			return;
 		}
 
@@ -618,7 +630,7 @@ class DB
 			$trace[] = [
 				'file' => isset($step['file']) ? $step['file'] : 'unknown',
 				'line' => isset($step['line']) ? $step['line'] : 'unknown',
-				'function' => $step['function'] ?? 'unknown',
+				'function' => $step['function'],
 				'class' => isset($step['class']) ? $step['class'] : 'unknown',
 			];
 		}

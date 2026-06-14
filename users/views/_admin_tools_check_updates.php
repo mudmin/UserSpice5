@@ -348,6 +348,7 @@ $update_available = false;
                     echo "Error: Could not delete zip file after failure. Please check permissions.";
                   }
                 }
+                // @phpstan-ignore booleanNot.alwaysTrue (idempotency guard kept deliberately; $failRan is provably false here because every error branch dies, but this protects the spiceUpdateFail call from running twice should a die ever be removed.)
                 if (!$failRan) {
                   spiceUpdateFail();
                   $failRan = true;
@@ -389,6 +390,7 @@ $update_available = false;
                       echo "Error: Could not delete zip file after failure. Please check permissions.";
                     }
                   }
+                  // @phpstan-ignore booleanNot.alwaysTrue (idempotency guard kept deliberately; $failRan is provably false here because every error branch dies, but this protects the spiceUpdateFail call from running twice should a die ever be removed.)
                   if (!$failRan) {
                     spiceUpdateFail();
                     $failRan = true;
@@ -442,6 +444,7 @@ $update_available = false;
                     }
                   }
 
+                  // @phpstan-ignore booleanNot.alwaysTrue (idempotency guard kept deliberately; $failRan is provably false here because every error branch dies, but this protects the spiceUpdateFail call from running twice should a die ever be removed.)
                   if (!$failRan) {
                     spiceUpdateFail();
                     $failRan = true;
@@ -471,6 +474,7 @@ $update_available = false;
                 }
 
                 logger($user->data()->id, $result->next_ver, 'Hash match failed');
+                // @phpstan-ignore booleanNot.alwaysTrue (idempotency guard kept deliberately; $failRan is provably false here because every error branch dies, but this protects the spiceUpdateFail call from running twice should a die ever be removed.)
                 if (!$failRan) {
                   spiceUpdateFail();
                   $failRan = true;
@@ -528,14 +532,26 @@ $update_available = false;
                 <input type="submit" name="save_api_key" value="Save API Key" class="btn btn-success">
                 <?php if (!empty($settings->spice_api)) { ?>
                   <input type="submit" name="save_api_key" value="Clear API Key" class="btn btn-outline-danger ms-2"
-                    onclick="document.getElementById('spice_api').value = '';">
+                    id="clearApiKeyBtn">
                 <?php } ?>
-                <p class="text-muted">If you do not want to use the API system, updates are always available for free at <a class="text-primary" target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a></p>
+                <p class="text-body-secondary">If you do not want to use the API system, updates are always available for free at <a class="text-primary" target="_blank" href="https://userspice.com/updates">https://userspice.com/updates</a></p>
               </div>
             </form>
           </div>
         </div>
       <?php } ?>
+      <script nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>">
+        // CSP-friendly binding (replaces inline onclick that cleared the field)
+        (function () {
+          var clearBtn = document.getElementById('clearApiKeyBtn');
+          if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+              var f = document.getElementById('spice_api');
+              if (f) { f.value = ''; }
+            });
+          }
+        })();
+      </script>
       <br><br>
       </div>
     </div>

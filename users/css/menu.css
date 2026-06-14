@@ -109,6 +109,12 @@ ul.us_menu.horizontal {
   padding: 5px 18px;
 }
 
+nav.us_sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+}
+
 ul.us_menu.horizontal .us_sub-menu {
   left: 0;
   top: 100%;
@@ -192,11 +198,16 @@ ul.us_menu.dark .dropdown-divider{
     display: block;
   }
 
+  /* Sub-menus flow in-line under the parent li on mobile so siblings push down
+     instead of getting painted over. Base rule sets position:absolute AND
+     float:right — both need to be undone here. */
   ul.us_menu.horizontal .us_sub-menu,
   ul.us_menu.horizontal .us_sub-menu.us_deep-sub-menu{
+    position: relative;
     width: 100%;
-    left: 0;
-    top: 100%;
+    left: unset;
+    top: unset;
+    float: unset;
     border: none;
   }
 
@@ -286,9 +297,15 @@ ul.us_menu.dark .dropdown-divider{
         /* Transition max-height/opacity normally, but delay overflow to visible until AFTER animation */
         transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0.4s;
     }
+
+    /* Open dropdown li must be uncapped so it can contain its in-flow sub-menu. */
+    ul.us_menu.horizontal.expanded > li.open {
+        max-height: none;
+    }
 }
 
 /* Change cursor to pointer for the hamburger icon */
 .us_menu_mobile_control {
     cursor: pointer;
 }
+

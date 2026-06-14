@@ -466,6 +466,7 @@ $lang = array_merge($lang, array(
     "2FA_SUCCESS_SETUP_CANCELLED"        => "A beállítás megszakítva.",
     // Error Messages
     "2FA_ERR_INVALID_BACKUP"             => "Érvénytelen helyreállító kód. Kérjük, próbálja újra.",
+    "2FA_ERR_INVALID_CODE"               => "Érvénytelen hitelesítési kód. Kérjük, próbálja újra.",
     "2FA_ERR_DISABLE_FAILED"             => "A kétfaktoros hitelesítés kikapcsolása sikertelen.",
     "2FA_ERR_NO_SECRET"                  => "A hitelesítési titok nem kérhető le. Kérjük, próbálja újra.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "A helyreállító kód ellenőrizve, de az érvénytelenítés sikertelen. Kérjük, lépjen kapcsolatba a támogatással.",
@@ -550,6 +551,7 @@ $lang = array_merge($lang, array(
 	"SET_PIN_NEXT"	=> "Új PIN-kódot állíthatsz be a következő hitelesítéskor",
 	"SET_UPDATE"		=> "Frissítsd felhasználói beállításaid",
 	"SET_NOCHANGE"	=> "Az adminisztrátor letiltotta a felhasználónevek módosítását.",
+	"SET_NOCHANGE_EMAIL"	=> "Az adminisztrátor letiltotta az e-mail-címek módosítását.",
 	"SET_ONECHANGE"	=> "Az adminisztrátor letiltotta a felhasználónevek többszöri módosítását és te már egyszer módosítottad azt.",
 
 	"SET_GRAVITAR"	=> "Szeretnéd megváltoztatni a profilképed?  <br> Látogass el ide <a href='https://hu.gravatar.com/'>https://hu.gravatar.com/</a> és regisztrálj be egy fiókot ugyanazzal az e-mail címmel, amit ezen a webhelyen is használsz. Gyors és egyszerű!",
@@ -609,6 +611,41 @@ $lang = array_merge($lang, array(
 ));
 
 //LEAVE THIS LINE AT THE BOTTOM.  It allows users/lang to override these keys
+// Core ReAuth (step-up authentication) — added 2026-05-17.
+$lang = array_merge($lang, array(
+	"REAUTH_TITLE"            => "Erősítse meg, hogy ön az",
+	"REAUTH_INTRO"            => "Biztonsága érdekében kérjük, igazolja személyazonosságát a folytatáshoz.",
+	"REAUTH_RELOGIN"          => "A folytatáshoz jelentkezzen be újra.",
+	"REAUTH_LOCKED"           => "Túl sok sikertelen próbálkozás. Kérjük, jelentkezzen be újra.",
+	"REAUTH_VERIFY"           => "Megerősítés",
+	"REAUTH_OR"               => "vagy",
+	"REAUTH_PASSWORD_LABEL"   => "Az ön jelszava",
+	"REAUTH_BAD_PASSWORD"     => "Helytelen jelszó.",
+	"REAUTH_TOTP_BACKUP"      => "Ez egy tartalék kód",
+	"REAUTH_EMAIL_BTN"        => "Küldjön nekem egy 6 jegyű kódot e-mailben",
+	"REAUTH_EMAIL_CODE_LABEL" => "Adja meg a 6 jegyű kódot",
+	"REAUTH_EMAIL_RESEND"     => "Új kód küldése",
+	"REAUTH_EMAIL_SUBJECT"    => "Ellenőrző kód",
+	"REAUTH_EMAIL_BODY"       => "Az ellenőrző kódja:",
+	"REAUTH_EMAIL_EXPIRE"     => "Ez a kód 10 perc múlva lejár. Ha nem ön kérte, figyelmen kívül hagyhatja ezt az e-mailt.",
+	"REAUTH_EMAIL_SENT"       => "Küldtünk önnek egy 6 jegyű kódot e-mailben.",
+	"REAUTH_EMAIL_FAIL"       => "Nem sikerült elküldeni az e-mailt. Kérjük, próbáljon másik módszert.",
+	"REAUTH_EMAIL_NONE"       => "Kérjük, először kérjen egy kódot.",
+	"REAUTH_EMAIL_EXPIRED"    => "Ez a kód lejárt. Kérjük, kérjen újat.",
+	"REAUTH_EMAIL_TOOMANY"    => "Túl sok próbálkozás. Kérjük, kérjen új kódot.",
+	"REAUTH_EMAIL_BAD"        => "Helytelen kód.",
+	"REAUTH_PASSKEY_BTN"      => "Hozzáférési kulcs használata",
+	"REAUTH_SOCIAL_BTN"       => "Ellenőrzés ezzel:",
+	"REAUTH_SOCIAL_MISMATCH"  => "Ez a fiók nem egyezik a bejelentkezésével. Kérjük, próbálja újra.",
+));
+
+// 2FA verification page (totp_verification.php) custom keys
+$lang = array_merge($lang, array(
+	"2FA_VERIFY_TROUBLE"   => "Problémája van a hitelesítő alkalmazással?",
+	"2FA_BACKUP_CODE_HELP" => "Adja meg az egyik mentett tartalék kódot",
+	"2FA_USE_BACKUP_BTN"   => "Tartalék kód használata",
+));
+
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {
 	include($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php");
 }

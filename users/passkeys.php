@@ -34,12 +34,9 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
             if ($db->query("DELETE FROM us_passkeys WHERE id = ? AND user_id = ?", [$passkey_id, $userId])) {
                 logger($userId, 'Passkey Deleted', 'Deleted passkey id: ' . $passkey_id);
                 usSuccess(lang("PASSKEY_DELETE_SUCCESS"));
-
-                $remainingPasskeys = $db->query("SELECT COUNT(*) as count FROM us_passkeys WHERE user_id = ?", [$userId])->first()->count;
-                if ($remainingPasskeys == 0) {
-                    $db->update('users', $userId, ['passkey_enabled' => 0]);
-                    logger($userId, 'Passkey', 'Last passkey deleted, passkey_enabled set to 0.');
-                }
+                // Passkey "enabled" state is derived from the us_passkeys table
+                // (deleting the row above is the source of truth); there is no
+                // denormalized users-table flag to maintain.
             } else {
                 usError(lang("PASSKEY_DELETE_FAIL_DB"));
                 logger($userId, 'Passkey Error', 'Failed to delete passkey id: ' . $passkey_id . ' DB Error: ' . $db->errorString());
@@ -96,7 +93,7 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
                         $passkeys = $db->query("SELECT * FROM us_passkeys WHERE user_id = ? ORDER BY created DESC", [$userId])->results(); 
                     ?>
                     <?php if(count($passkeys) < 10): ?>
-                        <button class="btn btn-primary mb-3" onclick="registerPasskey()"><?=lang("PASSKEY_REGISTER_NEW")?></button>
+                        <button type="button" class="btn btn-primary mb-3" data-pk-action="register"><?=lang("PASSKEY_REGISTER_NEW")?></button>
                     <?php else: ?>
                         <div class="alert alert-info"><?=lang("PASSKEY_ERR_LIMIT_REACHED")?></div>
                     <?php endif; ?>
@@ -106,26 +103,26 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
                         <?php foreach($passkeys as $pk): ?>
                             <div class="col-12 col-md-6 col-xl-4 mb-3">
                             <div class="card shadow-sm h-100">
-                                <div class="card-header bg-light">
+                                <div class="card-header bg-body-tertiary">
                                     <h6 class="mb-0"><i class="fa fa-key me-2"></i><?= safeReturn($pk->passkey_note) ?: '—' ?></h6>
                                 </div>
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span class="text-muted"><?=lang("PASSKEY_TIMES_USED_TH")?></span>
+                                        <span class="text-body-secondary"><?=lang("PASSKEY_TIMES_USED_TH")?></span>
                                         <strong><?= $pk->times_used ?></strong>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span class="text-muted"><?=lang("PASSKEY_LAST_USED_TH")?></span>
+                                        <span class="text-body-secondary"><?=lang("PASSKEY_LAST_USED_TH")?></span>
                                         <strong><?= $pk->last_used ?></strong>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span class="text-muted"><?=lang("PASSKEY_LAST_IP_TH")?></span>
+                                        <span class="text-body-secondary"><?=lang("PASSKEY_LAST_IP_TH")?></span>
                                         <strong><?= $pk->last_ip ?></strong>
                                     </li>
                                 </ul>
                                 <div class="card-footer d-flex gap-2">
-                                    <button type="button" class="btn btn-info btn-sm" onclick="showEditForm(<?= $pk->id ?>, '<?= safeReturn($pk->passkey_note, ENT_QUOTES) ?>')"><?=lang("PASSKEY_EDIT_NOTE_BTN")?></button>
-                                    <form method="post" onsubmit="return confirm('<?=lang('PASSKEY_CONFIRM_DELETE_JS')?>');" class="d-inline ms-auto">
+                                    <button type="button" class="btn btn-info btn-sm" data-pk-edit-id="<?= $pk->id ?>" data-pk-edit-note="<?= safeReturn($pk->passkey_note, ENT_QUOTES) ?>"><?=lang("PASSKEY_EDIT_NOTE_BTN")?></button>
+                                    <form method="post" data-us-confirm="<?= safeReturn(lang('PASSKEY_CONFIRM_DELETE_JS')) ?>" class="d-inline ms-auto">
                                         <?=tokenHere();?>
                                         <input type="hidden" name="passkey_id" value="<?= $pk->id ?>">
                                         <button type="submit" name="deletePasskey" class="btn btn-danger btn-sm"><?=lang("GEN_DEL")?></button>
@@ -165,7 +162,7 @@ if (Server::get('REQUEST_METHOD') === 'POST') {
                     <?php endif; ?>
                 <?php else: ?>
                     <div class="text-center">
-                        <button class="btn btn-lg btn-primary mb-3" onclick="authenticatePasskey()"><?=lang("PASSKEYS_LOGIN_TITLE")?></button>
+                        <button type="button" class="btn btn-lg btn-primary mb-3" data-pk-action="authenticate"><?=lang("PASSKEYS_LOGIN_TITLE")?></button>
                         <hr>
                         <p><?=lang("PASSKEY_MUST_REGISTER_FIRST")?></p>
                         <a href="<?=$us_url_root?>users/login.php" class="btn btn-secondary"><?=lang("PASSKEY_BACK_TO_LOGIN"); ?></a>
@@ -830,18 +827,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('login') && urlParams.get('login') === '1') {
         // Only auto-login if not already logged in (check for register button)
-        if (!document.querySelector('button[onclick="registerPasskey()"]')) {
+        if (!document.querySelector('[data-pk-action="register"]')) {
             authenticatePasskey();
         }
     }
 });
 
-// Expose functions globally for onclick handlers
+// Expose functions globally (kept for any external callers)
 window.registerPasskey = registerPasskey;
 window.authenticatePasskey = authenticatePasskey;
 window.runDiagnostics = runDiagnostics;
 window.toggleTroubleshooting = toggleTroubleshooting;
 window.showEditForm = showEditForm;
+
+// CSP-friendly bindings (replace inline on* attributes)
+document.addEventListener('click', function (e) {
+    var act = e.target.closest && e.target.closest('[data-pk-action]');
+    if (act) {
+        if (act.getAttribute('data-pk-action') === 'register') registerPasskey();
+        else if (act.getAttribute('data-pk-action') === 'authenticate') authenticatePasskey();
+    }
+    var edit = e.target.closest && e.target.closest('[data-pk-edit-id]');
+    if (edit) showEditForm(edit.getAttribute('data-pk-edit-id'), edit.getAttribute('data-pk-edit-note'));
+});
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest && e.target.closest('form[data-us-confirm]');
+    if (form && !window.confirm((form.getAttribute('data-us-confirm') || '').replace(/\\n/g, '\n'))) {
+        e.preventDefault();
+    }
+}, true);
 </script>
 
 <?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

@@ -42,7 +42,7 @@ Special thanks to John Bovey for the basis of the password strength feature.
         ?>
       <?php endif; ?>
 
-      <form class="form-signup border p-4 bg-light mb-5" action="" method="POST" id="payment-form">
+      <form class="form-signup border p-4 bg-body-tertiary mb-5" action="" method="POST" id="payment-form">
 
         <div class="row mb-3">
           <label id="username-label" class="col-form-label col-12 col-md-4 text-md-right text-md-end"><?= lang("GEN_UNAME"); ?> *</label>
