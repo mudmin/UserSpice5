@@ -100,6 +100,36 @@ if (!function_exists('echouser')) {
   }
 }
 
+if (!function_exists('echouserSqlExpr')) {
+  // SQL counterpart of echouser()'s modes: returns an expression that formats a
+  // display name from already-joined columns, so server-side parsers can use one
+  // expression for display, ORDER BY and search instead of an N+1 echouser() call.
+  // $echoType defaults to $settings->echouser; column names are caller-supplied
+  // and MUST be trusted identifiers (never user input).
+  function echouserSqlExpr($userCol, $fnameCol, $lnameCol, $echoType = null)
+  {
+    global $settings;
+    $echoType = ($echoType !== null) ? (int) $echoType : (int) $settings->echouser;
+    $ucfirst = function ($c) {
+      return "CONCAT(UPPER(LEFT($c,1)),SUBSTRING($c,2))";
+    };
+    $names = "CONCAT_WS(' ', $fnameCol, $lnameCol)";
+    switch ($echoType) {
+      case 0:
+        return $names;
+      case 2:
+        return "CONCAT(" . $ucfirst($userCol) . ", ' (', $names, ')')";
+      case 3:
+        return "CONCAT(" . $ucfirst($userCol) . ", ' (', $fnameCol, ')')";
+      case 4:
+        return "CONCAT(" . $ucfirst($fnameCol) . ", ' ', UPPER(LEFT($lnameCol,1)))";
+      case 1:
+      default: // settings constrain echouser to 0-4; fall back to username
+        return $ucfirst($userCol);
+    }
+  }
+}
+
 
 if (!function_exists('echousername')) {
   function echousername($id)
@@ -441,7 +471,7 @@ if (!function_exists('socialLogin')) {
 
       // Update with filtered fields only
       if (!empty($filteredFields)) {
-        $user->update($filteredFields);
+        $user->update($filteredFields, $user->data()->id);
       }
 
     // Handle new user

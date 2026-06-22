@@ -5,7 +5,6 @@ declare(strict_types=1);
  */
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
-use Webauthn\TrustPath\TrustPathLoader; 
 use Webauthn\TrustPath\TrustPath;
 use Webauthn\TrustPath\EmptyTrustPath;
 use Symfony\Component\Uid\Uuid;

@@ -11,6 +11,9 @@ $where = 'WHERE 1=1';
 // Define the tables with aliases for the JOIN
 $tables = "audit a LEFT JOIN users u ON a.user = u.id";
 
+// User display name follows the site's echouser setting
+$nameExpr = echouserSqlExpr('u.username', 'u.fname', 'u.lname');
+
 // Initialize DataTableRequest helper for secure ORDER BY and LIMIT handling
 $dtRequest = new DataTableRequest($db);
 $dtRequest->setColumns([
@@ -63,7 +66,7 @@ $order = $dtRequest->getOrderBy('a.id', 'DESC');
 $limit = $dtRequest->getLimit();
 
 // Final Query
-$logs = $db->query("SELECT a.*, u.username, u.fname, u.lname FROM {$tables} {$where} {$order} {$limit}", $params)->results(); // nosemgrep: userspice-raw-query-concat - $tables is hardcoded, $where/$order/$limit use parameterized placeholders or validated DataTableRequest output
+$logs = $db->query("SELECT a.*, u.username, u.fname, u.lname, {$nameExpr} AS display_name FROM {$tables} {$where} {$order} {$limit}", $params)->results(); // nosemgrep: userspice-raw-query-concat - $tables and $nameExpr are hardcoded identifiers, $where/$order/$limit use parameterized placeholders or validated DataTableRequest output
 
 // Format data
 $data = [];
@@ -77,7 +80,7 @@ foreach ($logs as $l) {
     $userDisplay = '';
     if ($l->user > 0) {
         if ($l->username) {
-            $userDisplay = $l->fname . ' ' . $l->lname . ' (' . $l->username . ')';
+            $userDisplay = safeReturn($l->display_name);
         } else {
             $userDisplay = 'User ID: ' . $l->user;
         }

@@ -1067,6 +1067,16 @@ if (!function_exists('languageSwitcher')) {
 
           return false;
         }
+        $installedLangs = array_map(function ($f) {
+          return substr($f, 0, -4);
+        }, array_values(array_filter(scandir($abs_us_root . $us_url_root . 'users/lang'), function ($f) {
+          return substr($f, -4) === '.php';
+        })));
+        if (!in_array($set, $installedLangs, true)) {
+          err('Language change failed');
+
+          return false;
+        }
         $_SESSION['us_lang'] = $set;
         if (isUserLoggedIn()) {
           $db->update('users', $user->data()->id, ['language' => $set]);

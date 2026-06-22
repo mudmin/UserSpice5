@@ -1,2 +1,2 @@
 <?php
-$user_spice_ver = '6.1.0';
+$user_spice_ver = '6.1.2';

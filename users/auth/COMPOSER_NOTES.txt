@@ -1,10 +1,25 @@
-Manually fixed unpatched bugs
-www/users/auth/vendor/bacon/bacon-qr-code/src/Common/ReedSolomonCodec.php line 225
-public function decode(SplFixedArray $data, SplFixedArray $erasures = null) : ?int
-to this:
-public function decode(SplFixedArray $data, ?SplFixedArray $erasures = null) : ?int
+COMPOSER BINARY
+The composer.phar is intentionally NOT shipped in this folder (it was ~3 MB, ~23%
+of the auth bundle, and end users never run it). To regenerate the lock/vendor on
+your build machine, fetch Composer into this dir first:
+  curl -sS https://getcomposer.org/installer | php -- --filename=composer
+  # or use a system-installed `composer`
+Then run `php composer update` (or `composer update`). Last regenerated with
+Composer 2.8.9.
 
-users/auth/vendor/bacon/bacon-qr-code/src/Encoder/Encoder.php on line 158
-private static function chooseMode(string $content, string $encoding = null) : Mode
-to this:
-private static function chooseMode(string $content, ?string $encoding = null) : Mode
+PLATFORM PIN (important)
+composer.json sets config.platform.php = 8.2.0 so transitive deps resolve to
+versions compatible with our minimum supported PHP (8.2). Do NOT remove this.
+Without it, regenerating the lock on a newer PHP (e.g. 8.5) pulls in Symfony 8.x
+components (string/uid/clock/property-access/property-info/type-info) that require
+PHP >= 8.4.1, which silently breaks login on PHP 8.2/8.3 installs.
+
+After any `composer update`, sanity-check that no package in composer.lock requires
+php >= 8.3/8.4.
+
+---
+OBSOLETE (kept for history): bacon/bacon-qr-code nullable-param hand patches.
+As of bacon/bacon-qr-code v3.1.1 these are fixed upstream and no longer need to be
+applied manually:
+  src/Common/ReedSolomonCodec.php  decode(SplFixedArray $data, ?SplFixedArray $erasures = null)
+  src/Encoder/Encoder.php          chooseMode(string $content, ?string $encoding = null)

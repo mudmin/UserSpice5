@@ -637,7 +637,14 @@ function spiceUpdateFail()
 
 function fetchExpectedRPID(): string
 {
-  return Server::get('HTTP_HOST');
+  $host = Server::get('HTTP_HOST');
+  if (strpos($host, '://') !== false) {
+    $host = (string) parse_url($host, PHP_URL_HOST);
+  }
+  if ($host !== 'localhost' && strpos($host, ':') !== false) {
+    $host = explode(':', $host)[0];
+  }
+  return $host;
 }
 
 

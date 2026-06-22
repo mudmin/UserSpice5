@@ -18,7 +18,9 @@ if(!$db->error()) {
   $missing = array_diff($migrations,$existing_updates);
 
   $update=Input::get('override');
-  if(!in_array($update,$existing_updates) && $update!='') {
+  if($update != '' && (!isset($user) || !$user->isLoggedIn() || !hasPerm([2], $user->data()->id))) {
+    $errors[] = "You are not authorized to override updates.";
+  } elseif(!in_array($update,$existing_updates) && $update!='') {
     $db->insert('updates',['migration'=>$update,'update_skipped'=>1]);
     if(!$db->error()) {
       if($db->count()>0) {

@@ -80,6 +80,30 @@ $rateLimits = [
         'total_max' => 10000,
         'total_window' => 3600
     ],
+    'passkey_auth' => [
+        'ip_max' => 5000,
+        'ip_window' => 3600,
+        'user_max' => 2500,
+        'user_window' => 3600,
+        'total_max' => 10000,
+        'total_window' => 3600
+    ],
+    'passkey_diagnostics' => [
+        'ip_max' => 5000,
+        'ip_window' => 3600,
+        'user_max' => 2500,
+        'user_window' => 3600,
+        'total_max' => 10000,
+        'total_window' => 3600
+    ],
+    'passkey_network-test' => [
+        'ip_max' => 5000,
+        'ip_window' => 3600,
+        'user_max' => 2500,
+        'user_window' => 3600,
+        'total_max' => 10000,
+        'total_window' => 3600
+    ],
 
     // Password and account recovery
     'password_reset_request' => [
@@ -115,16 +139,6 @@ $rateLimits = [
         'email_window' => 3600,
         'total_max' => 10000,
         'total_window' => 3600
-    ],
-
-    // Development/testing - very lenient
-    'diagnostics' => [
-        'ip_max' => 50000,
-        'ip_window' => 300,
-        'user_max' => 50000,
-        'user_window' => 300,
-        'total_max' => 100000,
-        'total_window' => 300
     ]
 ];
 

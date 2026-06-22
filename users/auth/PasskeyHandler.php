@@ -21,7 +21,6 @@ use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
-use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredential;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
@@ -33,18 +32,16 @@ use Cose\Algorithm\Manager as AlgorithmManager;
 use Cose\Algorithm\Signature\ECDSA\ES256;
 use Cose\Algorithm\Signature\RSA\RS256;
 use Webauthn\Counter\ThrowExceptionIfInvalid;
-use Webauthn\CeremonyStep\CeremonyStepManager;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
 
 class PasskeyHandler
 {
     private $db;
     private UserSpicePasskeyCredentialRepository $userSpicePasskeyCredentialRepository;
     private PublicKeyCredentialRpEntity $publicKeyCredentialRpEntity;
-    // NOTE: $publicKeyCredentialLoader and $serverRequestCreator are populated in
-    // the constructor but only consumed by code paths in other UserSpice projects
-    // that share this handler. PHPStan flags them as property.onlyWritten;
-    // whitelisted on the scanner side.
-    private PublicKeyCredentialLoader $publicKeyCredentialLoader;
+    // NOTE: $serverRequestCreator is populated in the constructor but only
+    // consumed by code paths in other UserSpice projects that share this handler.
+    // PHPStan flags it as property.onlyWritten; whitelisted on the scanner side.
     private AuthenticatorAttestationResponseValidator $authenticatorAttestationResponseValidator;
     private AuthenticatorAssertionResponseValidator $authenticatorAssertionResponseValidator;
     private ServerRequestCreator $serverRequestCreator;
@@ -80,33 +77,21 @@ class PasskeyHandler
             new NoneAttestationStatementSupport(),
         ]);
 
-        $this->publicKeyCredentialLoader = new PublicKeyCredentialLoader(
-            new AttestationObjectLoader($attestationStatementSupportManager)
-        );
-
         $algorithmManager = new AlgorithmManager();
         $algorithmManager->add(new ES256());
         $algorithmManager->add(new RS256());
 
-        $ceremonyStepManager = new CeremonyStepManager([]);
+        $csmFactory = new CeremonyStepManagerFactory();
+        $csmFactory->setAlgorithmManager($algorithmManager);
+        $csmFactory->setAttestationStatementSupportManager($attestationStatementSupportManager);
+        $csmFactory->setCounterChecker(new ThrowExceptionIfInvalid());
+        if ($rpId === 'localhost') {
+            $csmFactory->setSecuredRelyingPartyId(['localhost']);
+        }
 
-        $this->authenticatorAttestationResponseValidator = new AuthenticatorAttestationResponseValidator( // @phpstan-ignore arguments.count (deliberate cross-version call: extra positional arguments are required by web-auth/webauthn-lib 4.x and harmlessly ignored by 5.x's reduced constructor.)
-            $ceremonyStepManager,
-            $attestationStatementSupportManager,
-            $this->userSpicePasskeyCredentialRepository,
-            null,
-            null,
-            $algorithmManager
-        );
+        $this->authenticatorAttestationResponseValidator = new AuthenticatorAttestationResponseValidator($csmFactory->creationCeremony());
 
-        $this->authenticatorAssertionResponseValidator = new AuthenticatorAssertionResponseValidator( // @phpstan-ignore arguments.count (deliberate cross-version call: extra positional arguments are required by web-auth/webauthn-lib 4.x and harmlessly ignored by 5.x's reduced constructor.)
-            $ceremonyStepManager,
-            $this->userSpicePasskeyCredentialRepository,
-            null,
-            null,
-            $algorithmManager,
-            new ThrowExceptionIfInvalid()
-        );
+        $this->authenticatorAssertionResponseValidator = new AuthenticatorAssertionResponseValidator($csmFactory->requestCeremony());
 
         $psr17Factory = new Psr17Factory();
 

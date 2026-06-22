@@ -1126,8 +1126,9 @@ function calculateSecurityScore($settings, $php_status, $rpid_status, $email_con
     // Passkeys enabled (5 points) - Deduct if disabled
     if (!$settings->passkeys) $score -= 5;
 
-    // Email login available (5 points) - Deduct if disabled
-    if ($settings->email_login == 0) $score -= 5;
+    // Email login availability is intentionally NOT scored. Whether to allow
+    // login by email address is a usability choice, not a hardening step, so it
+    // is surfaced as an informational recommendation instead of a deduction.
 
     // Security headers (10 points) - Deduct 2 points per missing header
     $score -= ((5 - $headers_configured) * 2);
@@ -1156,6 +1157,16 @@ $deprecated_files_present = !empty($deprecated_php_files);
 $security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers, $init_has_samesite, $init_has_cookie_secure, $extra_curl_security_enabled, $deprecated_files_present);
 $score_color = $security_score >= 75 ? 'success' : ($security_score >= 60 ? 'warning' : 'danger');
 
+// Detect updates that were skipped/overridden but never acknowledged. The
+// confirm_skipped column is added by the 2026-06-16a migration; guard against it
+// being absent (new view deployed before the migration runs) by checking
+// $db->error() rather than assuming the column exists.
+$skipped_unconfirmed = 0;
+$skippedQ = $db->query("SELECT COUNT(*) AS c FROM updates WHERE update_skipped IS NOT NULL AND (confirm_skipped IS NULL OR confirm_skipped = 0)");
+if (!$db->error()) {
+    $skipped_unconfirmed = (int)($skippedQ->first()->c ?? 0);
+}
+
 // Build dynamic recommendations
 $recommendations = [];
 
@@ -1165,6 +1176,19 @@ if (!$is_updated) {
         'text' => "Your UserSpice version ({$user_spice_ver}) is outdated. Update to the latest version ({$versions->release_version}) for the newest features and security patches.",
         'link_text' => 'Go to Updates',
         'link_url' => $us_url_root . 'users/admin.php?view=updates'
+    ];
+}
+
+// Skipped/overridden updates that haven't been acknowledged (recommendation only -
+// no score impact).
+if ($skipped_unconfirmed > 0) {
+    $recommendations[] = [
+        'title' => 'Review Skipped Updates',
+        'text' => 'You have ' . $skipped_unconfirmed . ' update' . ($skipped_unconfirmed === 1 ? '' : 's') . ' that ' . ($skipped_unconfirmed === 1 ? 'was' : 'were') . ' skipped or overridden instead of applied. Skipped updates can leave your site missing schema changes or security fixes. Review ' . ($skipped_unconfirmed === 1 ? 'it' : 'them') . ' and confirm you intend to skip ' . ($skipped_unconfirmed === 1 ? 'it' : 'them') . '.',
+        'link_text' => 'Review Updates',
+        'link_url' => $us_url_root . 'users/admin.php?view=updates',
+        'level' => 'warning',
+        'icon' => 'fa-forward'
     ];
 }
 
@@ -1241,6 +1265,20 @@ if (!$settings->passkeys) {
         'text' => 'Passkeys offer a modern, secure, and passwordless login method that is resistant to phishing. Enable this option for your users.',
         'link_text' => 'Enable Passkeys',
         'link_url' => $us_url_root . 'users/admin.php?view=general&highlight=passkeys'
+    ];
+}
+
+// Email login is optional and does NOT affect the security score - surface it as
+// an informational nudge only.
+if ($settings->email_login == 0) {
+    $recommendations[] = [
+        'title' => 'Consider Enabling Email Login',
+        'text' => 'Email login is currently disabled, so users must sign in with their username. Enabling it also lets users log in with their email address, which many find more convenient. This is optional and does not affect your security score.',
+        'link_text' => 'Enable Now',
+        'link_url' => '#',
+        'modal' => 'confirm-email_login',
+        'level' => 'info',
+        'icon' => 'fa-envelope-open-text'
     ];
 }
 

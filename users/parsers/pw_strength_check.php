@@ -17,7 +17,7 @@ if(!isset($pw_settings->min_length)){
     echo json_encode($resp);die;
 }
 foreach($pw_settings as $key => $value){
-    $pw_settings->key = (int) $value;
+    $pw_settings->$key = (int) $value;
 }
 $password = $_POST['password'];
 $score = userSpicePasswordScore($password);

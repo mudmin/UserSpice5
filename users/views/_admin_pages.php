@@ -178,6 +178,19 @@ if (!empty($_POST)) {
   } //end of add folder to monitor
 } //end of post
 $csrf = Token::generate();
+
+// Fetch every page->permission mapping in ONE query, then group by page_id so the
+// render loop below does no per-row queries (avoids an N+1 against the DB).
+$pagePerms = [];
+$permRows = $db->query(
+  'SELECT m.page_id, p.name
+   FROM permission_page_matches m
+   JOIN permissions p ON p.id = m.permission_id
+   ORDER BY m.page_id, p.name'
+)->results();
+foreach ((array) $permRows as $pr) {
+  $pagePerms[$pr->page_id][] = $pr->name;
+}
 ?>
 
 <h2>Manage Page Access
@@ -216,6 +229,7 @@ $csrf = Token::generate();
           <th>Page Name</th>
           <th>Lang Key</th>
           <th>Access</th>
+          <th>Permissions</th>
         </tr>
       </thead>
       <tbody>
@@ -242,6 +256,15 @@ $csrf = Token::generate();
                   echo "<span style='color:red'>Private</span>";
                 } ?>
               </a>
+            </td>
+            <td>
+              <?php
+              $perms = $pagePerms[$dbpages[$count]->id] ?? [];
+              if (empty($perms)) {
+                echo "<span class='text-muted'>&mdash;</span>";
+              } else {
+                echo "<small>" . htmlspecialchars(implode(', ', $perms)) . "</small>";
+              } ?>
             </td>
           </tr>
         <?php

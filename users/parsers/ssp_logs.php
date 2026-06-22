@@ -10,12 +10,16 @@ $where = 'WHERE 1=1';
 
 $tables = "logs l LEFT JOIN users u ON l.user_id = u.id";
 
+// User display name follows the site's echouser setting; one SQL expression
+// drives the User column's display, sorting and search.
+$nameExpr = echouserSqlExpr('u.username', 'u.fname', 'u.lname');
+
 // Initialize DataTableRequest helper for secure ORDER BY and LIMIT handling
 $dtRequest = new DataTableRequest($db);
 $dtRequest->setColumns([
     0 => 'l.id',
     1 => 'l.ip',
-    2 => 'CONCAT(u.fname, u.lname)',
+    2 => $nameExpr,
     3 => 'l.cloak_from',
     4 => 'l.logdate',
     5 => 'l.logtype',
@@ -39,8 +43,8 @@ if (!empty($_GET['mode'])) {
 if (!empty($_GET['search']['value'])) {
     $val = Input::sanitize($_GET['search']['value']);
     $searchTerm = '%' . $val . '%';
-    $where .= " AND (l.ip LIKE ? OR l.logtype LIKE ? OR l.lognote LIKE ? OR u.fname LIKE ? OR u.lname LIKE ?)";
-    $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+    $where .= " AND (l.ip LIKE ? OR l.logtype LIKE ? OR l.lognote LIKE ? OR u.username LIKE ? OR u.fname LIKE ? OR u.lname LIKE ?)";
+    $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
 
 $totalRecords = $db->query("SELECT COUNT(*) as count FROM logs")->first()->count;
@@ -53,7 +57,7 @@ $order = $dtRequest->getOrderBy('l.id', 'DESC');
 $limit = $dtRequest->getLimit();
 
 // Final Query - NOW SELECTS FROM JOIN
-$logs = $db->query("SELECT l.*, u.fname, u.lname FROM {$tables} {$where} {$order} {$limit}", $params)->results();
+$logs = $db->query("SELECT l.*, u.username, u.fname, u.lname, {$nameExpr} AS display_name FROM {$tables} {$where} {$order} {$limit}", $params)->results();
 
 // Format data
 $data = [];
@@ -62,15 +66,15 @@ foreach ($logs as $l) {
     $row[] = '<span class="hideMe">' . sprintf('%11d', $l->id) . '</span>' . $l->id;
     $row[] = $l->ip;
 
-    // Display Name from JOIN results, with fallbacks for system/unknown users
+    // Display name follows echouser (via $nameExpr), with system/unknown fallbacks
     if ($l->user_id == 0) {
         $userName = 'System';
-    } elseif ($l->fname) {
-        $userName = $l->fname . ' ' . $l->lname;
+    } elseif ($l->display_name !== null && $l->display_name !== '') {
+        $userName = $l->display_name;
     } else {
         $userName = 'Unknown User';
     }
-    $row[] = $userName . ' (' . $l->user_id . ')';
+    $row[] = safeReturn($userName) . ' (' . $l->user_id . ')';
     $row[] = $l->cloak_from ? $l->cloak_from : null;
     $row[] = $l->logdate;
     $row[] = $l->logtype;

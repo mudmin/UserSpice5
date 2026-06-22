@@ -221,7 +221,12 @@ if ($method == "enter_email") {
 
       // Generate verification code for modes 2 and 3
       if ($settings->email_login == 2 || $settings->email_login == 3) {
-        $verification_code = substr(str_shuffle(passwordlessCharset()), 0, $settings->pwl_length);
+        $charset = passwordlessCharset();
+        $max = strlen($charset) - 1;
+        $verification_code = '';
+        for ($i = 0; $i < (int)$settings->pwl_length; $i++) {
+          $verification_code .= $charset[random_int(0, $max)];
+        }
         $fields['verification_code'] = hashVericode($verification_code);
       }
 

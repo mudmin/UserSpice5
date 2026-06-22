@@ -33,6 +33,30 @@ if (isset($_POST['save_api_key'])) {
   Redirect::to($us_url_root . 'users/admin.php?view=updates');
 }
 
+// Confirm a skipped/overridden update so it stops nagging on the security
+// dashboard. Restricted to master accounts because acknowledging a skipped
+// update is a security decision, not a routine setting change.
+if (isset($_POST['confirm_skip'])) {
+    if (!Token::check(Input::get('csrf'))) {
+        include($abs_us_root . $us_url_root . 'usersc/scripts/token_error.php');
+    }
+    if (!in_array($user->data()->id, $master_account)) {
+        usError("Only a master account can confirm skipped updates.");
+        Redirect::to($us_url_root . 'users/admin.php?view=updates');
+    }
+    $skip_id = (int) Input::get('confirm_skip');
+    if ($skip_id > 0) {
+        $db->update('updates', $skip_id, ['confirm_skipped' => 1]);
+        if (!$db->error()) {
+            logger($user->data()->id, 'System Updates', "Confirmed skipped update id {$skip_id}.");
+            usSuccess("Skipped update acknowledged.");
+        } else {
+            usError("Could not update record: " . $db->errorString());
+        }
+    }
+    Redirect::to($us_url_root . 'users/admin.php?view=updates');
+}
+
 $update_available = false;
 ?>
 <div class="row">
@@ -557,6 +581,55 @@ $update_available = false;
     </div>
   </div>
 </div>
+<?php
+// Skipped/overridden updates awaiting acknowledgement. Surfaced here because the
+// security dashboard links admins to this page to review them.
+$skipped_updates = [];
+$skippedQ = $db->query("SELECT id, migration, applied_on FROM updates WHERE update_skipped IS NOT NULL AND (confirm_skipped IS NULL OR confirm_skipped = 0) ORDER BY applied_on DESC");
+if (!$db->error()) {
+    $skipped_updates = $skippedQ->results();
+}
+$is_master = in_array($user->data()->id, $master_account);
+if (!empty($skipped_updates)) : ?>
+<div class="row">
+  <div class="col-12 col-md-8 mx-auto mt-3">
+    <div class="card border-warning">
+      <div class="card-header bg-warning text-dark">
+        <i class="fas fa-forward me-1"></i> Skipped Updates
+      </div>
+      <div class="card-body">
+        <p>The following update<?= count($skipped_updates) === 1 ? ' was' : 's were' ?> skipped or overridden instead of being applied. Skipping an update can leave your site missing schema changes or security fixes. If you intentionally skipped <?= count($skipped_updates) === 1 ? 'it' : 'them' ?>, confirm below to clear the security dashboard reminder.</p>
+        <?php if (!$is_master) : ?>
+          <div class="alert alert-info"><i class="fas fa-lock me-1"></i> Only a master account can confirm skipped updates.</div>
+        <?php endif; ?>
+        <table class="table table-sm align-middle mb-0">
+          <thead><tr><th>Update</th><th>Skipped On</th><th class="text-end">Action</th></tr></thead>
+          <tbody>
+          <?php foreach ($skipped_updates as $su) : ?>
+            <tr>
+              <td><code><?= safeReturn($su->migration) ?></code></td>
+              <td><?= safeReturn($su->applied_on) ?></td>
+              <td class="text-end">
+                <?php if ($is_master) : ?>
+                  <form action="" method="post" class="d-inline m-0">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="submit" name="confirm_skip" value="<?= (int) $su->id ?>" class="btn btn-sm btn-outline-success">
+                      <i class="fas fa-check me-1"></i>Confirm Skip
+                    </button>
+                  </form>
+                <?php else : ?>
+                  <span class="text-muted">&mdash;</span>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 <div class="row">
   <div class="col-12 text-center">
     <?php
