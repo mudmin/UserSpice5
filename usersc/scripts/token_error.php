@@ -12,7 +12,7 @@ if(!isset($lang) || !in_array("MAINT_TOK",$lang)){
   ];
 }
  ?>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 body {
     background-color: white;
 }
