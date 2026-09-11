@@ -23,11 +23,7 @@ $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? Input::sanitize(Server::get('
 if (!function_exists('ipCheck')) {
   function ipCheck(): string
   {
-    // Treat true CLI & PHPDBG as "no remote addr"
-    if (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') {
-      return '127.0.0.1';
-    }
-    return Server::get('REMOTE_ADDR');
+    return ClientIP::get();
   }
 }
 
@@ -637,7 +633,16 @@ if (!function_exists('random_password')) {
     // CSPRNG sampling over the password alphabet. The legacy str_shuffle
     // implementation used Mersenne Twister, capped output at 80 chars, and
     // produced unique-char-only strings — none acceptable for passwords.
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?';
+    //
+    // The alphabet deliberately excludes every character Input::sanitize()
+    // rewrites (& < > " '). login.php verifies trim(Input::get('password')),
+    // so what reaches password_verify() is always htmlspecialchars'd. A
+    // generated password containing one of those characters can therefore
+    // never match a hash made from the raw string: User::loginEmail()'s only
+    // fallback re-verifies the htmlentities form, not the raw one, and that
+    // fallback is skipped entirely at cost >= 13 (what we hash new users at).
+    // Do not add those five characters back without fixing that pipeline.
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()_-=+;:,.?[]{}~';
     $max = strlen($chars) - 1;
     $password = '';
     for ($i = 0; $i < $length; $i++) {
@@ -1031,27 +1036,21 @@ if (!function_exists('languageSwitcher')) {
   function languageSwitcher()
   {
 
-    global $db, $user, $abs_us_root, $us_url_root, $currentPage, $settings, $token;
+    global $db, $user, $abs_us_root, $us_url_root, $currentPage, $settings;
     if ($settings->allow_language != 1) {
       return false;
     }
-    $your_token = ipCheck();
     if (!empty($_POST['language_selector'])) {
-      $the_token = Input::get('your_token');
-      if ($your_token != $the_token) {
+      if (!Token::check(Input::get('csrf'))) {
         err('Language change failed');
 
         return false;
       } else {
-        $count = 0;
         $set = '';
         foreach ($_POST as $k => $v) {
-          ++$count;
-
-          if ($count != 3) {
-            continue;
-          } else {
+          if (substr($k, -2) === '_x') {
             $set = substr($k, 0, -2);
+            break;
           }
         }
         if (strlen($set) != 5 || (substr($set, 2, 1) != '-')) {
@@ -1077,13 +1076,10 @@ if (!function_exists('languageSwitcher')) {
         Redirect::to(currentPage());
       }
     }
-    $_SESSION['your_token'] = $your_token;
     $languages = scandir($abs_us_root . $us_url_root . 'users/lang'); ?>
 
     <form class="" action="" method="post">
       <p align="center">
-        <input type="hidden" name="your_token" value="<?php echo $your_token; ?>">
-
         <input type="hidden" name="language_selector" value="1">
         <?php
         foreach ($languages as $k => $v) {
@@ -1093,7 +1089,7 @@ if (!function_exists('languageSwitcher')) {
         <?php }
         } ?>
       </p>
-      <input type="hidden" name="csrf" value="<?php echo $token; ?>">
+      <input type="hidden" name="csrf" value="<?php echo Token::generate(); ?>">
     </form>
   <?php
   }

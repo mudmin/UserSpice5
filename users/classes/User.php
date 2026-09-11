@@ -209,17 +209,45 @@ class User
                     $strength = 999;
                 }
 
-                if (password_verify($password, $this->data()->password)) {
-                    $success = true;
-                    //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
-                } elseif (!is_null($rawpassword) && $strength < 13) {
-                    if (password_verify(Input::sanitize($rawpassword, true, true), $this->data()->password)) {
+                // login.php passes $password already run through Input::sanitize()
+                // (htmlspecialchars) and $rawpassword straight from $_POST. Over the
+                // years hashes have been built from three different renderings of the
+                // same secret, so try each one that is actually distinct:
+                //   1. the sanitized form - what every current UserSpice page hashes.
+                //   2. the htmlentities form - legacy, from when Input::sanitize()
+                //      used htmlentities. Only ever applied to pre-cost-13 hashes.
+                //   3. the raw, unsanitized string - anything that called
+                //      password_hash() on a secret it never put through Input, such
+                //      as generated passwords, plugins, or seeding scripts. Without
+                //      this a secret containing & < > " ' could never be verified,
+                //      because login always sanitizes before checking.
+                // Duplicates are dropped, so a password with no HTML-special
+                // characters (the overwhelming majority) still costs exactly one
+                // bcrypt on both success and failure.
+                $candidates = [$password];
+                if (!is_null($rawpassword) && $rawpassword !== '') {
+                    if ($strength < 13) {
+                        $candidates[] = Input::sanitize($rawpassword, true, true);
+                    }
+                    $candidates[] = $rawpassword;
+                }
+
+                //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
+                $matched = null;
+                foreach (array_unique($candidates) as $candidate) {
+                    if (password_verify($candidate, $this->data()->password)) {
                         $success = true;
+                        $matched = $candidate;
+                        break;
                     }
                 }
 
                 if ($success) {
-                    if ($strength < 13) {
+                    // Rehash when the stored hash is weak, and also when it turned out
+                    // to be built from a rendering other than the sanitized one, so the
+                    // account converges on a single canonical hash and later logins
+                    // match on the first candidate.
+                    if ($strength < 13 || $matched !== $password) {
                         //deal with custom login forms that do not properly pass the password
                         if ($rawpassword != null && $rawpassword != "") {
                             $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);

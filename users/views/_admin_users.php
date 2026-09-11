@@ -157,7 +157,6 @@ include $abs_us_root . $us_url_root . 'users/includes/user_manager_columns.php';
 // Get user data using the custom function
 $userData = $user_manager_get_data($settings, $db, $uCount, $maxUsers);
 $showAllUsers = $settings->uman_search == 0 ? Input::get('showAllUsers') : false;
-$random_password = random_password();
 
 foreach ($validation->errors() as $error) {
   usError($error);
