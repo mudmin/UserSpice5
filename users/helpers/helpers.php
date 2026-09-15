@@ -232,7 +232,11 @@ if (!function_exists('email')) {
       require_once $abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php";
     }
     $result = $mail->send();
-
+    
+    if (!$result) {
+      logger('', 'Email', 'Failed to send email to ' . (is_array($to) ? implode(',', $to) : $to) . ': ' . $mail->ErrorInfo);
+    }
+    
     return $result;
   }
 }
