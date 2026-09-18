@@ -21,7 +21,7 @@ $pos = [
 $containerClasses = 'toast-container position-fixed ' . $pos;
 ?>
 
-<style>
+<style nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>"> {
 #us-toast-container {
     padding-top: 4.6rem; 
     padding-left: .5rem;
