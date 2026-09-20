@@ -455,7 +455,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
   });
 </script>
 
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .card-custom {
     overflow: hidden;
     min-height: 450px;

@@ -17,23 +17,40 @@ if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt'
 }
 
 // Get proxy configuration status
-$proxy_enabled = isset($settings->behind_reverse_proxy) && $settings->behind_reverse_proxy;
-$proxy_config_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
+$ip_config = ClientIP::config();
+$file_mode = ($ip_config['source'] === 'file');
+$proxy_config_file = ClientIP::configFile();
+$file_writable = $file_mode ? is_writable($proxy_config_file) : is_writable(dirname($proxy_config_file));
+$proxy_enabled = $ip_config['enabled'];
+if ($file_mode) {
+    $proxy_config_count = count($ip_config['trusted_proxies']);
+} else {
+    $proxy_config_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
+}
 
 // Handle form submissions
 if (!empty($_POST)) {
-    if (!Token::check($_POST['csrf'])) {
+    if (!Token::check($_POST['csrf'] ?? '')) {
         usError("Token failed");
         Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
     }
 
     // Handle proxy settings toggle
     if (isset($_POST['toggle_proxy'])) {
-        $new_val = $settings->behind_reverse_proxy ? 0 : 1;
-        $db->update('settings', 1, ['behind_reverse_proxy' => $new_val]);
-        $message = $new_val ? "Configuration updated: UserSpice is now set as being behind a reverse proxy." : "Configuration updated: UserSpice is no longer set as being behind a reverse proxy.";
-        usSuccess($message);
-        logger($user->data()->id, 'RateLimit', "Toggled 'behind_reverse_proxy' setting to $new_val");
+        $new_val = $proxy_enabled ? 0 : 1;
+        if ($file_mode && $ip_config['enabled_from_file']) {
+            if ($file_writable && ClientIP::writeConfigFile($ip_config['trusted_proxies'], $ip_config['trusted_headers'], (bool)$new_val)) {
+                usSuccess("Configuration updated in the trusted proxy config file.");
+                logger($user->data()->id, 'RateLimit', "Toggled proxy mode to $new_val in trusted_proxies.php");
+            } else {
+                usError("This setting is controlled by usersc/includes/trusted_proxies.php, which is not writable.");
+            }
+        } else {
+            $db->update('settings', 1, ['behind_reverse_proxy' => $new_val]);
+            $message = $new_val ? "Configuration updated: UserSpice is now set as being behind a reverse proxy." : "Configuration updated: UserSpice is no longer set as being behind a reverse proxy.";
+            usSuccess($message);
+            logger($user->data()->id, 'RateLimit', "Toggled 'behind_reverse_proxy' setting to $new_val");
+        }
         Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
     }
 
@@ -57,15 +74,30 @@ if (!empty($_POST)) {
             Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
         }
 
-        if (filter_var($proxy_ip, FILTER_VALIDATE_IP) || preg_match('/^\d+\.\d+\.\d+\.\d+\/\d+$/', $proxy_ip)) {
-            $db->insert('us_rate_limit_proxy_settings', [
-                'proxy_ip' => $proxy_ip,
-                'header_name' => $header_name,
-                'priority' => $priority,
-                'enabled' => 1
-            ]);
-            usSuccess("Trusted proxy source added successfully");
-            logger($user->data()->id, 'RateLimit', "Added proxy config: $proxy_ip using header $header_name");
+        if (ClientIP::validCidr($proxy_ip)) {
+            if ($file_mode) {
+                $proxies = $ip_config['trusted_proxies'];
+                $headers = $ip_config['trusted_headers'];
+                if (!in_array($proxy_ip, $proxies, true)) {
+                    $proxies[] = $proxy_ip;
+                }
+                $headers[$header_name] = $priority;
+                if ($file_writable && ClientIP::writeConfigFile($proxies, $headers)) {
+                    usSuccess("Trusted proxy source added to the config file");
+                    logger($user->data()->id, 'RateLimit', "Added proxy $proxy_ip using header $header_name to trusted_proxies.php");
+                } else {
+                    usError("The trusted proxy config file is not writable");
+                }
+            } else {
+                $db->insert('us_rate_limit_proxy_settings', [
+                    'proxy_ip' => $proxy_ip,
+                    'header_name' => $header_name,
+                    'priority' => $priority,
+                    'enabled' => 1
+                ]);
+                usSuccess("Trusted proxy source added successfully");
+                logger($user->data()->id, 'RateLimit', "Added proxy config: $proxy_ip using header $header_name");
+            }
         } else {
             usError("Invalid IP address or CIDR format");
         }
@@ -78,6 +110,62 @@ if (!empty($_POST)) {
         $db->delete('us_rate_limit_proxy_settings', ['id' => $proxy_id]);
         usSuccess("Proxy configuration removed");
         logger($user->data()->id, 'RateLimit', "Deleted proxy config ID: $proxy_id");
+        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
+    }
+
+    // Handle file-based proxy entry deletion
+    if (isset($_POST['delete_proxy_entry']) && $file_mode) {
+        $entry = Input::get('proxy_entry');
+        $proxies = array_values(array_diff($ip_config['trusted_proxies'], [$entry]));
+        if ($file_writable && ClientIP::writeConfigFile($proxies, $ip_config['trusted_headers'])) {
+            usSuccess("Proxy removed from the config file");
+            logger($user->data()->id, 'RateLimit', "Removed proxy $entry from trusted_proxies.php");
+        } else {
+            usError("The trusted proxy config file is not writable");
+        }
+        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
+    }
+
+    // Handle file-based header entry deletion
+    if (isset($_POST['delete_header_entry']) && $file_mode) {
+        $header_entry = Input::get('header_entry');
+        $headers = $ip_config['trusted_headers'];
+        unset($headers[$header_entry]);
+        if ($file_writable && ClientIP::writeConfigFile($ip_config['trusted_proxies'], $headers)) {
+            usSuccess("Header removed from the config file");
+            logger($user->data()->id, 'RateLimit', "Removed header $header_entry from trusted_proxies.php");
+        } else {
+            usError("The trusted proxy config file is not writable");
+        }
+        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
+    }
+
+    // Export database proxy settings to the config file
+    if (isset($_POST['export_proxy_file']) && !$file_mode) {
+        $rows = $db->query("SELECT proxy_ip, header_name, priority FROM us_rate_limit_proxy_settings WHERE enabled = 1 ORDER BY priority ASC")->results();
+        $proxies = [];
+        $headers = [];
+        foreach ($rows as $row) {
+            $proxies[] = trim($row->proxy_ip);
+            $headers[$row->header_name] = (int)$row->priority;
+        }
+        if (ClientIP::writeConfigFile($proxies, $headers)) {
+            usSuccess("Trusted proxy configuration exported to usersc/includes/trusted_proxies.php. The file is now the authoritative source.");
+            logger($user->data()->id, 'RateLimit', "Exported proxy config to trusted_proxies.php");
+        } else {
+            usError("Could not write usersc/includes/trusted_proxies.php. Check directory permissions.");
+        }
+        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
+    }
+
+    // Remove the config file and fall back to database settings
+    if (isset($_POST['remove_proxy_file']) && $file_mode) {
+        if (is_writable(dirname($proxy_config_file)) && unlink($proxy_config_file)) {
+            usSuccess("Trusted proxy config file removed. Database settings are now active.");
+            logger($user->data()->id, 'RateLimit', "Removed trusted_proxies.php; reverted to database proxy config");
+        } else {
+            usError("Could not remove the trusted proxy config file. Check directory permissions.");
+        }
         Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
     }
 
@@ -149,35 +237,8 @@ if (file_exists($init_file)) {
 }
 
 // Get current IP for testing
-$current_ip = Server::get('REMOTE_ADDR', 'unknown');
-$real_ip = $current_ip; // Default fallback
-
-// Try to get real IP if method is available
-if (method_exists($rateLimit, 'getRealIP')) {
-    try {
-        $reflection = new ReflectionMethod($rateLimit, 'getRealIP');
-        if ($reflection->isPublic()) {
-            $real_ip = $rateLimit->getRealIP();
-        }
-    } catch (Exception $e) {
-        // Method might be private, use fallback logic
-        $real_ip = $current_ip;
-        if ($proxy_enabled && !empty($proxy_configs)) {
-            // Basic proxy detection fallback
-            $headers = ['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP'];
-            foreach ($headers as $header) {
-                if (!empty($_SERVER[$header])) {
-                    $ips = explode(',', $_SERVER[$header]);
-                    $client_ip = trim(end($ips));
-                    if (filter_var($client_ip, FILTER_VALIDATE_IP)) {
-                        $real_ip = $client_ip;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}
+$current_ip = ClientIP::peer();
+$real_ip = ClientIP::get();
 
 // Get recent rate limit activity
 $recent_activity = $db->query("
@@ -190,15 +251,18 @@ $recent_activity = $db->query("
 ")->results();
 
 // Get proxy configurations
-$proxy_configs = $db->query("
-    SELECT * FROM us_rate_limit_proxy_settings 
-    WHERE enabled = 1 
-    ORDER BY priority ASC
-")->results();
+$proxy_configs = [];
+if (!$file_mode) {
+    $proxy_configs = $db->query("
+        SELECT * FROM us_rate_limit_proxy_settings
+        WHERE enabled = 1
+        ORDER BY priority ASC
+    ")->results();
+}
 
 ?>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .rate-limit-card {
         transition: all 0.2s ease-in-out;
     }
@@ -309,11 +373,27 @@ $proxy_configs = $db->query("
     </div>
 </div>
 
+<?php if ($file_mode): ?>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info mb-0">
+            <i class="fas fa-file-code me-2"></i>
+            <strong>File-based proxy configuration active.</strong> Trusted proxy settings are loaded from <code>usersc/includes/trusted_proxies.php</code>, and the database proxy settings are ignored while this file exists. Changes made on this page are written to the file.
+            <?php if (!$file_writable): ?>
+                <br><span class="text-danger"><i class="fas fa-lock me-1"></i>The file is not writable, so this page is read-only. Edit the file directly or adjust its permissions.</span>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php if ($proxy_enabled && !$init_uses_getscheme): ?>
 <?php
     // Build dynamic trusted proxies array from configured proxies
     $trusted_proxy_ips = [];
-    if (!empty($proxy_configs)) {
+    if ($file_mode) {
+        $trusted_proxy_ips = $ip_config['trusted_proxies'];
+    } elseif (!empty($proxy_configs)) {
         foreach ($proxy_configs as $pc) {
             $trusted_proxy_ips[] = $pc->proxy_ip;
         }
@@ -635,15 +715,82 @@ if (Server::getScheme($trustedProxies) === 'https') {
                 </div>
                 <small class="text-body-secondary">Enable this if UserSpice sits behind a load balancer, CDN, or reverse proxy that forwards client IPs via headers.</small>
 
-                <?php if ($proxy_enabled && empty($proxy_configs)): ?>
+                <?php if ($proxy_enabled && $proxy_config_count == 0): ?>
                     <div class="alert alert-warning p-2 small mt-2">
                         The 'Behind Proxy' setting is enabled, but no trusted proxy sources are configured. IP detection will fall back to the standard server IP.
                     </div>
                 <?php endif; ?>
+
+                <?php if (!$file_mode && $proxy_config_count > 0): ?>
+                    <form method="post" class="mt-3">
+                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                        <button type="submit" name="export_proxy_file" class="btn btn-sm btn-outline-secondary" data-us-confirm="Write the current proxy settings to usersc/includes/trusted_proxies.php? The file will become the authoritative source, and provisioning scripts can then manage it directly.">
+                            <i class="fas fa-file-export me-1"></i>Export to Config File
+                        </button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
 
-        <?php if (!empty($proxy_configs)): ?>
+        <?php if ($file_mode): ?>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Trusted Proxy Sources</h5>
+                    <span class="badge bg-info">From File</span>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($ip_config['trusted_proxies']) && empty($ip_config['trusted_headers'])): ?>
+                        <div class="p-3 small text-body-secondary">No trusted proxies or headers are defined in the config file.</div>
+                    <?php endif; ?>
+                    <?php foreach ($ip_config['trusted_proxies'] as $entry): ?>
+                        <div class="proxy-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><?= htmlspecialchars($entry) ?></strong>
+                                    <br><small class="text-body-secondary">Trusted proxy</small>
+                                </div>
+                                <?php if ($file_writable): ?>
+                                    <form method="post" class="d-inline">
+                                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                                        <input type="hidden" name="proxy_entry" value="<?= htmlspecialchars($entry) ?>">
+                                        <button type="submit" name="delete_proxy_entry" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this proxy from the config file?">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                    <?php foreach ($ip_config['trusted_headers'] as $header_name => $priority): ?>
+                        <div class="p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><?= htmlspecialchars($header_name) ?></strong>
+                                    <br><small class="text-body-secondary">Header &middot; Priority: <?= (int)$priority ?></small>
+                                </div>
+                                <?php if ($file_writable): ?>
+                                    <form method="post" class="d-inline">
+                                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                                        <input type="hidden" name="header_entry" value="<?= htmlspecialchars($header_name) ?>">
+                                        <button type="submit" name="delete_header_entry" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this header from the config file?">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="card-footer">
+                    <form method="post">
+                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                        <button type="submit" name="remove_proxy_file" class="btn btn-sm btn-outline-danger" data-us-confirm="Delete the trusted proxy config file and switch back to database-managed settings?">
+                            <i class="fas fa-database me-1"></i>Switch Back to Database Config
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <?php elseif (!empty($proxy_configs)): ?>
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-server me-2"></i>Trusted Proxy Sources</h5>

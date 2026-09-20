@@ -25,8 +25,30 @@ if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt'
 }
 
 // Rate limit health score (shared with rate limits page)
-$rl_proxy_enabled = isset($settings->behind_reverse_proxy) && $settings->behind_reverse_proxy;
-$rl_proxy_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
+$rl_ip_config = ClientIP::config();
+$rl_proxy_enabled = $rl_ip_config['enabled'];
+if ($rl_ip_config['source'] === 'file') {
+    $rl_proxy_count = count($rl_ip_config['trusted_proxies']);
+} else {
+    $rl_proxy_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
+}
+$mod_remoteip_active = function_exists('apache_get_modules') && in_array('mod_remoteip', apache_get_modules());
+$upstream_resolved = false;
+if (!$mod_remoteip_active && $rl_proxy_enabled) {
+    $rl_remote_addr = Server::get('REMOTE_ADDR');
+    if ($rl_remote_addr !== '') {
+        foreach ($rl_ip_config['trusted_headers'] as $rl_header => $rl_priority) {
+            $rl_server_key = 'HTTP_' . strtoupper(str_replace('-', '_', $rl_header));
+            if (!empty($_SERVER[$rl_server_key])) {
+                $rl_entries = explode(',', $_SERVER[$rl_server_key]);
+                if (trim(end($rl_entries)) === $rl_remote_addr) {
+                    $upstream_resolved = true;
+                    break;
+                }
+            }
+        }
+    }
+}
 $rate_limit_health = calculateRateLimitHealth($rateLimits, $using_default_rate_limits, $rl_proxy_enabled, $rl_proxy_count);
 $rl_health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60 ? 'warning' : 'danger');
 
@@ -1088,7 +1110,7 @@ $has_default_security = file_exists($security_md_path) && md5_file($security_md_
 $init_file_path = $abs_us_root . $us_url_root . 'users/init.php';
 $init_has_samesite = false;
 $init_has_cookie_secure = false;
-$proxy_enabled = isset($settings->behind_reverse_proxy) && $settings->behind_reverse_proxy;
+$proxy_enabled = $rl_proxy_enabled;
 if (file_exists($init_file_path)) {
     $init_contents = file_get_contents($init_file_path);
     if ($init_contents !== false) {
@@ -1583,7 +1605,7 @@ if ($deprecated_files_present) {
 
 ?>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .quick-action-btn {
         display: flex;
         flex-direction: column;
@@ -2348,7 +2370,33 @@ if ($deprecated_files_present) {
                     <div class="small text-body-secondary">Maximum registration attempts from a single IP</div>
                     <div class="rate-limit-value"><?= $rateLimits['registration_attempt']['ip_max'] ?? 'N/A' ?> attempts / <?= ($rateLimits['registration_attempt']['ip_window'] ?? 0) / 60 ?> minutes</div>
                 </div>
+                <div class="rate-limit-item">
+                    <div><strong>Client IP Resolution</strong></div>
+                    <div class="small text-body-secondary">How UserSpice determines the visitor's IP address</div>
+                    <div class="rate-limit-value">
+                        <?php if (!$rl_proxy_enabled): ?>
+                            Direct connection (REMOTE_ADDR)
+                        <?php elseif ($rl_ip_config['source'] === 'file'): ?>
+                            Proxy headers &mdash; managed by <code>usersc/includes/trusted_proxies.php</code>
+                        <?php else: ?>
+                            Proxy headers &mdash; database settings (<?= $rl_proxy_count ?> trusted source<?= $rl_proxy_count == 1 ? '' : 's' ?>)
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <hr>
+                <?php if ($rl_proxy_enabled && ($mod_remoteip_active || $upstream_resolved)): ?>
+                    <div class="alert alert-warning p-2">
+                        <strong><i class="fas fa-exclamation-triangle me-1"></i>Both proxy layers appear to be enabled.</strong><br>
+                        <p class="mb-0">
+                            <?php if ($mod_remoteip_active): ?>
+                                Apache's <code>mod_remoteip</code> is active, so REMOTE_ADDR already contains the real client address before PHP runs.
+                            <?php else: ?>
+                                On this request, REMOTE_ADDR already matches the trusted forwarded header, which usually means the web server (<code>mod_remoteip</code>, nginx <code>real_ip</code>, or similar) resolved the client address before PHP ran.
+                            <?php endif; ?>
+                            With the "Behind Reverse Proxy" setting also enabled, the trusted proxy check compares against the already-resolved client address and always falls back. Disable one layer: keep the web server module and turn off "Behind Reverse Proxy", or remove the module and let UserSpice resolve the address.
+                        </p>
+                    </div>
+                <?php endif; ?>
                 <?php if ($using_default_rate_limits) : ?>
                     <div class="alert alert-danger p-2">
                         <strong>Warning: Default Rate Limits are Insecure!</strong><br>

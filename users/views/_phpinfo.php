@@ -20,7 +20,7 @@ if (in_array($user->data()->id, $master_account) && hasPerm(2)) {
             <?php phpinfo(); ?>
         </div>
     </div>
-    <style>
+    <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
         .sys-requirements-table {
             font-size: 1.5rem;
         }

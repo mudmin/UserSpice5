@@ -227,6 +227,9 @@ if (!function_exists('email')) {
 
     $mail->Subject = $subject;
     $mail->Body    = $body;
+    if (!empty($opts['altBody'])) {
+      $mail->AltBody = $opts['altBody'];
+    }
     if (!empty($attachment)) $mail->addAttachment($attachment);
     if (file_exists($abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php")) {
       require_once $abs_us_root . $us_url_root . "usersc/scripts/email_function_override.php";

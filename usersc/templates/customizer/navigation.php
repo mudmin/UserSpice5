@@ -1,4 +1,4 @@
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 .nav-item {
 padding-left:2rem;
 }

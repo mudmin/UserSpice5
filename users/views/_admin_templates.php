@@ -27,7 +27,7 @@ if (!empty($_POST['template'])) {
 }
 ?>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   #hr,
   #hr1 {
     display: none;

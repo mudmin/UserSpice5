@@ -6,7 +6,7 @@ if(file_exists($abs_us_root . $us_url_root . "usersc/modules/widgets.php")){
 }
 ?>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 /* A slower, red pulse effect */
 .settingsWidgetBreathe {
   /* Changed animation duration from 2.5s to 4s */

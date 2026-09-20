@@ -243,19 +243,34 @@ if ($method == "enter_email") {
       ];
 
       $encoded_email = rawurlencode($email);
-      if (lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }") {
-        $subject = lang("EML_PASSWORDLESS_SUBJECT");
+      if (!empty($verification_code) && lang("PASS_YOUR_CODE") != "{ Missing Text }") {
+        // Code-bearing subject so mail apps (iOS Mail, Gmail) offer to copy the
+        // one-time code; the code also makes each subject unique, so no
+        // timestamp is needed to defeat threading.
+        $subject = trim(lang("PASS_YOUR_CODE")) . " " . $verification_code;
+        if ($settings->site_name != "UserSpice") {
+          $subject = $settings->site_name . ": " . $subject;
+        }
+        $subject = html_entity_decode($subject, ENT_QUOTES);
       } else {
-        $subject = "Please verify your email to login.";
+        if (lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }") {
+          $subject = lang("EML_PASSWORDLESS_SUBJECT");
+        } else {
+          $subject = "Please verify your email to login.";
+        }
+        if ($settings->site_name != "UserSpice") {
+          $subject = $settings->site_name . ": " . $subject;
+        }
+        $subject = html_entity_decode($subject, ENT_QUOTES);
+        $subject .= " @ " . date("Y-m-d H:i:s");
       }
-      if ($settings->site_name != "UserSpice") {
-        $subject = $settings->site_name . ": " . $subject;
-      }
-      $subject = html_entity_decode($subject, ENT_QUOTES);
-
-      $subject .= " @ " . date("Y-m-d H:i:s");
       $body = email_body('_email_template_passwordless.php', $options);
-      $email_sent = email($email, $subject, $body);
+      $email_opts = [];
+      if (!empty($verification_code)) {
+        // Plain-text alternative gives OTP parsers the cleanest possible input
+        $email_opts['altBody'] = trim(html_entity_decode(lang("PASS_YOUR_CODE"), ENT_QUOTES)) . " " . $verification_code;
+      }
+      $email_sent = email($email, $subject, $body, $email_opts);
 
       if ($email_sent) {
         // Record successful passwordless request
@@ -389,7 +404,7 @@ if ($method == "check_email") {
                 <?= tokenHere() ?>
                 <div class="form-group">
                   <label for="code" class="h5"><?= lang("PASS_ENTER_CODE"); ?></label>
-                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-zA-Z0-9]{4,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
+                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" autocomplete="one-time-code" pattern="[a-zA-Z0-9]{4,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
                 </div>
                 <?php includeHook($hooks, 'form'); ?>
                 <button type="submit" class="btn btn-primary btn-lg mt-3"><?= lang("PASS_VER_BUTTON"); ?></button>

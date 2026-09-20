@@ -392,7 +392,7 @@ if (!empty($_POST)) {
 $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
 
 ?>
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .img-responsive {
         width: 100% !important;
     }

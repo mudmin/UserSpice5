@@ -4,7 +4,7 @@ $successes = [];
 $w = Input::get("w");
 $token = Token::generate();
 ?>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   tfoot input {
     width: 100%;
     box-sizing: border-box;

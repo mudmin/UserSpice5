@@ -25,8 +25,10 @@ if($settings->email_login == 1){
     <p><?=$EML_PASSWORDLESS_BODY?></p>
     
     <?php if($settings->email_login == 2 || $settings->email_login == 3) { ?>
-      <?=lang("PASS_YOUR_CODE")?><br>
-      <div
+      <!-- Label and code kept in one contiguous text flow with no whitespace
+           around the code so mail apps detect the one-time code and offer to
+           copy it, and a manual copy grabs only the code itself. -->
+      <p><?=lang("PASS_YOUR_CODE")?><span
         style="
           display:inline-block;
           padding:14px 18px;
@@ -39,13 +41,8 @@ if($settings->email_login == 1){
           letter-spacing:4px;
           white-space:nowrap;
         "
-        aria-label="<?=lang('PASS_YOUR_CODE')?>"
         dir="ltr"
-      >
-        <span style="font-family:inherit;">
-          <?=safeReturn($verification_code)?>
-        </span>
-      </div>
+      ><?=safeReturn($verification_code)?></span></p>
     <?php } ?>
     
     <?php if($settings->email_login == 1 || $settings->email_login == 3) { ?>

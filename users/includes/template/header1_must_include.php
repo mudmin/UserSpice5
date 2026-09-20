@@ -34,7 +34,7 @@ if(!file_exists($abs_us_root.$us_url_root."usersc/templates/".$settings->templat
 //the snippet below is meant to provide a basic btn-close class for bs 4 templates that don't have it
 
 	?>
-	<style>
+	<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 	.close {
 	  position: absolute;
 	  right: 2rem;

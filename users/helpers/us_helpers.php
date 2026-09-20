@@ -633,16 +633,7 @@ if (!function_exists('random_password')) {
     // CSPRNG sampling over the password alphabet. The legacy str_shuffle
     // implementation used Mersenne Twister, capped output at 80 chars, and
     // produced unique-char-only strings — none acceptable for passwords.
-    //
-    // The alphabet deliberately excludes every character Input::sanitize()
-    // rewrites (& < > " '). login.php verifies trim(Input::get('password')),
-    // so what reaches password_verify() is always htmlspecialchars'd. A
-    // generated password containing one of those characters can therefore
-    // never match a hash made from the raw string: User::loginEmail()'s only
-    // fallback re-verifies the htmlentities form, not the raw one, and that
-    // fallback is skipped entirely at cost >= 13 (what we hash new users at).
-    // Do not add those five characters back without fixing that pipeline.
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()_-=+;:,.?[]{}~';
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?';
     $max = strlen($chars) - 1;
     $password = '';
     for ($i = 0; $i < $length; $i++) {

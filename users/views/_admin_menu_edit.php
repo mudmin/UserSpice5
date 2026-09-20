@@ -532,7 +532,7 @@ if ($_POST) {
     </div>
   </div>
 </div>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .explain {
     font-size: .7rem;
     color: #999;

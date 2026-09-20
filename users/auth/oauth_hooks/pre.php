@@ -12,7 +12,7 @@ $oauthClientData = $_SESSION[INSTANCE . '_oauth_client_data'] ?? null;
 // Add OAuth-specific meta tags or styling
 if ($oauthClientData) {
     ?>
-    <style>
+    <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
         /* OAuth-specific styling can go here */
         .oauth-branding {
             text-align: center;

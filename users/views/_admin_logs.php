@@ -37,7 +37,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   Redirect::to('?view=logs');
 }
 ?>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   tfoot input {
     width: 100%;
     box-sizing: border-box;
@@ -204,7 +204,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     });
     });
 </script>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .badge {
     font-size: .8rem;
   }
