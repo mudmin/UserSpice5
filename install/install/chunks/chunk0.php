@@ -8,6 +8,7 @@ require_once 'classes/class.autoloader.php';
 
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.use_strict_mode', 1);
 if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
 	ini_set('session.cookie_secure', 1);
 }
