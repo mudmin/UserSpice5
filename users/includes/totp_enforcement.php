@@ -74,7 +74,7 @@ function shouldBypassTotp() {
     global $settings;
     
     // Global bypass flag
-    if (defined('TOTP_BYPASS') && defined('TOTP_BYPASS') === true) {
+    if (defined('TOTP_BYPASS') && TOTP_BYPASS == true) {
         return true;
     }
     

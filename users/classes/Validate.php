@@ -374,17 +374,14 @@ class Validate
 							break;
 						}
 
-						if ($this->_db->get($table, $fields)) {
-							$str = lang("VAL_EXISTS");
-							$str1 = lang("VAL_DB");
+						if ($this->_db->get($table, $fields) && !$this->_db->error()) {
 							if ($this->_db->count()==0) {
-								$this->addError(["{$display} $str {$display}",$item]);
-								$this->ruleBroken([$item,"is_in_database",false]);
-
-							} else {
-								$this->addError([$str1,$item]);
+								$this->addError(["{$display} ".lang("VAL_NOT_IN_DB"),$item]);
 								$this->ruleBroken([$item,"is_in_database",false]);
 							}
+						} else {
+							$this->addError([lang("VAL_DB"),$item]);
+							$this->ruleBroken([$item,"is_in_database",false]);
 						}
 						break;
 

@@ -453,7 +453,7 @@ if (!function_exists('err')) {
 if (!function_exists('redirect')) {
   function redirect($location)
   {
-    header("Location: {$location}");
+    Redirect::to($location);
   }
 }
 
@@ -789,26 +789,41 @@ echo "</pre>";
 */
 
 
+if (!function_exists('spiceEnvPath')) {
+  function spiceEnvPath()
+  {
+    global $config, $abs_us_root;
+
+    if (defined('ENV_PATH')) {
+      return ENV_PATH;
+    }
+    $envFilename = '.userspice.' . Config::get('remember/cookie_name') . '.env';
+    $outside = $abs_us_root . '/../' . $envFilename;
+    $inside = $abs_us_root . '/' . $envFilename;
+
+    // Existing keys stay put (legacy location checked first); new keys go outside the web root whenever possible.
+    $pw = $config['mysql']['password'] ?? '';
+    $legacy = ($pw == "password" || $pw == "") ? $inside : $outside;
+    $other = ($legacy === $inside) ? $outside : $inside;
+    if (@file_exists($legacy)) {
+      return $legacy;
+    }
+    if (@file_exists($other)) {
+      return $other;
+    }
+    if (@is_writable($abs_us_root . '/..')) {
+      return $outside;
+    }
+    return $legacy;
+  }
+}
+
 if (!function_exists('generateSpiceEncryptionKey')) {
   function generateSpiceEncryptionKey()
   {
     global $config, $abs_us_root;
 
-    // Use ENV_PATH constant if defined (set in init.php), otherwise calculate path
-    if (defined('ENV_PATH')) {
-      $envPath = ENV_PATH;
-    } else {
-      // Get cookie name for unique env filename
-      $cookieName = Config::get('remember/cookie_name');
-      $envFilename = '.userspice.' . $cookieName . '.env';
-
-      // Determine the correct path to .env file
-      if (isset($config['mysql']['password']) && $config['mysql']['password'] != "password" && $config['mysql']['password'] != "") {
-        $envPath = $abs_us_root . '/../' . $envFilename;
-      } else {
-        $envPath = $abs_us_root . '/' . $envFilename;
-      }
-    }
+    $envPath = spiceEnvPath();
 
     // Check if ENCRYPTION_KEY already exists
     if (file_exists($envPath)) {
@@ -840,22 +855,10 @@ if (!function_exists('spiceEncryptionKey')) {
   {
     global $config, $abs_us_root;
 
-    // Use ENV_PATH constant if defined (set in init.php), otherwise calculate path
-    if (defined('ENV_PATH')) {
-      $envPath = ENV_PATH;
-    } else {
-      // Get cookie name for unique env filename
-      $cookieName = Config::get('remember/cookie_name');
-      $envFilename = '.userspice.' . $cookieName . '.env';
-
-      // Determine the correct path to .env file
-      $envPath = ($config['mysql']['password'] == "password" || $config['mysql']['password'] == "")
-        ? $abs_us_root . '/' . $envFilename
-        : $abs_us_root . '/../' . $envFilename;
-    }
+    $envPath = spiceEnvPath();
 
     // Load and parse the .env file
-    $env = parse_ini_file($envPath);
+    $env = file_exists($envPath) ? parse_ini_file($envPath) : [];
     if (!isset($env['ENCRYPTION_KEY'])) {
       // Try to generate the key automatically
       $result = generateSpiceEncryptionKey();

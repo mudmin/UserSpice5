@@ -114,9 +114,9 @@ $usersWith = $usersWithQ->results();
         <tbody>
           <?php foreach ($usersWith as $u) { ?>
             <tr>
-              <td><?=$u->fname?></td>
-              <td><?=$u->lname?></td>
-              <td><?=$u->email?></td>
+              <td><?=safeReturn($u->fname, true)?></td>
+              <td><?=safeReturn($u->lname, true)?></td>
+              <td><?=safeReturn($u->email, true)?></td>
               <td>
                 <a href="<?=$us_url_root?>users/admin.php?view=user&id=<?= $u->user_id ?>" class="btn btn-primary">View</a>
 

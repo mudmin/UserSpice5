@@ -92,7 +92,7 @@ foreach ($logs as $l) {
             $userQuery = $db->query("SELECT username, fname, lname FROM users WHERE id = ?", [$lastUser->user_id]);
             if ($userQuery->count() > 0) {
                 $user = $userQuery->first();
-                $userDisplay = 'IP last used by ' . $user->fname . ' ' . $user->lname . ' (' . $user->username . ')';
+                $userDisplay = 'IP last used by ' . safeReturn($user->fname . ' ' . $user->lname . ' (' . $user->username . ')', true);
             } else {
                 $userDisplay = 'IP last used by User ID: ' . $lastUser->user_id;
             }

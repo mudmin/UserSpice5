@@ -22,8 +22,6 @@ $table = Input::get('table');
 $token = Input::get('token');
 if($table == ""){
   $table = "settings";
-}elseif(!substr($table,0,4) == "plg_"){
-  $table = "settings";
 }else{
   if(isset($config['mysql']['db'])){
     $dbname = $config['mysql']['db'];

@@ -107,6 +107,9 @@ foreach ($folders as $f) {
 
 
 if ($_POST) {
+  if (!Token::check(Input::get('csrf'))) {
+    include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
+  }
   $parentId = Input::get('parent');
   if ($item) {
     $fields = ['type', 'label', 'link', 'icon_class', 'link_target', 'a_class', 'li_class', 'disabled'];
@@ -203,6 +206,7 @@ if ($_POST) {
         <?php if ($item) : ?>
 
           <form method="post">
+            <?php tokenHere(); ?>
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
               <button type="submit" data-us-dirty="false" class="btn btn-primary save-button">Save</button>
@@ -349,6 +353,7 @@ if ($_POST) {
           </form>
         <?php else : ?>
           <form method="post">
+            <?php tokenHere(); ?>
             <div class="d-flex justify-content-end align-items-center">
               <a class="btn btn-secondary mr-1" href="<?= $us_url_root ?>users/admin.php?view=menus">Cancel</a>
               <button type="submit" data-us-dirty="false" class="btn btn-primary">Save</button>
@@ -659,7 +664,7 @@ if ($_POST) {
 
   function usDeleteMenuItem(itemId) {
     if (window.confirm("Are you sure you want to delete this menu item? This cannot be undone.")) {
-      window.location.href = `<?= $us_url_root ?>users/admin.php?view=delete_menu_item&menu_id=<?= $menuId ?>&item_id=${itemId}`;
+      window.location.href = `<?= $us_url_root ?>users/admin.php?view=delete_menu_item&menu_id=<?= $menuId ?>&item_id=${itemId}&token=<?= Token::generate() ?>`;
     }
   }
 

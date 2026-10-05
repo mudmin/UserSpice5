@@ -109,6 +109,23 @@ if (isset($tokenData['error'])) {
 
 // Combine token data with user data from response
 $userData = $responseData['userdata'] ?? [];
+
+// Identity must come from the token exchange or a signed response, never from unsigned redirect data.
+if (!empty($tokenData['email'])) {
+    if (!empty($userData['email']) && strcasecmp($userData['email'], $tokenData['email']) !== 0) {
+        logger(1, "OAuth Client Security", "Response email does not match token email - possible tampering");
+        usError('OAuth authentication failed: Identity mismatch');
+        Redirect::to($us_url_root . 'users/login.php');
+        exit;
+    }
+    $userData['email'] = $tokenData['email'];
+} elseif (empty($oSettings->response_secret)) {
+    logger(1, "OAuth Client Security", "Unverifiable OAuth identity rejected. Update the OAuth server or set a Response Secret on both client and server.");
+    usError('OAuth authentication failed: Server identity could not be verified. The site administrator needs to update the OAuth server or configure a Response Secret.');
+    Redirect::to($us_url_root . 'users/login.php');
+    exit;
+}
+
 if (empty($userData['email'])) {
     logger(1, "OAuth Client Error", "No email address in OAuth response");
     usError('OAuth authentication failed: No email address provided');
@@ -166,7 +183,7 @@ if ($existingUserC > 0) {
     $existingUser = $existingUserQ->first();
 
     // Handle tags if present
-    if (isset($responseData['tags'])) {
+    if (isset($responseData['tags']) && !empty($oSettings->response_secret)) {
         storeUserTags($existingUser->id, $responseData);
     }
 
@@ -188,6 +205,9 @@ if ($existingUserC > 0) {
 
     // Log the user in
     $sessionName = Config::get('session/session_name');
+    if (!headers_sent()) {
+        session_regenerate_id(true);
+    }
     Session::put($sessionName, $existingUser->id);
 
     // Execute custom login script if it exists
@@ -206,6 +226,12 @@ if ($existingUserC > 0) {
     Redirect::to($us_url_root . $settings->redirect_uri_after_login);
     exit;
 } else {
+    if ($settings->registration == 0) {
+        logger(0, "OAuth Client", "New account not created via OAuth because registration is disabled");
+        usError(lang("JOIN_CLOSED"));
+        Redirect::to($us_url_root . 'users/join.php');
+        exit;
+    }
     // New user - create account
     $userId = createNewUser($userData, $responseData, $oSettings);
     if ($userId) {
@@ -229,12 +255,17 @@ function createNewUser($userData, $responseData, $oSettings)
         include $abs_us_root . $us_url_root . 'usersc/oauth_client/assets/before_user_creation.php';
     }
 
+    if (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+        logger(1, "OAuth Client Error", "Invalid email address in OAuth response");
+        return false;
+    }
+
     $user = new User();
     $fields = [
         'email' => $userData['email'],
         'username' => $userData['email'], // Use email as username
-        'fname' => $userData['fname'] ?? '',
-        'lname' => $userData['lname'] ?? '',
+        'fname' => Input::sanitize($userData['fname'] ?? ''),
+        'lname' => Input::sanitize($userData['lname'] ?? ''),
         'password' => password_hash(randomstring(20), PASSWORD_BCRYPT, ['cost' => 14]),
         'permissions' => 1,
         'join_date' => date('Y-m-d H:i:s'),
@@ -254,10 +285,13 @@ function createNewUser($userData, $responseData, $oSettings)
 
     // Log the user in immediately
     $sessionName = Config::get('session/session_name');
+    if (!headers_sent()) {
+        session_regenerate_id(true);
+    }
     Session::put($sessionName, $theNewId);
 
     // Handle tags if present
-    if (isset($responseData['tags'])) {
+    if (isset($responseData['tags']) && !empty($oSettings->response_secret)) {
         storeUserTags($theNewId, $responseData);
     }
 

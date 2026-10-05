@@ -59,7 +59,7 @@ if ($act == 1 || !$allowPasswords) {
     $pre = 1;
 }
 
-if (Input::exists()) {
+if (Input::exists() && $settings->registration == 1) {
     $token = $_POST['csrf'];
     if (!Token::check($token)) {
         include $abs_us_root.$us_url_root.'usersc/scripts/token_error.php';

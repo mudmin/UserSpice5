@@ -338,6 +338,7 @@ $lang = array_merge($lang, array(
 	"VAL_SAME"				=> "must be the same",
 	"VAL_EXISTS"			=> "already exists. Please choose another",
 	"VAL_DB"					=> "Database Error",
+	"VAL_NOT_IN_DB"			=> "was not found",
 	"VAL_NUM"					=> "must be a number",
 	"VAL_INT"					=> "must be a whole number",
 	"VAL_EMAIL"				=> "must be a valid email address",

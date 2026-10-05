@@ -361,16 +361,16 @@ if($results->email_act == 0){
 
   if($check > 0){
     ?>
-          <form action="" method="post"
-        data-us-confirm="Are you sure you want to mark all users as verified? This cannot be undone."
-        >
-    <div class='alert alert-warning mt-3'>You have <?=$check?> unverified <?=$term?> but your system is not currently requiring users to verify their email.  Would you like to mark all users as verified?
+    <form action="" method="post"
+      data-us-confirm="Are you sure you want to mark all users as verified? This cannot be undone."
+      >
+      <div class='alert alert-warning mt-3'>You have <?=$check?> unverified <?=$term?> but your system is not currently requiring users to verify their email.  Would you like to mark all users as verified?
 
         <?=tokenHere();?>
         <input type="hidden" name="verify_all" value="1">
         <input type="submit" class="ms-5 btn btn-success" value="Mark All Users as Verified">
-      </form>
-    </div>
+      </div>
+    </form>
     <?php 
   }
 }

@@ -142,7 +142,7 @@ $codeUsage = '<?php
       }
     } else {
       if (window.confirm("Are you sure? This cannot be undone!")) {
-        window.location.href = `<?= $us_url_root ?>users/admin.php?view=delete_menu&menu_id=${id}`;
+        window.location.href = `<?= $us_url_root ?>users/admin.php?view=delete_menu&menu_id=${id}&token=<?= Token::generate() ?>`;
       }
     }
 

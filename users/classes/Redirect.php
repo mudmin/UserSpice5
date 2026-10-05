@@ -93,7 +93,7 @@ class Redirect
   //This is the old Redirect::to method that attempts to see if a link is valid before redirecting
   public static function safe($location = null, $args = '')
   {
-    global $us_url_root, $settings, $user;
+    global $us_url_root, $settings, $user, $userspice_nonce;
     if ($location) {
 
 
@@ -122,15 +122,16 @@ class Redirect
         }
       }
       if ($args) $location .= $args; // allows 'login.php?err=Error+Message' or the like
+      $location = self::normalizeLocation((string)$location);
       if (!headers_sent()) {
         header('Location: ' . $location);
         exit();
       } else {
         echo '<script nonce="' . htmlspecialchars($userspice_nonce ?? '') . '" type="text/javascript">';
-        echo 'window.location.href="' . $location . '";';
+        echo 'window.location.href=' . json_encode($location, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';';
         echo '</script>';
         echo '<noscript>';
-        echo '<meta http-equiv="refresh" content="0;url=' . $location . '" />';
+        echo '<meta http-equiv="refresh" content="0;url=' . htmlspecialchars($location, ENT_QUOTES, 'UTF-8') . '" />';
         echo '</noscript>';
         exit;
       }
@@ -177,6 +178,7 @@ class Redirect
     // 1) Strip control chars and trim
     $location = preg_replace('/[\x00-\x1F\x7F]/u', '', $location);
     $location = trim($location);
+    $isAbsolute = false;
 
     // 2) If absolute URL, only allow http/https and (by default) same-origin
     if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $location)) {
@@ -200,12 +202,14 @@ class Redirect
             $same = ($current !== '' && $host === $current);
             $extAllowed = (!$opts['same_origin'] && ($allowed ? in_array($host, $allowed, true) : true));
 
-            if (!$same && !$extAllowed) {
-              // force same-origin by demoting to path-only
+            if (!$extAllowed) {
+              // default same-origin mode (or host not allowed): demote to path-only
               $path = ($parts['path'] ?? '/');
               $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
               $location = self::normalizePath($path);
               $location .= $query;
+            } else {
+              $isAbsolute = true;
             }
           }
         }
@@ -213,7 +217,7 @@ class Redirect
     }
 
     // 3) If schema-relative ("//evil.com/...") or empty, kill it
-    if ($location === '' || str_starts_with($location, '//') || str_starts_with($location, '\\')) {
+    if ($location === '' || preg_match('#^[/\\\\]{2}#', $location) || str_starts_with($location, '\\')) {
       $location = '/';
     }
 
@@ -225,13 +229,14 @@ class Redirect
     }
 
     // 4) Make it an absolute path (not full URL) rooted at us_url_root
-    if (!str_starts_with($location, '/')) {
-      $base = rtrim((string)$opts['base_path'], '/');
-      $path = $base . '/' . ltrim($location, '/');
-    } else {
+    if ($isAbsolute) {
       $path = $location;
+    } elseif (!str_starts_with($location, '/')) {
+      $base = rtrim((string)$opts['base_path'], '/');
+      $path = self::normalizePath($base . '/' . ltrim($location, '/'));
+    } else {
+      $path = self::normalizePath($location);
     }
-    $path = self::normalizePath($path);
 
     // 5) Merge args safely
     if (is_array($args)) {
@@ -340,7 +345,7 @@ class Redirect
     }
 
     // Block scheme-relative URLs (//evil.com)
-    if (substr($location, 0, 2) === '//') {
+    if (preg_match('#^[/\\\\]{2}#', $location)) {
       return '/';
     }
 

@@ -118,6 +118,7 @@ if (Input::get('reset') == 1) { //$_GET['reset'] is set when clicking the link i
 				'email_verified' => true,
 				'force_pr' => 0,
 			), $ruser->data()->id);
+			$db->query("DELETE FROM users_session WHERE user_id = ?", [$ruser->data()->id]); // revoke remember-me tokens
 			$reset_password_success = TRUE;
 			logger($ruser->data()->id, "User", "Reset password.");
 			handleAuthSuccess('password_reset_submit', $ruser->data()->id, $email, ['token' => $vericode]);

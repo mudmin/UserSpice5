@@ -2100,6 +2100,25 @@ if ($deprecated_files_present) {
                     ];
                 }
 
+                if (($settings->cron_ip ?? '') === '' && $db->query("SELECT id FROM crons WHERE active = 1")->count() > 0) {
+                    $alerts[] = [
+                        'level' => 'danger',
+                        'icon' => 'fas fa-clock',
+                        'title' => 'Cron Jobs Open to Anyone',
+                        'message' => 'You have active cron jobs but no Cron IP set, so anyone can trigger them by visiting users/cron/cron.php. Set the Cron Job IP in General Settings.'
+                    ];
+                }
+
+                $envKeyPath = function_exists('spiceEnvPath') ? realpath(spiceEnvPath()) : false;
+                if ($envKeyPath && strpos($envKeyPath, rtrim(realpath($abs_us_root), '/') . '/') === 0) {
+                    $alerts[] = [
+                        'level' => 'danger',
+                        'icon' => 'fas fa-key',
+                        'title' => 'Encryption Key Inside Web Root',
+                        'message' => 'Your encryption key file (' . safeReturn(basename($envKeyPath)) . ') is inside your web root and may be downloadable. Move it to the folder above your web root, or define ENV_PATH in users/init.php to point to its new location.'
+                    ];
+                }
+
                 // Warning alerts
                 if (!$is_updated) {
                     $alerts[] = [

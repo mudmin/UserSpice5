@@ -8,7 +8,7 @@ $filters = [
   'database_debug' => 'View Only Database Debugging Logs',
 ];
 $token = Token::generate(); 
-if (in_array($user->data()->id, $master_account) && $action != '') {
+if (in_array($user->data()->id, $master_account) && $action != '' && Token::check(Input::get('token'))) {
   $query = '';
   switch ($action) {
     case 'delete_logs':
@@ -114,8 +114,8 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
         <h5 class="modal-title">Log ID #<span id="logMetadataID"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" id="logMetadataBody">
-
+      <div class="modal-body">
+        <pre id="logMetadataBody" style="white-space: pre-wrap;"></pre>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -136,7 +136,7 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
     msg = "Are you sure you want to clear these logs? This cannot be undone";
     if (confirm(msg)) {
       var url = window.location.href
-      url = `${url}&action=${val}`
+      url = `${url}&action=${val}&token=<?= $token ?>`
       window.location.href = url
     } else {
       $("select#logs_actions")[0].selectedIndex = 0;
@@ -166,8 +166,8 @@ if (in_array($user->data()->id, $master_account) && $action != '') {
   function generateMetadataModal(logId) {
     $.get("<?php echo $us_url_root; ?>users/parsers/logMetadataById.php?id=" + logId + "&token=<?= Token::generate() ?>",
     function(data, status) {
-      $("#logMetadataBody").html(data)
-      $("#logMetadataID").html(logId)
+      $("#logMetadataBody").text(data)
+      $("#logMetadataID").text(logId)
       $("#logMetadata").modal("show");
     });
   }

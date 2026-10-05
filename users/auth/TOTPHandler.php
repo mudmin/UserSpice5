@@ -299,7 +299,11 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
     public function invalidateBackupCode(int $userId, string $codeToInvalidate): bool
     {
         try {
-            $currentHashedCodes = $this->getHashedBackupCodes($userId);
+            $rawBackupCodes = $this->db->query("SELECT backup_codes_h FROM us_totp_secrets WHERE user_id = ? AND verified = 1", [$userId])->first()->backup_codes_h ?? '';
+            $currentHashedCodes = json_decode((string)$rawBackupCodes, true);
+            if (!is_array($currentHashedCodes)) {
+                $currentHashedCodes = [];
+            }
             if (empty($currentHashedCodes)) {
                 // logger($userId, "TOTP_Warning", "Attempted to invalidate backup code, but no codes found.");
                 return false;
@@ -324,12 +328,13 @@ public function getQRCodeImageDataUri(string $email, string $secret): string
 
             $encodedBackupCodes = json_encode($updatedCodes);
 
+            // Only write if the list is unchanged since we read it, so a racing request can't reuse this code
             $this->db->query(
-                "UPDATE us_totp_secrets SET backup_codes_h = ?, updated_at = ? WHERE user_id = ?",
-                [$encodedBackupCodes, date("Y-m-d H:i:s"), $userId]
+                "UPDATE us_totp_secrets SET backup_codes_h = ?, updated_at = ? WHERE user_id = ? AND backup_codes_h = ?",
+                [$encodedBackupCodes, date("Y-m-d H:i:s"), $userId, $rawBackupCodes]
             );
 
-            if ($this->db->error()) {
+            if ($this->db->error() || $this->db->count() !== 1) {
                 // logger($userId, "TOTP_Error", "Failed to update backup codes in DB: " . $this->db->errorString());
                 return false;
             }

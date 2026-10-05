@@ -176,12 +176,7 @@ if (!empty($_POST)) {
                             $_SESSION[$currentSessionName . '_user_last_login'] = date("Y-m-d H:i:s");
                             reauthMarkConfirmed();
                             $_SESSION[$currentSessionName . '_totp_verified'] = true;
-
-                            // Update last login in database
-                            $db->update('users', $tempUserId, [
-                                'last_login' => date("Y-m-d H:i:s"),
-                                'logins' => $userData->logins + 1
-                            ]);
+                            $user->recordLogin($tempUserId);
 
                             // Execute login success hooks
                             $hooks = getMyHooks(['page' => 'loginSuccess']);
@@ -255,7 +250,7 @@ if (!empty($_POST)) {
                     // Attempt to login with credentials
                     $tempUser = new User();
                     $rawpassword = $_POST['password'];
-                    $login = $tempUser->loginEmail($username, $password, $remember, $rawpassword);
+                    $login = $tempUser->loginEmail($username, $password, $remember, $rawpassword, false);
 
                     if ($login) {
                         // Credentials are valid - now check if TOTP is required
@@ -271,7 +266,11 @@ if (!empty($_POST)) {
 
                         if ($requireTOTP) {
                             // Check if TOTP code was provided in the same form
-                            if (!empty($totpCode)) {
+                            if (!empty($totpCode) && !checkRateLimit('totp_verify', $tempUser->data()->id)) {
+                                unset($_SESSION[$currentSessionName]);
+                                reauthClearConfirmed();
+                                $errors[] = getRateLimitErrorMessage('totp_verify');
+                            } elseif (!empty($totpCode)) {
                                 $userSecret = $totpHandler->getUserSecret($tempUser->data()->id);
                                 if ($userSecret && $totpHandler->verifyCode($userSecret, $totpCode)) {
                                     // Record successful login with TOTP
@@ -281,6 +280,7 @@ if (!empty($_POST)) {
                                     ]);
 
                                     $user = $tempUser; // Set user object for further processing
+                                    $user->recordLogin();
 
                                     // TOTP verified, complete login immediately
                                     $hooks = getMyHooks(['page' => 'loginSuccess']);
@@ -310,6 +310,7 @@ if (!empty($_POST)) {
                                         'user_agent' => Server::get('HTTP_USER_AGENT')
                                     ]);
                                     unset($_SESSION[$currentSessionName]);
+                                    reauthClearConfirmed();
                                     $errors[] = $totpUnavailableMsg ?: lang("2FA_ERR_INVALID_CODE");
                                     unset($_SESSION[$currentSessionName . '_totp_user_id_to_verify']);
                                     unset($_SESSION[$currentSessionName . '_totp_remember_me']);
@@ -319,6 +320,7 @@ if (!empty($_POST)) {
                             } else {
                                 // TOTP required but not provided - set up for next step
                                 unset($_SESSION[$currentSessionName]);
+                                reauthClearConfirmed();
                                 $_SESSION[$currentSessionName . '_totp_user_id_to_verify'] = $tempUser->data()->id;
                                 $_SESSION[$currentSessionName . '_totp_remember_me'] = $remember;
                                 // Note: _login_dest already in session from securePage(), no need to copy
@@ -338,6 +340,7 @@ if (!empty($_POST)) {
                                 'user_agent' => Server::get('HTTP_USER_AGENT')
                             ]);
                             $user = $tempUser; // Set user object for further processing
+                            $user->recordLogin();
 
                             // No TOTP required - complete normal login
                             $hooks = getMyHooks(['page' => 'loginSuccess']);

@@ -1,6 +1,9 @@
 <?php
-global $user, $us_url_root;
+global $user, $us_url_root, $abs_us_root;
 $db = DB::getInstance();
+if (!Token::check(Input::get('token'))) {
+  include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
+}
 $menuId = Input::get('menu_id');
 $itemId = Input::get('item_id');
 

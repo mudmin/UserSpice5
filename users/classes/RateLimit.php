@@ -128,6 +128,11 @@ class RateLimit
 				'metadata' => json_encode($metadata)
 			]);
 		}
+
+		// Prune old rows now and then so the table stays small without a cron
+		if (random_int(1, 100) === 1) {
+			$this->cleanup($this->minRetentionHours());
+		}
 		return true;
 	}
 
@@ -142,13 +147,8 @@ class RateLimit
 		$action = $this->sanitizeAction($action);
 		if (!$action) return false;
 
+		// IP failures are not auto-cleared on success, so one good login can't reset an IP's count
 		$identifiers = $this->sanitizeIdentifiers($identifiers);
-		if (!isset($identifiers['ip'])) {
-			$ip = $this->getRealIP();
-			if ($ip) {
-				$identifiers['ip'] = $ip;
-			}
-		}
 
 		foreach ($identifiers as $type => $value) {
 			if (empty($value)) continue;
@@ -281,6 +281,23 @@ class RateLimit
 		// 	logger(0, "RateLimit", "Cleaned up $count old rate limit records");
 		// }
 		return $count;
+	}
+
+	/**
+	 * Hours of history cleanup must keep: 24, or the longest configured window if that is longer.
+	 */
+	private function minRetentionHours()
+	{
+		$longest = 0;
+		foreach ($this->rateLimits as $limits) {
+			if (!is_array($limits)) continue;
+			foreach ($limits as $key => $value) {
+				if (substr($key, -7) === '_window') {
+					$longest = max($longest, (int)$value);
+				}
+			}
+		}
+		return max(24, (int)ceil($longest / 3600));
 	}
 
 	// ============== PROXY AND IP DETECTION METHODS ==============

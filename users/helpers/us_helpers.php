@@ -633,7 +633,15 @@ if (!function_exists('random_password')) {
     // CSPRNG sampling over the password alphabet. The legacy str_shuffle
     // implementation used Mersenne Twister, capped output at 80 chars, and
     // produced unique-char-only strings — none acceptable for passwords.
-    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?';
+    //
+    // The alphabet deliberately excludes every character Input::sanitize()
+    // rewrites (& < > " '). login.php verifies trim(Input::get('password')),
+    // so the first password_verify() always sees the htmlspecialchars'd form.
+    // User::loginEmail() does fall back to the raw $_POST string, so such a
+    // password would still log in, but only via that fallback, which costs an
+    // extra bcrypt and triggers a rehash. Other code that hashes or compares
+    // the sanitized form may not be as forgiving, so keep these five out.
+    $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()_-=+;:,.?[]{}~';
     $max = strlen($chars) - 1;
     $password = '';
     for ($i = 0; $i < $length; $i++) {
@@ -1265,6 +1273,17 @@ if (!function_exists('reauthMarkConfirmed')) {
       $_SESSION[$k] = [];
     }
     $_SESSION[$k]['last_confirm'] = date('Y-m-d H:i:s');
+  }
+}
+
+// Drop the reauth stamp, e.g. when a login is rolled back pending TOTP.
+if (!function_exists('reauthClearConfirmed')) {
+  function reauthClearConfirmed()
+  {
+    $k = reauthSessionKey();
+    unset($_SESSION[$k]['last_confirm']);
+    unset($_SESSION[Config::get('session/session_name') . '_last_confirm']);
+    unset($_SESSION['last_confirm']);
   }
 }
 

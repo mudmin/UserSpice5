@@ -141,9 +141,17 @@ class User
         return false;
     }
 
+    private function regenerateSession()
+    {
+        if (session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
+            session_regenerate_id(true);
+        }
+    }
+
     public function login($username = null, $password = null, $remember = false)
     {
         if (!$username && !$password && $this->exists()) {
+            $this->regenerateSession();
             Session::put($this->_sessionName, $this->data()->id);
             $date = date('Y-m-d H:i:s');
             $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
@@ -152,6 +160,7 @@ class User
             $user = $this->find($username);
             if ($user) {
                 if (password_verify($password, $this->data()->password)) {
+                    $this->regenerateSession();
                     Session::put($this->_sessionName, $this->data()->id);
                     if ($remember) {
                         $hash = Hash::unique();
@@ -195,13 +204,19 @@ class User
         return false;
     }
 
-    public function loginEmail($email = null, $password = null, $remember = false, $rawpassword = null)
+    public function loginEmail($email = null, $password = null, $remember = false, $rawpassword = null, $recordLogin = true)
     {
         $success = false;
         if (!$email && !$password && $this->exists()) {
+            $this->regenerateSession();
             Session::put($this->_sessionName, $this->data()->id);
         } else {
             $user = $this->find($email, 1);
+
+            if (!$user || $this->data()->password === null) {
+                // Same bcrypt cost as a real check, so response time doesn't reveal whether the account exists
+                password_verify((string)$password, '$2y$13$WQJPF12kdq/UCcdF5MUHh.jwnqpaMU.Fh76ulGmVQ3UxQ1Na0v0.G');
+            }
 
             if ($user && $this->data()->password !== null) {
                 $strength = substr($this->data()->password, 4, 2);
@@ -253,6 +268,7 @@ class User
                             $this->_db->update('users', $this->data()->id, ['password' => password_hash(Input::sanitize($rawpassword), PASSWORD_BCRYPT, ['cost' => 13])]);
                         }
                     }
+                    $this->regenerateSession();
                     Session::put($this->_sessionName, $this->data()->id);
 
                     if ($remember) {
@@ -267,27 +283,9 @@ class User
 
                         Cookie::put($this->_cookieName, $hash, Config::get('remember/cookie_expiry'));
                     }
-                    $date = date('Y-m-d H:i:s');
-                    $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $this->data()->id]);
                     reauthMarkConfirmed();
-                    $ip = ipCheck();
-                    $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $this->data()->id, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $ip]);
-
-                    $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
-                    $c = $q->count();
-                    if ($c < 1) {
-                        $this->_db->insert('us_ip_list', [
-                            'user_id' => $this->data()->id,
-                            'ip' => $ip,
-                            'timestamp' => date('Y-m-d H:i:s'),
-                        ]);
-                    } else {
-                        $f = $q->first();
-                        $this->_db->update('us_ip_list', $f->id, [
-                            'user_id' => $this->data()->id,
-                            'ip' => $ip,
-                            'timestamp' => date('Y-m-d H:i:s'),
-                        ]);
+                    if ($recordLogin) {
+                        $this->recordLogin();
                     }
 
                     return true;
@@ -296,6 +294,34 @@ class User
         }
 
         return false;
+    }
+
+    // Records a completed login: last_login/logins, the login log row and us_ip_list.
+    // login.php passes $recordLogin = false to loginEmail() and calls this once TOTP (if any) has passed.
+    public function recordLogin($userId = null)
+    {
+        $userId = $userId ?? $this->data()->id;
+        $date = date('Y-m-d H:i:s');
+        $this->_db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $userId]);
+        $ip = ipCheck();
+        $this->_db->insert('logs', ['logdate' => $date, 'user_id' => $userId, 'logtype' => 'login', 'lognote' => 'User logged in.', 'ip' => $ip]);
+
+        $q = $this->_db->query('SELECT id FROM us_ip_list WHERE ip = ?', [$ip]);
+        $c = $q->count();
+        if ($c < 1) {
+            $this->_db->insert('us_ip_list', [
+                'user_id' => $userId,
+                'ip' => $ip,
+                'timestamp' => $date,
+            ]);
+        } else {
+            $f = $q->first();
+            $this->_db->update('us_ip_list', $f->id, [
+                'user_id' => $userId,
+                'ip' => $ip,
+                'timestamp' => $date,
+            ]);
+        }
     }
 
     //Google oAuth Login Stuff

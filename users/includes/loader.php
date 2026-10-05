@@ -68,7 +68,7 @@ if ($safeLangPath) {
 $currentPage = currentPage();
 
 // TOTP enforcement
-if ($user->isLoggedIn() && isset($settings->totp) && $settings->totp > 0) {
+if ($user->isLoggedIn() && isset($settings->totp) && $settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
 	require_once $abs_us_root . $us_url_root . 'users/includes/totp_enforcement.php';
 	handleTotpEnforcement($user, $settings, $currentPage);
 }

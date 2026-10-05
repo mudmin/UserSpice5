@@ -11,6 +11,7 @@ require_once 'classes/class.autoloader.php';
 
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.use_strict_mode', 1);
 
 // Uncomment and configure if behind a reverse proxy (load balancer, CDN, etc.):
 // $trustedProxies = ['10.0.0.1']; // Your proxy's internal IP(s)

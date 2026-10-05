@@ -297,6 +297,7 @@ class DB
 		if (is_array($w)) {
 			#echo "DEBUG: is_array - check<br />\n";
 			$comb_ops   = ['and', 'or', 'and not', 'or not'];
+			// ALIKE/NOT ALIKE are not MySQL operators (they fail as SQL errors); kept for backward compatibility
 			$valid_ops  = ['=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'ALIKE', 'NOT ALIKE', 'REGEXP', 'NOT REGEXP'];
 			$two_args   = ['IS NULL', 'IS NOT NULL'];
 			$four_args  = ['BETWEEN', 'NOT BETWEEN'];
@@ -437,8 +438,8 @@ class DB
 
 	public function delete($table, $where)
 	{
-		if (is_int($where)) {
-			return $this->deleteById($table, $where);
+		if (is_int($where) || (is_string($where) && ctype_digit($where) && (int)$where > 0)) {
+			return $this->deleteById($table, (int)$where);
 		}
 		return empty($where) ? false : $this->action('DELETE', $table, $where);
 	}

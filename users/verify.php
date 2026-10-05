@@ -114,6 +114,9 @@ if (Input::exists('get')) {
                 <?php
                 exit();
             }
+            if ($settings->email_login == 1 && !Token::check(Input::get('csrf'))) {
+                include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
+            }
 
             // Process the login (if confirmation already submitted)
             // Atomically claim the one-time code BEFORE establishing the session.

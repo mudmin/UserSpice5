@@ -124,7 +124,7 @@ if (!empty($_POST)) {
                             <?php foreach ($searchResults as $result) { ?>
                                 <tr>
                                     <td><?= safeReturn($result['timestamp']) ?></td>
-                                    <td class="fetchUser text-primary" data-uid="<?= (int)$result['user_id'] ?>><?= safeReturn($result['user_id']) ?></td>
+                                    <td class="fetchUser text-primary" data-uid="<?= (int)$result['user_id'] ?>"><?= safeReturn($result['user_id']) ?></td>
                                     <td><?= safeReturn($result['ip']) ?></td>
                                     <td><small><?= safeReturn($result['full_url'] ?? $result['page']) ?></small></td>
                                     <td><?= safeReturn($result['request_method']) ?></td>
@@ -306,6 +306,15 @@ if (!empty($_POST)) {
     function fetchUserDetails(userId) {
         const loadingModal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
         loadingModal.show();
+
+        if (userId === '0') {
+            document.getElementById('userDetailsId').textContent = '0';
+            document.getElementById('userDetailsName').textContent = 'Guest (not logged in)';
+            document.getElementById('userDetailsUsername').textContent = '';
+            document.getElementById('userDetailsEmail').textContent = '';
+            return;
+        }
+
         document.getElementById('userDetailsId').textContent = 'Loading...';
         document.getElementById('userDetailsName').textContent = 'Loading...';
         document.getElementById('userDetailsUsername').textContent = 'Loading...';
@@ -326,16 +335,16 @@ if (!empty($_POST)) {
                     document.getElementById('userDetailsUsername').textContent = data.data.username;
                     document.getElementById('userDetailsEmail').textContent = data.data.email;
                 } else {
-                    document.getElementById('userDetailsId').textContent = 'Error';
-                    document.getElementById('userDetailsName').textContent = 'User not found';
+                    document.getElementById('userDetailsId').textContent = userId;
+                    document.getElementById('userDetailsName').textContent = 'User not found (account may have been deleted)';
                     document.getElementById('userDetailsUsername').textContent = '';
                     document.getElementById('userDetailsEmail').textContent = '';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('userDetailsId').textContent = 'Error';
-                document.getElementById('userDetailsName').textContent = 'Failed to fetch user details';
+                document.getElementById('userDetailsId').textContent = userId;
+                document.getElementById('userDetailsName').textContent = 'Lookup failed (request error)';
                 document.getElementById('userDetailsUsername').textContent = '';
                 document.getElementById('userDetailsEmail').textContent = '';
             });
