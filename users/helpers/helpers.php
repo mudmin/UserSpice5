@@ -236,6 +236,10 @@ if (!function_exists('email')) {
     }
     $result = $mail->send();
 
+    if (!$result) {
+      logger('', 'Email', 'Failed to send email to ' . (is_array($to) ? implode(',', $to) : $to) . ': ' . $mail->ErrorInfo);
+    }
+
     return $result;
   }
 }
