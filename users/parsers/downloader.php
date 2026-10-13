@@ -106,6 +106,36 @@ function usOpenTempZipFile(string $abs_us_root, string $us_url_root, bool $diag,
   return [null, null];
 }
 
+function usNormalizeExtractPath(string $path): string|false
+{
+  $path = str_replace('\\', '/', $path);
+  $isAbsolute = (isset($path[0]) && $path[0] === '/') || preg_match('#^[A-Za-z]:/#', $path);
+  if (!$isAbsolute) {
+    $cwd = getcwd();
+    if ($cwd === false) return false;
+    $path = str_replace('\\', '/', $cwd) . '/' . $path;
+  }
+
+  $prefix = '';
+  if (preg_match('#^([A-Za-z]:)/#', $path, $m)) {
+    $prefix = $m[1];
+    $path = substr($path, 2);
+  }
+
+  $out = [];
+  foreach (explode('/', $path) as $seg) {
+    if ($seg === '' || $seg === '.') continue;
+    if ($seg === '..') {
+      if (empty($out)) return false;
+      array_pop($out);
+      continue;
+    }
+    $out[] = $seg;
+  }
+
+  return $prefix . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $out);
+}
+
 /**
  * Zip Slip / symlink guardrails.
  * - Blocks absolute paths, Windows drive paths, backslashes, NUL bytes
@@ -115,7 +145,11 @@ function usOpenTempZipFile(string $abs_us_root, string $us_url_root, bool $diag,
  */
 function usValidateZipEntries(ZipArchive $zip, string $baseExtractPath): array
 {
+  // realpath() fails when the extract dir doesn't exist yet; extractTo() will create it
   $baseReal = realpath($baseExtractPath);
+  if ($baseReal === false) {
+    $baseReal = usNormalizeExtractPath($baseExtractPath);
+  }
   if ($baseReal === false) {
     return [false, "Invalid extract path"];
   }

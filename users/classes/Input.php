@@ -77,14 +77,14 @@ class Input {
         if (is_array($item)){
             $postItems = [];
             foreach ($item as $key => $itemValue){
-                $postItems[$key]=self::sanitize($itemValue, $trim, $fallback);
+                $postItems[is_string($key) ? htmlspecialchars($key, ENT_QUOTES, 'UTF-8') : $key]=self::sanitize($itemValue, $trim, $fallback);
             }
             return $postItems;
         }elseif(is_object($item)){
             $item = (array)$item;
             $postItems = [];
             foreach ($item as $key => $itemValue){
-                $postItems[$key]=self::sanitize($itemValue, $trim, $fallback);
+                $postItems[is_string($key) ? htmlspecialchars($key, ENT_QUOTES, 'UTF-8') : $key]=self::sanitize($itemValue, $trim, $fallback);
             }
             return (object)$postItems;
         }else{

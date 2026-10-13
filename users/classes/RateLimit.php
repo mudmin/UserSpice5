@@ -9,7 +9,6 @@ class RateLimit
 {
 	private $db;
 	private $rateLimits;
-	private $proxyConfig;
 
 	public function __construct($database = null)
 	{
@@ -21,7 +20,6 @@ class RateLimit
 		}
 		$this->rateLimits = $rateLimits;
 
-		$this->loadProxyConfig();
 		$this->createTableIfNotExists();
 	}
 
@@ -130,6 +128,11 @@ class RateLimit
 				'metadata' => json_encode($metadata)
 			]);
 		}
+
+		// Prune old rows now and then so the table stays small without a cron
+		if (random_int(1, 100) === 1) {
+			$this->cleanup($this->minRetentionHours());
+		}
 		return true;
 	}
 
@@ -144,13 +147,8 @@ class RateLimit
 		$action = $this->sanitizeAction($action);
 		if (!$action) return false;
 
+		// IP failures are not auto-cleared on success, so one good login can't reset an IP's count
 		$identifiers = $this->sanitizeIdentifiers($identifiers);
-		if (!isset($identifiers['ip'])) {
-			$ip = $this->getRealIP();
-			if ($ip) {
-				$identifiers['ip'] = $ip;
-			}
-		}
 
 		foreach ($identifiers as $type => $value) {
 			if (empty($value)) continue;
@@ -285,105 +283,28 @@ class RateLimit
 		return $count;
 	}
 
-	// ============== PROXY AND IP DETECTION METHODS ==============
-
-	private function loadProxyConfig()
+	/**
+	 * Hours of history cleanup must keep: 24, or the longest configured window if that is longer.
+	 */
+	private function minRetentionHours()
 	{
-		global $settings;
-
-		$this->proxyConfig = [
-
-			'behind_reverse_proxy' => isset($settings->behind_reverse_proxy) && (bool)$settings->behind_reverse_proxy,
-			'trusted_proxies'      => [],
-			'trusted_headers'      => [],
-		];
-
-		try {
-
-			$result = $this->db->query(
-				"SELECT proxy_ip, header_name, priority 
-                 FROM us_rate_limit_proxy_settings 
-                 WHERE enabled = 1 
-                 ORDER BY priority ASC"
-			);
-
-			if ($result && !$result->error()) {
-				foreach ($result->results() as $row) {
-					$this->proxyConfig['trusted_proxies'][] = trim($row->proxy_ip);
-					$this->proxyConfig['trusted_headers'][$row->header_name] = (int)$row->priority;
+		$longest = 0;
+		foreach ($this->rateLimits as $limits) {
+			if (!is_array($limits)) continue;
+			foreach ($limits as $key => $value) {
+				if (substr($key, -7) === '_window') {
+					$longest = max($longest, (int)$value);
 				}
 			}
-		} catch (Exception $e) {
-			// Fails gracefully if db/tables don't exist yet
-			logger(0, "RateLimit", "Could not load proxy config: " . $e->getMessage());
 		}
+		return max(24, (int)ceil($longest / 3600));
 	}
+
+	// ============== PROXY AND IP DETECTION METHODS ==============
 
 	public function getRealIP()
 	{
-		$remoteAddr = Server::get('REMOTE_ADDR', 'unknown');
-
-		if (!$this->proxyConfig['behind_reverse_proxy'] || empty($this->proxyConfig['trusted_proxies'])) {
-			return $this->validateIP($remoteAddr, false); // Check without disallowing private ranges
-		}
-
-		if (!$this->isTrustedProxy($remoteAddr)) {
-			logger(0, "RateLimit", "Untrusted proxy detected: $remoteAddr");
-			return $this->validateIP($remoteAddr);
-		}
-
-		$headers = $this->proxyConfig['trusted_headers'];
-		asort($headers);
-
-		foreach (array_keys($headers) as $header) {
-			$serverHeader = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
-
-			if (!empty($_SERVER[$serverHeader])) {
-				$ips = explode(',', $_SERVER[$serverHeader]);
-				$clientIp = trim(end($ips)); // Get the last IP in the list
-				if ($validatedIP = $this->validateIP($clientIp)) {
-					return $validatedIP;
-				}
-			}
-		}
-
-		logger(0, "RateLimit", "No valid IP found in trusted headers, falling back to REMOTE_ADDR.");
-		return $this->validateIP($remoteAddr, false);
-	}
-
-	private function validateIP($ip, $noPrivate = true)
-	{
-		$flags = FILTER_FLAG_NO_RES_RANGE;
-		if ($noPrivate) {
-			$flags |= FILTER_FLAG_NO_PRIV_RANGE;
-		}
-		return filter_var($ip, FILTER_VALIDATE_IP, $flags) ? $ip : false;
-	}
-
-	private function isTrustedProxy($ip)
-	{
-		if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-			return false;
-		}
-
-		$ip_long = ip2long($ip);
-		if ($ip_long === false) return false;
-
-		foreach ($this->proxyConfig['trusted_proxies'] as $proxyAddress) {
-			if (strpos($proxyAddress, '/') !== false) {
-				list($subnet, $mask) = explode('/', $proxyAddress, 2);
-				if (filter_var($subnet, FILTER_VALIDATE_IP)) {
-					$subnet_long = ip2long($subnet);
-					$mask_long = ~((1 << (32 - (int)$mask)) - 1);
-					if (($ip_long & $mask_long) == ($subnet_long & $mask_long)) {
-						return true;
-					}
-				}
-			} elseif ($ip === $proxyAddress) {
-				return true;
-			}
-		}
-		return false;
+		return ClientIP::get();
 	}
 
 	// ============== HELPER AND SANITIZATION METHODS ==============

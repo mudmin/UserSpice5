@@ -37,6 +37,9 @@ switch ($view) {
     include $path;
     break;
   case 'legacy':
+    if (!checkAccess('view', 'legacy')) {
+      Redirect::to('admin.php');
+    }
     if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/admin_panels.php')) {
       include $abs_us_root . $us_url_root . 'usersc/includes/admin_panels.php';
     } else {
@@ -124,6 +127,9 @@ switch ($view) {
     break;
   case 'plugins_config':
     $plugin = Input::get('plugin');
+    if (!checkAccess('page', '_admin_plugins.php') || !preg_match('/^[A-Za-z0-9_-]+$/', (string)$plugin)) {
+      Redirect::to('admin.php');
+    }
     if (file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $plugin . '/configure.php')) {
       if (file_exists($abs_us_root . $us_url_root . 'users/views/_configure_plugin_header.php')) {
         include $abs_us_root . $us_url_root . 'users/views/_configure_plugin_header.php';

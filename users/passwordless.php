@@ -54,7 +54,7 @@ if ($method == "") {
 if ($method == "verify_code") {
   $email = Input::get('email');
   $code = strtolower(Input::get('code'));
-  $user_id = Input::get('user_id');
+  $user_id = $db->query("SELECT id FROM users WHERE email = ?", [$email])->first()->id ?? 0;
 
   // Check rate limit for login attempts
   if (!checkRateLimit('login_attempt', $user_id, $email)) {
@@ -161,7 +161,7 @@ if ($method == "verify_code") {
         includeHook($failHooks, 'body');
 
         usError("Invalid code. Attempts remaining: " . (3 - $invalid_attempts));
-        Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . urlencode($email) . '&user_id=' . $user_id);
+        Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . urlencode($email));
       }
     } else {
       // Record failed login attempt (no valid login record found)
@@ -204,6 +204,7 @@ if ($method == "enter_email") {
         Redirect::to($us_url_root . 'users/passwordless.php');
       }
       sleep(1);
+      Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . rawurlencode($email));
     } else {
       $search = $searchQ->first();
       $user_id = $search->id;
@@ -243,19 +244,34 @@ if ($method == "enter_email") {
       ];
 
       $encoded_email = rawurlencode($email);
-      if (lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }") {
-        $subject = lang("EML_PASSWORDLESS_SUBJECT");
+      if (!empty($verification_code) && lang("PASS_YOUR_CODE") != "{ Missing Text }") {
+        // Code-bearing subject so mail apps (iOS Mail, Gmail) offer to copy the
+        // one-time code; the code also makes each subject unique, so no
+        // timestamp is needed to defeat threading.
+        $subject = trim(lang("PASS_YOUR_CODE")) . " " . $verification_code;
+        if ($settings->site_name != "UserSpice") {
+          $subject = $settings->site_name . ": " . $subject;
+        }
+        $subject = html_entity_decode($subject, ENT_QUOTES);
       } else {
-        $subject = "Please verify your email to login.";
+        if (lang("EML_PASSWORDLESS_SUBJECT") != "{ Missing Text }") {
+          $subject = lang("EML_PASSWORDLESS_SUBJECT");
+        } else {
+          $subject = "Please verify your email to login.";
+        }
+        if ($settings->site_name != "UserSpice") {
+          $subject = $settings->site_name . ": " . $subject;
+        }
+        $subject = html_entity_decode($subject, ENT_QUOTES);
+        $subject .= " @ " . date("Y-m-d H:i:s");
       }
-      if ($settings->site_name != "UserSpice") {
-        $subject = $settings->site_name . ": " . $subject;
-      }
-      $subject = html_entity_decode($subject, ENT_QUOTES);
-
-      $subject .= " @ " . date("Y-m-d H:i:s");
       $body = email_body('_email_template_passwordless.php', $options);
-      $email_sent = email($email, $subject, $body);
+      $email_opts = [];
+      if (!empty($verification_code)) {
+        // Plain-text alternative gives OTP parsers the cleanest possible input
+        $email_opts['altBody'] = trim(html_entity_decode(lang("PASS_YOUR_CODE"), ENT_QUOTES)) . " " . $verification_code;
+      }
+      $email_sent = email($email, $subject, $body, $email_opts);
 
       if ($email_sent) {
         // Record successful passwordless request
@@ -265,14 +281,10 @@ if ($method == "enter_email") {
           'user_agent' => Server::get('HTTP_USER_AGENT')
         ]);
 
-        Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . $encoded_email . '&user_id=' . $user_id);
+        Redirect::to($us_url_root . 'users/passwordless.php?method=check_email&email=' . $encoded_email);
       } else {
-        // Record failed passwordless request (email send failed)
-        handleAuthFailure('password_reset_request', $user_id, $email, [], [
-          'method' => 'passwordless_request',
-          'failure_reason' => 'email_send_failed',
-          'user_agent' => Server::get('HTTP_USER_AGENT')
-        ]);
+        // A send failure is a server problem, not the user's, so it must not count toward their rate limit
+        logger($user_id, "Passwordless", "Passwordless login email could not be sent.");
 
         usError(lang("PASS_GENERIC_ERROR"));
       }
@@ -384,12 +396,11 @@ if ($method == "check_email") {
             <div class="mt-4">
               <form action="" method="post" class="text-center">
                 <input type="hidden" name="method" value="verify_code">
-                <input type="hidden" name="email" value="<?= sanitize($email) ?>">
-                <input type="hidden" name="user_id" value="<?= $user_id ?>">
+                <input type="hidden" name="email" value="<?= safeReturn(hed($email)) ?>">
                 <?= tokenHere() ?>
                 <div class="form-group">
                   <label for="code" class="h5"><?= lang("PASS_ENTER_CODE"); ?></label>
-                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" pattern="[a-zA-Z0-9]{4,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
+                  <input type="text" id="code" name="code" class="form-control form-control-lg mx-auto" autocomplete="one-time-code" pattern="[a-zA-Z0-9]{4,<?= $settings->pwl_length ?>}" maxlength="<?= $settings->pwl_length ?>" required style="width: <?= ($settings->pwl_length * 2) - 1 ?>ch;">
                 </div>
                 <?php includeHook($hooks, 'form'); ?>
                 <button type="submit" class="btn btn-primary btn-lg mt-3"><?= lang("PASS_VER_BUTTON"); ?></button>

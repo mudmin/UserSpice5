@@ -13,8 +13,6 @@ $user = new User();
 
 // HANDLE TOKEN REQUESTS FIRST (POST to /users/auth/)
 if (Server::get('REQUEST_METHOD') === 'POST' && isset($_POST['grant_type'])) {
-    logger(1, "OAuth Server", "Token request received: " . json_encode($_POST));
-    
     if ($_POST['grant_type'] === 'authorization_code') {
         $oauthProvider->handleTokenRequest();
         exit; // handleTokenRequest() sends its own response

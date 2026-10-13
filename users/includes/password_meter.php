@@ -61,7 +61,7 @@ if ($pw_settings->meter_active == 1) {
         <?= implode("", $statements); ?>
     </table>
 
-    <style>
+    <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .password-verification {
       font-size: 80%;
     }

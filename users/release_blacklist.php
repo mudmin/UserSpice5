@@ -1,7 +1,7 @@
 <?php 
 require_once '../users/init.php';
-if($settings->cron_ip != ipCheck()){
-    logger('','Blacklist clear','Cron request DENIED from '.Input::sanitize(ipCheck()));
+if($settings->cron_ip != ClientIP::peer()){
+    logger('','Blacklist clear','Cron request DENIED from '.Input::sanitize(ClientIP::peer()));
     die;
 }
 $now = date("Y-m-d H:i:s");

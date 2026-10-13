@@ -20,6 +20,21 @@ if(!$db->error()) {
   $update=Input::get('override');
   if($update != '' && (!isset($user) || !$user->isLoggedIn() || !hasPerm([2], $user->data()->id))) {
     $errors[] = "You are not authorized to override updates.";
+  } elseif(!in_array($update,$existing_updates) && $update!='' && !Token::check(Input::get('csrf'))) {
+    // Overrides are permanent, so require a tokenized confirmation before skipping (or running) anything
+    ?>
+    <link href="<?=$us_url_root?>users/css/bootstrap.min.css" rel="stylesheet">
+    <div class="container text-center mt-5">
+      <h3>Skip migration <?=safeReturn($update, true)?>?</h3>
+      <p>It will be marked as complete without running. This cannot be undone.</p>
+      <form method="post" action="?override=<?=urlencode(hed($update))?>">
+        <?php tokenHere(); ?>
+        <button type="submit" class="btn btn-danger">Skip this migration</button>
+        <a class="btn btn-secondary" href="<?=$us_url_root?>users/admin.php">Cancel</a>
+      </form>
+    </div>
+    <?php
+    exit;
   } elseif(!in_array($update,$existing_updates) && $update!='') {
     $db->insert('updates',['migration'=>$update,'update_skipped'=>1]);
     if(!$db->error()) {

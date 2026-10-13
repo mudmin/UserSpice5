@@ -187,7 +187,6 @@ class Menu {
         include $php_file;
         $data = ob_get_clean();
         $html .=  $data;
-        @ob_end_flush();
       }
       $html .= "</span>";
       $html .= "<div class='us_menu_mobile_control' data-target='{$this->menu->id}{$uniq}' data-bs-target='{$this->menu->id}{$uniq}'><i class='fa fa-bars'></i></div></div>";
@@ -241,7 +240,6 @@ class Menu {
         include $abs_us_root . $us_url_root . $item->link;
         $data = ob_get_clean();
         $html .=  $data;
-        @ob_end_flush();
         $html .= "";
       }else{
         $html .= "<li class='{$liClass}' data-menu='{$item->menu}'>";

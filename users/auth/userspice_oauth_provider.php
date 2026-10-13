@@ -43,21 +43,21 @@ public function handleAuthorizationRequest() {
         $redirectUri = $clientData->redirect_uri;
     }
 
-    // Validate response_type (only 'code' is supported)
-    if (!empty($responseType) && $responseType !== 'code') {
-        return $this->redirectWithError($redirectUri, 'unsupported_response_type', $state);
-    }
-
     // Validate client exists and is enabled
     $clientData = $this->db->query("SELECT * FROM us_oauth_server_clients WHERE client_id = ? AND client_enabled = 1", [$clientId])->first();
     if (!$clientData) {
-        return $this->redirectWithError($redirectUri, 'invalid_client', $state);
+        return $this->sendErrorResponse('invalid_client', 'Invalid client_id');
     }
 
     // Validate redirect_uri matches registered URI
     if ($redirectUri !== $clientData->redirect_uri) {
         // dump($redirectUri); dump($clientData->redirect_uri);
         return $this->sendErrorResponse('invalid_request', 'Invalid redirect_uri, expected ' . $clientData->redirect_uri);
+    }
+
+    // Validate response_type (only 'code' is supported)
+    if (!empty($responseType) && $responseType !== 'code') {
+        return $this->redirectWithError($redirectUri, 'unsupported_response_type', $state);
     }
 
     logger(1, "OAuth Server", "Valid authorization request received for client: $clientId");
@@ -77,6 +77,13 @@ public function handleAuthorizationRequest() {
         // Verify the client ID and redirect URI
         if (!$this->verifyClient($clientId, $redirectUri)) {
             logger(1, "OAuth Server", "Invalid client ID or redirect URI: $clientId, $redirectUri");
+            return false;
+        }
+
+        // Banned users (permissions = 0) never get codes
+        $perm = $this->db->query("SELECT permissions FROM users WHERE id = ?", [$userId])->first();
+        if (!$perm || (int)$perm->permissions === 0) {
+            logger($userId, "OAuth Server", "Auth code refused for banned or missing user");
             return false;
         }
     
@@ -251,7 +258,9 @@ public function handleAuthorizationRequest() {
         $response = [
             'access_token' => $accessToken,
             'token_type' => 'Bearer',
-            'expires_in' => 3600 // 1 hour
+            'expires_in' => 3600, // 1 hour
+            // Server-confirmed identity; clients use this instead of the unsigned redirect data.
+            'email' => $this->db->query("SELECT email FROM users WHERE id = ?", [$userId])->first()->email ?? null
         ];
         // SECURITY FIX: Don't log access tokens - log success without sensitive data
         logger(1, "OAuth Server", "Token issued successfully for user: $userId, client: $clientId");
@@ -296,7 +305,7 @@ private function sendErrorResponse($error, $description = null) {
     }
     echo json_encode($response);
     logger(1, "OAuth Server Error", "Error response sent: $error - $description");
-    return false;
+    exit;
 }
 
 private function redirectWithError($redirectUri, $error, $state = null) {
@@ -311,7 +320,7 @@ private function redirectWithError($redirectUri, $error, $state = null) {
     logger(1, "OAuth Server Error", $msg);
     
 
-    Redirect::sanitized($redirectUri, $args);
+    Redirect::sanitized($redirectUri, $args, 302, ['same_origin' => false, 'allowed_hosts' => [parse_url($redirectUri, PHP_URL_HOST)]]);
     // Note: Redirect::sanitized() calls exit(), so the script will stop here.
     return false;
 }

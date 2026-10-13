@@ -15,7 +15,7 @@ $usSessionMessageClasses = [
   'valErr' => 'danger',
 ];
 ?>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 /* Toast notification bar styles */
 .us-toast-bar {
   height: 4px;

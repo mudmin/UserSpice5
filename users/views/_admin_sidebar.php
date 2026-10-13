@@ -1,4 +1,4 @@
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .sidebar {
     height: 100%;
   }

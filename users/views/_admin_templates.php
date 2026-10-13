@@ -7,6 +7,9 @@ foreach ($dirs as $d) {
 }
 
 if (!empty($_POST['template'])) {
+  if (!Token::check(Input::get('csrf'))) {
+    include $abs_us_root . $us_url_root . 'usersc/scripts/token_error.php';
+  }
   $choice = Input::get('template');
   $navstyle = Input::get('navstyle');
   //check if choice is a valid template
@@ -17,7 +20,7 @@ if (!empty($_POST['template'])) {
       Redirect::to('admin.php?view=templates');
     } else {
       logger($user->data()->id, "Admin Templates", "Failed to assign template, Error: " . $db->errorString());
-      usSuccess("Template assigned");
+      usError("Failed to assign template");
       Redirect::to('admin.php?view=templates');
     }
   } else {
@@ -27,7 +30,7 @@ if (!empty($_POST['template'])) {
 }
 ?>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   #hr,
   #hr1 {
     display: none;
@@ -86,6 +89,7 @@ if (!empty($_POST['template'])) {
 
                   <form id="template_<?= $t ?>" action="" method="post" class="d-inline">
                     <input type="hidden" name="template" value="<?= $t ?>">
+                    <?php tokenHere(); ?>
                     <?php if ($t != $core_template) { ?>
                       <input type="submit" name="activate" value="Activate" class="btn btn-primary">
                     <?php } else { ?>

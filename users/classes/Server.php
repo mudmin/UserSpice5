@@ -100,6 +100,16 @@ final class Server
                 $raw = $derived;
             }
         }
+        // PHP_SELF includes PATH_INFO (/page.php/extra); drop it so page checks see the real script.
+        if ($key === 'PHP_SELF' && is_string($raw) && !empty($_SERVER['PATH_INFO']) && is_string($_SERVER['PATH_INFO'])) {
+            $pi = $_SERVER['PATH_INFO'];
+            if (strlen($raw) > strlen($pi) && substr($raw, -strlen($pi)) === $pi) {
+                $trimmed = substr($raw, 0, -strlen($pi));
+                if (preg_match('/\.php$/i', $trimmed)) {
+                    $raw = $trimmed;
+                }
+            }
+        }
         if ($raw === null) {
             return $default;
         }

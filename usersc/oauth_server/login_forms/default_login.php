@@ -74,7 +74,7 @@ if ($showForgot == true && $settings->registration == 1) {
     </div>
 </div>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .login-card {
         max-width: 500px;
         margin: auto;

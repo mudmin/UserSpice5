@@ -636,12 +636,11 @@ if (!function_exists('random_password')) {
     //
     // The alphabet deliberately excludes every character Input::sanitize()
     // rewrites (& < > " '). login.php verifies trim(Input::get('password')),
-    // so what reaches password_verify() is always htmlspecialchars'd. A
-    // generated password containing one of those characters can therefore
-    // never match a hash made from the raw string: User::loginEmail()'s only
-    // fallback re-verifies the htmlentities form, not the raw one, and that
-    // fallback is skipped entirely at cost >= 13 (what we hash new users at).
-    // Do not add those five characters back without fixing that pipeline.
+    // so the first password_verify() always sees the htmlspecialchars'd form.
+    // User::loginEmail() does fall back to the raw $_POST string, so such a
+    // password would still log in, but only via that fallback, which costs an
+    // extra bcrypt and triggers a rehash. Other code that hashes or compares
+    // the sanitized form may not be as forgiving, so keep these five out.
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*()_-=+;:,.?[]{}~';
     $max = strlen($chars) - 1;
     $password = '';
@@ -1274,6 +1273,17 @@ if (!function_exists('reauthMarkConfirmed')) {
       $_SESSION[$k] = [];
     }
     $_SESSION[$k]['last_confirm'] = date('Y-m-d H:i:s');
+  }
+}
+
+// Drop the reauth stamp, e.g. when a login is rolled back pending TOTP.
+if (!function_exists('reauthClearConfirmed')) {
+  function reauthClearConfirmed()
+  {
+    $k = reauthSessionKey();
+    unset($_SESSION[$k]['last_confirm']);
+    unset($_SESSION[Config::get('session/session_name') . '_last_confirm']);
+    unset($_SESSION['last_confirm']);
   }
 }
 

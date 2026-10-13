@@ -159,7 +159,7 @@ $activeClientCount = $activeClientsQ->count();
   });
 </script>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .bg-edit {
     background-color: #d1ecf1 !important;
   }

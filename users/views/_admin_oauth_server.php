@@ -162,7 +162,7 @@ if (!empty($_POST)) {
   }
 </script>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   /* light blue bg for bg edit */
   .bg-edit {
     background-color: #d1ecf1 !important;

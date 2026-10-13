@@ -448,7 +448,6 @@ if (!function_exists('socialLogin')) {
     if ($existingUser !== null) {
       $user = new User($existingUser->id);
       $date = date('Y-m-d H:i:s');
-      $db->query('UPDATE users SET last_login = ?, logins = logins + 1 WHERE id = ?', [$date, $user->data()->id]);
       $_SESSION['last_confirm'] = date('Y-m-d H:i:s');
       $db->insert('logs', ['logdate' => $date, 'user_id' => $user->data()->id, 'logtype' => 'Login', 'lognote' => 'User logged in.', 'ip' => ipCheck()]);
       $ip = ipCheck();
@@ -478,8 +477,10 @@ if (!function_exists('socialLogin')) {
     } else {
       // #2 continued: If no valid email, don't create new user
       if (!$hasValidEmail) {
-        session_destroy();
-        Redirect::to($us_url_root . 'users/join.php?err=' . urlencode('Email address required to create account'));
+        $_SESSION = [];
+        session_regenerate_id(true);
+        usError('Email address required to create account');
+        Redirect::to($us_url_root . 'users/login.php');
         die();
       }
 
@@ -500,7 +501,7 @@ if (!function_exists('socialLogin')) {
         'permissions' => 1,
         'oauth_tos_accepted' => false,
         'language' => $newLang,
-        'logins' => 1,
+        'logins' => 0,
         'join_date' => $date,
         'last_login' => $date,
         'email_verified' => 1,
@@ -514,14 +515,23 @@ if (!function_exists('socialLogin')) {
       $createFields['email_verified'] = 1;
       $createFields['join_date'] = $date;
       $createFields['last_login'] = $date;
-      $createFields['logins'] = 1;
+      $createFields['logins'] = 0;
 
       $activeCheck = $db->query('SELECT active FROM users LIMIT 1');
       if (!$activeCheck->error()) {
         $createFields['active'] = 1;
       }
 
-      $theNewId = $user->create($createFields);
+      try {
+        $theNewId = $user->create($createFields);
+      } catch (Exception $e) {
+        logger(0, 'Social Login', 'Account creation failed: ' . $e->getMessage(), ['email' => $email]);
+        $_SESSION = [];
+        session_regenerate_id(true);
+        usError('We could not create your account. Please try again or contact the site administrator.');
+        Redirect::to($us_url_root . 'users/login.php');
+        die();
+      }
       $user->find($theNewId);
 
       if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/during_user_creation.php')) {

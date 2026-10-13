@@ -1,4 +1,4 @@
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   input[type=checkbox] {
     /* Double-sized Checkboxes */
     -ms-transform: scale(2);

@@ -245,6 +245,7 @@ if (!empty($_POST)) {
 
           $new_password_hash = password_hash(Input::get('password'), PASSWORD_BCRYPT, ['cost' => 13]);
           $user->update(['password' => $new_password_hash, 'force_pr' => 0, 'vericode' => hashVericode(randomstring(15))], $user->data()->id);
+          $db->query("DELETE FROM users_session WHERE user_id = ?", [$user->data()->id]); // revoke remember-me tokens
           $successes[] = lang('PW_UPD');
           logger($user->data()->id, 'User', 'Updated password.');
           if ($settings->session_manager == 1) {

@@ -19,6 +19,9 @@ $return = [
   'Data' => null,
 ];
 
+header('Content-Type: text/plain; charset=UTF-8');
+header('X-Content-Type-Options: nosniff');
+
 $id = Input::get('id');
 $db->query('SELECT * FROM logs WHERE id = ?', [$id]);
 if ($db->count() == 1) {
@@ -27,9 +30,9 @@ if ($db->count() == 1) {
         $return['isJson'] = true;
         $return['Data']->metadata = json_decode($return['Data']->metadata);
     }
-    dump($return['Data']->metadata);
+    var_dump($return['Data']->metadata);
 } else {
-    dump(null);
+    var_dump(null);
 }
 
 die();

@@ -290,6 +290,7 @@ if (!empty($_POST)) {
           //process
           $new_password_hash = password_hash(Input::get('pwx', true), PASSWORD_BCRYPT, ['cost' => 13]);
           $user->update(['password' => $new_password_hash], $userId);
+          $db->query("DELETE FROM users_session WHERE user_id = ?", [$userId]); // revoke remember-me tokens
           $successes[] = 'Password updated.';
           logger($user->data()->id, 'User Manager', "User # $userdetails->id Updated. Updated password for $userdetails->fname.");
           if ($settings->session_manager == 1) {

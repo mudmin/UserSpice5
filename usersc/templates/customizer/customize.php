@@ -1151,7 +1151,7 @@ function renderInputField($name, $set)
           </div>
         </div>
 
-        <style>
+        <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
           .customizer-status-bar {
             position: sticky;
             top: 0;
@@ -1462,7 +1462,7 @@ function renderInputField($name, $set)
           </div>
         </div>
 
-        <style>
+        <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
           .customizer-collapse-toggle { cursor: pointer; }
           .customizer-collapse-chevron { transition: transform 0.2s ease; }
           .customizer-collapse-toggle.collapsed .customizer-collapse-chevron { transform: rotate(180deg); }
@@ -1545,7 +1545,7 @@ function renderInputField($name, $set)
         <label class="form-check-label small text-muted" for="toggleVarNames">Show CSS variable names</label>
       </div>
     </div>
-    <style>
+    <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
       /* Variable-name hints are advanced-only — hidden until the switch is on. */
       .customizer-varname { display: none; }
       .customizer-show-varnames .customizer-varname { display: block; }
@@ -1887,7 +1887,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';</
   </div>
 </div>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .how-it-works-button {
     transition: all 0.5s ease;
     overflow: hidden;
@@ -1960,7 +1960,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';</
      and lets paired-theme rows show the ◐ glyph in their natural width. -->
 <link rel="stylesheet" href="<?= $us_url_root ?>users/css/select2.min.css">
 <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript" src="<?= $us_url_root ?>users/js/select2.min.js"></script>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   /* Match Bootstrap .form-select-sm sizing so the picker doesn't grow the row */
   #fe_light_theme + .select2-container .select2-selection--single,
   #fe_dark_theme + .select2-container .select2-selection--single,

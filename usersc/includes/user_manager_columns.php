@@ -37,7 +37,7 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
             return '';
 
         case 'name':
-            return '<a class="nounderline text-body" href="admin.php?view=user&id=' . $user->id . '">' . $user->fname . ' ' . $user->lname . '</a>';
+            return '<a class="nounderline text-body" href="admin.php?view=user&id=' . $user->id . '">' . safeReturn($user->fname . ' ' . $user->lname, true) . '</a>';
 
         case 'last_login':
             if ($user->last_login != "0000-00-00 00:00:00") {
@@ -67,7 +67,7 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
 
         default:
             // For standard columns, just return the value if it exists, otherwise blank
-            return isset($user->$column) ? $user->$column : '';
+            return isset($user->$column) ? safeReturn($user->$column, true) : '';
     }
 };
 

@@ -229,9 +229,9 @@ includeHook($hooks, 'body');
                                                 <input type="checkbox" name="remove[]" class="remove" value="<?= $u->id ?>">
                                             <?php } ?>
                                         </td>
-                                        <td><?= $u->lname ?></td>
-                                        <td><?= $u->fname ?></td>
-                                        <td><?= $u->email ?></td>
+                                        <td><?= safeReturn($u->lname, true) ?></td>
+                                        <td><?= safeReturn($u->fname, true) ?></td>
+                                        <td><?= safeReturn($u->email, true) ?></td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
@@ -268,9 +268,9 @@ includeHook($hooks, 'body');
                                     } ?>
                                     <tr>
                                         <td><input type="checkbox" name="add[]" class="add" value="<?= $u->id ?>"></td>
-                                        <td><?= $u->lname ?></td>
-                                        <td><?= $u->fname ?></td>
-                                        <td><?= $u->email ?></td>
+                                        <td><?= safeReturn($u->lname, true) ?></td>
+                                        <td><?= safeReturn($u->fname, true) ?></td>
+                                        <td><?= safeReturn($u->email, true) ?></td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

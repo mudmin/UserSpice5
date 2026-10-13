@@ -35,7 +35,7 @@ if (file_exists($customizerPairFile)) {
 }
 if ($customizerDarkPaired && empty($GLOBALS['usThemeToggleRendered'])) :
 ?>
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .customizer-theme-toggle {
     position: fixed;
     right: 1rem;

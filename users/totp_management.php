@@ -107,11 +107,17 @@ if (isset($_SESSION[INSTANCE . '_totp_pending']) &&
     }
 }
 
+if (!empty($_POST['totp_action']) && !Token::check($_POST['csrf'] ?? '')) {
+    $_SESSION['totp_error_message'] = lang("CSRF_ERROR");
+    Redirect::to('totp_management.php');
+    exit;
+}
+
 // Require TOTP validation for sensitive actions
-// For highly sensitive actions (disable, regenerate), always require fresh verification
+// For highly sensitive actions (disable, regenerate, re-enroll), always require fresh verification
 if ($totpHandler->isTOTPEnabled($userId) && !empty($_POST['totp_action'])) {
     $action = Input::get('totp_action');
-    $blocked_actions = ['disable', 'regenerate_backup_codes'];
+    $blocked_actions = ['disable', 'regenerate_backup_codes', 'init_enable'];
 
     if (in_array($action, $blocked_actions)) {
         // Create atomic pending action with secure token
@@ -138,12 +144,7 @@ $anchor = '#totp_management_section_anchor';
 $totpAction = null;
 
 if (!empty($_POST['totp_action'])) {
-    // Regular POST form submission - validate CSRF
-    if (!Token::check($_POST['csrf'])) {
-        $_SESSION['totp_error_message'] = lang("CSRF_ERROR");
-        Redirect::to($baseRedirectUrl);
-        exit;
-    }
+    // Regular POST form submission (CSRF validated above)
     $totpAction = Input::get('totp_action');
 } elseif ($executePendingAction && $pendingActionToExecute) {
     // Pending action after TOTP verification - no CSRF needed (already verified)
@@ -155,6 +156,7 @@ if ($totpAction) {
             case 'init_enable':
                 $_SESSION['totp_secret'] = $totpHandler->generateSecret();
                 $_SESSION['totp_setup_initiated'] = true;
+                unset($_SESSION[INSTANCE . '_totp_pending']);
                 // logger($userId, "TOTP_Setup", "Initiated TOTP setup process via totp_management.php.");
 
                 Redirect::to($baseRedirectUrl . '?totp_event=setup_initiated' . $anchor);
@@ -567,7 +569,7 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
     }, true);
 </script>
 
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .totp-setup-form {
         border: 2px solid #28a745;
         border-radius: 8px;

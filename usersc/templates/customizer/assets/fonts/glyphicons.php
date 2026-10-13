@@ -1,4 +1,4 @@
-<style>
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
 @font-face {
   font-family: 'Glyphicons Halflings';
   src: url('<?=$us_url_root?>usersc/templates/<?=$settings->template?>/assets/fonts/glyphicons-halflings-regular.eot');

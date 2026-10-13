@@ -124,7 +124,7 @@ if (!empty($_POST)) {
 }
 $token = Token::generate();
 ?>
-<style media="screen">
+<style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .hov:hover {
     opacity: 0.5;
     transition: .4s ease;

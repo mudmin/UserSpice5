@@ -91,7 +91,7 @@ if (count($deletions) > 0) {
       continue;
     } else {
     }
-    $delMsgs .= $delName->page . '\\n';
+    $delMsgs .= $delName->page . "\n";
   }
   deletePages(implode(',', $deletes));
 }
@@ -243,7 +243,7 @@ foreach ((array) $permRows as $pr) {
           <tr>
             <td><span class="hideMe"><?= sprintf('%08d', $dbpages[$count]->id) ?></span>
               <?= $dbpages[$count]->id; ?></td>
-            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->page; ?></a></td>
+            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= safeReturn($dbpages[$count]->page) ?></a></td>
             <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title; ?></a></td>
             <td><?= htmlspecialchars($dbpages[$count]->lang_key ?? ''); ?></td>
             <td>
@@ -279,7 +279,7 @@ foreach ((array) $permRows as $pr) {
 if ($delMsgs != '') {
 ?>
   <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
-    alert("The following pages have been deleted from your database because they are either no longer present or because you used securePage on a file that was not monitored by UserSpice. You can add additional folders at the top of this page.\n \n<?= $delMsgs; ?>");
+    alert("The following pages have been deleted from your database because they are either no longer present or because you used securePage on a file that was not monitored by UserSpice. You can add additional folders at the top of this page.\n \n" + <?= safeJsonEncodeForJs($delMsgs) ?>);
   </script>
 
 <?php
