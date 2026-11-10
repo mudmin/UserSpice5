@@ -9,7 +9,9 @@ require_once 'classes/class.autoloader.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
-if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+// Mark the session cookie Secure on HTTPS, including when TLS ends at a proxy
+// or CDN in front of PHP (X-Forwarded-Proto / Cloudflare CF-Visitor).
+if (ClientIP::requestLooksHttps()) {
 	ini_set('session.cookie_secure', 1);
 }
 session_start();
