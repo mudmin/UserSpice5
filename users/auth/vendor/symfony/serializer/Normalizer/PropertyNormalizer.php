@@ -94,7 +94,7 @@ class PropertyNormalizer extends AbstractObjectNormalizer
      */
     private function supports(string $class): bool
     {
-        if ($this->classDiscriminatorResolver?->getMappingForClass($class)) {
+        if ($this->classDiscriminatorResolver?->getMappingForMappedObject($class)) {
             return true;
         }
 
@@ -118,7 +118,7 @@ class PropertyNormalizer extends AbstractObjectNormalizer
             return false;
         }
 
-        if ($this->classDiscriminatorResolver?->getMappingForMappedObject($classOrObject)?->getTypeProperty() === $attribute) {
+        if ($this->isDiscriminatorTypeProperty($classOrObject, $attribute)) {
             return true;
         }
 

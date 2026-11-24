@@ -126,7 +126,7 @@ abstract class ParagonIE_Sodium_Core_Ed25519 extends ParagonIE_Sodium_Core_Curve
     {
         $p1 = self::ge_mul_l($A);
         $t = self::fe_sub($p1->Y, $p1->Z);
-        return self::fe_isnonzero($p1->X) && self::fe_isnonzero($t);
+        return !self::fe_isnonzero($p1->X) && !self::fe_isnonzero($t);
     }
 
     /**
@@ -312,37 +312,40 @@ abstract class ParagonIE_Sodium_Core_Ed25519 extends ParagonIE_Sodium_Core_Curve
         if ($d === 0) {
             throw new SodiumException('All zero public key');
         }
+        if (self::small_order($pk)) {
+            throw new SodiumException('Public key has small order');
+        }
 
         /* The original value of ParagonIE_Sodium_Compat::$fastMult */
         $orig = ParagonIE_Sodium_Compat::$fastMult;
 
         // Set ParagonIE_Sodium_Compat::$fastMult to true to speed up verification.
         ParagonIE_Sodium_Compat::$fastMult = true;
+        try {
+            $A = self::ge_frombytes_negate_vartime($pk);
+            if (!self::is_on_main_subgroup($A)) {
+                throw new SodiumException('Public key is not on main subgroup');
+            }
 
-        $A = self::ge_frombytes_negate_vartime($pk);
-        if (!self::is_on_main_subgroup($A)) {
-            throw new SodiumException('Public key is not on main subgroup');
+            $hDigest = hash(
+                'sha512',
+                self::substr($sig, 0, 32) .
+                    self::substr($pk, 0, 32) .
+                    $message,
+                true
+            );
+            $h = self::sc_reduce($hDigest) . self::substr($hDigest, 32);
+            $R = self::ge_double_scalarmult_vartime(
+                $h,
+                $A,
+                self::substr($sig, 32)
+            );
+            $rcheck = self::ge_tobytes($R);
+
+            return self::verify_32($rcheck, self::substr($sig, 0, 32));
+        } finally {
+            ParagonIE_Sodium_Compat::$fastMult = $orig;
         }
-
-        $hDigest = hash(
-            'sha512',
-            self::substr($sig, 0, 32) .
-                self::substr($pk, 0, 32) .
-                $message,
-            true
-        );
-        $h = self::sc_reduce($hDigest) . self::substr($hDigest, 32);
-        $R = self::ge_double_scalarmult_vartime(
-            $h,
-            $A,
-            self::substr($sig, 32)
-        );
-        $rcheck = self::ge_tobytes($R);
-
-        // Reset ParagonIE_Sodium_Compat::$fastMult to what it was before.
-        ParagonIE_Sodium_Compat::$fastMult = $orig;
-
-        return self::verify_32($rcheck, self::substr($sig, 0, 32));
     }
 
     /**
@@ -358,12 +361,12 @@ abstract class ParagonIE_Sodium_Core_Ed25519 extends ParagonIE_Sodium_Core_Curve
         if (self::strlen($S) < 32) {
             throw new SodiumException('Signature must be 32 bytes');
         }
-        $L = array(
+        $L = [
             0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
             0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10
-        );
+        ];
         $c = 0;
         $n = 1;
         $i = 32;
@@ -391,98 +394,100 @@ abstract class ParagonIE_Sodium_Core_Ed25519 extends ParagonIE_Sodium_Core_Curve
     public static function small_order(string $R): bool
     {
         /** @var array<int, array<int, int>> $blocklist */
-        $blocklist = array(
+        $blocklist = [
             /* 0 (order 4) */
-            array(
+            [
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            ),
+            ],
             /* 1 (order 1) */
-            array(
+            [
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-            ),
+            ],
             /* 2707385501144840649318225287225658788936804267575313519463743609750303402022 (order 8) */
-            array(
+            [
                 0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0,
                 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98, 0xf0,
                 0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39,
                 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53, 0xfc, 0x05
-            ),
+            ],
             /* 55188659117513257062467267217118295137698188065244968500265048394206261417927 (order 8) */
-            array(
+            [
                 0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f,
                 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
                 0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6,
                 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x7a
-            ),
+            ],
             /* p-1 (order 2) */
-            array(
+            [
                 0x13, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0,
                 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98, 0xf0,
                 0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39,
                 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53, 0xfc, 0x85
-            ),
+            ],
             /* p (order 4) */
-            array(
+            [
                 0xb4, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f,
                 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
                 0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6,
                 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0xfa
-            ),
+            ],
             /* p+1 (order 1) */
-            array(
+            [
                 0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
-            ),
+            ],
             /* p+2707385501144840649318225287225658788936804267575313519463743609750303402022 (order 8) */
-            array(
+            [
                 0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
-            ),
+            ],
             /* p+55188659117513257062467267217118295137698188065244968500265048394206261417927 (order 8) */
-            array(
+            [
                 0xee, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f
-            ),
+            ],
             /* 2p-1 (order 2) */
-            array(
+            [
                 0xd9, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-            ),
+            ],
             /* 2p (order 4) */
-            array(
+            [
                 0xda, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-            ),
+            ],
             /* 2p+1 (order 1) */
-            array(
+            [
                 0xdb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-            )
-        );
+            ]
+        ];
         $countBlocklist = count($blocklist);
         for ($i = 0; $i < $countBlocklist; ++$i) {
             $c = 0;
-            for ($j = 0; $j < 32; ++$j) {
+            for ($j = 0; $j < 31; ++$j) {
                 $c |= self::chrToInt($R[$j]) ^ $blocklist[$i][$j];
             }
+            // The x sign bit cannot change the order of the decoded point:
+            $c |= (self::chrToInt($R[31]) & 0x7f) ^ ($blocklist[$i][31] & 0x7f);
             if ($c === 0) {
                 return true;
             }
