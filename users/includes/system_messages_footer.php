@@ -125,7 +125,12 @@ $usSessionMessageClasses = [
    * Sanitizes HTML using a safe token-replacement approach.
    * 1. Replace allowed tags with unique tokens
    * 2. Strip ALL HTML via textContent
-   * 3. Restore allowed tags from tokens
+   * 3. HTML-escape the decoded text (US_TOAST_ESCAPE_V1). textContent decodes
+   *    entities, so "&lt;img onerror=...&gt;" in a ?err= link would otherwise
+   *    come back as a real <img> tag and run once assigned to innerHTML. Never
+   *    remove this step; the security dashboard checks for the marker in any
+   *    usersc/includes/system_messages_footer.php override.
+   * 4. Restore allowed tags from tokens (tokens contain no escaped characters)
    */
   function sanitizeAndFormat(html) {
     let temp = String(html).substring(0, MAX_MESSAGE_LENGTH);
@@ -161,6 +166,15 @@ $usSessionMessageClasses = [
     const doc = new DOMParser().parseFromString(temp, 'text/html');
     let safeText = doc.body.textContent || "";
 
+    // US_TOAST_ESCAPE_V1: textContent has decoded entities, so escape the text
+    // back before anything reaches innerHTML.
+    safeText = safeText
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
     // Restore allowed tags from tokens
     tokens.forEach((tag, index) => {
       const tokenPattern = new RegExp(`${TOKEN_PREFIX.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}${index}${TOKEN_PREFIX.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}`, 'g');
@@ -175,6 +189,10 @@ $usSessionMessageClasses = [
     // Now safe to use innerHTML since we've sanitized to only allowed tags
     bodyElement.innerHTML = safeText;
   }
+
+  // Shared with users/js/messages.js (usMessage) so every message sink uses
+  // the same allowlist sanitizer.
+  window.usSanitizeMessage = function(msg){ return sanitizeAndFormat(String(msg == null ? '' : msg)); };
 
   // Shorthand helpers
   window.usSuccess = function(msg){ userSpiceMessage(msg,'success'); };

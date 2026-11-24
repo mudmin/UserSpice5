@@ -51,6 +51,14 @@ if ($method == "") {
 }
 
 // Handle code verification
+// POST with a valid token only, so a crafted GET link (or an empty-body POST,
+// which skips the check above) can't sign a visitor into someone else's
+// account (login CSRF). Input::get() reads the query string too, so check the
+// token from $_POST explicitly.
+if ($method == "verify_code" && (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !Token::check($_POST['csrf'] ?? ''))) {
+  Redirect::to($us_url_root . 'users/passwordless.php');
+  exit;
+}
 if ($method == "verify_code") {
   $email = Input::get('email');
   $code = strtolower(Input::get('code'));
@@ -128,22 +136,21 @@ if ($method == "verify_code") {
 
         $user = new User($user_id);
         $user->login();
+        setLoginMethod('email');
 
         // Execute login success hooks
         $successHooks = getMyHooks(['page' => 'loginSuccess']);
         includeHook($successHooks, 'body');
 
+        // Page captured before login (session only; never from the request)
+        $dest = consumeLoginDest();
         if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
           require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
         }
-        $dest = sanitizedDest('dest');
-        if (!empty($dest)) {
-          $redirect = Input::get('redirect');
-          if (!empty($redirect)) Redirect::sanitized($redirect);
-          else Redirect::to($dest);
-        } else {
-          Redirect::to($us_url_root . $settings->redirect_uri_after_login);
+        if ($dest !== '') {
+          Redirect::sanitized($dest);
         }
+        Redirect::to($us_url_root . $settings->redirect_uri_after_login);
       } else {
         $invalid_attempts++;
         $db->update('us_email_logins', $login->id, ['invalid_attempts' => $invalid_attempts]);
@@ -344,7 +351,6 @@ if ($method == "enter_email") {
                 <input type="email" id="email" name="email" class="form-control form-control-lg" required autocomplete="email" />
               </div>
               <?php includeHook($hooks, 'form'); ?>
-              <input type="hidden" name="redirect" value="<?= Input::get('redirect') ?>" />
               <button class="submit col-12 btn btn-primary rounded submit px-3" id="next_button" type="submit">
                 <i class="fa fa-sign-in"></i> <?= lang("SIGNIN_BUTTONTEXT", ""); ?>
               </button>

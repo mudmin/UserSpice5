@@ -1,6 +1,5 @@
 <?php
 $sn = Config::get('session/session_name');
-$ip = ipCheck();
 
 
 if (isset($_POST['change_track'])) {
@@ -166,7 +165,7 @@ $update_available = false;
               $class = "text-bg-success";
             }
           ?>
-            <div class="card mb-3 me-3 col" style="color: #000 !important;">
+            <div class="card mb-3 me-3 col">
               <h5>Your Version</h5>
               <h4><?= $user_spice_ver ?></h4>
             </div>
@@ -234,7 +233,7 @@ $update_available = false;
             curl_setopt($ch, CURLOPT_STDERR, $verbose);
           }
 
-          if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
+          if (ClientIP::isLocal() || !$extra_curl_security_enabled) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
           } else {
@@ -254,11 +253,6 @@ $update_available = false;
             dump("Verbose cURL output: " . $verboseLog);
             dump("Raw Response: " . $result);
           }
-
-          //close cURL resource
-          if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
- }
 
           if (!$apiResponse['success']) {
             echo '<div class="alert alert-danger" role="alert">';
@@ -332,7 +326,7 @@ $update_available = false;
               curl_setopt($ch_start, CURLOPT_AUTOREFERER, true);
                          curl_setopt($ch_start, CURLOPT_TIMEOUT, 10);
   
-              if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
+              if (ClientIP::isLocal() || !$extra_curl_security_enabled) {
                 curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 0);
                 curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
               } else {
@@ -345,9 +339,6 @@ $update_available = false;
                 echo 'Error :- ' . curl_error($ch_start);
                 logger($user->data()->id, $result->next_ver, 'Curl error' . curl_error($ch_start));
                 die;
-              }
-              if (PHP_VERSION_ID < 80500) {
-                  curl_close($ch_start);
               }
               fclose($zip_resource);
 
@@ -400,7 +391,7 @@ $update_available = false;
 
                 if (!empty($non_writable_paths)) {
                   logger($user->data()->id, $result->next_ver, "Required paths not fully writable: " . implode(', ', $non_writable_paths));
-                  echo '<br><span style="color:red;">Error: Some directories or files in the `users` and/or `usersc` folders are not writable. Please check permissions.</span>';
+                  echo '<br><span class="text-danger-emphasis">Error: Some directories or files in the `users` and/or `usersc` folders are not writable. Please check permissions.</span>';
                   echo '<br>The following paths are not writable:<ul>';
                   foreach ($non_writable_paths as $path) {
                     echo "<li>$path</li>";
@@ -431,7 +422,7 @@ $update_available = false;
                   logger($user->data()->id, $result->next_ver, 'Zip file extracted successfully');
                   $zip->close();
 
-                  echo "<br><strong><span style='color:blue'>" . safeReturn(hed($result->message)) . "</span></strong>";
+                  echo "<br><strong><span class='text-primary-emphasis'>" . safeReturn(hed($result->message)) . "</span></strong>";
 
                   if (file_exists($zipFile)) {
                     if (!unlink($zipFile)) {
@@ -456,7 +447,7 @@ $update_available = false;
                   Redirect::to($us_url_root . 'users/updates/index.php?auto=1');
                 } else {
                   // Extraction failed
-                  echo '<br><span style="color:red;">Error: Failed to extract zip file</span>';
+                  echo '<br><span class="text-danger-emphasis">Error: Failed to extract zip file</span>';
                   logger($user->data()->id, $result->next_ver, 'Failed to extract zip file');
 
                   $zip->close();
@@ -528,7 +519,7 @@ $update_available = false;
         <br>
         <div class="text-center">
           <form class="" action="" method="post">
-            <input type="submit" name="sysup" value="Download & Install Updates" class="btn btn-primary"><br>
+            <button type="submit" name="sysup" value="1" class="btn btn-primary">Download &amp; Install Updates</button><br>
             It's always a good idea to backup UserSpice before updating.
           </form>
         </div>

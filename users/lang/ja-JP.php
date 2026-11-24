@@ -479,6 +479,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "メール変更要求が多すぎます。しばらく待ってからもう一度お試しください。",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "パスワード変更の試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
     "RATE_LIMIT_GENERIC"                 => "試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "SOCIAL_EMAIL_IN_USE"                => "このメールアドレスは既にアカウントに登録されていますが、ログインに使用したサービスでご本人のものであることが確認されていません。そのアカウントのパスワードでログインしてください。",
 ));
 
 
@@ -654,6 +655,16 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "認証アプリで問題が発生していますか？",
 	"2FA_BACKUP_CODE_HELP" => "保存したバックアップコードのいずれかを入力してください",
 	"2FA_USE_BACKUP_BTN"   => "バックアップコードを使用",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_LOGO_HOME" => "%m1% ホーム",
+	"MENU_EMAIL"     => "%m1% にメール",
+	"MENU_CALL"      => "%m1% に電話",
+	"SKIP_TO_MAIN"   => "メインコンテンツへスキップ",
+	"PW_REQ_MET"     => "達成",
+	"PW_REQ_NOT_MET" => "未達成",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

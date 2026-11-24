@@ -105,14 +105,14 @@ return array (
   'navbar-light-hover-color' => 'rgba(0, 0, 0, 0.7)',
   'navbar-dark-color' => 'rgba(255, 255, 255, 0.55)',
   'navbar-dark-hover-color' => 'rgba(255, 255, 255, 0.75)',
+  'link-color' => '#6ea8fe',
+  'link-hover-color' => '#8bb9fe',
   'custom_css' => "
 /* === BOOTSTRAP DEFAULT - DARK === stock Bootstrap 5.3 dark mode, no decoration */
 :root { color-scheme: dark; }
 /* native form-control & <select> dropdown list render dark */
 .form-select option, .form-control option { background-color: #212529; color: #dee2e6; }
 /* Bootstrap 5.3 dark-mode link & code colors */
-a:not(.btn):not(.nav-link) { color: #6ea8fe; }
-a:not(.btn):not(.nav-link):hover { color: #8bb9fe; }
 code { color: #e685b5; }
 ",
 );

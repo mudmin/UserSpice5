@@ -25,8 +25,9 @@ function handleTotpEnforcement($user, $settings, $currentPage) {
     }
 
     // Custom site policy hook: allow usersc to dynamically adjust $settings->totp
-    // (e.g. force required for admins via hasPerm(), disable for trusted IPs via
-    // ipCheck()). Loader.php only invokes this function when $settings->totp > 0,
+    // (e.g. force required for admins via hasPerm(), relax it for a genuinely
+    // local request via ClientIP::isLocal(), or for an office range via
+    // ClientIP::peer() when no proxy sits in front). Loader.php only invokes this function when $settings->totp > 0,
     // so the policy file can demote to 0, promote 1->2, or leave it alone.
     // $user, $settings, $currentPage, and $db are in scope inside the include.
     if (file_exists($abs_us_root . $us_url_root . 'usersc/includes/custom_totp_policy.php')) {

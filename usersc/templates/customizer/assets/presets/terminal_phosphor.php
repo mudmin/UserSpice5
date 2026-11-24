@@ -67,6 +67,8 @@ return array (
   'us-menu-custom-submenu-border' => '#00ff66',
   'font-sans-serif' => '\\"Courier New\\", Courier, \\"DejaVu Sans Mono\\", monospace',
   'headings-color' => 'var(--bs-primary)',
+  'link-color' => '#66ff99',
+  'link-hover-color' => '#99ffc4',
   'custom_css' => '/* === TERMINAL PHOSPHOR === CRT, scanlines, glow */
 :root { color-scheme: dark; }
 body {
@@ -138,6 +140,5 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   box-shadow: 0 0 24px rgba(0, 255, 102, 0.4);
 }
 code, pre, kbd { background: #002211; color: #66ff99; border: 1px solid #005500; }
-a:not(.btn):not(.nav-link) { color: #66ff99; text-decoration: underline; }
-a:not(.btn):not(.nav-link):hover { color: #99ffc4; text-shadow: 0 0 6px #00ff66; }',
+a:not(.btn):not(.nav-link) {  text-decoration: underline; }a:not(.btn):not(.nav-link):hover {  text-shadow: 0 0 6px #00ff66; }',
 );

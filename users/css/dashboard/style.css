@@ -2,16 +2,22 @@
 	background-color: #000 !important;
 }
 
-body, p {
+/* Near-black text is light-mode only. Unscoped, it overrode Bootstrap's dark
+   color mode and left paragraphs and links unreadable on every dashboard page. */
+:where(html:not([data-bs-theme="dark"])) body,
+:where(html:not([data-bs-theme="dark"])) p {
   color:black;
 }
 
 a{
-  color:#0d0d0d;
   font-weight: 500;
 }
 
-a:hover{
+:where(html:not([data-bs-theme="dark"])) a{
+  color:#0d0d0d;
+}
+
+:where(html:not([data-bs-theme="dark"])) a:hover{
   color: #292828;
   /* font-weight: 700; */
 }
@@ -40,9 +46,17 @@ form label {font-weight:600}
 .feedback.right .dropdown-menu{ right: 0px}
 .feedback .hideme{ display: none}
 
-/* override Bootstrap default colours */
-:root {--bs-primary: #334f6b; 
-  --bs-secondary: #494e53; 
-  --bs-primary-rgb: rgb(51,79,107);
-  --bs-secondary-rgb: rgb(73,78,83);
+/* .btn-outline-dark is dark-on-dark under Bootstrap's dark color mode. Outline it
+   in the theme's body text color instead, filling with it on hover/active. */
+[data-bs-theme="dark"] .btn-outline-dark {
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-border-color: var(--bs-body-color);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-body-color);
+  --bs-btn-hover-border-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-body-color);
+  --bs-btn-active-border-color: var(--bs-body-color);
+  --bs-btn-disabled-color: var(--bs-body-color);
+  --bs-btn-disabled-border-color: var(--bs-body-color);
 }

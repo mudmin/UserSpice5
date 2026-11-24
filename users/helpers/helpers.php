@@ -236,6 +236,14 @@ if (!function_exists('email')) {
     }
     $result = $mail->send();
 
+    // PHPMailer runs without exceptions here, so a failed send only shows up
+    // in ErrorInfo. Log it so delivery problems aren't silent.
+    // (Applied from UserSpice5 PR #46, which closes issue #45.)
+    if (!$result) {
+      $recipients = is_array($to) ? implode(',', array_map('strval', $to)) : (string)$to;
+      logger('', 'Email', 'Failed to send email to ' . $recipients . ': ' . $mail->ErrorInfo);
+    }
+
     return $result;
   }
 }

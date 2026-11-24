@@ -12,7 +12,7 @@
 // Define the column headers for the table
 $user_manager_columns = [
     'id' => 'ID',
-    'force_pr' => '', // Lock icon column
+    'force_pr' => '<span class="visually-hidden">Password reset required</span>', // Lock icon column; hidden title names the sortable header for screen readers
     'username' => 'Username',
     'name' => 'Name',
     'email' => 'Email',
@@ -32,7 +32,7 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
 
         case 'force_pr':
             if ($user->force_pr == 1) {
-                return '<a class="nounderline text-danger" href="admin.php?view=user&id=' . $user->id . '"><i class="fa fa-lock"></i></a>';
+                return '<a class="nounderline text-danger" href="admin.php?view=user&id=' . $user->id . '" aria-label="Password reset required"><i class="fa fa-lock" aria-hidden="true"></i></a>';
             }
             return '';
 
@@ -55,13 +55,13 @@ $user_manager_column_data = function($user, $column) use ($act, $uCount, $maxUse
         case 'status':
             $html = '';
             if($user->permissions == 0) {
-                $html .= '<i class="fa fa-fw fa-lock text-danger" data-bs-toggle="tooltip" title="The users\'s account locked (banned)"></i>';
+                $html .= '<i class="fa fa-fw fa-lock text-danger" role="img" data-bs-toggle="tooltip" title="This user\'s account is locked (banned)"></i>';
             } else {
-                $html .= '<i class="fa fa-fw fa-unlock" data-bs-toggle="tooltip" title="The users\'s account unlocked (active)"></i>';
+                $html .= '<i class="fa fa-fw fa-unlock" role="img" data-bs-toggle="tooltip" title="This user\'s account is unlocked (active)"></i>';
             }
 
             if ($act == 1 && $user->email_verified == 1) {
-                $html .= ' <i class="fa fa-envelope" data-bs-toggle="tooltip" title="User email is verified"></i>';
+                $html .= ' <i class="fa fa-envelope" role="img" data-bs-toggle="tooltip" title="User email is verified"></i>';
             }
             return $html;
 

@@ -10,7 +10,7 @@
 return array (
   'primary' => '#1a1a1a',
   'primary-hover' => '#000000',
-  'primary-text-emphasis' => '#0a0a0a',
+  'primary-text-emphasis' => '#1a1a1a',
   'primary-bg-subtle' => '#ececec',
   'primary-border-subtle' => '#1a1a1a',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#2d5f3f',
   'success-hover' => '#234d33',
-  'success-text-emphasis' => '#163322',
+  'success-text-emphasis' => '#2d5f3f',
   'success-bg-subtle' => '#e8eee9',
   'success-border-subtle' => '#a8c4b1',
 
   'info' => '#2c5777',
   'info-hover' => '#214459',
-  'info-text-emphasis' => '#16303f',
+  'info-text-emphasis' => '#2c5777',
   'info-bg-subtle' => '#e8eef2',
   'info-border-subtle' => '#a3b8c6',
 
   'warning' => '#8b6914',
   'warning-hover' => '#705310',
-  'warning-text-emphasis' => '#4d3a0b',
+  'warning-text-emphasis' => '#846413',
   'warning-bg-subtle' => '#f3eedf',
   'warning-border-subtle' => '#c9b884',
 
   'danger' => '#8b2c2c',
   'danger-hover' => '#702222',
-  'danger-text-emphasis' => '#4d1717',
+  'danger-text-emphasis' => '#8b2c2c',
   'danger-bg-subtle' => '#f1e2e2',
   'danger-border-subtle' => '#c89090',
 
@@ -72,6 +72,8 @@ return array (
 
   'font-sans-serif' => 'Georgia, \"Times New Roman\", Times, serif',
   'headings-color' => 'inherit',
+  'link-color' => '#1a1a1a',
+  'link-hover-color' => '#5a5a5a',
 
   'custom_css' => "
 /* === PAPERWHITE === editorial, serif, restful */
@@ -113,10 +115,8 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 .alert { border-radius: 0; border-width: 1px; }
 hr { border-color: #d4d4d0; }
 a:not(.btn):not(.nav-link) {
-  color: #1a1a1a;
   text-decoration: underline;
   text-underline-offset: 0.25em;
 }
-a:not(.btn):not(.nav-link):hover { color: #5a5a5a; }
 ",
 );

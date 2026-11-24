@@ -13,14 +13,9 @@ ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
 
-// Uncomment and configure if behind a reverse proxy (load balancer, CDN, etc.):
-// $trustedProxies = ['10.0.0.1']; // Your proxy's internal IP(s)
-// if (Server::getScheme($trustedProxies) === 'https') {
-//     ini_set('session.cookie_secure', 1);
-// }
-
-// Standard HTTPS detection (use this if NOT behind a reverse proxy):
-if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+// Mark the session cookie Secure on HTTPS, including when TLS ends at a proxy
+// or CDN in front of PHP (X-Forwarded-Proto / Cloudflare CF-Visitor).
+if (ClientIP::requestLooksHttps()) {
 	ini_set('session.cookie_secure', 1);
 }
 session_start();

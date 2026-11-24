@@ -10,7 +10,7 @@
 return array (
   'primary' => '#00b894',
   'primary-hover' => '#009b7a',
-  'primary-text-emphasis' => '#005544',
+  'primary-text-emphasis' => '#007760',
   'primary-bg-subtle' => '#d6f5ec',
   'primary-border-subtle' => '#7fdcc4',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#55efc4',
   'success-hover' => '#36d4a8',
-  'success-text-emphasis' => '#1d5e4f',
+  'success-text-emphasis' => '#0b785a',
   'success-bg-subtle' => '#e1faf2',
   'success-border-subtle' => '#a9f1d8',
 
   'info' => '#74b9ff',
   'info-hover' => '#5a9ee0',
-  'info-text-emphasis' => '#2b4c70',
+  'info-text-emphasis' => '#0067cf',
   'info-bg-subtle' => '#e3f0ff',
   'info-border-subtle' => '#b8d6f7',
 
   'warning' => '#fdcb6e',
   'warning-hover' => '#e9b658',
-  'warning-text-emphasis' => '#7a5a14',
+  'warning-text-emphasis' => '#905f02',
   'warning-bg-subtle' => '#fff4dd',
   'warning-border-subtle' => '#fbdda7',
 
   'danger' => '#d63031',
   'danger-hover' => '#b62424',
-  'danger-text-emphasis' => '#6b1414',
+  'danger-text-emphasis' => '#bf2627',
   'danger-bg-subtle' => '#fadbdb',
   'danger-border-subtle' => '#ed9999',
 
@@ -71,6 +71,8 @@ return array (
   'us-menu-custom-submenu-border' => '#00b894',
 
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#007760',
+  'link-hover-color' => '#006350',
 
   'custom_css' => "
 /* === MINT FRESH === friendly, rounded, soft */
@@ -104,5 +106,6 @@ return array (
 .alert { border-radius: 12px; border: none; }
 .badge { border-radius: 8px; padding: 0.4em 0.7em; }
 .modal-content { border-radius: 16px; border: none; box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+
 ",
 );

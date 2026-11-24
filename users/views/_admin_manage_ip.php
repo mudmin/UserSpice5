@@ -92,10 +92,10 @@ if (!empty($_POST)) {
           <?= tokenHere(); ?>
           <div class="row">
             <div class="col-12 col-md-4">
-              <input type="text" class="form-control" aria-describedby="ip-label" name="ip" placeholder="Enter IP Address" required>
+              <input type="text" class="form-control" aria-label="IP address" name="ip" placeholder="Enter IP Address" required>
             </div>
             <div class="col-12 col-md-4">
-              <select class="form-control" name="type" id="ipType" aria-describedby="type-label" required>
+              <select class="form-control" name="type" id="ipType" aria-label="IP list type" required>
                 <option value="" disabled selected>Choose Type</option>
                 <option value="whitelist">Whitelist</option>
                 <option value="blacklist">Blacklist</option>
@@ -146,7 +146,7 @@ if (!empty($_POST)) {
                     <th scope="col">Added By</th>
                     <th scope="col">Added On</th>
                     <th scope="col">
-                      <input type="checkbox" class="removeWhite"> Delete
+                      <label class="mb-0"><input type="checkbox" class="removeWhite"> Delete</label>
                     </th>
                   </tr>
                 </thead>
@@ -181,7 +181,7 @@ if (!empty($_POST)) {
                     <th scope="col">Added By</th>
                     <th scope="col">Added On</th>
                     <th scope="col">
-                      <input type="checkbox" class="removeBlack"> Delete
+                      <label class="mb-0"><input type="checkbox" class="removeBlack"> Delete</label>
                     </th>
                   </tr>
                 </thead>
@@ -222,7 +222,7 @@ if (!empty($_POST)) {
       </div>
       <div class="modal-body">
         <p>IP blacklist expiration is handled by a cron job that runs the following query:</p>
-        <pre>$now = date("Y-m-d H:i:s");
+        <pre tabindex="0">$now = date("Y-m-d H:i:s");
 $db->query("DELETE FROM us_ip_blacklist WHERE expires IS NOT NULL AND expires < ?", [$now]);</pre>
         <p>Set up your cron job to <code>curl</code> your site domain at <code>/users/release_blacklist.php</code>. The query is very lightweight so it can be triggered every minute.</p>
         <p>If you choose to run the cron job less frequently, it will delay how soon an expired IP is removed from the blacklist.</p>

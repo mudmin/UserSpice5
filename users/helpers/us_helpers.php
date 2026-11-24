@@ -69,9 +69,10 @@ if (!function_exists('passwordsAllowed')) {
       return false; // Passwords disabled
     }
     if ($no_passwords_setting == 2) {
-      // Passwords disabled except on localhost
-      $ip = ipCheck();
-      return ($ip === '127.0.0.1' || $ip === '::1');
+      // Passwords disabled except on localhost. isLocal() refuses requests
+      // that came through a proxy or tunnel, which would otherwise all
+      // arrive from 127.0.0.1.
+      return ClientIP::isLocal();
     }
     return true; // Default to enabled
   }
@@ -226,6 +227,11 @@ if (!function_exists('usernameExists')) {
 
 // retrieve ?dest=page and check that it exists in the legitimate pages in the
 // database or is in the Config::get('whitelisted_destinations')
+//
+// DEPRECATED (6.1.8): core no longer reads a login destination from the
+// request. Login exits use consumeLoginDest() (users/helpers/permissions.php),
+// which returns the page securePage() captured in the session. Kept only for
+// third-party code; don't use it for new login flows.
 if (!function_exists('sanitizedDest')) {
   function sanitizedDest($varname = 'dest')
   {
@@ -404,13 +410,13 @@ if (!function_exists('bin')) {
     global $lang;
     $number = (int) $number;
     if ($number == 0) {
-      echo "<strong><span style='color:red'>" . lang("GEN_NO") . "</span></strong>";
+      echo "<strong><span class='text-danger-emphasis'>" . lang("GEN_NO") . "</span></strong>";
     }
     if ($number == 1) {
-      echo "<strong><span style='color:green'>" . lang("GEN_YES") . "</span></strong>";
+      echo "<strong><span class='text-success-emphasis'>" . lang("GEN_YES") . "</span></strong>";
     }
     if ($number != 0 && $number != 1) {
-      echo "<strong><span style='color:blue'>-</span></strong>";
+      echo "<strong><span class='text-primary-emphasis'>-</span></strong>";
     }
   }
 }
@@ -716,15 +722,39 @@ if (!function_exists('lognote')) {
   }
 }
 
+if (!function_exists('cronCallerAllowed')) {
+  /**
+   * May this request run users/cron/cron.php? Uses settings.cron_ip:
+   * - empty: anyone (the security dashboard warns about this)
+   * - 127.0.0.1, ::1 or localhost: only a genuinely local request (ClientIP::isLocal())
+   * - off: only a local request (crons disabled)
+   * - an address: that caller. settings.cron_ip_source picks which address is
+   *   compared: 'peer' = the connection (ClientIP::peer()), 'resolved' = the
+   *   visitor resolved through trusted proxies (ipCheck()). Missing = 'resolved'.
+   * A local request (command line, http://localhost/) is always allowed.
+   */
+  function cronCallerAllowed()
+  {
+    global $settings;
+    $cronIp = strtolower(trim((string)($settings->cron_ip ?? '')));
+    if ($cronIp === '' || ClientIP::isLocal()) {
+      return true;
+    }
+    if ($cronIp === 'off' || in_array($cronIp, ['127.0.0.1', '::1', 'localhost'], true)) {
+      return false;
+    }
+    $caller = ($settings->cron_ip_source ?? 'resolved') === 'peer' ? ClientIP::peer() : ipCheck();
+    return strtolower($caller) === $cronIp;
+  }
+}
+
 if (!function_exists('isLocalhost')) {
   function isLocalhost()
   {
-    $ip = ipCheck();
-    if ($ip == '127.0.0.1' || $ip == '::1' || $ip == 'localhost') {
-      return true;
-    } else {
-      return false;
-    }
+    // Genuinely local only: a same-server proxy or Cloudflare Tunnel delivers
+    // every visitor from 127.0.0.1, so a bare loopback comparison would treat
+    // the whole internet as localhost (see ClientIP::isLocal()).
+    return ClientIP::isLocal();
   }
 }
 
@@ -1943,14 +1973,14 @@ if (!function_exists('checkAPIkey')) {
   {
     $msg = "";
     if ($key == "") {
-      $msg = "<h6><span style='color:blue'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</span> </h6>";
+      $msg = "<h6><span class='text-primary-emphasis'>Entering your free API key will enable cool features like Updates, Bug Reports, and Spice Shaker.</span> </h6>";
     } elseif (
       !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/", trim($key))
       && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/", trim($key))
     ) {
-      $msg = "<h4><span style='color:red'>The API Key does not appear to be valid.</span> </h4>";
+      $msg = "<h4><span class='text-danger-emphasis'>The API Key does not appear to be valid.</span> </h4>";
     } else {
-      $msg =  "<h4><span style='color:green'><span>&#10003;</span> Your API Key appears to be valid.</span> </h4>";
+      $msg =  "<h4><span class='text-success-emphasis'><span>&#10003;</span> Your API Key appears to be valid.</span> </h4>";
     }
     return $msg;
   }
@@ -2306,13 +2336,13 @@ function userspiceActiveLog($currentPage, $user = null, $additionalData = [])
 
 
   // Get full URL
-  $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https://" : "http://";
+  $protocol = ClientIP::isHttps() ? "https://" : "http://";
   $fullUrl = $protocol . Server::get('HTTP_HOST') . Server::get('REQUEST_URI');
 
   // Prepare log entry
   $logEntry = [
     'timestamp' => date('Y-m-d H:i:s'),
-    'ip' => Server::get('REMOTE_ADDR'),
+    'ip' => ipCheck(),
     'user_id' => ($user && isset($user->data()->id)) ? $user->data()->id : 0,
     'page' => $currentPage,
     'full_url' => $fullUrl,
@@ -2503,9 +2533,6 @@ if (!function_exists('us_file_get_contents')) {
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; UserSpice)');
         $result = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
- }
 
         if ($httpCode == 200) {
           return $result;
@@ -2561,7 +2588,7 @@ if (!function_exists('is_path_writable')) {
 
 /**
  * Validate a cURL API response for common failure modes.
- * Must be called BEFORE curl_close() since it reads curl state.
+ * Must be called while the cURL handle is still in scope since it reads curl state.
  *
  * Returns an associative array:
  *   'success'          => bool

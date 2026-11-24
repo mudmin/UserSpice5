@@ -29,8 +29,10 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
 }
 
 .us-toast {
-    background: white !important;
-    border: none !important;
+    /* theme variables: a fixed white toast went unreadable under dark-mode text */
+    background: var(--bs-body-bg) !important;
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color) !important; /* sets it apart from a same-color page in dark mode */
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
     border-radius: 0.5rem !important;
     overflow: hidden !important;
@@ -70,7 +72,7 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
 
 .us-toast-body {
     padding: 1rem 1.25rem;
-    color: #495057 !important;
+    color: var(--bs-body-color) !important;
     font-weight: 500;
 }
 
@@ -86,6 +88,10 @@ $containerClasses = 'toast-container position-fixed ' . $pos;
 .us-toast-left .btn-close {
     order: -1;
     margin: 0.75rem 0.75rem 0 0.75rem;
+}
+
+.us-toast .toast-body {
+    color: var(--bs-body-color);
 }
 
 .toast-body > li {

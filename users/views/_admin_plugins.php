@@ -182,9 +182,9 @@ $token = Token::generate();
                   continue;
                 }
                 if (!file_exists($abs_us_root . $us_url_root . 'usersc/plugins/' . $t . '/info.xml')) { ?>
-                  <tr>
+                  <tr data-plugin-name="<?= safeReturn($t) ?>">
                     <td colspan="4">
-                      Loading <?= $t ?> has failed, XML file does not exist
+                      Loading <?= safeReturn($t) ?> has failed, XML file does not exist
                     </td>
                   </tr>
                 <?php
@@ -199,7 +199,7 @@ $token = Token::generate();
                 $buttonTitle = $xml->button != '' ? $xml->button : "Configure Plugin";
                 $isActive = pluginActive($t, true);
                 ?>
-                <tr id="ctrl-<?= $xml->name ?>" data-plugin-name="<?= $xml->name ?>">
+                <tr id="ctrl-<?= safeReturn((string)$xml->name) ?>" data-plugin-name="<?= safeReturn((string)$xml->name) ?>">
                   <td>
                     <div class="d-flex flex-row">
 
@@ -214,8 +214,8 @@ $token = Token::generate();
                         <?php } ?>
                       </div>
 
-                      <div class="d-flex flex-column ps-3"<?= $isActive ? '' : ' style="color:#9a9a9a;"' ?>>
-                        <h4 class="mb-1"><?= $xml->name ?></h4>
+                      <div class="d-flex flex-column ps-3<?= $isActive ? '' : ' text-body-secondary' ?>">
+                        <h4 class="mb-1"><?= safeReturn((string)$xml->name) ?></h4>
                         <small class="ml-2"><strong>Author: </strong><a class="text-body" href="<?= $xml->website ?>"><?= $xml->author ?></a></small>
                         <small class="ml-2"><strong>Released: </strong><?= $xml->release ?></small>
                         <small class="ml-2"><strong>Version: </strong><?= $xml->version ?></small>
@@ -225,7 +225,7 @@ $token = Token::generate();
                     </div>
                   </td>
                   <td>
-                    <p class="<?= $isActive ? 'text-body' : '' ?>"<?= $isActive ? '' : ' style="color:#9a9a9a;"' ?>><?= $xml->description ?></p>
+                    <p class="<?= $isActive ? 'text-body' : 'text-body-secondary' ?>"><?= $xml->description ?></p>
                   </td>
                   <td class="text-center">
                     <h4><?php pluginStatus($usplugins[$t]); ?></h4>
@@ -233,7 +233,7 @@ $token = Token::generate();
                       <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
                       <input type="hidden" name="lock" value="lock">
                       <input type="hidden" name="plugin" value="<?= $t ?>">
-                      <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
+                      <input type="hidden" name="jump" value="#ctrl-<?= safeReturn((string)$xml->name) ?>">
                       <?php if (file_exists($abs_us_root . $us_url_root . "usersc/plugins/" . $t . "/.noupdate")) { ?>
                         <button type="submit" name="action" value="unlockme" class="btn" title="Unlock this plugin to allow Spice Shaker to update it.">
                           <i class="fa fa-lock" aria-hidden="true"></i>
@@ -249,7 +249,7 @@ $token = Token::generate();
                     <div class="d-flex justify-content-center">
                       <form class="" action="" method="post">
                         <input type="hidden" name="csrf" value="<?= Token::generate(); ?>">
-                        <input type="hidden" name="jump" value="#ctrl-<?= $xml->name ?>">
+                        <input type="hidden" name="jump" value="#ctrl-<?= safeReturn((string)$xml->name) ?>">
                         <input type="hidden" name="plugin" value="<?= $t ?>">
                         <?php if ($usplugins[$t] == 1) {  //plugin installed and active 
                         ?>
@@ -314,7 +314,7 @@ $token = Token::generate();
     var value = $(this).val().toLowerCase();
     $('table tbody tr').filter(function() {
       // Using the "t" attribute to filter based on the plugin name
-      $(this).toggle($(this).attr('data-plugin-name').toLowerCase().indexOf(value) > -1)
+      $(this).toggle(($(this).attr('data-plugin-name') || '').toLowerCase().indexOf(value) > -1)
     });
   });
   <?php } ?>

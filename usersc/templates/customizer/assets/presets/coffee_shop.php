@@ -10,7 +10,7 @@
 return array (
   'primary' => '#8d6e63',
   'primary-hover' => '#6f5749',
-  'primary-text-emphasis' => '#3e2723',
+  'primary-text-emphasis' => '#7a5f55',
   'primary-bg-subtle' => '#eee2dc',
   'primary-border-subtle' => '#c9b5ac',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#689f38',
   'success-hover' => '#558b2f',
-  'success-text-emphasis' => '#2f4d18',
+  'success-text-emphasis' => '#497027',
   'success-bg-subtle' => '#e3eed4',
   'success-border-subtle' => '#a8c98a',
 
   'info' => '#7986cb',
   'info-hover' => '#5c6bbc',
-  'info-text-emphasis' => '#2d3559',
+  'info-text-emphasis' => '#4c5dba',
   'info-bg-subtle' => '#e1e4f3',
   'info-border-subtle' => '#a8b1de',
 
   'warning' => '#ffa726',
   'warning-hover' => '#f59100',
-  'warning-text-emphasis' => '#6e4309',
+  'warning-text-emphasis' => '#945800',
   'warning-bg-subtle' => '#ffeacd',
   'warning-border-subtle' => '#ffc97f',
 
   'danger' => '#c62828',
   'danger-hover' => '#a02121',
-  'danger-text-emphasis' => '#5a1212',
+  'danger-text-emphasis' => '#b52525',
   'danger-bg-subtle' => '#f5d2d2',
   'danger-border-subtle' => '#e08c8c',
 
@@ -72,6 +72,8 @@ return array (
 
   'font-sans-serif' => 'Georgia, \"Times New Roman\", Times, serif',
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#7b5f56',
+  'link-hover-color' => '#664f47',
 
   'custom_css' => "
 /* === COFFEE SHOP === cozy, serif-touched, terracotta */
@@ -116,5 +118,6 @@ h1, h2, h3, .h1, .h2, .h3 {
   --bs-table-striped-bg: #efe5d4;
 }
 .alert { border-radius: 6px; }
+
 ",
 );

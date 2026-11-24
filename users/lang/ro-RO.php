@@ -435,7 +435,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "Nu s-a putut recupera secretul de autentificare. Te rugăm să încerci din nou.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Codul de rezervă a fost verificat, dar nu s-a putut invalida. Te rugăm să contactezi suportul.",
     "2FA_ERR_NO_CODE_PROVIDED" => "Nu a fost furnizat niciun cod de autentificare.",
-    "RATE_LIMIT_LOGIN"   => "Prea multe încercări de autentificare eșuate. Te rugăm să aștepți înainte de a încerca din nou.",
+    "RATE_LIMIT_LOGIN"   => "Prea multe încercări de autentificare. Te rugăm să aștepți înainte de a încerca din nou.",
     "RATE_LIMIT_TOTP"    => "Prea multe coduri de autentificare incorecte. Te rugăm să aștepți înainte de a încerca din nou.",
     "RATE_LIMIT_PASSKEY" => "Prea multe încercări de autentificare cu cheie de acces. Te rugăm să aștepți înainte de a încerca din nou.",
     "RATE_LIMIT_PASSKEY_STORE" => "Prea multe încercări de înregistrare a cheii de acces. Te rugăm să aștepți înainte de a încerca din nou.",
@@ -446,6 +446,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Prea multe cereri de schimbare a e-mailului. Te rugăm să aștepți înainte de a încerca din nou.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Prea multe încercări de schimbare a parolei. Te rugăm să aștepți înainte de a încerca din nou.",
     "RATE_LIMIT_GENERIC" => "Prea multe încercări. Te rugăm să aștepți înainte de a încerca din nou.",
+    "SOCIAL_EMAIL_IN_USE" => "Această adresă de e-mail aparține deja unui cont, iar furnizorul tău de autentificare nu a confirmat că este a ta. Autentifică-te în schimb cu parola acelui cont.",
 ));
 
 
@@ -590,6 +591,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Aveți probleme cu aplicația de autentificare?",
 	"2FA_BACKUP_CODE_HELP" => "Introduceți unul dintre codurile de rezervă salvate",
 	"2FA_USE_BACKUP_BTN"   => "Folosiți cod de rezervă",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Meniu",
+	"MENU_LOGO_HOME" => "Pagina principală %m1%",
+	"MENU_EMAIL"     => "Trimite e-mail la %m1%",
+	"MENU_CALL"      => "Sună la %m1%",
+	"SKIP_TO_MAIN"   => "Salt la conținutul principal",
+	"PW_REQ_MET"     => "îndeplinit",
+	"PW_REQ_NOT_MET" => "neîndeplinit",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

@@ -11,7 +11,7 @@
 return array (
   'primary' => '#268bd2',
   'primary-hover' => '#1f6fa8',
-  'primary-text-emphasis' => '#0f3854',
+  'primary-text-emphasis' => '#1d6aa0',
   'primary-bg-subtle' => '#d6e9f5',
   'primary-border-subtle' => '#8bbde0',
   'secondary' => '#2aa198',
@@ -21,22 +21,22 @@ return array (
   'secondary-border-subtle' => '#88c8c2',
   'success' => '#859900',
   'success-hover' => '#6a7a00',
-  'success-text-emphasis' => '#353d00',
+  'success-text-emphasis' => '#5f6e00',
   'success-bg-subtle' => '#ecf0ce',
   'success-border-subtle' => '#bdc879',
   'info' => '#6c71c4',
   'info-hover' => '#555aac',
-  'info-text-emphasis' => '#2c2e62',
+  'info-text-emphasis' => '#545abb',
   'info-bg-subtle' => '#e2e3f3',
   'info-border-subtle' => '#a8abdb',
   'warning' => '#b58900',
   'warning-hover' => '#946f00',
-  'warning-text-emphasis' => '#4a3800',
+  'warning-text-emphasis' => '#826200',
   'warning-bg-subtle' => '#f3e8cc',
   'warning-border-subtle' => '#d6bb73',
   'danger' => '#dc322f',
   'danger-hover' => '#b62725',
-  'danger-text-emphasis' => '#6f1413',
+  'danger-text-emphasis' => '#bb221f',
   'danger-bg-subtle' => '#f8d6d5',
   'danger-border-subtle' => '#ee9290',
   'light' => '#eee8d5',
@@ -49,7 +49,7 @@ return array (
   'dark-text-emphasis' => '#021519',
   'dark-bg-subtle' => '#93a1a1',
   'dark-border-subtle' => '#586e75',
-  'body-color' => '#657b83',
+  'body-color' => '#576970',
   'body-bg' => '#fdf6e3',
   'border-color' => '#dcd3b6',
   'form-control-bg' => '#fdf6e3',
@@ -62,6 +62,8 @@ return array (
   'us-menu-custom-divider' => '#586e75',
   'us-menu-custom-submenu-border' => '#586e75',
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#19659c',
+  'link-hover-color' => '#134f7c',
   'custom_css' => '/* === SOLARIZED LIGHT === Schoonover palette */
 .card {
   background-color: #eee8d5;
@@ -88,10 +90,8 @@ return array (
 }
 code, pre, kbd {
   background-color: #eee8d5;
-  color: #586e75;
+  color: #576970;
   border-radius: 3px;
   padding: 0.1em 0.35em;
-}
-a:not(.btn):not(.nav-link) { color: #268bd2; }
-a:not(.btn):not(.nav-link):hover { color: #1f6fa8; }',
+}',
 );

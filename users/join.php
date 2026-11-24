@@ -277,16 +277,7 @@ if ($settings->registration == 1) {
 includeHook($hooks, 'bottom');
 ?>
 
-<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
-    $(document).ready(function(){
-        $('.password_view_control').hover(function () {
-            $('#password').attr('type', 'text');
-            $('#confirm').attr('type', 'text');
-        }, function () {
-            $('#password').attr('type', 'password');
-            $('#confirm').attr('type', 'password');
-        });
-    });
-</script>
+<?php // show/hide password: keyboard + touch, not hover-only ?>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" src="<?=$us_url_root?>users/js/password-view.js?v=<?=filemtime($abs_us_root.$us_url_root.'users/js/password-view.js')?>"></script>
 
 <?php require_once $abs_us_root.$us_url_root.'users/includes/html_footer.php'; ?>

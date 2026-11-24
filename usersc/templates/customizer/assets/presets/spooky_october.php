@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#ff7518',
 
   'headings-color' => 'var(--bs-primary)',
+  'link-color' => '#ffd54f',
+  'link-hover-color' => '#ff7518',
 
   'custom_css' => "
 /* === SPOOKY OCTOBER === pumpkin night */
@@ -101,7 +103,7 @@ h1, h2, h3, .h1, .h2, .h3 {
   color: #f5e6d3;
 }
 .card-header {
-  background: linear-gradient(90deg, #6a1b9a, #ff7518);
+  background: linear-gradient(90deg, #6a1b9a, #ae4600);
   color: #f5e6d3 !important;
   border-bottom: none;
   font-weight: 700;
@@ -139,7 +141,10 @@ h1, h2, h3, .h1, .h2, .h3 {
   color: #f5e6d3;
   box-shadow: 0 0 28px rgba(255, 117, 24, 0.35);
 }
-a:not(.btn):not(.nav-link) { color: #ffd54f; }
-a:not(.btn):not(.nav-link):hover { color: #ff7518; text-shadow: 0 0 8px rgba(255, 117, 24, 0.6); }
+a:not(.btn):not(.nav-link):hover {  text-shadow: 0 0 8px rgba(255, 117, 24, 0.6); }
+
+/* Links inside the decorative card header take the header's own text color
+   (checked for contrast against every gradient stop), underlined to stay links. */
+.card-header a:not(.btn) { color: inherit; text-decoration: underline; }
 ",
 );

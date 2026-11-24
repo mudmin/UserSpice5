@@ -447,7 +447,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                    => "인증 비밀을 검색할 수 없습니다. 다시 시도해주세요.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "백업 코드는 확인되었지만 무효화에 실패했습니다. 지원팀에 문의하세요.",
     "2FA_ERR_NO_CODE_PROVIDED"             => "인증 코드가 제공되지 않았습니다.",
-    "RATE_LIMIT_LOGIN"              => "로그인 시도 실패가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
+    "RATE_LIMIT_LOGIN"              => "로그인 시도가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
     "RATE_LIMIT_TOTP"               => "잘못된 인증 코드가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
     "RATE_LIMIT_PASSKEY"            => "패스키 인증 시도가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
     "RATE_LIMIT_PASSKEY_STORE"      => "패스키 등록 시도가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
@@ -458,6 +458,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"       => "이메일 변경 요청이 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
     "RATE_LIMIT_PASSWORD_CHANGE"    => "비밀번호 변경 시도가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
     "RATE_LIMIT_GENERIC"            => "시도가 너무 많습니다. 다시 시도하기 전에 기다려주세요.",
+    "SOCIAL_EMAIL_IN_USE"           => "이 이메일 주소는 이미 다른 계정에서 사용 중이며, 로그인 제공업체에서 본인 소유임을 확인하지 않았습니다. 대신 해당 계정의 비밀번호로 로그인해주세요.",
 ));
 
 
@@ -640,6 +641,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "인증 앱에 문제가 있나요?",
 	"2FA_BACKUP_CODE_HELP" => "저장된 백업 코드 중 하나를 입력하세요",
 	"2FA_USE_BACKUP_BTN"   => "백업 코드 사용",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "메뉴",
+	"MENU_LOGO_HOME" => "%m1% 홈",
+	"MENU_EMAIL"     => "%m1%에 이메일",
+	"MENU_CALL"      => "%m1%에 전화",
+	"SKIP_TO_MAIN"   => "본문으로 건너뛰기",
+	"PW_REQ_MET"     => "충족",
+	"PW_REQ_NOT_MET" => "미충족",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

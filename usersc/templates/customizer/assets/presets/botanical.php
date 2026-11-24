@@ -10,7 +10,7 @@
 return array (
   'primary' => '#4a7c3a',
   'primary-hover' => '#3a6429',
-  'primary-text-emphasis' => '#1e3318',
+  'primary-text-emphasis' => '#426f34',
   'primary-bg-subtle' => '#dde7d4',
   'primary-border-subtle' => '#a5c098',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#79995e',
   'success-hover' => '#557039',
-  'success-text-emphasis' => '#2c3e1c',
+  'success-text-emphasis' => '#576e44',
   'success-bg-subtle' => '#e3edd5',
   'success-border-subtle' => '#b3c79a',
 
   'info' => '#75a373',
   'info-hover' => '#5e8b5b',
-  'info-text-emphasis' => '#2e4a2e',
+  'info-text-emphasis' => '#4c724b',
   'info-bg-subtle' => '#e5efe2',
   'info-border-subtle' => '#b8d0b5',
 
   'warning' => '#d4a017',
   'warning-hover' => '#b88813',
-  'warning-text-emphasis' => '#5e470a',
+  'warning-text-emphasis' => '#85640e',
   'warning-bg-subtle' => '#f8ecc4',
   'warning-border-subtle' => '#e6c971',
 
   'danger' => '#a04444',
   'danger-hover' => '#823636',
-  'danger-text-emphasis' => '#4a1f1f',
+  'danger-text-emphasis' => '#9c4242',
   'danger-bg-subtle' => '#eed5d5',
   'danger-border-subtle' => '#d09f9f',
 
@@ -72,6 +72,8 @@ return array (
 
   'font-sans-serif' => '\"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, serif',
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#457436',
+  'link-hover-color' => '#39602d',
 
   'custom_css' => "
 /* === BOTANICAL === refined nature, gold accents */
@@ -125,5 +127,6 @@ h1::after, .h1::after {
 }
 hr { border-color: #c9a44c; border-width: 1px 0 0 0; opacity: 0.5; }
 .alert { border-radius: 4px; border-left: 4px solid; }
+
 ",
 );

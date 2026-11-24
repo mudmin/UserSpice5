@@ -102,7 +102,7 @@ Get groups and names
 $navCheck = $db->query("SELECT navigation_type FROM settings")->first();
 if($navCheck->navigation_type == 0){
 ?>
-<div style='color:red;' class="mb-2">Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</div>
+<div class="mb-2 text-danger-emphasis">Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</div>
 <?php   } ?>
 <p class="text-center mb-3">
   <a href="admin.php?view=nav&action=newDropdown" class="btn btn-dark" role="button">New Dropdown</a>
@@ -171,13 +171,13 @@ if($navCheck->navigation_type == 0){
                   <p class="oce text-body" data-id="<?= $item->id ?>" data-field="logged_in" data-input="select"><?= ($item->logged_in) ? 'Yes' : 'No'; ?></p>
                 </td>
                 <td>
-                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="display_order" data-input="input"><?= $item->display_order ?></p< /td>
+                  <p class="oce text-body" data-id="<?= $item->id ?>" data-field="display_order" data-input="input"><?= $item->display_order ?></p></td>
 
 
                 <td><?= $item->icon_class ?></td>
                 <td>
-                  <a class="text-body" href="admin.php?view=nav_item&id=<?= $item->id ?>&action=edit"><span class="fa fa-cog fa-lg"></span></a> /
-                  <a class="text-body" href="admin.php?view=nav&id=<?= $item->id ?>&action=delete"><span class="fa fa-remove fa-lg"></span></a>
+                  <a class="text-body" href="admin.php?view=nav_item&id=<?= $item->id ?>&action=edit" aria-label="Edit <?= safeReturn(strip_tags($item->label), true) ?>"><span class="fa fa-cog fa-lg" aria-hidden="true"></span></a> /
+                  <a class="text-body" href="admin.php?view=nav&id=<?= $item->id ?>&action=delete" aria-label="Delete <?= safeReturn(strip_tags($item->label), true) ?>"><span class="fa fa-remove fa-lg" aria-hidden="true"></span></a>
                 </td>
               </tr>
             <?php

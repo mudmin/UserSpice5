@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#00b894',
 
   'headings-color' => '#f4fbf8',
+  'link-color' => '#00d6ac',
+  'link-hover-color' => '#55efc4',
 
   'custom_css' => "
 /* === MINT FRESH DARK === friendly, rounded, soft — dark */
@@ -117,7 +119,7 @@ return array (
 
 .list-group { background-color: transparent; }
 .list-group-item { background-color: #1a3029; border-color: #2a4a42; color: #e3efea; }
-.list-group-item.active { background-color: #00b894; border-color: #00b894; color: #ffffff; }
+.list-group-item.active { background-color: #00b894; border-color: #00b894; color: #14241f; }
 
 .popover { background-color: #1a3029; border-color: #2a4a42; border-radius: 12px; }
 .popover-header { background-color: #14241f; border-bottom-color: #2a4a42; color: #55efc4; }
@@ -137,7 +139,5 @@ return array (
 .alert { border-radius: 12px; border: none; }
 .badge { border-radius: 8px; padding: 0.4em 0.7em; }
 
-a:not(.btn):not(.nav-link) { color: #00d6ac; }
-a:not(.btn):not(.nav-link):hover { color: #55efc4; }
 ",
 );

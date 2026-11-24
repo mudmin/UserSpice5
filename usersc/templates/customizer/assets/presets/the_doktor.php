@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#c5102b',
 
   'headings-color' => '#f4e6ce',
+  'link-color' => '#e8a317',
+  'link-hover-color' => '#ffce5a',
 
   'custom_css' => "
 /* === THE DOKTOR === 23 flavors of dark-cherry cola, bottled. */
@@ -146,7 +148,7 @@ h1, h2, h3, .h1, .h2, .h3 {
   color: #f4e6ce;
 }
 .card-header {
-  background: linear-gradient(90deg, #c5102b 0%, #8b1a2b 55%, #c8842e 100%) !important;
+  background: linear-gradient(90deg, #c5102b 0%, #8b1a2b 55%, #996523 100%) !important;
   color: #fff6e6 !important;
   font-style: italic;
   font-weight: 800;
@@ -201,11 +203,8 @@ h1, h2, h3, .h1, .h2, .h3 {
   --bs-table-hover-color: #fff6e6;
 }
 a:not(.btn):not(.nav-link) {
-  color: #e8a317;
   text-decoration: none;
-}
-a:not(.btn):not(.nav-link):hover {
-  color: #ffce5a;
+}a:not(.btn):not(.nav-link):hover {
   text-shadow: 0 0 8px rgba(232, 163, 23, 0.6);
 }
 .modal-content {
@@ -227,5 +226,9 @@ a:not(.btn):not(.nav-link):hover {
 .alert { border-left: 5px solid currentColor; }
 .badge { letter-spacing: 0.04em; }
 hr { border-color: #c8842e; opacity: 0.5; }
+
+/* Links inside the decorative card header take the header's own text color
+   (checked for contrast against every gradient stop), underlined to stay links. */
+.card-header a:not(.btn) { color: inherit; text-decoration: underline; }
 ",
 );

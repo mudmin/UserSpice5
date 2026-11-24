@@ -62,7 +62,7 @@ return array (
   'border-color' => '#504945',
   'form-control-bg' => '#32302f',
 
-  'secondary-color' => '#a89984',
+  'secondary-color' => '#afa28e',
   'tertiary-color' => '#7c6f64',
   'emphasis-color' => '#fbf1c7',
   'secondary-bg' => '#3c3836',
@@ -78,6 +78,8 @@ return array (
   'us-menu-custom-submenu-border' => '#504945',
 
   'headings-color' => 'inherit',
+  'link-color' => '#8cab9f',
+  'link-hover-color' => '#8ec07c',
 
   'custom_css' => "
 /* === GRUVBOX === warm retro dev palette */
@@ -120,7 +122,5 @@ code, pre, kbd {
   background-color: #1d2021;
   color: #fabd2f;
 }
-a:not(.btn):not(.nav-link) { color: #83a598; }
-a:not(.btn):not(.nav-link):hover { color: #8ec07c; }
 ",
 );

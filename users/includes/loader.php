@@ -47,6 +47,27 @@ if (ipCheckBan() && currentPage() != "banned.php") {
 	exit();
 }
 
+// Banned users (permissions = 0). Checked here
+// rather than in securePage() so it covers every request that loads init.php,
+// including parsers and pages that never call securePage(). banned.php and
+// logout.php are exempt so there is no redirect loop and a banned user can
+// still end their session.
+if ($user->isLoggedIn() && !in_array(currentPage(), ['banned.php', 'logout.php'])) {
+	$bannedCheck = $user->data();
+	if ($bannedCheck->permissions == 0) {
+		// A cloaked admin is not the banned user; don't strand them on
+		// banned.php with no Uncloak button.
+		if (isCloaked()) {
+			endCloak();
+			usError("That user is banned, so your cloak was ended.");
+			Redirect::to($us_url_root . 'users/admin.php?view=users');
+			exit();
+		}
+		Redirect::to($us_url_root . 'usersc/scripts/banned.php');
+		exit();
+	}
+}
+
 // Language
 if ($settings->allow_language == 0 || !isUserLoggedIn()) {
     if (!isset($_SESSION['us_lang'])) {

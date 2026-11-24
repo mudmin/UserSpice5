@@ -18,7 +18,7 @@ $token = Token::generate();
   </div>
   <div class="col-12 col-sm-7 text-end">
     <?php if ($w != "") { ?>
-      <h4><span style="color:red">Currently Ignoring Whitelisted IPs</h4>
+      <h4><span class="text-danger-emphasis">Currently Ignoring Whitelisted IPs</span></h4>
       <a href="admin.php?view=security_logs" class="btn btn-primary">Show All</a>
     <?php } else { ?>
       <a href="admin.php?view=security_logs&w=true" class="btn btn-primary">Hide Whitelisted IPs</a>

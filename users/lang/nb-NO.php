@@ -470,7 +470,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Kunne ikke hente autentiseringshemmeligheten. Vennligst prøv igjen.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Reservekoden ble verifisert, men ugyldiggjøringen mislyktes. Vennligst kontakt support.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Ingen autentiseringskode ble oppgitt.",
-    "RATE_LIMIT_LOGIN"                   => "For mange mislykkede innloggingsforsøk. Vennligst vent før du prøver igjen.",
+    "RATE_LIMIT_LOGIN"                   => "For mange innloggingsforsøk. Vennligst vent før du prøver igjen.",
     "RATE_LIMIT_TOTP"                    => "For mange feilaktige autentiseringskoder. Vennligst vent før du prøver igjen.",
     "RATE_LIMIT_PASSKEY"                 => "For mange autentiseringsforsøk med passnøkkel. Vennligst vent før du prøver igjen.",
     "RATE_LIMIT_PASSKEY_STORE"           => "For mange registreringsforsøk for passnøkkel. Vennligst vent før du prøver igjen.",
@@ -481,6 +481,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "For mange forespørsler om e-postendring. Vennligst vent før du prøver igjen.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "For mange forsøk på passordendring. Vennligst vent før du prøver igjen.",
     "RATE_LIMIT_GENERIC"                 => "For mange forsøk. Vennligst vent før du prøver igjen.",
+    "SOCIAL_EMAIL_IN_USE"                => "Denne e-postadressen tilhører allerede en konto, og innloggingsleverandøren din har ikke bekreftet at den er din. Logg heller inn med passordet til den kontoen.",
 ));
 
 
@@ -665,6 +666,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Har du problemer med autentiseringsappen?",
 	"2FA_BACKUP_CODE_HELP" => "Skriv inn en av dine lagrede sikkerhetskoder",
 	"2FA_USE_BACKUP_BTN"   => "Bruk sikkerhetskode",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Meny",
+	"MENU_LOGO_HOME" => "%m1% forside",
+	"MENU_EMAIL"     => "E-post til %m1%",
+	"MENU_CALL"      => "Ring %m1%",
+	"SKIP_TO_MAIN"   => "Hopp til hovedinnhold",
+	"PW_REQ_MET"     => "oppfylt",
+	"PW_REQ_NOT_MET" => "ikke oppfylt",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

@@ -238,11 +238,11 @@ foreach ($validation->errors() as $error) {
   </div>
 </div>
 
-<div id="adduser" class="modal fade" role="dialog">
+<div id="adduser" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="adduser-title">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">New User</h4>
+        <h4 class="modal-title" id="adduser-title">New User</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
@@ -250,7 +250,7 @@ foreach ($validation->errors() as $error) {
         <div class="modal-body">
 
           <div class="form-group" id="username-group">
-            <label>
+            <label for="username">
               Username (<?php echo $settings->min_un; ?>-<?php echo $settings->max_un; ?> chars)<span id="usernameCheck" class="small ml-2"></span>
             </label>
 
@@ -260,7 +260,7 @@ foreach ($validation->errors() as $error) {
           </div>
 
           <div class="form-group" id="fname-group">
-            <label>First Name</label>
+            <label for="fname">First Name</label>
 
             <input type="search" class="form-control" id="fname" name="fname" value="<?php if (!$form_valid && !empty($_POST)) {
                                                                                         echo $fname;
@@ -268,7 +268,7 @@ foreach ($validation->errors() as $error) {
           </div>
 
           <div class="form-group" id="lname-group">
-            <label>Last Name</label>
+            <label for="lname">Last Name</label>
 
             <input type="search" class="form-control" id="lname" name="lname" value="<?php if (!$form_valid && !empty($_POST)) {
                                                                                         echo $lname;
@@ -276,7 +276,7 @@ foreach ($validation->errors() as $error) {
           </div>
 
           <div class="form-group" id="email-group">
-            <label>Email</label>
+            <label for="email">Email</label>
 
             <input class="form-control" type="search" name="email" id="email" value="<?php if (!$form_valid && !empty($_POST)) {
                                                                                         echo $email;
@@ -284,14 +284,14 @@ foreach ($validation->errors() as $error) {
           </div>
 
           <div class="form-group">
-            <label>
+            <label for="password">
               Password (<?php echo $settings->min_pw; ?>-<?php echo $settings->max_pw; ?> chars)
-              <a href="#" id="togglePasswords" class="ms-2 text-body-secondary"><i class="fa fa-eye"></i></a>
             </label>
+            <button type="button" id="togglePasswords" class="btn btn-link btn-sm p-0 ms-2 text-body-secondary" aria-label="<?= lang('PW_SHOWS'); ?>" aria-controls="password confirm" aria-pressed="false"><i class="fa fa-eye" aria-hidden="true"></i></button>
             <input class="form-control" type="password" name="password" id="password" placeholder="Password" required autocomplete="off">
           </div>
           <div class="form-group">
-            <label>Confirm Password</label>
+            <label for="confirm">Confirm Password</label>
             <input type="password" id="confirm" name="confirm" class="form-control" autocomplete="off" placeholder="Confirm Password" required>
           </div>
 
@@ -373,9 +373,11 @@ foreach ($validation->errors() as $error) {
       if (pw.type === 'password') {
         pw.type = 'text'; cf.type = 'text';
         icon.classList.replace('fa-eye', 'fa-eye-slash');
+        this.setAttribute('aria-pressed', 'true');
       } else {
         pw.type = 'password'; cf.type = 'password';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
+        this.setAttribute('aria-pressed', 'false');
       }
     });
   }

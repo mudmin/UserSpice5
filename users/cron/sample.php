@@ -5,11 +5,10 @@ $db = DB::getInstance();
 $ip = ipCheck();
 logger("","CronRequest","Cron request from $ip.");
 
-if($settings->cron_ip != ''){
-if($ip != $settings->cron_ip && $ip != '127.0.0.1'){
-	logger("","CronRequest","Cron request DENIED from $ip.");
+if(!cronCallerAllowed()){
+	$cronProxied = ClientIP::hasForwardingHeaders() ? " The request came through a proxy; run cron from the command line or request http://localhost/ directly." : "";
+	logger("","CronRequest","Cron request DENIED from $ip.$cronProxied");
 	die;
-	}
 }
 $errors = $successes = [];
 

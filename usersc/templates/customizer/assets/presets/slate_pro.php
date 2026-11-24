@@ -10,7 +10,7 @@
 return array (
   'primary' => '#4f46e5',
   'primary-hover' => '#4338ca',
-  'primary-text-emphasis' => '#312e81',
+  'primary-text-emphasis' => '#4f46e5',
   'primary-bg-subtle' => '#eef2ff',
   'primary-border-subtle' => '#c7d2fe',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#059669',
   'success-hover' => '#047857',
-  'success-text-emphasis' => '#064e3b',
+  'success-text-emphasis' => '#047854',
   'success-bg-subtle' => '#ecfdf5',
   'success-border-subtle' => '#a7f3d0',
 
   'info' => '#0b89c9',
   'info-hover' => '#0369a1',
-  'info-text-emphasis' => '#075985',
+  'info-text-emphasis' => '#096fa4',
   'info-bg-subtle' => '#e0f2fe',
   'info-border-subtle' => '#bae6fd',
 
   'warning' => '#d97706',
   'warning-hover' => '#b45309',
-  'warning-text-emphasis' => '#78350f',
+  'warning-text-emphasis' => '#9f5704',
   'warning-bg-subtle' => '#fef3c7',
   'warning-border-subtle' => '#fde68a',
 
   'danger' => '#dc2626',
   'danger-hover' => '#b91c1c',
-  'danger-text-emphasis' => '#7f1d1d',
+  'danger-text-emphasis' => '#c92020',
   'danger-bg-subtle' => '#fee2e2',
   'danger-border-subtle' => '#fecaca',
 
@@ -71,6 +71,8 @@ return array (
   'us-menu-custom-submenu-border' => '#1e293b',
 
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#4f46e5',
+  'link-hover-color' => '#342ae1',
 
   'custom_css' => "
 /* === SLATE PRO === restrained B2B baseline */
@@ -94,5 +96,6 @@ return array (
   --bs-table-striped-bg: #f8fafc;
 }
 .navbar { box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05); }
+
 ",
 );

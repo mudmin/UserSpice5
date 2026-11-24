@@ -97,3 +97,190 @@ function syncCustomizerPresets($presets_dir, $child_themes_dir) {
     }
     return $installed;
 }
+
+/**
+ * SHA-1 of a theme file with CRs stripped, so a copy that went through a
+ * Windows checkout or FTP transfer still matches its shipped hash. Must match
+ * the hashing in build_preset_hashes.sh.
+ */
+function customizerThemeHash($file) {
+    $content = is_file($file) ? file_get_contents($file) : false;
+    return $content === false ? '' : sha1(str_replace("\r", '', $content));
+}
+
+/**
+ * Copy $src over $dest and make sure the next require sees the new file.
+ * No chmod: copying over an existing file keeps its mode, and chmod fails
+ * (with a warning) when the web server is not the file's owner.
+ */
+function customizerReplaceThemeFile($src, $dest) {
+    if (!copy($src, $dest)) {
+        return false;
+    }
+    if (function_exists('opcache_invalidate')) {
+        opcache_invalidate($dest, true);
+    }
+    return true;
+}
+
+/**
+ * Surfaces whose live stylesheet was compiled from a theme that has since been
+ * repaired, e.g. ['backend' => ['solarized_light', 'solarized_dark']]. Written
+ * by repairCustomizerPresets(); a surface is removed when compileCustomizerTheme()
+ * rebuilds it. The file is install-specific and must never ship.
+ */
+function customizerRebuildPendingFile() {
+    return __DIR__ . '/assets/css/rebuild_pending.php';
+}
+
+function readCustomizerRebuildPending() {
+    $file = customizerRebuildPendingFile();
+    if (!is_file($file)) {
+        return [];
+    }
+    $pending = require $file;
+    return is_array($pending) ? $pending : [];
+}
+
+function writeCustomizerRebuildPending(array $pending) {
+    $file = customizerRebuildPendingFile();
+    $pending = array_filter($pending);
+    if (empty($pending)) {
+        $ok = !is_file($file) || unlink($file);
+    } else {
+        $content  = "<?php\n// Written by repairCustomizerPresets(); an entry is removed when it is rebuilt.\n";
+        $content .= "// Install-specific - never ship this file.\n\nreturn " . var_export($pending, true) . ";\n";
+        $created = !is_file($file);
+        $writable = $created ? is_writable(dirname($file)) : is_writable($file);
+        $ok = $writable && file_put_contents($file, $content) !== false;
+        if ($ok && $created) {
+            chmod($file, 0644); // only on a file we just created; chmod fails if we are not the owner
+        }
+    }
+    if (function_exists('opcache_invalidate')) {
+        opcache_invalidate($file, true);
+    }
+    return $ok;
+}
+
+/**
+ * Bring installed copies of shipped presets up to date without touching edits.
+ *
+ * assets/preset_hashes.php lists the hash of every version of each preset we
+ * ever shipped. A copy matching one of them was never edited by the admin, so
+ * it is replaced with the current preset; a copy matching none was customized
+ * and is left alone. Checks the gallery copies in child_themes/ and the light
+ * theme a Site Themes pair copied into customizations.php / dashboard.php.
+ *
+ * Only theme FILES change here. Stylesheets are compiled, so every stylesheet a
+ * replacement makes stale is queued in rebuild_pending.php first: the Site Themes
+ * surfaces that use the theme, plus any gallery theme with its own compiled CSS
+ * (a page can load one directly with $child_theme). The customizer then shows a
+ * "Rebuild live stylesheets" banner - nothing visitors see changes until an
+ * admin clicks it. If the queue cannot be written, nothing is replaced.
+ *
+ * Returns ['repaired' => [names], 'customized' => [names]], where 'customized'
+ * are gallery copies that differ from every shipped version and were kept.
+ */
+function repairCustomizerPresets($template_dir) {
+    $result = ['repaired' => [], 'customized' => []];
+
+    $hashFile = $template_dir . '/assets/preset_hashes.php';
+    $stock = is_file($hashFile) ? require $hashFile : [];
+    if (!is_array($stock) || empty($stock)) {
+        return $result;
+    }
+
+    $presetsDir = $template_dir . '/assets/presets';
+    $childDir = $template_dir . '/assets/child_themes';
+    $cssDir = $template_dir . '/assets/css';
+
+    $pair = is_file($cssDir . '/theme_pair.php') ? require $cssDir . '/theme_pair.php' : [];
+    if (!is_array($pair)) {
+        $pair = [];
+    }
+    if (!isset($pair['frontend']) && isset($pair['dark'])) {
+        // Legacy single-key file: a front-end dark theme only.
+        $pair = ['frontend' => ['light' => '', 'dark' => (string) $pair['dark']]];
+    }
+    // Where each surface's editable light theme lives.
+    $lightFiles = [
+        'frontend' => $cssDir . '/customizations.php',
+        'backend'  => $childDir . '/dashboard.php',
+    ];
+    // Gallery themes that have a compiled stylesheet of their own.
+    $compiled = [];
+    if (is_file($cssDir . '/revision.php')) {
+        require $cssDir . '/revision.php'; // sets $child_themes
+        if (isset($child_themes) && is_array($child_themes)) {
+            $compiled = array_diff(array_keys($child_themes), ['dashboard']);
+        }
+    }
+
+    // Plan: which files to replace, and which stylesheets that makes stale.
+    $replace = [];
+    $pending = [];
+    foreach ($stock as $name => $hashes) {
+        $preset = $presetsDir . '/' . $name . '.php';
+        if (!is_array($hashes) || !is_file($preset)) {
+            continue;
+        }
+        $current = customizerThemeHash($preset);
+
+        $copy = $childDir . '/' . $name . '.php';
+        $copyHash = customizerThemeHash($copy);
+        if ($copyHash !== '' && $copyHash !== $current) {
+            if (!in_array($copyHash, $hashes, true)) {
+                $result['customized'][] = $name;
+            } else {
+                $replace[$copy] = [$preset, $name];
+                foreach ($pair as $surface => $p) {
+                    if (is_array($p) && isset($lightFiles[$surface]) && ($p['dark'] ?? '') === $name) {
+                        $pending[$surface][] = $name;
+                    }
+                }
+                if (in_array($name, $compiled, true)) {
+                    $pending['child_themes'][] = $name;
+                }
+            }
+        }
+
+        // A light theme applied from this preset was copied into the surface's
+        // own file, so it needs its own check.
+        foreach ($lightFiles as $surface => $lightFile) {
+            if (($pair[$surface]['light'] ?? '') !== $name) {
+                continue;
+            }
+            $lightHash = customizerThemeHash($lightFile);
+            if ($lightHash !== '' && $lightHash !== $current && in_array($lightHash, $hashes, true)) {
+                $replace[$lightFile] = [$preset, $name];
+                $pending[$surface][] = $name;
+            }
+        }
+    }
+    if (empty($replace)) {
+        return $result;
+    }
+
+    // Queue the rebuilds before touching anything: a replaced theme whose
+    // stylesheet never gets rebuilt would leave the live site silently stale.
+    if (!empty($pending)) {
+        $queued = readCustomizerRebuildPending();
+        foreach ($pending as $key => $names) {
+            $queued[$key] = array_values(array_unique(array_merge($queued[$key] ?? [], $names)));
+        }
+        if (!writeCustomizerRebuildPending($queued)) {
+            return $result;
+        }
+    }
+
+    foreach ($replace as $dest => $source) {
+        list($preset, $name) = $source;
+        if (is_writable($dest) && customizerReplaceThemeFile($preset, $dest)
+            && !in_array($name, $result['repaired'], true)) {
+            $result['repaired'][] = $name;
+        }
+    }
+
+    return $result;
+}

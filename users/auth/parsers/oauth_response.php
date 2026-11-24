@@ -55,8 +55,10 @@ if (!$state || $state !== ($_SESSION['oauth_state'] ?? '')) {
 }
 
 // Clear the state and client info from session
+$codeVerifier = $_SESSION['oauth_code_verifier'] ?? '';
 unset($_SESSION['oauth_state']);
 unset($_SESSION['oauth_client_id']);
+unset($_SESSION['oauth_code_verifier']);
 
 // Decode and verify response data if present
 $responseData = null;
@@ -98,7 +100,7 @@ if ($response) {
 
 // Exchange the authorization code for an access token
 $tokenUrl = rtrim($oSettings->server_url, '/') . '/' . trim($oSettings->server_target, '/') . '/';
-$tokenData = exchangeCodeForToken($tokenUrl, $oSettings->client_id, $oSettings->client_secret, $authCode, $oSettings->redirect_uri);
+$tokenData = exchangeCodeForToken($tokenUrl, $oSettings->client_id, $oSettings->client_secret, $authCode, hed((string)$oSettings->redirect_uri), $codeVerifier);
 
 if (isset($tokenData['error'])) {
     logger(1, "OAuth Client Error", "Token exchange failed: " . ($tokenData['error'] ?? 'Unknown error'));
@@ -203,26 +205,27 @@ if ($existingUserC > 0) {
         }
     }
 
-    // Log the user in
-    $sessionName = Config::get('session/session_name');
-    if (!headers_sent()) {
-        session_regenerate_id(true);
-    }
-    Session::put($sessionName, $existingUser->id);
+    // Log the user in through the User object, so $user is the logged-in
+    // user for custom_login_script.php and last_login/reauth are recorded
+    $user = new User($existingUser->id);
+    $user->login();
 
-    // Execute custom login script if it exists
-    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
-        include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
-    }
-
-    // Set login method for TOTP/security purposes
+    // Record the login before custom_login_script.php, which usually redirects
     if (function_exists('setLoginMethod')) {
         setLoginMethod('oauth');
     }
-
     logger($existingUser->id, "OAuth Client Login", "User logged in via OAuth from: " . $oSettings->client_name);
+    $hooks = getMyHooks(['page' => 'loginSuccess']);
+    includeHook($hooks, 'body');
 
-    // Redirect to dashboard
+    // Page captured before login (session only; never from the request)
+    $dest = consumeLoginDest();
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+    }
+    if ($dest !== '') {
+        Redirect::sanitized($dest);
+    }
     Redirect::to($us_url_root . $settings->redirect_uri_after_login);
     exit;
 } else {
@@ -248,7 +251,9 @@ if ($existingUserC > 0) {
  */
 function createNewUser($userData, $responseData, $oSettings)
 {
-    global $db, $abs_us_root, $us_url_root, $settings;
+    // custom_login_script.php is included inside this function; it sees these
+    // globals plus the locals ($user, $dest).
+    global $db, $abs_us_root, $us_url_root, $settings, $us_session_var;
 
     // Check if user creation from OAuth is allowed
     if (file_exists($abs_us_root . $us_url_root . 'usersc/oauth_client/assets/before_user_creation.php')) {
@@ -283,12 +288,9 @@ function createNewUser($userData, $responseData, $oSettings)
         return false;
     }
 
-    // Log the user in immediately
-    $sessionName = Config::get('session/session_name');
-    if (!headers_sent()) {
-        session_regenerate_id(true);
-    }
-    Session::put($sessionName, $theNewId);
+    // Log the user in immediately, through the User object
+    $user = new User($theNewId);
+    $user->login();
 
     // Handle tags if present
     if (isset($responseData['tags']) && !empty($oSettings->response_secret)) {
@@ -315,17 +317,22 @@ function createNewUser($userData, $responseData, $oSettings)
             include $safeLoginScriptPath;
         }
     }
-    // Execute custom login script if it exists
-    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
-        include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
-    }
-
-    // Set login method for TOTP/security purposes
+    // Record the login before custom_login_script.php, which usually redirects
     if (function_exists('setLoginMethod')) {
         setLoginMethod('oauth');
     }
+    logger($theNewId, "OAuth Client Login", "New account created and logged in via OAuth from: " . $oSettings->client_name);
+    $hooks = getMyHooks(['page' => 'loginSuccess']);
+    includeHook($hooks, 'body');
 
-    // Redirect to dashboard
+    // Page captured before login (session only; never from the request)
+    $dest = consumeLoginDest();
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+        include $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+    }
+    if ($dest !== '') {
+        Redirect::sanitized($dest);
+    }
     Redirect::to($us_url_root . $settings->redirect_uri_after_login);
     return $theNewId;
 }
@@ -433,7 +440,7 @@ function storeUserTags($userId, $responseData)
 /**
  * Exchange authorization code for access token
  */
-function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $redirectUri)
+function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $redirectUri, $codeVerifier = '')
 {
     $data = [
         'grant_type' => 'authorization_code',
@@ -442,6 +449,9 @@ function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $r
         'client_id' => $clientId,
         'client_secret' => $clientSecret
     ];
+    if ($codeVerifier !== '') {
+        $data['code_verifier'] = $codeVerifier;
+    }
 
     logger(1, "OAuth Client", "Sending token request to: $tokenUrl");
 
@@ -460,16 +470,8 @@ function exchangeCodeForToken($tokenUrl, $clientId, $clientSecret, $authCode, $r
     $curlError = curl_error($ch);
 
     if ($result === FALSE) {
-        if (PHP_VERSION_ID < 80500) {
-            curl_close($ch);
-        }
-
         logger(1, "OAuth Client Error", "cURL error: $curlError");
         return ['error' => 'Network error: ' . $curlError];
-    }
-
-    if (PHP_VERSION_ID < 80500) {
-        curl_close($ch);
     }
 
     logger(1, "OAuth Client", "Token exchange response - HTTP Code: $httpCode");

@@ -111,7 +111,8 @@ if (!empty($_POST)) {
     'server_target' => Input::get('server_target'),
     'client_id' => Input::get('client_id'),
     'client_secret' => Input::get('client_secret'),
-    'redirect_uri' => Input::get('redirect_uri'),
+    // Stored as plain text: Input::get() escapes & to &amp;, and the server compares the URI exactly.
+    'redirect_uri' => hed(Input::get('redirect_uri')),
     'login_title' => Input::get('login_title'),
     'client_icon' => Input::get('client_icon'),
     'login_script' => Input::get('login_script'),
@@ -502,13 +503,13 @@ $activeClientCount = $activeClientsQ->count();
 
               <p class="mt-2"><strong>Client ID and Client Secret:</strong> These credentials are provided by the OAuth server administrator when they create a client configuration for your application. These must match exactly what's configured on the server side. Keep the client secret secure and never expose it in client-side code.</p>
 
-              <p class="mt-2"><strong>Redirect URI:</strong> This is the URL on your server where users will be sent after authentication on the OAuth server. This must be configured exactly the same on both the client (here) and the server. The default format is typically <span style="color:red;">https://yourdomain.com/users/auth/parsers/oauth_response.php</span></p>
+              <p class="mt-2"><strong>Redirect URI:</strong> This is the URL on your server where users will be sent after authentication on the OAuth server. This must be configured exactly the same on both the client (here) and the server. The default format is typically <span class="text-danger-emphasis">https://yourdomain.com/users/auth/parsers/oauth_response.php</span></p>
 
               <p class="mt-2"><strong>Login Button Title:</strong> The text that appears on the OAuth login button on your login page. This helps users identify which service they're logging in with (e.g., "Login with Main Server", "Corporate Login", etc.).</p>
 
-              <p class="mt-2"><strong>Login Button Icon:</strong> A visual icon that appears alongside the login button. You can add custom icons by placing image files (PNG, JPG, SVG) in the <span style="color:red;">usersc/oauth_client/assets/</span> directory. This helps users visually identify the OAuth option.</p>
+              <p class="mt-2"><strong>Login Button Icon:</strong> A visual icon that appears alongside the login button. You can add custom icons by placing image files (PNG, JPG, SVG) in the <span class="text-danger-emphasis">usersc/oauth_client/assets/</span> directory. This helps users visually identify the OAuth option.</p>
 
-              <p class="mt-2"><strong>Login Script:</strong> An optional script that runs after successful OAuth authentication. <b>These scripts provide powerful post-authentication capabilities.</b> You can create custom scripts to handle role mapping, welcome messages, or any other post-login logic. Place custom scripts in <span style="color:red;">usersc/oauth_client/login_scripts/</span> and examine the default script for implementation examples.</p>
+              <p class="mt-2"><strong>Login Script:</strong> An optional script that runs after successful OAuth authentication. <b>These scripts provide powerful post-authentication capabilities.</b> You can create custom scripts to handle role mapping, welcome messages, or any other post-login logic. Place custom scripts in <span class="text-danger-emphasis">usersc/oauth_client/login_scripts/</span> and examine the default script for implementation examples.</p>
 
               <h5 class="mt-4">Multi-Server Authentication</h5>
               <p class="mt-2">This system supports multiple OAuth server configurations simultaneously. Users can choose from multiple authentication options on the login page, allowing for scenarios like:</p>
@@ -537,7 +538,7 @@ $activeClientCount = $activeClientsQ->count();
                 <li><strong>SSL/HTTPS issues:</strong> Both client and server should use HTTPS in production</li>
               </ul>
 
-              <p class="mt-2">This feature works in conjunction with the <a target="_blank" href="<?= $us_url_root ?>users/admin.php?view=oauth" style="color:blue;">OAuth Server</a> which allows you to create your own OAuth authentication server. There is also an <a href="https://github.com/mudmin/userspice-oauth-examples" target="_blank" style="color:blue;">extensive repository</a> of tools and examples for implementing OAuth in various languages and applications including WordPress, Rust, Python, React and many others.</p>
+              <p class="mt-2">This feature works in conjunction with the <a target="_blank" href="<?= $us_url_root ?>users/admin.php?view=oauth">OAuth Server</a> which allows you to create your own OAuth authentication server. There is also an <a href="https://github.com/mudmin/userspice-oauth-examples" target="_blank">extensive repository</a> of tools and examples for implementing OAuth in various languages and applications including WordPress, Rust, Python, React and many others.</p>
 
 
             </div>

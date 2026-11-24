@@ -447,7 +447,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Skrivnega ključa za avtentikacijo ni bilo mogoče pridobiti. Poskusite znova.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Varnostna koda je bila preverjena, vendar je razveljavitev spodletela. Obrnite se na podporo.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Avtentikacijska koda ni bila vnesena.",
-    "RATE_LIMIT_LOGIN"                   => "Preveč neuspelih poskusov prijave. Počakajte, preden poskusite znova.",
+    "RATE_LIMIT_LOGIN"                   => "Preveč poskusov prijave. Počakajte, preden poskusite znova.",
     "RATE_LIMIT_TOTP"                    => "Preveč napačnih avtentikacijskih kod. Počakajte, preden poskusite znova.",
     "RATE_LIMIT_PASSKEY"                 => "Preveč poskusov avtentikacije s pristopnim ključem. Počakajte, preden poskusite znova.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Preveč poskusov registracije pristopnega ključa. Počakajte, preden poskusite znova.",
@@ -458,6 +458,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Preveč zahtev za spremembo e-pošte. Počakajte, preden poskusite znova.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Preveč poskusov spremembe gesla. Počakajte, preden poskusite znova.",
     "RATE_LIMIT_GENERIC"                 => "Preveč poskusov. Počakajte, preden poskusite znova.",
+    "SOCIAL_EMAIL_IN_USE"                => "Ta e-poštni naslov že pripada računu, vaš ponudnik prijave pa ni potrdil, da je vaš. Namesto tega se prijavite z geslom tega računa.",
 ));
 
 	
@@ -633,6 +634,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Imate težave z aplikacijo za preverjanje pristnosti?",
 	"2FA_BACKUP_CODE_HELP" => "Vnesite eno od shranjenih varnostnih kod",
 	"2FA_USE_BACKUP_BTN"   => "Uporabi varnostno kodo",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Meni",
+	"MENU_LOGO_HOME" => "Domača stran %m1%",
+	"MENU_EMAIL"     => "E-pošta za %m1%",
+	"MENU_CALL"      => "Pokliči %m1%",
+	"SKIP_TO_MAIN"   => "Skoči na glavno vsebino",
+	"PW_REQ_MET"     => "izpolnjeno",
+	"PW_REQ_NOT_MET" => "ni izpolnjeno",
 ));
 
 if(file_exists($abs_us_root.$us_url_root."usersc/lang/".$lang["THIS_CODE"].".php")){

@@ -76,7 +76,9 @@ return array (
   'us-menu-custom-divider' => 'rgba(255, 46, 154, 0.4)',
   'us-menu-custom-submenu-border' => '#00f0ff',
 
-  'headings-color' => 'var(--bs-primary)',
+  'headings-color' => '#ff9ed2',
+  'link-color' => '#00f0ff',
+  'link-hover-color' => '#5cf6ff',
 
   'custom_css' => "
 /* === SYNTHWAVE === Miami Vice in 2087 */
@@ -84,7 +86,7 @@ return array (
 body {
   background:
     linear-gradient(180deg, rgba(26, 0, 51, 0) 0%, rgba(26, 0, 51, 0.85) 50%, #1a0033 100%),
-    linear-gradient(180deg, #ff2e9a 0%, #ff6f00 40%, #1a0033 70%) fixed;
+    linear-gradient(180deg, #95004d 0%, #7d3600 40%, #1a0033 70%) fixed;
   min-height: 100vh;
 }
 h1, h2, h3, .h1, .h2, .h3 {
@@ -142,12 +144,9 @@ h1, h2, h3, .h1, .h2, .h3 {
   --bs-table-hover-bg: rgba(0, 240, 255, 0.10);
 }
 a:not(.btn):not(.nav-link) {
-  color: #00f0ff;
   text-decoration: none;
   transition: text-shadow 0.2s ease;
-}
-a:not(.btn):not(.nav-link):hover {
-  color: #5cf6ff;
+}a:not(.btn):not(.nav-link):hover {
   text-shadow: 0 0 8px #00f0ff;
 }
 .modal-content {
@@ -155,5 +154,9 @@ a:not(.btn):not(.nav-link):hover {
   border: 1px solid #00f0ff;
   box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
 }
+
+/* Links inside the decorative card header take the header's own text color
+   (checked for contrast against every gradient stop), underlined to stay links. */
+.card-header a:not(.btn) { color: inherit; text-decoration: underline; }
 ",
 );

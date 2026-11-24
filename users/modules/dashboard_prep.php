@@ -27,5 +27,5 @@ if(!securePage(Server::get('PHP_SELF'))){
 }
 $chartsLoaded = "true"; //widget signal not to reload js
 ?>
-<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" src="<?= $us_url_root ?>users/js/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" src="<?= $us_url_root ?>users/js/chart.umd.min.js?v=<?= filemtime($abs_us_root . $us_url_root . 'users/js/chart.umd.min.js') ?>" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/user_spice_ver.php'; ?>

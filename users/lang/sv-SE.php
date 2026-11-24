@@ -468,7 +468,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Kunde inte hämta autentiseringshemligheten. Vänligen försök igen.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Reservkoden verifierades men det gick inte att ogiltigförklara den. Vänligen kontakta support.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Ingen autentiseringskod angavs.",
-    "RATE_LIMIT_LOGIN"                   => "För många misslyckade inloggningsförsök. Vänligen vänta innan du försöker igen.",
+    "RATE_LIMIT_LOGIN"                   => "För många inloggningsförsök. Vänligen vänta innan du försöker igen.",
     "RATE_LIMIT_TOTP"                    => "För många felaktiga autentiseringskoder. Vänligen vänta innan du försöker igen.",
     "RATE_LIMIT_PASSKEY"                 => "För många autentiseringsförsök med lösennyckel. Vänligen vänta innan du försöker igen.",
     "RATE_LIMIT_PASSKEY_STORE"           => "För många registreringsförsök av lösennyckel. Vänligen vänta innan du försöker igen.",
@@ -479,6 +479,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "För många begäranden om e-poständring. Vänligen vänta innan du försöker igen.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "För många försök att ändra lösenord. Vänligen vänta innan du försöker igen.",
     "RATE_LIMIT_GENERIC"                 => "För många försök. Vänligen vänta innan du försöker igen.",
+    "SOCIAL_EMAIL_IN_USE"                => "Den här e-postadressen tillhör redan ett konto, och din inloggningsleverantör har inte bekräftat att den är din. Logga in med lösenordet för det kontot i stället.",
 ));
 
 $lang = array_merge($lang, array(
@@ -662,6 +663,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Har du problem med din autentiseringsapp?",
 	"2FA_BACKUP_CODE_HELP" => "Ange en av dina sparade säkerhetskoder",
 	"2FA_USE_BACKUP_BTN"   => "Använd säkerhetskod",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Meny",
+	"MENU_LOGO_HOME" => "%m1% startsida",
+	"MENU_EMAIL"     => "E-post till %m1%",
+	"MENU_CALL"      => "Ring %m1%",
+	"SKIP_TO_MAIN"   => "Hoppa till huvudinnehållet",
+	"PW_REQ_MET"     => "uppfyllt",
+	"PW_REQ_NOT_MET" => "inte uppfyllt",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

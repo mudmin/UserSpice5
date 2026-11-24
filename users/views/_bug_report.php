@@ -43,10 +43,6 @@ if (!empty($_POST) && $settings->spice_api != '') {
   //execute the POST request
   $result = curl_exec($ch);
   $apiResponse = usValidateApiResponse($result, $ch);
-  //close cURL resource
-  if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
-  }
   if (!$apiResponse['success']) {
     $httpCode = $apiResponse['httpCode'];
     if ($httpCode == 401) {
@@ -87,10 +83,6 @@ if ($settings->spice_api != '' && !empty($_GET['showreports'])) {
   //execute the POST request
   $result = curl_exec($ch);
   $apiResponse = usValidateApiResponse($result, $ch);
-  //close cURL resource
-  if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
-  }
   if (!$apiResponse['success']) {
     $bugApiError = $apiResponse['error'];
     $bugConnectionFailed = $apiResponse['connectionFailed'];
@@ -108,7 +100,7 @@ if ($settings->spice_api != '' && !empty($_GET['showreports'])) {
     <p>A System report will be submitted with the following information to help in the diagnosis of the problem. If you don't want to submit this information, please submit a report directly at <a target="_blank" href="https://bugs.userspice.com">https://bugs.userspice.com</a>. Please note that the API may collect other information about the API call itself in order to prevent spam.
     </p>
     <?php if ($settings->spice_api == '') { ?>
-      <a href="https://userspice.com/developer-api-keys/"><span style='color:red'><strong>The Bug Report feature will not work with out a FREE API Key.</span></strong>
+      <a href="https://userspice.com/developer-api-keys/"><span class='text-danger-emphasis'><strong>The Bug Report feature will not work with out a FREE API Key.</strong></span>
         Get One Here</a>
       <form class="" action="" method="post">
         <div class="input-group">
@@ -129,16 +121,16 @@ if ($settings->spice_api != '' && !empty($_GET['showreports'])) {
   <div class="col-12 col-md-6">
     <form class="" action="" method="post">
       <?= tokenHere(); ?>
-      <label for="">Please give a brief summary of the problem</label>
-      <input class="form-control" type="text" name="brief" value="" required>
-      <label for="">What type of bug report is this?</label>
-      <select class="form-control" name="bugtype" required>
+      <label for="brief">Please give a brief summary of the problem</label>
+      <input class="form-control" type="text" name="brief" id="brief" value="" required>
+      <label for="bugtype">What type of bug report is this?</label>
+      <select class="form-control" name="bugtype" id="bugtype" required>
         <option value="" disabled selected="selected">--Please Choose--</option>
         <option value="triage">General UserSpice Bug</option>
         <option value="plugin">Plugin/Widget/Template issue</option>
       </select>
-      <label for="">Please give as much detail about how to recreate your problem as possible.</label>
-      <textarea class="form-control" name="problem" rows="8" cols="80" required></textarea><br>
+      <label for="problem">Please give as much detail about how to recreate your problem as possible.</label>
+      <textarea class="form-control" name="problem" id="problem" rows="8" cols="80" required></textarea><br>
 
       <div class="form-check mt-2 mb-2">
         <input class="form-check-input" type="checkbox" value="1" id="is_security_report" name="is_security_report">

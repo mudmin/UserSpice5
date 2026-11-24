@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#1e293b',
 
   'headings-color' => '#f1f5f9',
+  'link-color' => '#818cf8',
+  'link-hover-color' => '#a5b4fc',
 
   'custom_css' => "
 /* === SLATE PRO DARK === restrained B2B baseline, dark */
@@ -97,7 +99,7 @@ return array (
   border-color: #4f46e5 !important;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
 }
-.form-control::placeholder { color: #64748b; }
+.form-control::placeholder { color: #94a3b8; }
 
 .dropdown-menu { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
 .dropdown-item { color: #cbd5e1; }
@@ -127,7 +129,5 @@ return array (
 }
 
 .navbar { box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
-a:not(.btn):not(.nav-link) { color: #818cf8; }
-a:not(.btn):not(.nav-link):hover { color: #a5b4fc; }
 ",
 );

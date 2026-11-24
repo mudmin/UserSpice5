@@ -10,7 +10,7 @@
 return array (
   'primary' => '#ff5290',
   'primary-hover' => '#e63d7a',
-  'primary-text-emphasis' => '#7a1c40',
+  'primary-text-emphasis' => '#cc0049',
   'primary-bg-subtle' => '#ffdfe9',
   'primary-border-subtle' => '#ffa3c0',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#66e090',
   'success-hover' => '#52c97a',
-  'success-text-emphasis' => '#1f5e36',
+  'success-text-emphasis' => '#187739',
   'success-bg-subtle' => '#dcf5e3',
   'success-border-subtle' => '#a8e6ba',
 
   'info' => '#a8dadc',
   'info-hover' => '#8fc8ca',
-  'info-text-emphasis' => '#2a5e60',
+  'info-text-emphasis' => '#2f7275',
   'info-bg-subtle' => '#e8f5f6',
   'info-border-subtle' => '#c8e6e7',
 
   'warning' => '#ffc857',
   'warning-hover' => '#f0b73e',
-  'warning-text-emphasis' => '#6e521a',
+  'warning-text-emphasis' => '#8e5f00',
   'warning-bg-subtle' => '#fff1d6',
   'warning-border-subtle' => '#fed99a',
 
   'danger' => '#d93642',
   'danger-hover' => '#c92935',
-  'danger-text-emphasis' => '#6e1620',
+  'danger-text-emphasis' => '#be242f',
   'danger-bg-subtle' => '#fad9dc',
   'danger-border-subtle' => '#f0a3a9',
 
@@ -70,7 +70,9 @@ return array (
   'us-menu-custom-divider' => 'rgba(255, 77, 141, 0.3)',
   'us-menu-custom-submenu-border' => '#ff4d8d',
 
-  'headings-color' => 'var(--bs-primary)',
+  'headings-color' => '#d1004b',
+  'link-color' => '#d1004b',
+  'link-hover-color' => '#b0003f',
 
   'custom_css' => "
 /* === BUBBLEGUM === playful, chunky, bouncy */
@@ -90,7 +92,7 @@ h1, h2, h3, .h1, .h2, .h3 {
   box-shadow: 0 8px 0 0 #ff4d8d;
 }
 .card-header {
-  background: linear-gradient(135deg, #ff4d8d, #ff85b0);
+  background: linear-gradient(135deg, #e70053, #e80052);
   color: #ffffff !important;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -138,5 +140,10 @@ h1, h2, h3, .h1, .h2, .h3 {
   border: 4px solid #ff4d8d;
   box-shadow: 0 10px 0 0 rgba(255, 77, 141, 0.3);
 }
+
+
+/* Links inside the decorative card header take the header's own text color
+   (checked for contrast against every gradient stop), underlined to stay links. */
+.card-header a:not(.btn) { color: inherit; text-decoration: underline; }
 ",
 );

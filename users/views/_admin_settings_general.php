@@ -150,47 +150,47 @@ if (!$totpDisabled) {
         <div class="card-body">
           <!-- Site Name -->
           <div class="form-group">
-            <label>Free API Key (<a class="text-primary" href="https://userspice.com/developer-api-keys/" target="_blank">Get One Here</a>) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" value="<?= $settings->spice_api; ?>">
+            <label for="spice_api">Free API Key (<a class="text-primary" href="https://userspice.com/developer-api-keys/" target="_blank">Get One Here</a>)</label> <button type="button" id="spice_api-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Get your free API key to use features such as Auto Updates, Bug Reports, and Spice Shaker"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="API Key" name="spice_api" id="spice_api" aria-describedby="spice_api-help" value="<?= $settings->spice_api; ?>">
             <span id="APIKeyMessage"><?= checkAPIkey($settings->spice_api); ?></span>
 
           </div>
           <!-- Site Name -->
           <div class="form-group">
-            <label>Site Name <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Modify this to change the name of your site, including in the <title> tag, the maintenance page and some system emails."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Site Name" name="site_name" id="site_name" value="<?= $settings->site_name; ?>">
+            <label for="site_name">Site Name</label> <button type="button" id="site_name-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Modify this to change the name of your site, including in the <title> tag, the maintenance page and some system emails."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Site Name" name="site_name" id="site_name" aria-describedby="site_name-help" value="<?= $settings->site_name; ?>">
           </div>
 
           <!-- Copyright Option -->
           <div class="form-group">
-            <label>Copyright Message <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This message will be at the bottom of every page. The copyright symbol and year are automatically added."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Copyright Message" name="copyright" id="copyright" value="<?= $settings->copyright; ?>">
+            <label for="copyright">Copyright Message</label> <button type="button" id="copyright-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="This message will be at the bottom of every page. The copyright symbol and year are automatically added."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Copyright Message" name="copyright" id="copyright" aria-describedby="copyright-help" value="<?= $settings->copyright; ?>">
           </div>
 
 
           <!-- Error Message Timeout Length -->
           <div class="form-group">
-            <label>Error Message Timeout (seconds) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This hides those red error messages at the top of your page on urls with err= in them."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="err_time">Error Message Timeout (seconds)</label> <button type="button" id="err_time-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="This hides those red error messages at the top of your page on urls with err= in them."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <div class="input-group">
-              <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="Error message timeout time" name="err_tim" id="err_time" value="<?= $settings->err_time; ?>">
+              <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="Error message timeout time" name="err_tim" id="err_time" aria-describedby="err_time-help" value="<?= $settings->err_time; ?>">
               <span class="input-group-addon input-group-text">seconds</span>
             </div>
           </div>
 
           <div class="form-group">
-            <label>Max users before User Manager Search Engine turns on.
-            <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="If you have a lot of users, you may see performance issues with the datatables on the user manager.  Setting this number below your current number of users will turn on the search engine."><i class="fa fa-question-circle offset-circle"></i></a>
-          <small class="ps-2">Current user count is <span class="text-success"><?= $db->query("SELECT count(*) as counter from users")->first()->counter; ?></span></small>
-          </label>
+            <label for="max_users_dt">Max users before User Manager Search Engine turns on.
 
-            <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="Max users for datatables" name="max_users_dt" id="max_users_dt" value="<?= $settings->max_users_dt; ?>">
+          <small class="ps-2">Current user count is <span class="text-success"><?= $db->query("SELECT count(*) as counter from users")->first()->counter; ?></span></small>
+          </label> <button type="button" id="max_users_dt-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="If you have a lot of users, you may see performance issues with the datatables on the user manager.  Setting this number below your current number of users will turn on the search engine."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+
+            <input type="number" step="1" min="0" class="form-control ajxnum" data-desc="Max users for datatables" name="max_users_dt" id="max_users_dt" aria-describedby="max_users_dt-help" value="<?= $settings->max_users_dt; ?>">
           </div>
 
           <!-- Social Login Location -->
           <div class="form-group">
-            <label>Social Login Location<a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Determines if you want your social login / passkey buttons at the top or bottom of your login and registration pages"><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="social_login_location">Social Login Location</label> <button type="button" id="social_login_location-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Determines if you want your social login / passkey buttons at the top or bottom of your login and registration pages"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
 
-            <select id="social_login_location" class="form-control ajxnum" data-desc="Social Login Location" name="social_login_location">
+            <select id="social_login_location" aria-describedby="social_login_location-help" class="form-control ajxnum" data-desc="Social Login Location" name="social_login_location">
               <option <?php if ($settings->social_login_location == 0) {
                         echo "selected='selected'";
                       } ?> value="0">Top of Forms</option>
@@ -206,17 +206,17 @@ if (!$totpDisabled) {
 
           <!-- Site Offline -->
           <div class="form-group">
-            <label>Maintenance Mode (Site Offline) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Need to go into Maintenance Mode to do an upgrade? Enable this! This will display a 'Maintenance Mode Active' message for those in the default Administrator permission group (ID: 2) and redirect the remaining to the maintenance page. This will occur until the setting is disabled. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="site_offline">Maintenance Mode (Site Offline)</label> <button type="button" id="site_offline-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Need to go into Maintenance Mode to do an upgrade? Enable this! This will display a 'Maintenance Mode Active' message for those in the default Administrator permission group (ID: 2) and redirect the remaining to the maintenance page. This will occur until the setting is disabled. Default: No."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="site_offline" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Site offline" <?php if ($settings->site_offline == 1) {
+                  <input id="site_offline" aria-describedby="site_offline-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Site offline" <?php if ($settings->site_offline == 1) {
                                                                                                                                                   echo 'checked="true"';
                                                                                                                                                 } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
@@ -231,17 +231,17 @@ if (!$totpDisabled) {
 
           <!-- Navigation Type Option -->
           <div class="form-group">
-            <label>Enable Database-Driven Navigation <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="As of U 4.3 navigations can be controlled from the database, switch between the original and database-driven navigaton here. Default: Database Driven."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="navigation_type">Enable Database-Driven Navigation</label> <button type="button" id="navigation_type-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="As of U 4.3 navigations can be controlled from the database, switch between the original and database-driven navigaton here. Default: Database Driven."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="navigation_type" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Navigation style" <?php if ($settings->navigation_type == 1) {
+                  <input id="navigation_type" aria-describedby="navigation_type-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Navigation style" <?php if ($settings->navigation_type == 1) {
                                                                                                                                                         echo 'checked="true"';
                                                                                                                                                       } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
           <?php
@@ -250,8 +250,8 @@ if (!$totpDisabled) {
           }
           ?>
           <div class="form-group">
-            <label>Main Div Class <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Traditionally you'll use container or container-fluid in this field. You can add multiple classes by adding spaces. Not every theme will respect this setting. Default: container-fluid"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Main Div Class" name="container_open_class" id="container_open_class" value="<?= $og_container_open_class; ?>">
+            <label for="container_open_class">Main Div Class</label> <button type="button" id="container_open_class-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Traditionally you'll use container or container-fluid in this field. You can add multiple classes by adding spaces. Not every theme will respect this setting. Default: container-fluid"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Main Div Class" name="container_open_class" id="container_open_class" aria-describedby="container_open_class-help" value="<?= $og_container_open_class; ?>">
           </div>
         </div>
       </div>
@@ -264,77 +264,77 @@ if (!$totpDisabled) {
 
           <!-- Force SSL -->
           <div class="form-group">
-            <label>Force HTTPS Connections <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Don't want anyone accessing your site insecurely? Enabled this. This will redirect any users from an HTTP (non-secure) connection to HTTPS. Make sure your SSL Cert is valid before doing this! Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="force_ssl">Force HTTPS Connections</label> <button type="button" id="force_ssl-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Don't want anyone accessing your site insecurely? Enabled this. This will redirect any users from an HTTP (non-secure) connection to HTTPS. Make sure your SSL Cert is valid before doing this! Default: No."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="force_ssl" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Force HTTPS" <?php if ($settings->force_ssl == 1) {
+                  <input id="force_ssl" aria-describedby="force_ssl-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Force HTTPS" <?php if ($settings->force_ssl == 1) {
                                                                                                                                               echo 'checked="true"';
                                                                                                                                             } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <div class="form-group">
-            <label>Force Password Reset <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This will change the force_pr value in your users database for all users to 1, requiring every user including the current one to reset their password. They will not be able to leave the user settings page until this make this change. This will always be no, however when you change it to Yes and save changes, it will perform the above action, and reset back to no. This isn't a setting, but a function."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label>Force Password Reset</label> <button type="button" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="This will change the force_pr value in your users database for all users to 1, requiring every user including the current one to reset their password. They will not be able to leave the user settings page until this make this change. This will always be no, however when you change it to Yes and save changes, it will perform the above action, and reset back to no. This isn't a setting, but a function."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end">
               <button type="button" name="force_user_pr" id="force_user_pr" class="btn btn-outline-danger input-group-addon">Force PW Reset</button>
               <span>
           </div>
 
           <div class="form-group">
-            <label>Enable User Permission Restrictions <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Use this as a safeguard to only allow users to add/remove permission levels they have access to. You might use this in a format to give certain users access to add/remove users or make site changes, but you don't want them to give other users permissions they don't have, or take those away. Your safeguard for this (in your own case if you have certain permissions not assigned to yourself) is by restricting the page administration to the default Level 2 as you can do anything from these pages currently. This will still show the user the levels on user administration but will have a disabled attribute. Default: Disabled."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="permission_restriction">Enable User Permission Restrictions</label> <button type="button" id="permission_restriction-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Use this as a safeguard to only allow users to add/remove permission levels they have access to. You might use this in a format to give certain users access to add/remove users or make site changes, but you don't want them to give other users permissions they don't have, or take those away. Your safeguard for this (in your own case if you have certain permissions not assigned to yourself) is by restricting the page administration to the default Level 2 as you can do anything from these pages currently. This will still show the user the levels on user administration but will have a disabled attribute. Default: Disabled."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="permission_restriction" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Password Restriction Setting" <?php if ($settings->permission_restriction == 1) {
+                  <input id="permission_restriction" aria-describedby="permission_restriction-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Password Restriction Setting" <?php if ($settings->permission_restriction == 1) {
                                                                                                                                                                             echo 'checked="true"';
                                                                                                                                                                           } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <div class="form-group">
-            <label>Enable Page Permission Restrictions <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Only allow one permission level per page using this setting. This is particularly good for ensuring no overlap in permission levels. You can have a permission group hierarchy such as this: User, User Manager, Database Manager, Administrator. In this case you want to give all your User Managers access to the user administration section, and yourself of course, but many not to those who manage your database only (maybe you want to give them access to site and email settings only). In any case, it will change the checkboxes on Admin Page section to radio buttons under Add Permission Level and restrict addition from the permission level settings to be added only if no other level has it. Default: Disabled."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="page_permission_restriction">Enable Page Permission Restrictions</label> <button type="button" id="page_permission_restriction-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Only allow one permission level per page using this setting. This is particularly good for ensuring no overlap in permission levels. You can have a permission group hierarchy such as this: User, User Manager, Database Manager, Administrator. In this case you want to give all your User Managers access to the user administration section, and yourself of course, but many not to those who manage your database only (maybe you want to give them access to site and email settings only). In any case, it will change the checkboxes on Admin Page section to radio buttons under Add Permission Level and restrict addition from the permission level settings to be added only if no other level has it. Default: Disabled."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="page_permission_restriction" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Page Permission Restriction Setting" <?php if ($settings->page_permission_restriction == 1) {
+                  <input id="page_permission_restriction" aria-describedby="page_permission_restriction-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Page Permission Restriction Setting" <?php if ($settings->page_permission_restriction == 1) {
                                                                                                                                                                                         echo 'checked="true"';
                                                                                                                                                                                       } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <div class="form-group">
-            <label>New Pages Default To "Private" <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Does what it says. Default: Enabled."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="page_default_private">New Pages Default To "Private"</label> <button type="button" id="page_default_private-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Does what it says. Default: Enabled."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
-                <label class="switch switch-text switch-success">
-                  <input id="page_default_private" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="New Pages Private Setting" <?php if ($settings->page_default_private == 1) {
+                <span class="switch switch-text switch-success">
+                  <input id="page_default_private" aria-describedby="page_default_private-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="New Pages Private Setting" <?php if ($settings->page_default_private == 1) {
                                                                                                                                                                       echo 'checked="true"';
                                                                                                                                                                     } ?>>
               </div>
               <span data-on="Yes" data-off="No" class="switch-label"></span>
               <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <!-- Cron Job Security -->
           <a name="cron"></a>
           <div class="form-group">
-            <label>Only allow cron jobs from the following IP <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Cron jobs are automated server tasks that can make your life easier.  You may want to make sure, though, that they originate from you and not someone else.  You can whitelist an ip address here."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Cron Job IP" name="cron_ip" id="cron_ip" value="<?= $settings->cron_ip; ?>" placeholder="<?php if ($settings->cron_ip == '') {
+            <label for="cron_ip">Only allow cron jobs from the following IP</label> <button type="button" id="cron_ip-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Cron jobs are automated server tasks that can make your life easier.  You may want to make sure, though, that they originate from you and not someone else.  You can whitelist an ip address here."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Cron Job IP" name="cron_ip" id="cron_ip" aria-describedby="cron_ip-help" value="<?= $settings->cron_ip; ?>" placeholder="<?php if ($settings->cron_ip == '') {
                                                                                                                                                                                     echo 'No security is IP is set';
                                                                                                                                                                                   } ?>">
           </div>
@@ -354,21 +354,21 @@ if (!$totpDisabled) {
           <!-- Passkeys -->
 
           <div class="form-group" id="setting-passkeys">
-            <label>Enable Passkeys <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="passkeys">Enable Passkeys</label> <button type="button" id="passkeys-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Passkeys are a type of passwordless login which stores the user's identity on their own device."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
               <?php if ($pkDisabled && $pkDisabledReason !== '') { ?>
                 <span class="text-danger fw-bold"><small><?= $pkDisabledReason ?></small></span>
               <?php } else { ?>
                 <div class="form-check form-switch">
 
-                  <label class="switch switch-text switch-success">
-                    <input id="passkeys" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) {
+                  <span class="switch switch-text switch-success">
+                    <input id="passkeys" aria-describedby="passkeys-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Passkeys" <?php if ($settings->passkeys == 1) {
                                                                                                                                             echo 'checked="true"';
                                                                                                                                           } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-                </label>
+                </span>
               <?php } ?>
             </span>
             <?php if ($pkDisabled && isset($rpidWarning)) {
@@ -378,7 +378,7 @@ if (!$totpDisabled) {
 
           <!-- TOTP -->
           <div class="form-group" id="setting-totp">
-            <label>Enable TOTP (Two-Factor Authentication)
+            <label for="totp">Enable TOTP (Two-Factor Authentication)
               <?php
 
               if ($totpEncryptionValid) {
@@ -388,15 +388,15 @@ if (!$totpDisabled) {
                 echo "<span class='text-danger mt-2'><small><i class='fa fa-exclamation-triangle'></i> Encryption not ready. See <a href='{$us_url_root}users/admin.php?view=security' target='_blank'>security dashboard</a>.</small></span>";
               }
               ?>
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Allows users to enable Time-based One-Time Password (TOTP) two-factor authentication for their accounts. This does not force it, but makes the option available on their user settings page."><i class="fa fa-question-circle offset-circle"></i></a>
-            </label>
+
+            </label> <button type="button" id="totp-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Allows users to enable Time-based One-Time Password (TOTP) two-factor authentication for their accounts. This does not force it, but makes the option available on their user settings page."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
 
             <?php if ($totpDisabled) { ?>
               <span class="float-end">
                 <span class="text-danger fw-bold"><small><?= $totpDisabledReason ?></small></span>
               </span>
             <?php } else { ?>
-              <select id="totp" class="form-control ajxnum" data-desc="Enable TOTP" name="totp">
+              <select id="totp" aria-describedby="totp-help" class="form-control ajxnum" data-desc="Enable TOTP" name="totp">
                 <option <?php if (!isset($settings->totp) || $settings->totp == 0) {
                           echo "selected='selected'";
                         } ?> value="0">Disabled</option>
@@ -427,8 +427,8 @@ if (!$totpDisabled) {
 
           <!-- Remove Password Logins -->
           <div class="form-group">
-            <label>Password Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <select id="no_passwords" class="form-control ajxnum" data-desc="Password Logins" name="no_passwords">
+            <label for="no_passwords">Password Logins</label> <button type="button" id="no_passwords-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="<?= $no_passwords ?>"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <select id="no_passwords" aria-describedby="no_passwords-help" class="form-control ajxnum" data-desc="Password Logins" name="no_passwords">
               <option <?php if ($settings->no_passwords == 0) {
                         echo "selected='selected'";
                       } ?> value="0">Enabled</option>
@@ -439,13 +439,13 @@ if (!$totpDisabled) {
                         echo "selected='selected'";
                       } ?> value="2">Disabled (except localhost)</option>
             </select>
-            <small class="text-body-secondary">When set to "Disabled (except localhost)", password logins are only allowed from 127.0.0.1 or ::1</small>
+            <small class="text-body-secondary">When set to "Disabled (except localhost)", password logins are only allowed from a genuinely local request (127.0.0.1 or ::1 with a localhost address, never through a proxy or tunnel)</small>
           </div>
 
           <!-- passwordless code length -->
           <div class="form-group">
-            <label>Passwordless Code Length<a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This is the number of chars the end user will have to enter to login"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <select id="pwl_length" class="form-control ajxnum" data-desc="Passwordless Code Length" name="pwl_length">
+            <label for="pwl_length">Passwordless Code Length</label> <button type="button" id="pwl_length-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="This is the number of chars the end user will have to enter to login"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <select id="pwl_length" aria-describedby="pwl_length-help" class="form-control ajxnum" data-desc="Passwordless Code Length" name="pwl_length">
 
               <?php for ($i = 4; $i <= 12; $i++) { ?>
                 <option value="<?= $i ?>" <?php if ($settings->pwl_length == $i) {
@@ -458,9 +458,9 @@ if (!$totpDisabled) {
 
           <!-- Enable Email Logins -->
           <div class="form-group">
-            <label>Allow Passwordless Logins <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="<?= $email_login ?>"><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="email_login">Allow Passwordless Logins</label> <button type="button" id="email_login-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="<?= $email_login ?>"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
 
-            <select id="email_login" class="form-control ajxnum" data-desc="Email Login" name="email_login">
+            <select id="email_login" aria-describedby="email_login-help" class="form-control ajxnum" data-desc="Email Login" name="email_login">
               <option value="0" <?php if ($settings->email_login == 0) {
                                   echo 'selected="selected"';
                                 } ?>>Disabled</option>
@@ -476,17 +476,17 @@ if (!$totpDisabled) {
 
             </select>
             <br>
-            <small>All links will point to <span style="color:red;"><?= $verify_url ?></span>. If that is not correct, change it <a href="<?= $us_url_root ?>users/admin.php?view=email" style="color:blue;"> here</a>.</small><br>
+            <small>All links will point to <span class="text-danger-emphasis"><?= $verify_url ?></span>. If that is not correct, change it <a href="<?= $us_url_root ?>users/admin.php?view=email"> here</a>.</small><br>
             <small>Need to debug? See options in <code>usersc/scripts/passwordless_login_overrides.php</code></small><br>
-            <small>View passwordless debug logs <a href="<?= $us_url_root ?>users/admin.php?view=logs&mode=passwordless" style="color:blue;"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
+            <small>View passwordless debug logs <a href="<?= $us_url_root ?>users/admin.php?view=logs&mode=passwordless"> here</a>. The code option is a great way to combat antivirus software that visits links, thus invalidating them before they can be used by the end user.</small>
           </div>
 
 
           <!-- ReAuth (step-up authentication) grace window -->
           <div class="form-group">
-            <label>ReAuth Grace Window (minutes) <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="How long a step-up re-authentication (forceReauth) stays valid before the user must confirm their identity again. Used by sensitive actions such as editing account settings. Minimum 1 minute — if set to 0 or left blank, the default of 15 minutes is used."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="reauth_timeout">ReAuth Grace Window (minutes)</label> <button type="button" id="reauth_timeout-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="How long a step-up re-authentication (forceReauth) stays valid before the user must confirm their identity again. Used by sensitive actions such as editing account settings. Minimum 1 minute — if set to 0 or left blank, the default of 15 minutes is used."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <div class="input-group">
-              <input type="number" step="1" min="1" class="form-control ajxnum" data-desc="ReAuth Grace Window" name="reauth_timeout" id="reauth_timeout" value="<?= $settings->reauth_timeout ?? 15; ?>">
+              <input type="number" step="1" min="1" class="form-control ajxnum" data-desc="ReAuth Grace Window" name="reauth_timeout" id="reauth_timeout" aria-describedby="reauth_timeout-help" value="<?= $settings->reauth_timeout ?? 15; ?>">
               <span class="input-group-addon input-group-text">minutes</span>
             </div>
             <small class="text-body-secondary">Applies to passwords, TOTP, passkeys, email codes, and social re-auth.</small>
@@ -494,29 +494,29 @@ if (!$totpDisabled) {
 
           <!-- Force Password Reset -->
           <div class="form-group">
-            <label>Force Password Reset on Manual Creation <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="When a user is created from the admin panel, force their password to be reset upon login, this will also send them a password reset link on manual creation no matter what password you enter on the form. If you enable this, the force_pr value in your users database for this user will be 1 when created. Default: No."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="force_pr">Force Password Reset on Manual Creation</label> <button type="button" id="force_pr-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="When a user is created from the admin panel, force their password to be reset upon login, this will also send them a password reset link on manual creation no matter what password you enter on the form. If you enable this, the force_pr value in your users database for this user will be 1 when created. Default: No."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
-                <label class="switch switch-text switch-success">
-                  <input id="force_pr" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Force Inital Password Reset" <?php if ($settings->force_pr == 1) {
+                <span class="switch switch-text switch-success">
+                  <input id="force_pr" aria-describedby="force_pr-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Force Inital Password Reset" <?php if ($settings->force_pr == 1) {
                                                                                                                                                             echo 'checked="true"';
                                                                                                                                                           } ?>>
               </div>
               <span data-on="Yes" data-off="No" class="switch-label"></span>
               <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <div class="form-group">
-            <label>Redirect After Login <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="The folder and file that you wish to redirect the user to after login. Default: users/account.php. Note that admins get redirected to this dashboard by default unless you intercept that call with something in usersc/scripts/custom_login_script.php"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Redirect After Login" name="redirect_uri_after_login" id="redirect_uri_after_login" value="<?= $settings->redirect_uri_after_login; ?>">
+            <label for="redirect_uri_after_login">Redirect After Login</label> <button type="button" id="redirect_uri_after_login-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="The folder and file that you wish to redirect the user to after login. Default: users/account.php. Note that admins get redirected to this dashboard by default unless you intercept that call with something in usersc/scripts/custom_login_script.php"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <input type="text" autocomplete="off" class="form-control ajxtxt" data-desc="Redirect After Login" name="redirect_uri_after_login" id="redirect_uri_after_login" aria-describedby="redirect_uri_after_login-help" value="<?= $settings->redirect_uri_after_login; ?>">
           </div>
 
           <!-- echouser Option -->
           <div class="form-group">
-            <label>echouser Function <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="What do you want to echo when you use the echouser function? You can use this to echo their name in several different formats. Need their username instead? Use echousername. If it cannot find the user, it will echo Deleted. Default: FName LName."><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <select id="echouser" class="form-control ajxnum" data-desc="echouser Function" name="echouser">
+            <label for="echouser">echouser Function</label> <button type="button" id="echouser-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="What do you want to echo when you use the echouser function? You can use this to echo their name in several different formats. Need their username instead? Use echousername. If it cannot find the user, it will echo Deleted. Default: FName LName."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <select id="echouser" aria-describedby="echouser-help" class="form-control ajxnum" data-desc="echouser Function" name="echouser">
               <option value="0" <?php if ($settings->echouser == 0) {
                                   echo 'selected="selected"';
                                 } ?>>0. FName LName</option>
@@ -536,17 +536,17 @@ if (!$totpDisabled) {
           </div>
 
           <div class="form-group">
-            <label>Enable OAuth Server <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="This UserSpice install can act as a centralized OAuth server for other applications.  These can be UserSpice, WordPress or dozens of other applications and languages. Default: Off."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="oauth_server">Enable OAuth Server</label> <button type="button" id="oauth_server-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="This UserSpice install can act as a centralized OAuth server for other applications.  These can be UserSpice, WordPress or dozens of other applications and languages. Default: Off."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
               <div class="form-check form-switch">
-                <label class="switch switch-text switch-success">
-                  <input id="oauth_server" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="OAuth Server" <?php if ($settings->oauth_server == 1) {
+                <span class="switch switch-text switch-success">
+                  <input id="oauth_server" aria-describedby="oauth_server-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="OAuth Server" <?php if ($settings->oauth_server == 1) {
                                                                                                                                                   echo 'checked="true"';
                                                                                                                                                 } ?>>
               </div>
               <span data-on="Yes" data-off="No" class="switch-label"></span>
               <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
         </div>
@@ -561,12 +561,12 @@ if (!$totpDisabled) {
         <div class="card-body">
 
           <div class="form-group" id="setting-debug">
-            <label>Enable Debug Mode <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="debug">Enable Debug Mode</label> <button type="button" id="debug-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Track down difficult form, database and redirect errors."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success"></label>
-              <a style="color:blue;" href="admin.php?view=logs&mode=debug" class="">View Debug Logs</a>
+              <span class="switch switch-text switch-success"></span>
+              <a href="admin.php?view=logs&mode=debug" class="">View Debug Logs</a>
             </span>
-            <select id="debug" class="form-control ajxnum" data-desc="Debug Mode" name="debug">
+            <select id="debug" aria-describedby="debug-help" class="form-control ajxnum" data-desc="Debug Mode" name="debug">
               <option <?php if ($settings->debug == 0) {
                         echo "selected='selected'";
                       } ?> value="0">Off (Mode 0)</option>
@@ -603,8 +603,8 @@ if (!$totpDisabled) {
           ?>
           <div class="form-group">
 
-            <label>Default Language <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Set the default language for your site"><i class="fa fa-question-circle offset-circle"></i></a></label>
-            <select id="default_language" class="form-control ajxtxt" data-desc="Default Language" name="default_language">
+            <label for="default_language">Default Language</label> <button type="button" id="default_language-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Set the default language for your site"><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
+            <select id="default_language" aria-describedby="default_language-help" class="form-control ajxtxt" data-desc="Default Language" name="default_language">
               <option value="<?= $settings->default_language; ?>"><?= $settings->default_language; ?></option>
               <?php foreach ($languages as $l) {
                 if ($l != false && $l != $settings->default_language) { ?>
@@ -616,17 +616,17 @@ if (!$totpDisabled) {
 
           <!-- Allow Users To Change Language -->
           <div class="form-group">
-            <label>Allow users to change their language <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="With this enabled, logged in users will be able to set their default language and non-logged in users will be able to change their language for this session."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="allow_language">Allow users to change their language</label> <button type="button" id="allow_language-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="With this enabled, logged in users will be able to set their default language and non-logged in users will be able to change their language for this session."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
             <span class="float-end offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="allow_language" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Allow user to change language setting" <?php if ($settings->allow_language == 1) {
+                  <input id="allow_language" aria-describedby="allow_language-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Allow user to change language setting" <?php if ($settings->allow_language == 1) {
                                                                                                                                                                             echo 'checked="true"';
                                                                                                                                                                           } ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
         </div>
@@ -639,9 +639,9 @@ if (!$totpDisabled) {
         </div>
         <div class="card-body">
           <div class="form-group">
-            <label>Update Track <a role="button" tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Choose your update channel. Production is recommended for mission critical applications. Bleeding Edge provides early access to updates. Experimental includes features in development."><i class="fa fa-question-circle offset-circle"></i></a></label>
+            <label for="bleeding_edge">Update Track</label> <button type="button" id="bleeding_edge-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Choose your update channel. Production is recommended for mission critical applications. Bleeding Edge provides early access to updates. Experimental includes features in development."><i class="fa fa-question-circle offset-circle" aria-hidden="true"></i></button>
 
-            <select id="bleeding_edge" class="form-control ajxnum" data-desc="Update Track" name="bleeding_edge">
+            <select id="bleeding_edge" aria-describedby="bleeding_edge-help" class="form-control ajxnum" data-desc="Update Track" name="bleeding_edge">
               <option <?php if ($settings->bleeding_edge == 0) {
                         echo "selected='selected'";
                       } ?> value="0">Production Updates (Stable)</option>

@@ -25,7 +25,12 @@ function handleOAuthEnforcement($user, $settings, $currentPage) {
     if (isOAuthSafePage($currentPage)) {
         return;
     }
-    
+
+    // The authorization endpoint starts or replaces the flow itself.
+    if (Server::get('PHP_SELF') === $us_url_root . 'users/auth/index.php') {
+        return;
+    }
+
     // Get OAuth flow data
     $oauthData = $_SESSION[INSTANCE . '_oauth_data'] ?? null;
     $oauthClientData = $_SESSION[INSTANCE . '_oauth_client_data'] ?? null;
@@ -47,7 +52,12 @@ function handleOAuthEnforcement($user, $settings, $currentPage) {
         exit;
     }
     
-    // User is logged in and TOTP verified (if required) - complete OAuth flow
+    // TOTP safe pages (totp_verification.php, totp_management.php) pass TOTP
+    // enforcement, so wait here until TOTP is done before issuing a code.
+    if (isOAuthTotpPending($user, $settings)) {
+        return;
+    }
+
     completeOAuthFlow($user, $oauthData, $oauthClientData);
 }
 
@@ -69,7 +79,52 @@ function shouldBypassOAuth() {
  * Check if OAuth flow is active
  */
 function isOAuthFlowActive() {
-    return isset($_SESSION[INSTANCE . '_oauth_flow_active']) && $_SESSION[INSTANCE . '_oauth_flow_active'] === true;
+    if (($_SESSION[INSTANCE . '_oauth_flow_active'] ?? null) !== true) {
+        return false;
+    }
+    // A flow started before flows had a start time gets its clock started now.
+    if (!isset($_SESSION[INSTANCE . '_oauth_flow_started'])) {
+        $_SESSION[INSTANCE . '_oauth_flow_started'] = time();
+    }
+    if ($_SESSION[INSTANCE . '_oauth_flow_started'] < time() - oauthFlowLifetime()) {
+        logger(0, "OAuth Server", "OAuth sign-in expired, clearing flow");
+        clearOAuthFlow();
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Seconds an unfinished OAuth sign-in stays active.
+ */
+function oauthFlowLifetime() {
+    return 1800;
+}
+
+/**
+ * Is the user still waiting on TOTP? Same rules as handleTotpEnforcement().
+ */
+function isOAuthTotpPending($user, $settings) {
+    global $abs_us_root, $us_url_root;
+
+    if (!isset($settings->totp) || $settings->totp < 1 || version_compare(PHP_VERSION, '8.2.0', '<')) {
+        return false;
+    }
+    if (function_exists('isCloaked') && isCloaked()) {
+        return false;
+    }
+    if (defined('TOTP_BYPASS') && TOTP_BYPASS == true) {
+        return false;
+    }
+    require_once $abs_us_root . $us_url_root . 'users/includes/totp_enforcement.php';
+
+    $userId = $user->data()->id;
+    $loginMethod = $_SESSION[INSTANCE . '_login_method'] ?? 'password';
+    if (!isTotpRequired($settings, $loginMethod, loadTotpRequirements($userId), $userId)) {
+        return false;
+    }
+    $status = getUserTotpStatus($userId);
+    return empty($status['session_verified']);
 }
 
 /**
@@ -100,14 +155,14 @@ function completeOAuthFlow($user, $oauthData, $oauthClientData) {
         $authCode = $oauthProvider->generateAuthCode(
             $user->data()->id, 
             $oauthData['client_id'], 
-            $oauthData['redirect_uri']
+            $oauthData['redirect_uri'],
+            $oauthData['code_challenge'] ?? '',
+            $oauthData['code_challenge_method'] ?? ''
         );
         
         if (!$authCode) {
             throw new Exception("Failed to generate authorization code");
         }
-        
-        logger($user->data()->id, "OAuth Server", "Generated Auth Code: $authCode for client: " . $oauthData['client_id']);
         
         // Build response data
         $response = [];
@@ -137,7 +192,8 @@ function completeOAuthFlow($user, $oauthData, $oauthClientData) {
         }
 
         // Construct redirect URL
-        $redirectUrl = $oauthData['redirect_uri'] . '?code=' . $authCode;
+        // A registered redirect URI may already carry a query string
+        $redirectUrl = $oauthData['redirect_uri'] . (strpos($oauthData['redirect_uri'], '?') === false ? '?' : '&') . 'code=' . $authCode;
         $redirectUrl .= '&response=' . urlencode($responseEncoded);
         if (!empty($signature)) {
             $redirectUrl .= '&signature=' . urlencode($signature);
@@ -162,7 +218,7 @@ function completeOAuthFlow($user, $oauthData, $oauthClientData) {
         
         // Try to redirect back to client with error
         if (isset($oauthData['redirect_uri'])) {
-            $errorUrl = $oauthData['redirect_uri'] . '?error=server_error';
+            $errorUrl = $oauthData['redirect_uri'] . (strpos($oauthData['redirect_uri'], '?') === false ? '?' : '&') . 'error=server_error';
             if (!empty($oauthData['state'])) {
                 $errorUrl .= '&state=' . urlencode($oauthData['state']);
             }
@@ -190,6 +246,7 @@ function clearOAuthFlow() {
     unset($_SESSION[INSTANCE . '_oauth_login_form']);
     unset($_SESSION[INSTANCE . '_oauth_login_title']);
     unset($_SESSION[INSTANCE . '_oauth_csrf_token']);
+    unset($_SESSION[INSTANCE . '_oauth_flow_started']);
 }
 
 /**
@@ -199,6 +256,7 @@ function initializeOAuthFlow($oauthData, $oauthClientData) {
     $_SESSION[INSTANCE . '_oauth_flow_active'] = true;
     $_SESSION[INSTANCE . '_oauth_data'] = $oauthData;
     $_SESSION[INSTANCE . '_oauth_client_data'] = $oauthClientData;
+    $_SESSION[INSTANCE . '_oauth_flow_started'] = time();
 
     // Generate server-side CSRF token for OAuth flow protection
     // This is separate from the client's 'state' parameter and protects against CSRF attacks

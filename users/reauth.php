@@ -377,7 +377,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
           <?php endif; ?>
 
           <div class="text-center mt-3">
-            <a href="<?= $us_url_root ?>users/logout.php" class="text-danger small">
+            <a href="<?= $us_url_root ?>users/logout.php" class="text-danger-emphasis small">
               <?= safeReturn(lang('MENU_LOGOUT') ?: 'Log out') ?>
             </a>
           </div>

@@ -229,8 +229,18 @@ ul.us_menu.dark .dropdown-divider{
     display: none;
   }
 
+  /* visually hidden rather than display:none, so the collapsed icon-only links
+     keep their label as an accessible name */
   ul.us_menu:not(.horizontal):not(.expanded) .labelText{
-    display: none;
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   ul.us_menu:not(.horizontal):not(.expanded) i{
@@ -282,8 +292,11 @@ ul.us_menu.dark .dropdown-divider{
         max-height: 0;
         opacity: 0;
         overflow: hidden;
+        /* hidden (not just transparent) once collapsed, so the items leave the tab
+           order and the accessibility tree while aria-expanded says "false" */
+        visibility: hidden;
         /* Ensure overflow is hidden immediately when closing */
-        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0s;
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0s, visibility 0s linear 0.4s;
     }
 
     /* When expanded, animate to full height */
@@ -293,9 +306,10 @@ ul.us_menu.dark .dropdown-divider{
         /* Enough for text, submenus will overflow */
         opacity: 1;
         overflow: visible;
+        visibility: visible;
         /* Allow submenus to show */
         /* Transition max-height/opacity normally, but delay overflow to visible until AFTER animation */
-        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0.4s;
+        transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, overflow 0s linear 0.4s, visibility 0s linear 0s;
     }
 
     /* Open dropdown li must be uncapped so it can contain its in-flow sub-menu. */
@@ -309,3 +323,32 @@ ul.us_menu.dark .dropdown-divider{
     cursor: pointer;
 }
 
+
+/* Brand + mobile controls live in one <li> (see Menu.php) so the menu
+   <ul> only holds <li>. display:contents keeps its children laying out as direct
+   flex items of the menu, and must beat the mobile "> li" rules above. */
+ul.us_menu > li.us_menu_chrome,
+ul.us_menu.horizontal > li.us_menu_chrome {
+  display: contents !important;
+  visibility: visible !important; /* the brand + hamburger never collapse */
+}
+
+/* icons injected by usersc/hooks/mobile_menu/ were never inside an <li>; keep
+   the menu-item icon spacing off them */
+ul.us_menu li.us_menu_chrome a i {
+  margin-right: 0;
+}
+
+/* The hamburger is a real <button> for keyboard users; strip the UA button look.
+   The padding keeps a comfortable tap target. */
+.us_menu_mobile_control {
+  background: transparent;
+  border: 0;
+  padding: .375rem .5rem;
+  color: inherit;
+  line-height: 1;
+}
+.us_menu_mobile_control:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

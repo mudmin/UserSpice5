@@ -64,7 +64,7 @@ if ($customizerDarkPaired && empty($GLOBALS['usThemeToggleRendered'])) :
         aria-label="Toggle light or dark mode" aria-pressed="false" title="Switch to dark mode">
   <i class="fas fa-moon"></i>
 </button>
-<script nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>" defer src="<?= $us_url_root ?>users/js/theme-toggle.js"></script>
+<script nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>" defer src="<?= $us_url_root ?>users/js/theme-toggle.js?v=<?= filemtime($abs_us_root . $us_url_root . 'users/js/theme-toggle.js') ?>"></script>
 <?php endif; ?>
 
 </body>

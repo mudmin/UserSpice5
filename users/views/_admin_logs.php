@@ -58,10 +58,10 @@ if (in_array($user->data()->id, $master_account) && $action != '' && Token::chec
     <?php } else { ?>
       <span class="badge badge-danger">Disabled</span>
     <?php } ?>
-    <a href="<?= $us_url_root ?>users/logs" style="color:blue;">View Logs</a>
+    <a href="<?= $us_url_root ?>users/logs">View Logs</a>
     </div>
     <div class="col-12 col-sm-3">
-      <select class="form-control" name="logs_actions" id="logs_actions">
+      <select class="form-control" name="logs_actions" id="logs_actions" aria-label="Log action">
         <option disabled selected value>Select an action...</option>
         <option value="delete_logs">Clear All Logs (Keep IDs)</option>
         <option value="truncate_logs">Clear All Logs (Reset IDs)</option>
@@ -69,7 +69,7 @@ if (in_array($user->data()->id, $master_account) && $action != '' && Token::chec
       </select>
     </div>
     <div class="col-12 col-sm-3">
-      <select class="form-control" name="logs_filters" id="logs_filters">
+      <select class="form-control" name="logs_filters" id="logs_filters" aria-label="Log filter">
         <option disabled selected value>Select a filter...</option>
         <?php if ($mode != '') { ?>
           <option value="">View All Logs</option>
@@ -107,11 +107,11 @@ if (in_array($user->data()->id, $master_account) && $action != '' && Token::chec
     </table>
   </div>
 </div>
-<div class="modal" id="logMetadata" tabindex="-1" role="dialog">
+<div class="modal" id="logMetadata" tabindex="-1" role="dialog" aria-labelledby="logMetadata-title">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Log ID #<span id="logMetadataID"></span></h5>
+        <h5 class="modal-title" id="logMetadata-title">Log ID #<span id="logMetadataID"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

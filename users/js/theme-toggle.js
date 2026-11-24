@@ -75,7 +75,9 @@
     syncButtons(currentMode());
     var btns = document.querySelectorAll('.us-theme-toggle');
     for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener('click', function () {
+      btns[i].addEventListener('click', function (e) {
+        // the menu toggle is an <a href="#" role="button">; don't follow the "#"
+        e.preventDefault();
         var next = currentMode() === 'dark' ? 'light' : 'dark';
         applyMode(next);
         try {
@@ -84,6 +86,15 @@
           /* storage unavailable — the choice just won't persist */
         }
       });
+      // role="button" links only activate on Enter; give them Space like a real button
+      if (btns[i].tagName === 'A') {
+        btns[i].addEventListener('keydown', function (e) {
+          if (e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      }
     }
   });
 

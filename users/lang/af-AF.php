@@ -466,7 +466,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Kon nie stawinggeheim herwin nie. Probeer asseblief weer.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Rugsteunkode geverifieer, maar kon dit nie ongeldig maak nie. Kontak asseblief ondersteuning.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Geen stawingskode verskaf nie.",
-    "RATE_LIMIT_LOGIN"                   => "Te veel mislukte intekenpogings. Wag asseblief voor jy weer probeer.",
+    "RATE_LIMIT_LOGIN"                   => "Te veel intekenpogings. Wag asseblief voor jy weer probeer.",
     "RATE_LIMIT_TOTP"                    => "Te veel verkeerde stawingskodes. Wag asseblief voor jy weer probeer.",
     "RATE_LIMIT_PASSKEY"                 => "Te veel pogings tot toegangsleutel-stawing. Wag asseblief voor jy weer probeer.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Te veel pogings tot toegangsleutel-registrasie. Wag asseblief voor jy weer probeer.",
@@ -477,6 +477,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Te veel e-pos-veranderingsversoeke. Wag asseblief voor jy weer probeer.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Te veel wagwoord-veranderingspogings. Wag asseblief voor jy weer probeer.",
     "RATE_LIMIT_GENERIC"                 => "Te veel pogings. Wag asseblief voor jy weer probeer.",
+    "SOCIAL_EMAIL_IN_USE"                => "Hierdie e-posadres behoort reeds aan 'n rekening, en jou intekenverskaffer het nie bevestig dat dit joune is nie. Teken eerder in met daardie rekening se wagwoord.",
 ));
 
 
@@ -660,6 +661,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Sukkel jy met jou verifikasie-app?",
 	"2FA_BACKUP_CODE_HELP" => "Voer een van jou gestoorde rugsteunkodes in",
 	"2FA_USE_BACKUP_BTN"   => "Gebruik rugsteunkode",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Kieslys",
+	"MENU_LOGO_HOME" => "%m1% tuisblad",
+	"MENU_EMAIL"     => "E-pos %m1%",
+	"MENU_CALL"      => "Bel %m1%",
+	"SKIP_TO_MAIN"   => "Gaan na hoofinhoud",
+	"PW_REQ_MET"     => "voldoen",
+	"PW_REQ_NOT_MET" => "nie voldoen nie",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

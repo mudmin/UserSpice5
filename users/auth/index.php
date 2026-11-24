@@ -9,6 +9,11 @@ if (!isset($settings->oauth_server) || $settings->oauth_server < 1) {
 
 // Initialize OAuth provider
 $oauthProvider = new UserSpiceOAuthProvider();
+
+// CORS preflight from browser-based public clients
+if (Server::get('REQUEST_METHOD') === 'OPTIONS') {
+    $oauthProvider->handleCorsPreflight();
+}
 $user = new User();
 
 // HANDLE TOKEN REQUESTS FIRST (POST to /users/auth/)
@@ -73,7 +78,7 @@ $oauthClientData = $clientDataQ->first();
 
 
 // STEP 4: Validate redirect_uri matches what's registered
-if ($oauthData['redirect_uri'] !== $oauthClientData->redirect_uri) {
+if ($oauthData['redirect_uri'] !== hed((string)$oauthClientData->redirect_uri)) {
     // Redirect URI mismatch - this is a security issue, don't redirect
     http_response_code(400);
     header('Content-Type: application/json');
@@ -86,22 +91,12 @@ if ($oauthData['redirect_uri'] !== $oauthClientData->redirect_uri) {
     exit;
 }
 
-// STEP 5: Check if user is already logged in AND OAuth flow is already active
+// STEP 5: A new authorization request replaces any flow already in the session,
+// so the code is issued with this request's state and PKCE challenge
 if ($user->isLoggedIn() && isset($_SESSION[INSTANCE . '_oauth_flow_active'])) {
-    // Check if this is the same OAuth flow or a new one
-    $existingOauthData = $_SESSION[INSTANCE . '_oauth_data'] ?? null;
-    
-    if ($existingOauthData && $existingOauthData['client_id'] === $oauthData['client_id']) {
-        // Same OAuth flow, redirect to trigger enforcement
-        logger($user->data()->id, "OAuth Server", "Existing OAuth flow detected, redirecting to enforcement");
-        Redirect::to($us_url_root . 'users/account.php');
-        exit;
-    } else {
-        // Different OAuth flow, clear the old one and start new
-        logger($user->data()->id, "OAuth Server", "New OAuth flow, clearing previous flow");
-        require_once $abs_us_root . $us_url_root . 'users/includes/oauth_enforcement.php';
-        clearOAuthFlow();
-    }
+    logger($user->data()->id, "OAuth Server", "Replacing existing OAuth flow with new request for client: " . $oauthData['client_id']);
+    require_once $abs_us_root . $us_url_root . 'users/includes/oauth_enforcement.php';
+    clearOAuthFlow();
 }
 
 // STEP 6: Check if user is already logged in but no OAuth flow active
@@ -132,7 +127,6 @@ $oauthHooks = [];
 if (isset($_SESSION[INSTANCE . '_oauth_flow_active'])) {
     $oauthHooks['pre'][] = 'users/auth/oauth_hooks/pre.php';
     $oauthHooks['post'][] = 'users/auth/oauth_hooks/post.php';
-    $oauthHooks['loginSuccess'][] = 'users/auth/oauth_hooks/loginSuccess.php';
 }
 
 // STEP 9: Load appropriate login page

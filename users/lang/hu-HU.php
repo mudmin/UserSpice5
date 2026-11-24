@@ -471,7 +471,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "A hitelesítési titok nem kérhető le. Kérjük, próbálja újra.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "A helyreállító kód ellenőrizve, de az érvénytelenítés sikertelen. Kérjük, lépjen kapcsolatba a támogatással.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Nincs hitelesítési kód megadva.",
-    "RATE_LIMIT_LOGIN"                   => "Túl sok sikertelen bejelentkezési próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
+    "RATE_LIMIT_LOGIN"                   => "Túl sok bejelentkezési próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
     "RATE_LIMIT_TOTP"                    => "Túl sok helytelen hitelesítési kód. Kérjük, várjon, mielőtt újra próbálkozna.",
     "RATE_LIMIT_PASSKEY"                 => "Túl sok jelszókulcsos hitelesítési próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Túl sok jelszókulcs regisztrációs próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
@@ -482,6 +482,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Túl sok e-mail cím módosítási kérelem. Kérjük, várjon, mielőtt újra próbálkozna.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Túl sok jelszóváltoztatási próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
     "RATE_LIMIT_GENERIC"                 => "Túl sok próbálkozás. Kérjük, várjon, mielőtt újra próbálkozna.",
+    "SOCIAL_EMAIL_IN_USE"                => "Ez az e-mail-cím már egy fiókhoz tartozik, és a bejelentkezési szolgáltatója nem erősítette meg, hogy az Öné. Jelentkezzen be inkább annak a fióknak a jelszavával.",
 ));
 
 
@@ -644,6 +645,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Problémája van a hitelesítő alkalmazással?",
 	"2FA_BACKUP_CODE_HELP" => "Adja meg az egyik mentett tartalék kódot",
 	"2FA_USE_BACKUP_BTN"   => "Tartalék kód használata",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menü",
+	"MENU_LOGO_HOME" => "%m1% kezdőlap",
+	"MENU_EMAIL"     => "E-mail: %m1%",
+	"MENU_CALL"      => "Hívás: %m1%",
+	"SKIP_TO_MAIN"   => "Ugrás a fő tartalomra",
+	"PW_REQ_MET"     => "teljesül",
+	"PW_REQ_NOT_MET" => "nem teljesül",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

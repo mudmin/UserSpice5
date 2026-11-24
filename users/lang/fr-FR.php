@@ -441,7 +441,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "Impossible de récupérer le secret d'authentification. Veuillez réessayer.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Code de secours vérifié mais échec de l'invalidation. Veuillez contacter le support.",
     "2FA_ERR_NO_CODE_PROVIDED" => "Aucun code d'authentification fourni.",
-    "RATE_LIMIT_LOGIN"   => "Trop de tentatives de connexion échouées. Veuillez attendre avant de réessayer.",
+    "RATE_LIMIT_LOGIN"   => "Trop de tentatives de connexion. Veuillez attendre avant de réessayer.",
     "RATE_LIMIT_TOTP"    => "Trop de codes d'authentification incorrects. Veuillez attendre avant de réessayer.",
     "RATE_LIMIT_PASSKEY" => "Trop de tentatives d'authentification avec clé d'accès. Veuillez attendre avant de réessayer.",
     "RATE_LIMIT_PASSKEY_STORE" => "Trop de tentatives d'enregistrement de clé d'accès. Veuillez attendre avant de réessayer.",
@@ -452,6 +452,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Trop de demandes de changement d'e-mail. Veuillez attendre avant de réessayer.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Trop de tentatives de changement de mot de passe. Veuillez attendre avant de réessayer.",
     "RATE_LIMIT_GENERIC" => "Trop de tentatives. Veuillez attendre avant de réessayer.",
+    "SOCIAL_EMAIL_IN_USE" => "Cette adresse e-mail est déjà associée à un compte, et votre fournisseur de connexion n'a pas confirmé qu'elle vous appartient. Connectez-vous plutôt avec le mot de passe de ce compte.",
 ));
 
  // needs work in French
@@ -635,6 +636,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Vous rencontrez un problème avec votre application d'authentification ?",
 	"2FA_BACKUP_CODE_HELP" => "Saisissez l'un de vos codes de secours enregistrés",
 	"2FA_USE_BACKUP_BTN"   => "Utiliser un code de secours",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "Accueil de %m1%",
+	"MENU_EMAIL"     => "Écrire à %m1%",
+	"MENU_CALL"      => "Appeler le %m1%",
+	"SKIP_TO_MAIN"   => "Aller au contenu principal",
+	"PW_REQ_MET"     => "respecté",
+	"PW_REQ_NOT_MET" => "non respecté",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

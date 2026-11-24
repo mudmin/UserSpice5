@@ -2,21 +2,24 @@
 if ($pw_settings->meter_active == 1) {
            
 
-    $unmet_icon = '<i class="fa fa-times text-danger me-2" style="font-size:1.25rem; padding-right:.25rem!important;></i>';
-    $met_icon = '<i class="fa fa-check text-success" style="margin-right:.35rem;"></i>';
+    // decorative: each row's text says what the requirement is
+    $unmet_icon = '<i class="fa fa-times text-danger me-2" style="font-size:1.25rem; padding-right:.25rem!important;" aria-hidden="true"></i>';
+    $met_icon = '<i class="fa fa-check text-success" style="margin-right:.35rem;" aria-hidden="true"></i>';
 
 
     function generate_icon_statement($id, $iconHtml, $tooltipText)
     {
       global $unmet_icon, $met_icon;
+      // Icons are visual only (the text names the rule). The met state is spoken by
+      // the hidden status text, which the script below keeps up to date.
+      $notMet = htmlspecialchars(lang('PW_REQ_NOT_MET'));
       return "<tr>
-            <td>
+            <td aria-hidden='true'>
                 <span id='{$id}_met_icon' class='password-requirement-icon' style='display:none;'>{$met_icon}</span>
                 <span id='{$id}_unmet_icon' class='password-requirement-icon'>{$unmet_icon}</span>
-                <span id='{$id}_met_icon' class='password-requirement-icon'>{$met_icon}</span>
                 {$iconHtml}
             </td>
-            <td><span id='{$id}' class='text-body-secondary'>{$tooltipText}</span></td>
+            <td><span id='{$id}_text' class='text-body-secondary'>{$tooltipText}</span><span class='visually-hidden'>: <span class='us-pw-status'>{$notMet}</span>.</span></td>
         </tr>";
     }
 
@@ -57,7 +60,7 @@ if ($pw_settings->meter_active == 1) {
     if ($goal_score < 0) $goal_score = 0;
     $statements[] = generate_icon_statement('score', $score_icon, ">= " . $goal_score . "<span class='usPasswordScore'></span>");
 ?>
-    <table style="border-collapse: collapse; border: none;">
+    <table id="passwordhelp" style="border-collapse: collapse; border: none;">
         <?= implode("", $statements); ?>
     </table>
 
@@ -131,7 +134,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && pswd.length >= pwSettings.min_length,
         iconMet: $("#min_length_met_icon"),
         iconUnmet: $("#min_length_unmet_icon"),
-        text: $("#min_length")
+        text: $("#min_length_text")
       });
     }
 
@@ -140,7 +143,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && pswd.length <= pwSettings.max_length,
         iconMet: $("#max_length_met_icon"),
         iconUnmet: $("#max_length_unmet_icon"),
-        text: $("#max_length")
+        text: $("#max_length_text")
       });
     }
 
@@ -150,7 +153,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && /[A-Z]/.test(pswd),
         iconMet: $("#caps_met_icon"),
         iconUnmet: $("#caps_unmet_icon"),
-        text: $("#caps")
+        text: $("#caps_text")
       });
     }
 
@@ -160,7 +163,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && /[a-z]/.test(pswd),
         iconMet: $("#lower_met_icon"),
         iconUnmet: $("#lower_unmet_icon"),
-        text: $("#lower")
+        text: $("#lower_text")
       });
     }
 
@@ -170,7 +173,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && /\d/.test(pswd),
         iconMet: $("#number_met_icon"),
         iconUnmet: $("#number_unmet_icon"),
-        text: $("#number")
+        text: $("#number_text")
       });
     }
 
@@ -180,7 +183,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
         condition: isPasswordNotEmpty && /[^A-Za-z0-9]/.test(pswd),
         iconMet: $("#symbols_met_icon"),
         iconUnmet: $("#symbols_unmet_icon"),
-        text: $("#symbols")
+        text: $("#symbols_text")
       });
     }
 
@@ -189,7 +192,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
       condition: isPasswordNotEmpty && pswd === confirmPswd,
       iconMet: $("#password_match_met_icon"),
       iconUnmet: $("#password_match_unmet_icon"),
-      text: $("#password_match")
+      text: $("#password_match_text")
     });
 
     // Add score condition
@@ -215,6 +218,7 @@ function setupPasswordValidation(passwordSelector, confirmSelector, submitButton
   }
 
   function updateConditionDisplay(conditionMet, iconMet, iconUnmet, text) {
+    text.closest('td').find('.us-pw-status').text(conditionMet ? <?= json_encode(lang('PW_REQ_MET')) ?> : <?= json_encode(lang('PW_REQ_NOT_MET')) ?>);
     if (conditionMet) {
       iconMet.css('display', 'inline-block');
       iconUnmet.hide();

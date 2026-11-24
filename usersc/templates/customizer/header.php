@@ -7,8 +7,9 @@ require_once($abs_us_root.$us_url_root.'usersc/templates/'.$settings->template.'
 <link rel="stylesheet" href="<?=$us_url_root?>users/css/bootstrap.min.css">
 
 <link href="<?=$us_url_root?>users/css/datatables.css" rel="stylesheet">
-<link href="<?=$us_url_root?>users/css/menu.css" rel="stylesheet">
-<script src="<?= $us_url_root?>users/js/menu.js"></script>
+<?php // filemtime versions bust stale browser copies whenever an update changes these files ?>
+<link href="<?=$us_url_root?>users/css/menu.css?v=<?=filemtime($abs_us_root.$us_url_root.'users/css/menu.css')?>" rel="stylesheet">
+<script src="<?= $us_url_root?>users/js/menu.js?v=<?=filemtime($abs_us_root.$us_url_root.'users/js/menu.js')?>"></script>
 <link rel="stylesheet" href="<?=$us_url_root?>users/fonts/css/fontawesome.min.css">
 <link rel="stylesheet" href="<?=$us_url_root?>users/fonts/css/brands.min.css">
 <link rel="stylesheet" href="<?=$us_url_root?>users/fonts/css/solid.min.css">
@@ -82,6 +83,23 @@ if ($customizerDarkPaired) :
 </script>
 <?php endif; ?>
 
+<style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
+/* Skip link: hidden until focused (Bootstrap .visually-hidden-focusable), then
+   pinned top-left over the menu instead of pushing the flex layout down. */
+.us-skip-link:focus {
+  position: absolute !important;
+  top: .5rem;
+  left: .5rem;
+  z-index: 1080;
+  padding: .5rem 1rem;
+  /* !important: theme link rules (a:not(.btn)...) would otherwise recolor it */
+  background: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  border: 2px solid currentColor;
+  border-radius: .25rem;
+}
+</style>
 </head>
 <body class="d-flex flex-column min-vh-100">
+<a class="us-skip-link visually-hidden-focusable" href="#main-content"><?= lang("SKIP_TO_MAIN") ?></a>
 <?php require_once($abs_us_root.$us_url_root.'users/includes/template/header3_must_include.php'); ?>

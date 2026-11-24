@@ -1,6 +1,9 @@
 <?php 
 require_once '../users/init.php';
-if($settings->cron_ip != ClientIP::peer()){
+// A loopback cron_ip only matches a genuinely local request (behind a
+// same-server proxy or tunnel every visitor arrives from 127.0.0.1).
+$cronIpLoopback = in_array(strtolower(trim((string)$settings->cron_ip)), ['127.0.0.1', '::1', 'localhost'], true);
+if(!ClientIP::isLocal() && ($cronIpLoopback || $settings->cron_ip != ClientIP::peer())){
     logger('','Blacklist clear','Cron request DENIED from '.Input::sanitize(ClientIP::peer()));
     die;
 }

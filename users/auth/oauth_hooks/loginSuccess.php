@@ -22,6 +22,11 @@ if (!validateOAuthCsrfToken($submittedCsrfToken)) {
     exit;
 }
 
+// The flow finishes through oauth_enforcement.php once TOTP is done.
+if (isOAuthTotpPending($user, $settings)) {
+    return;
+}
+
 if ($oauthData && $oauthClientData && $user->isLoggedIn()) {
     $oauthProvider = new UserSpiceOAuthProvider();
     
@@ -29,11 +34,12 @@ if ($oauthData && $oauthClientData && $user->isLoggedIn()) {
     $authCode = $oauthProvider->generateAuthCode(
         $user->data()->id, 
         $oauthData['client_id'], 
-        $oauthData['redirect_uri']
+        $oauthData['redirect_uri'],
+        $oauthData['code_challenge'] ?? '',
+        $oauthData['code_challenge_method'] ?? ''
     );
     
     if ($authCode) {
-        logger($user->data()->id, "OAuth Server", "Generated Auth Code: $authCode for client: " . $oauthData['client_id']);
         
         // Build response data
         $response = [];
@@ -62,7 +68,7 @@ if ($oauthData && $oauthClientData && $user->isLoggedIn()) {
         }
 
         // Construct the redirect URL
-        $redirectUrl = $oauthData['redirect_uri'] . '?code=' . $authCode;
+        $redirectUrl = $oauthData['redirect_uri'] . (strpos($oauthData['redirect_uri'], '?') === false ? '?' : '&') . 'code=' . $authCode;
         $redirectUrl .= '&response=' . urlencode($responseEncoded);
         if (!empty($signature)) {
             $redirectUrl .= '&signature=' . urlencode($signature);

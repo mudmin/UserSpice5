@@ -570,12 +570,13 @@ $shouldShowBackupCodes = isset($_SESSION['totp_backup_codes_to_display']);
 </script>
 
 <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
+    /* theme variables so the form stays readable in dark mode */
     .totp-setup-form {
-        border: 2px solid #28a745;
+        border: 2px solid var(--bs-success);
         border-radius: 8px;
         box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
         padding: 20px;
-        background-color: #f8f9fa;
+        background-color: var(--bs-tertiary-bg);
         animation: subtle-pulse 2s ease-in-out infinite alternate;
     }
 

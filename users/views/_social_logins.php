@@ -1,6 +1,6 @@
 <?php
-$_SESSION['redirect'] = $_REQUEST['redirect'] ?? "";
-$_SESSION['dest'] = $_REQUEST['dest'] ?? "";
+// Social logins return to the page captured before login (session only, see
+// consumeLoginDest()); request dest/redirect parameters are deliberately ignored.
 $socialsQ = $db->query("SELECT * FROM plg_social_logins WHERE built_in = 0 ORDER BY `provider`;");
 $socialsC = $socialsQ->count();
 $socials = $socialsQ->results();
@@ -39,7 +39,7 @@ if($settings->passkeys == 1 && currentPage() != "join.php"){
 
 if($loginOpts > 0) {
 ?>
-<link rel="stylesheet" href="<?=$us_url_root?>users/css/social-logins.css">
+<link rel="stylesheet" href="<?=$us_url_root?>users/css/social-logins.css?v=<?=filemtime($abs_us_root.$us_url_root.'users/css/social-logins.css')?>">
 <div class="<?php echo (isset($settings->social_login_location) && $settings->social_login_location == 0) ? 'mb-3 mt-1' : 'mb-2 mt-2'; ?>">
 <?php if (!isset($settings->social_login_location) || $settings->social_login_location != 0): ?>
 <div class="separator"><?= strpos(lang('EML_SIGN_IN_WITH'), "{") !== false ? 'Sign in with:' : lang('EML_SIGN_IN_WITH') ?></div>

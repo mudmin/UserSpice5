@@ -227,6 +227,8 @@ try {
                         $userToLogin->login();
                         reauthMarkConfirmed();
                         setLoginMethod('passkeys');
+                        // passkeys.php runs the loginSuccess hooks once for this login
+                        $_SESSION[INSTANCE . '_passkey_login_hooks'] = 1;
                         // logger($result['user_id'], 'PasskeyLogin', 'User logged in via passkey. Credential ID: ' . $result['credentialId']);
                     } elseif ((int)$result['user_id'] === (int)(function_exists('realUserId') ? realUserId() : $user->data()->id)) {
                         // Already logged in and the passkey belongs to the real
@@ -400,7 +402,7 @@ try {
                 }
                 $networkInfo = [
                     'server_time' => date('Y-m-d H:i:s'),
-                    'client_ip' => Server::get('REMOTE_ADDR', 'unknown'),
+                    'client_ip' => ipCheck(),
                     'protocol' => Server::getScheme(),
                     'session_active' => session_status() === PHP_SESSION_ACTIVE
                 ];

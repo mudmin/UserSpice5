@@ -448,7 +448,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                    => "Não foi possível recuperar o segredo de autenticação. Tente novamente.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "Código de backup verificado, mas falha ao invalidar. Entre em contato com o suporte.",
     "2FA_ERR_NO_CODE_PROVIDED"             => "Nenhum código de autenticação fornecido.",
-    "RATE_LIMIT_LOGIN"              => "Muitas tentativas de login falharam. Aguarde antes de tentar novamente.",
+    "RATE_LIMIT_LOGIN"              => "Muitas tentativas de login. Aguarde antes de tentar novamente.",
     "RATE_LIMIT_TOTP"               => "Muitos códigos de autenticação incorretos. Aguarde antes de tentar novamente.",
     "RATE_LIMIT_PASSKEY"            => "Muitas tentativas de autenticação de chave de acesso. Aguarde antes de tentar novamente.",
     "RATE_LIMIT_PASSKEY_STORE"      => "Muitas tentativas de registro de chave de acesso. Aguarde antes de tentar novamente.",
@@ -459,6 +459,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"       => "Muitas solicitações de alteração de email. Aguarde antes de tentar novamente.",
     "RATE_LIMIT_PASSWORD_CHANGE"    => "Muitas tentativas de alteração de senha. Aguarde antes de tentar novamente.",
     "RATE_LIMIT_GENERIC"            => "Muitas tentativas. Aguarde antes de tentar novamente.",
+    "SOCIAL_EMAIL_IN_USE"           => "Este endereço de e-mail já pertence a uma conta, e seu provedor de login não confirmou que ele é seu. Em vez disso, faça login com a senha dessa conta.",
 ));
 
 
@@ -621,6 +622,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Está com problemas com seu aplicativo autenticador?",
 	"2FA_BACKUP_CODE_HELP" => "Digite um dos seus códigos de backup salvos",
 	"2FA_USE_BACKUP_BTN"   => "Usar código de backup",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "Página inicial de %m1%",
+	"MENU_EMAIL"     => "Enviar e-mail para %m1%",
+	"MENU_CALL"      => "Ligar para %m1%",
+	"SKIP_TO_MAIN"   => "Pular para o conteúdo principal",
+	"PW_REQ_MET"     => "atendido",
+	"PW_REQ_NOT_MET" => "não atendido",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

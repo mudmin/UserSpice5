@@ -148,6 +148,11 @@ class User
         }
     }
 
+    /**
+     * Start a session for this user. With $username and $password it also checks
+     * the password, but it skips what users/login.php adds: rate limits and TOTP.
+     * Don't call it to check credentials; use verifyLoginCredentials().
+     */
     public function login($username = null, $password = null, $remember = false)
     {
         if (!$username && !$password && $this->exists()) {
@@ -239,23 +244,9 @@ class User
                 // Duplicates are dropped, so a password with no HTML-special
                 // characters (the overwhelming majority) still costs exactly one
                 // bcrypt on both success and failure.
-                $candidates = [$password];
-                if (!is_null($rawpassword) && $rawpassword !== '') {
-                    if ($strength < 13) {
-                        $candidates[] = Input::sanitize($rawpassword, true, true);
-                    }
-                    $candidates[] = $rawpassword;
-                }
-
                 //UserSpice passwords were hashed with a cost of 10, then 12, so we're going to use this to update both the hash strength and deal with passwords that were corrupted because of the Input::sanitize function.
-                $matched = null;
-                foreach (array_unique($candidates) as $candidate) {
-                    if (password_verify($candidate, $this->data()->password)) {
-                        $success = true;
-                        $matched = $candidate;
-                        break;
-                    }
-                }
+                $matched = $this->matchingPasswordCandidate($this->data()->password, $password, $rawpassword);
+                $success = $matched !== null;
 
                 if ($success) {
                     // Rehash when the stored hash is weak, and also when it turned out
@@ -294,6 +285,54 @@ class User
         }
 
         return false;
+    }
+
+    /**
+     * Which rendering of the password matches the stored hash: the sanitized
+     * form, the legacy htmlentities form (pre-cost-13 hashes only) or the raw
+     * string. See loginEmail(). Returns the matching candidate, or null.
+     */
+    private function matchingPasswordCandidate($storedHash, $password, $rawpassword)
+    {
+        $strength = substr((string)$storedHash, 4, 2);
+        if (!is_numeric($strength)) {
+            $strength = 999;
+        }
+        $candidates = [$password];
+        if (!is_null($rawpassword) && $rawpassword !== '') {
+            if ($strength < 13) {
+                $candidates[] = Input::sanitize($rawpassword, true, true);
+            }
+            $candidates[] = $rawpassword;
+        }
+        foreach (array_unique($candidates) as $candidate) {
+            if (password_verify($candidate, $storedHash)) {
+                return $candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check a username (or email) and password without logging in: no session,
+     * no remember-me cookie, no rehash and no login record. Returns the user id,
+     * or false. Rate limits, banned accounts and TOTP are left to the caller;
+     * verifyLoginCredentials() handles them the way users/login.php does.
+     */
+    public function checkCredentials($username, $password, $rawpassword = null)
+    {
+        $row = null;
+        if (is_string($username) && $username !== '') {
+            $row = filter_var($username, FILTER_VALIDATE_EMAIL) !== false
+                ? $this->_db->query("SELECT id, password FROM users WHERE email = ? LIMIT 1", [$username])->first()
+                : $this->_db->query("SELECT id, password FROM users WHERE username = ? LIMIT 1", [$username])->first();
+        }
+        if (!$row || $row->password === null) {
+            // Same bcrypt cost as a real check, so response time doesn't reveal whether the account exists
+            password_verify((string)$password, '$2y$13$WQJPF12kdq/UCcdF5MUHh.jwnqpaMU.Fh76ulGmVQ3UxQ1Na0v0.G');
+            return false;
+        }
+        return $this->matchingPasswordCandidate($row->password, (string)$password, $rawpassword) !== null ? (int)$row->id : false;
     }
 
     // Records a completed login: last_login/logins, the login log row and us_ip_list.
@@ -390,6 +429,18 @@ class User
         // collide with any existing username OR email, then route through
         // create() so it picks up the same sanity checks as every other
         // user creation path.
+        // Honor the "Allow New User Registration" setting, same as join.php
+        // and socialLogin(). Redirect rather than return null so legacy
+        // callers never receive an empty result.
+        $regSetting = $this->_db->query('SELECT registration FROM settings WHERE id = 1')->first();
+        if (!$regSetting || $regSetting->registration != 1) {
+            global $us_url_root;
+            logger(0, 'OAuth Login', 'New account not created via checkUser() because registration is disabled', ['provider' => $oauth_provider]);
+            usError(lang('JOIN_CLOSED'));
+            Redirect::to($us_url_root . 'users/join.php');
+            die();
+        }
+
         $username = $this->_uniqueOauthUsername($email);
 
         $newId = $this->create([

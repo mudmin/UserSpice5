@@ -466,7 +466,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Couldn't retrieve the authentication secret. Please try again.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Backup code was verified but failed to invalidate. Please contact support, sorry.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "No authentication code provided.",
-    "RATE_LIMIT_LOGIN"                   => "Whoa, take'er easy! Too many failed login attempts. Please wait a bit before trying again, sorry.",
+    "RATE_LIMIT_LOGIN"                   => "Whoa, take'er easy! Too many login attempts. Please wait a bit before trying again, sorry.",
     "RATE_LIMIT_TOTP"                    => "Too many incorrect authentication codes. Maybe go for a walk and try again in a bit.",
     "RATE_LIMIT_PASSKEY"                 => "Too many passkey authentication attempts. Please wait a bit before trying again.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Too many passkey registration attempts. Please wait a bit.",
@@ -477,6 +477,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Too many email change requests. Please try again in a bit.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Too many password change attempts. Please wait before trying again.",
     "RATE_LIMIT_GENERIC"                 => "Aboot time for a little break, eh? Too many attempts. Please wait before trying again.",
+    "SOCIAL_EMAIL_IN_USE"                => "Sorry, this email address already belongs to an account, and your sign-in provider hasn't confirmed that it's yours. Please sign in with that account's password instead, eh?",
 ));
 
 
@@ -638,6 +639,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Having trouble with your authenticator?",
 	"2FA_BACKUP_CODE_HELP" => "Enter one of your saved backup codes",
 	"2FA_USE_BACKUP_BTN"   => "Use Backup Code",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "%m1% home",
+	"MENU_EMAIL"     => "Email %m1%",
+	"MENU_CALL"      => "Call %m1%",
+	"SKIP_TO_MAIN"   => "Skip to main content",
+	"PW_REQ_MET"     => "met",
+	"PW_REQ_NOT_MET" => "not met",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

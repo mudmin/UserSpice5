@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function(){
   for(let i = 0; i < drops.length; i++) {
     const drop = drops[i];
     drop.addEventListener('click', toggleDropdown);
+    drop.addEventListener('keydown', toggleKeydown);
   }
   const mobileControls = document.querySelectorAll('.us_menu_mobile_control');
   for(let i = 0; i < mobileControls.length; i++) {
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var parentLi = parent.closest('li.dropdown');
       if (parentLi) {
         // simulate the active item's parent menu link to be clicked, so it will open
-        parentLi.firstChild.click();
+        parentLi.firstElementChild.click();
       }
 
     }
@@ -35,11 +36,39 @@ function closeSiblings(dropdown) {
       if (dd) {
         dd.classList.remove('show');
         dd.parentNode.classList.remove('open');
+        syncExpanded(dd.previousElementSibling, false);
       }
     }
     sibling = sibling.nextElementSibling;
   }
 }
+
+function syncExpanded(toggle, expanded) {
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+}
+
+// Dropdown toggles are <a role="button">: links only activate on Enter, so add
+// Space like a real button, and Escape closes the open dropdown.
+function toggleKeydown(e) {
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    e.currentTarget.click();
+  } else if (e.key === 'Escape' && e.currentTarget.getAttribute('aria-expanded') === 'true') {
+    e.preventDefault();
+    e.currentTarget.click();
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape' || e.defaultPrevented) return;
+  const open = e.target.closest && e.target.closest('.us_menu .dropdown.open');
+  if (!open || e.target === open.firstElementChild) return;
+  const toggle = open.firstElementChild;
+  toggle.click();
+  toggle.focus();
+});
 
 function expandMenuIfMobile(menuId) {
   const screenWidth = window.innerWidth;
@@ -47,6 +76,7 @@ function expandMenuIfMobile(menuId) {
     const menu = document.querySelector(`.us_menu[data-menu_id="${menuId}"]`);
     if(menu && !menu.classList.contains('expanded')) {
       menu.classList.add('expanded');
+      syncExpanded(menu.querySelector('.us_menu_mobile_control'), true);
     }
   }
 }
@@ -57,12 +87,14 @@ function toggleDropdown(e) {
   const sub = e.currentTarget.nextElementSibling; // submenu UL
   if(sub.classList.contains('show')) {
     sub.classList.remove('show');
+    syncExpanded(e.currentTarget, false);
     if (parent.classList.contains('open')) {
       parent.classList.remove('open');
     }
   }
   else {
     sub.classList.add('show');
+    syncExpanded(e.currentTarget, true);
     parent.classList.add('open');
     closeSiblings(parent); // this line fails on non-dashboard menu
     expandMenuIfMobile(parent.dataset.menu);
@@ -120,7 +152,7 @@ const addOffClick = (e) => {
       document.removeEventListener('click', offClick);
       if (open) {
         // simulate the active item's parent menu link to be clicked, so it will close
-        open.firstChild.click();
+        open.firstElementChild.click();
       }
     }
   };
@@ -135,5 +167,6 @@ function mobileControlClick(evt) {
   menuId = menuId.replace('us_menu_#', 'us_');
   menuId = menuId.split("_", 4).join("_");
   const menu = document.getElementById(menuId);
-  menu.classList.toggle('expanded');
+  const expanded = menu.classList.toggle('expanded');
+  syncExpanded(evt.currentTarget, expanded);
 }

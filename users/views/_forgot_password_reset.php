@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<?php if(!$errors=='') { display_errors($errors); } ?>
 			<div class="form-group">
 				<label for="password"><?=lang("PW_NEW");?>:</label>
-				<input type="password" name="password" value="" id="password" class="form-control" autocomplete="new-password">
+				<input type="password" name="password" value="" id="password" class="form-control" autocomplete="new-password" <?= ($pw_settings->meter_active == 1) ? 'aria-describedby="passwordhelp"' : '' ?>>
 			</div>
 			<div class="form-group">
 				<label for="confirm"><?=lang("PW_CONF");?>:</label>

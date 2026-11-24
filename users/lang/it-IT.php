@@ -437,7 +437,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "Impossibile recuperare il segreto di autenticazione. Riprova.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Codice di backup verificato ma impossibile invalidarlo. Contatta il supporto.",
     "2FA_ERR_NO_CODE_PROVIDED" => "Nessun codice di autenticazione fornito.",
-    "RATE_LIMIT_LOGIN"   => "Troppi tentativi di accesso falliti. Attendi prima di riprovare.",
+    "RATE_LIMIT_LOGIN"   => "Troppi tentativi di accesso. Attendi prima di riprovare.",
     "RATE_LIMIT_TOTP"    => "Troppi codici di autenticazione errati. Attendi prima di riprovare.",
     "RATE_LIMIT_PASSKEY" => "Troppi tentativi di autenticazione con passkey. Attendi prima di riprovare.",
     "RATE_LIMIT_PASSKEY_STORE" => "Troppi tentativi di registrazione passkey. Attendi prima di riprovare.",
@@ -448,6 +448,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Troppe richieste di cambio email. Attendi prima di riprovare.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Troppi tentativi di cambio password. Attendi prima di riprovare.",
     "RATE_LIMIT_GENERIC" => "Troppi tentativi. Attendi prima di riprovare.",
+    "SOCIAL_EMAIL_IN_USE" => "Questo indirizzo email appartiene già a un account e il tuo provider di accesso non ha confermato che sia tuo. Accedi invece con la password di quell'account.",
 ));
 
 
@@ -606,6 +607,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Problemi con la tua app di autenticazione?",
 	"2FA_BACKUP_CODE_HELP" => "Inserisci uno dei tuoi codici di backup salvati",
 	"2FA_USE_BACKUP_BTN"   => "Usa codice di backup",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "Home di %m1%",
+	"MENU_EMAIL"     => "Scrivi a %m1%",
+	"MENU_CALL"      => "Chiama %m1%",
+	"SKIP_TO_MAIN"   => "Vai al contenuto principale",
+	"PW_REQ_MET"     => "soddisfatto",
+	"PW_REQ_NOT_MET" => "non soddisfatto",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

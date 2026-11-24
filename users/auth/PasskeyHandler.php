@@ -142,8 +142,13 @@ class PasskeyHandler
             'network_type' => 'unknown'
         ];
 
-        $remoteAddr = Server::get('REMOTE_ADDR', '');
+        // Resolved client, not the connecting proxy: behind a trusted proxy
+        // (e.g. Cloudflare) REMOTE_ADDR describes the CDN, not the user.
+        $remoteAddr = ipCheck();
         $userAgent = Server::get('HTTP_USER_AGENT', '');
+        // The site's own proxy adds forwarding headers to every request, so
+        // they say nothing about the user's network.
+        $siteProxy = ClientIP::isTrustedPeer();
 
         // Corporate network indicators
         if (
@@ -156,11 +161,11 @@ class PasskeyHandler
         }
 
         // Proxy/VPN indicators
-        if (
+        if (!$siteProxy && (
             Server::get('HTTP_X_FORWARDED_FOR', '') !== '' ||
             Server::get('HTTP_X_REAL_IP', '') !== '' ||
             Server::get('HTTP_VIA', '') !== ''
-        ) {
+        )) {
             $analysis['likely_issues'][] = lang("PASSKEY_NETWORK_PROXY");
         }
 
@@ -171,7 +176,7 @@ class PasskeyHandler
         }
 
         // Corporate firewall indicators
-        if (Server::get('HTTP_X_FORWARDED_PROTO', '') === 'https') {
+        if (!$siteProxy && Server::get('HTTP_X_FORWARDED_PROTO', '') === 'https') {
             $analysis['likely_issues'][] = lang("PASSKEY_NETWORK_CORPORATE");
         }
 
@@ -740,7 +745,7 @@ class PasskeyHandler
             $this->userSpicePasskeyCredentialRepository->saveCredentialSource($updatedCredentialSource);
 
             $this->db->query("UPDATE us_passkeys SET times_used = times_used + 1, last_used = NOW(), last_ip = ? WHERE credential_id = ?", [
-                Server::get('REMOTE_ADDR', ''),
+                ipCheck(),
                 $updatedCredentialSource->publicKeyCredentialId
             ]);
 
@@ -782,6 +787,8 @@ class PasskeyHandler
                 'origin'          => Server::get('HTTP_ORIGIN', 'unknown'),
                 'user_agent'      => Server::get('HTTP_USER_AGENT', ''),
                 'remote_addr'     => Server::get('REMOTE_ADDR', ''),
+                'client_ip'       => ipCheck(),
+                'behind_trusted_proxy' => ClientIP::isTrustedPeer(),
                 'request_scheme'  => Server::getScheme(),
                 'server_port'     => Server::get('SERVER_PORT', 0),
             ],

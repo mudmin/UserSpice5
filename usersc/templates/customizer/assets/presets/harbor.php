@@ -10,7 +10,7 @@
 return array (
   'primary' => '#0e7490',
   'primary-hover' => '#0c5e74',
-  'primary-text-emphasis' => '#0a4456',
+  'primary-text-emphasis' => '#0e718d',
   'primary-bg-subtle' => '#d4eef4',
   'primary-border-subtle' => '#9bd3e0',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#0f766e',
   'success-hover' => '#0c5e58',
-  'success-text-emphasis' => '#0a443f',
+  'success-text-emphasis' => '#0e716a',
   'success-bg-subtle' => '#d2ece9',
   'success-border-subtle' => '#97cfc9',
 
   'info' => '#027bba',
   'info-hover' => '#026da3',
-  'info-text-emphasis' => '#024d73',
+  'info-text-emphasis' => '#026ca3',
   'info-bg-subtle' => '#d4ecf8',
   'info-border-subtle' => '#9bd2ee',
 
   'warning' => '#b45309',
   'warning-hover' => '#934307',
-  'warning-text-emphasis' => '#5c2b05',
+  'warning-text-emphasis' => '#a84d08',
   'warning-bg-subtle' => '#f6e6d4',
   'warning-border-subtle' => '#e3bd92',
 
   'danger' => '#be123c',
   'danger-hover' => '#9c0f31',
-  'danger-text-emphasis' => '#6b0a22',
+  'danger-text-emphasis' => '#be123c',
   'danger-bg-subtle' => '#f7d6de',
   'danger-border-subtle' => '#ea9aac',
 
@@ -61,7 +61,7 @@ return array (
   'border-color' => '#d4e0e5',
   'form-control-bg' => '#ffffff',
 
-  'secondary-color' => '#5a7682',
+  'secondary-color' => '#546e79',
   'tertiary-color' => '#92a8b0',
   'emphasis-color' => '#0c1f26',
   'secondary-bg' => '#e6eef1',
@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#1c3c47',
 
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#0e7490',
+  'link-hover-color' => '#0c5e74',
 
   'custom_css' => "
 /* === HARBOR === clean cool-blue professional */
@@ -100,7 +102,5 @@ return array (
   --bs-table-striped-bg: #eef4f6;
 }
 .navbar { box-shadow: 0 1px 3px rgba(16, 42, 51, 0.06); }
-a:not(.btn):not(.nav-link) { color: #0e7490; }
-a:not(.btn):not(.nav-link):hover { color: #0c5e74; }
 ",
 );

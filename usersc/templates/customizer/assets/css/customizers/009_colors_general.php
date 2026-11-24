@@ -25,6 +25,24 @@ return [
                 ]
             ]
         ],
+        // Links are colored through Bootstrap's own variables (not an `a` selector),
+        // so components that color their own links (alerts, dropdowns, list groups,
+        // pagination) keep theirs. dark_value is what a dark-mode block uses when
+        // the theme doesn't set one: Bootstrap's own dark-mode link colors.
+        'link_color' => [
+            'label'      => 'Link Color',
+            'type'       => 'color',
+            'variable'   => '--bs-link-color',
+            'value'      => '#0d6efd',
+            'dark_value' => '#6ea8fe'
+        ],
+        'link_hover_color' => [
+            'label'      => 'Link Hover Color',
+            'type'       => 'color',
+            'variable'   => '--bs-link-hover-color',
+            'value'      => '#0a58ca',
+            'dark_value' => '#8bb9fe'
+        ],
         'border_color' => [
             'label'    => 'Border Color',
             'type'     => 'color',

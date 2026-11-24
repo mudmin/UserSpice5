@@ -28,27 +28,19 @@ if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt'
 $rl_ip_config = ClientIP::config();
 $rl_proxy_enabled = $rl_ip_config['enabled'];
 if ($rl_ip_config['source'] === 'file') {
-    $rl_proxy_count = count($rl_ip_config['trusted_proxies']);
+    $rl_proxy_count = count($rl_ip_config['trusted_proxies']) + count($rl_ip_config['file_bindings']);
 } else {
     $rl_proxy_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
 }
+// Presets (e.g. Cloudflare) count as configured trust sources too
+$rl_proxy_count += count($rl_ip_config['presets']);
 $mod_remoteip_active = function_exists('apache_get_modules') && in_array('mod_remoteip', apache_get_modules());
-$upstream_resolved = false;
-if (!$mod_remoteip_active && $rl_proxy_enabled) {
-    $rl_remote_addr = Server::get('REMOTE_ADDR');
-    if ($rl_remote_addr !== '') {
-        foreach ($rl_ip_config['trusted_headers'] as $rl_header => $rl_priority) {
-            $rl_server_key = 'HTTP_' . strtoupper(str_replace('-', '_', $rl_header));
-            if (!empty($_SERVER[$rl_server_key])) {
-                $rl_entries = explode(',', $_SERVER[$rl_server_key]);
-                if (trim(end($rl_entries)) === $rl_remote_addr) {
-                    $upstream_resolved = true;
-                    break;
-                }
-            }
-        }
-    }
-}
+// REMOTE_ADDR already equals a forwarded value: a web-server module resolved
+// the client before PHP ran. detect() checks every common client header,
+// including ones that only presets trust.
+// Evidence on this request that the web server already resolved the visitor;
+// a loaded mod_remoteip without a RemoteIPHeader doesn't count.
+$upstream_resolved = $rl_proxy_enabled && ClientIP::detect()['upstream_resolved'];
 $rate_limit_health = calculateRateLimitHealth($rateLimits, $using_default_rate_limits, $rl_proxy_enabled, $rl_proxy_count);
 $rl_health_color = $rate_limit_health >= 80 ? 'success' : ($rate_limit_health >= 60 ? 'warning' : 'danger');
 
@@ -209,6 +201,22 @@ $cspInfo      = detectCSP();
 $cspConfigured = !empty($cspInfo['enforced']) || !empty($cspInfo['report_only']);
 $security_headers = check_security_headers();
 $headers_configured = count(array_filter($security_headers));
+
+// HTTPS ended at a trusted proxy, yet this response carries no HSTS header:
+// security_headers.php decided HSTS from the raw HTTPS server variable.
+$hsts_direct_https = !in_array(strtolower((string)Server::get('HTTPS')), ['', 'off'], true) || Server::get('SERVER_PORT') == 443;
+$hsts_proxy_gap = !$security_headers['strict-transport-security'] && !$hsts_direct_https
+    && method_exists('ClientIP', 'isHttps') && ClientIP::isHttps();
+$hsts_headers_file = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.php';
+$hsts_proxy_fixable = false;
+if ($hsts_proxy_gap && is_readable($hsts_headers_file)) {
+    $hsts_contents = (string)file_get_contents($hsts_headers_file);
+    foreach (hstsLegacyProtocolLines() as $hsts_line) {
+        if (strpos($hsts_contents, $hsts_line) !== false) {
+            $hsts_proxy_fixable = is_writable($hsts_headers_file);
+        }
+    }
+}
 
 // Handle write_rpid request
 if (!empty($_POST) && isset($_POST['write_rpid'])) {
@@ -613,6 +621,23 @@ if (!empty($_POST) && isset($_POST['handle_backup'])) {
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Make HSTS detection in security_headers.php proxy-aware
+if (!empty($_POST) && isset($_POST['fix_hsts_proxy'])) {
+    if (!Token::check($_POST['csrf'])) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+    $file_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.php';
+    $backup_path = $abs_us_root . $us_url_root . 'usersc/includes/security_headers.BACKUP.php';
+    if (fixHstsProxyDetection($file_path, $backup_path)) {
+        logger($user->data()->id, 'Security', 'Made HSTS detection in security_headers.php proxy-aware (backup created)');
+        usSuccess('security_headers.php now sends HSTS when HTTPS ends at your proxy. A backup was saved as usersc/includes/security_headers.BACKUP.php.');
+    } else {
+        usError('Could not update security_headers.php automatically. The file may not be writable, or it was customized.');
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
 // Handle fix $_SERVER request for security_headers.php
 if (!empty($_POST) && isset($_POST['fix_server_headers'])) {
     if (!Token::check($_POST['csrf'])) {
@@ -720,6 +745,45 @@ if (!empty($_POST) && isset($_POST['fix_cookie_samesite'])) {
     Redirect::to($us_url_root . "users/admin.php?view=security");
 }
 
+// Site override of the toast/message footer. Core's copy escapes message text
+// after stripping tags (marker US_TOAST_ESCAPE_V1); older copies decoded
+// entities and wrote the result to innerHTML, so ?err=&lt;img onerror...&gt;
+// ran script on every page. An override shadows the core fix entirely.
+$toast_override_file = $abs_us_root . $us_url_root . 'usersc/includes/system_messages_footer.php';
+$toast_override_state = 'none'; // none | patched | vulnerable | unknown
+if (is_file($toast_override_file)) {
+    $toast_override_src = (string)@file_get_contents($toast_override_file);
+    if (strpos($toast_override_src, 'US_TOAST_ESCAPE_V1') !== false
+        || (strpos($toast_override_src, "replace(/</g, '&lt;')") !== false && strpos($toast_override_src, "replace(/>/g, '&gt;')") !== false)) {
+        $toast_override_state = 'patched';
+    } elseif (strpos($toast_override_src, 'textContent') !== false && strpos($toast_override_src, 'innerHTML') !== false) {
+        $toast_override_state = 'vulnerable';
+    } else {
+        $toast_override_state = 'unknown';
+    }
+}
+
+// Disable a vulnerable toast override by renaming it, so core's fixed copy loads
+if (!empty($_POST) && isset($_POST['disable_toast_override'])) {
+    if (!Token::check($_POST['csrf'] ?? '')) {
+        usError("Token failed");
+        Redirect::to($us_url_root . "users/admin.php?view=security");
+    }
+    if (is_file($toast_override_file)) {
+        $toast_backup = $toast_override_file . '.disabled-' . date('Ymd-His');
+        if (is_writable(dirname($toast_override_file)) && @rename($toast_override_file, $toast_backup)) {
+            if (function_exists('opcache_invalidate')) {
+                opcache_invalidate($toast_override_file, true);
+            }
+            logger($user->data()->id, 'Security', 'Disabled usersc/includes/system_messages_footer.php override (renamed to ' . basename($toast_backup) . ')');
+            usSuccess('Your message footer override was renamed to <code>' . safeReturn('usersc/includes/' . basename($toast_backup)) . '</code>. The core version is now in use. Copy any customizations into a fresh copy of the core file if you still need them.');
+        } else {
+            usError('Could not rename usersc/includes/system_messages_footer.php. Check that the web server can write to usersc/includes, or rename it by hand.');
+        }
+    }
+    Redirect::to($us_url_root . "users/admin.php?view=security");
+}
+
 // Handle adding session.cookie_secure to init.php
 if (!empty($_POST) && isset($_POST['fix_cookie_secure'])) {
     if (!Token::check($_POST['csrf'])) {
@@ -739,7 +803,10 @@ if (!empty($_POST) && isset($_POST['fix_cookie_secure'])) {
             }
             // Insert before session_start();
             $anchor = "session_start();";
-            $secure_block = "if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {\n\tini_set('session.cookie_secure', 1);\n}\n";
+            // requestLooksHttps() also recognizes TLS terminated at a proxy or CDN
+            // (X-Forwarded-Proto / CF-Visitor). It is lenient on purpose: a
+            // spoofed value can only mark the spoofer's own cookie Secure.
+            $secure_block = "if (ClientIP::requestLooksHttps()) {\n\tini_set('session.cookie_secure', 1);\n}\n";
             if (strpos($contents, $anchor) !== false) {
                 $newContents = str_replace(
                     $anchor,
@@ -1051,6 +1118,50 @@ function checkServerVariableUsageHeaders($file_path) {
 }
 
 // Function to fix $_SERVER usage in security_headers.php
+/**
+ * The proxy-aware HTTPS detection for usersc/includes/security_headers.php,
+ * replacing either stock line older versions shipped.
+ */
+function hstsProxyAwareBlock(): string {
+    return '// ClientIP::isHttps() also counts HTTPS ended at a trusted proxy (Cloudflare, a load balancer).
+if (class_exists(\'ClientIP\') && method_exists(\'ClientIP\', \'isHttps\')) {
+  $protocol = ClientIP::isHttps() ? "https://" : "http://";
+} else {
+  $https = strtolower((string)Server::get(\'HTTPS\'));
+  $protocol = (($https !== \'\' && $https !== \'off\') || Server::get(\'SERVER_PORT\') == 443) ? "https://" : "http://";
+}';
+}
+
+function hstsLegacyProtocolLines(): array {
+    return [
+        '$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";',
+        '$protocol = (Server::get(\'HTTPS\') !== \'\' || Server::get(\'SERVER_PORT\') == 443) ? "https://" : "http://";',
+    ];
+}
+
+/**
+ * Swap a stock HTTPS line in security_headers.php for the proxy-aware block,
+ * backing the file up first. False when the file has neither stock line.
+ */
+function fixHstsProxyDetection($file_path, $backup_path): bool {
+    if (!file_exists($file_path) || !is_writable($file_path)) {
+        return false;
+    }
+    $contents = file_get_contents($file_path);
+    if ($contents === false) {
+        return false;
+    }
+    $newContents = str_replace(hstsLegacyProtocolLines(), hstsProxyAwareBlock(), $contents);
+    if ($newContents === $contents || file_put_contents($backup_path, $contents) === false) {
+        return false;
+    }
+    $result = file_put_contents($file_path, $newContents) !== false;
+    if ($result && function_exists('opcache_invalidate')) {
+        opcache_invalidate($file_path, true);
+    }
+    return $result;
+}
+
 function fixServerVariableUsageHeaders($file_path, $backup_path): bool {
     if (!file_exists($file_path) || !is_writable($file_path)) {
         return false;
@@ -1061,7 +1172,7 @@ function fixServerVariableUsageHeaders($file_path, $backup_path): bool {
     }
 
     $oldLine = '$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";';
-    $newLine = '$protocol = (Server::get(\'HTTPS\') !== \'\' || Server::get(\'SERVER_PORT\') == 443) ? "https://" : "http://";';
+    $newLine = hstsProxyAwareBlock();
 
     if (strpos($contents, $oldLine) === false) {
         return false;
@@ -1126,7 +1237,7 @@ function calculateSecurityScore($settings, $php_status, $rpid_status, $email_con
     $max_score = 100;
 
     // HTTPS (15 points) - Deduct if not using HTTPS
-    if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') $score -= 15;
+    if (!ClientIP::isHttps()) $score -= 15;
 
     // Session cookie SameSite (5 points) - Deduct if missing
     if (!$init_has_samesite) $score -= 5;
@@ -1202,6 +1313,16 @@ $cloak_totp_mgmt         = function_exists('cloakCanManage') && cloakCanManage('
 $cloak_cred_mgmt_enabled = $cloak_passkey_mgmt || $cloak_totp_mgmt;
 
 $security_score = calculateSecurityScore($settings, $php_status, $rpid_status, $email_configured, $headers_configured, $is_updated, $using_default_rate_limits, $server_var_init, $server_var_root, $server_var_headers, $init_has_samesite, $init_has_cookie_secure, $extra_curl_security_enabled, $deprecated_files_present, $cloak_cred_mgmt_enabled);
+// An override missing the toast escape is a live XSS on every page
+if ($toast_override_state === 'vulnerable') {
+    $security_score = max(0, $security_score - 15);
+}
+// Root AGENTS.md / CLAUDE.md that the web server hands out (only requested when they exist)
+require_once $abs_us_root . $us_url_root . 'users/helpers/ai_prompts.php';
+$ai_exposed_files = array_keys(array_filter(usAiWebExposure(false, true), function ($v) { return $v === 'exposed'; }));
+if (!empty($ai_exposed_files)) {
+    $security_score = max(0, $security_score - 5);
+}
 $score_color = $security_score >= 75 ? 'success' : ($security_score >= 60 ? 'warning' : 'danger');
 
 // Detect updates that were skipped/overridden but never acknowledged. The
@@ -1301,6 +1422,26 @@ if ($headers_configured < 5) {
         'text' => "Your site is missing " . (5 - $headers_configured) . "/5 recommended security headers, which help protect against common attacks like clickjacking and XSS.",
         'link_text' => 'View Header Status',
         'link_url' => '#security-headers-card'
+    ];
+}
+
+// Proxy/CDN detection: this request came through Cloudflare, a tunnel, or an
+// internal reverse proxy that UserSpice doesn't trust yet, so every visitor
+// looks like the proxy's address to logs, rate limits, and bans.
+$proxy_detect = ClientIP::detect();
+if ($proxy_detect['suggest'] !== '') {
+    $proxy_titles = [
+        'cloudflare' => 'Your Site Is Behind Cloudflare',
+        'cloudflare_tunnel' => 'Your Site Is Behind Cloudflare Tunnel',
+        'custom' => 'Your Site Is Behind an Untrusted Proxy',
+    ];
+    $recommendations[] = [
+        'title' => $proxy_titles[$proxy_detect['suggest']],
+        'text' => 'This request reached PHP from <code>' . safeReturn($proxy_detect['peer']) . '</code> rather than from the visitor. Until that proxy is trusted, logging, rate limiting, and IP bans treat all your visitors as one address.',
+        'link_text' => 'Open Proxy &amp; CDN',
+        'link_url' => $us_url_root . 'users/admin.php?view=proxy',
+        'level' => 'warning',
+        'icon' => 'fa-network-wired'
     ];
 }
 
@@ -1485,6 +1626,19 @@ if ($root_backup_exists && !$server_var_root['found']) {
     ];
 }
 
+if ($hsts_proxy_gap) {
+    $recommendations[] = [
+        'title' => 'HSTS Is Not Sent Behind Your Proxy',
+        'text' => 'Visitors reach this site over HTTPS through your proxy, but the response carries no <code>Strict-Transport-Security</code> header. <code>usersc/includes/security_headers.php</code> checks the server\'s own HTTPS variable, which is off when HTTPS ends at the proxy.'
+            . ($hsts_proxy_fixable ? ' Fix Now switches it to <code>ClientIP::isHttps()</code>, which trusts HTTPS reported by your trusted proxy.' : ' Change its HTTPS check to <code>ClientIP::isHttps()</code>.'),
+        'link_text' => $hsts_proxy_fixable ? 'Fix Now' : 'Learn More',
+        'link_url' => $hsts_proxy_fixable ? '#' : $us_url_root . 'users/admin.php?view=proxy',
+        'modal' => $hsts_proxy_fixable ? 'confirm-fix_hsts_proxy' : null,
+        'level' => 'warning',
+        'icon' => 'fa-lock'
+    ];
+}
+
 if ($server_var_headers['found']) {
     if ($server_var_headers['fixable']) {
         $recommendations[] = [
@@ -1550,8 +1704,42 @@ if (!$init_has_samesite) {
     ];
 }
 
-// Session cookie Secure flag recommendation (only when NOT behind a proxy)
-if (!$init_has_cookie_secure && !$proxy_enabled) {
+if (!empty($ai_exposed_files)) {
+    $recommendations[] = [
+        'title' => 'AI Assistant Files Are Downloadable',
+        'text' => 'Anyone can download ' . safeReturn(implode(' and ', $ai_exposed_files)) . ' from your website. These files often hold paths, hostnames or credentials written for AI coding assistants. Block them on the AI Assistants page, or keep sensitive details out of them.',
+        'link_text' => 'Fix Now',
+        'link_url' => $us_url_root . 'users/admin.php?view=ai',
+        'level' => 'warning',
+        'icon' => 'fa-robot'
+    ];
+}
+
+if ($toast_override_state === 'vulnerable') {
+    $recommendations[] = [
+        'title' => 'Message Footer Override Allows Script Injection',
+        'text' => 'Your site uses its own <code>usersc/includes/system_messages_footer.php</code>, which replaces the core file and is missing the core security fix. Anyone can send a link such as <code>?err=&amp;lt;img onerror=...&amp;gt;</code> that runs script on your site, including on the login page. Disable the override to use the fixed core version, or copy the escaping step (marked <code>US_TOAST_ESCAPE_V1</code>) from <code>users/includes/system_messages_footer.php</code> into it.',
+        'link_text' => 'Fix Now',
+        'link_url' => '#',
+        'modal' => 'confirm-disable_toast_override',
+        'level' => 'danger',
+        'icon' => 'fa-bug'
+    ];
+} elseif ($toast_override_state === 'unknown') {
+    $recommendations[] = [
+        'title' => 'Review Your Message Footer Override',
+        'text' => 'Your site uses its own <code>usersc/includes/system_messages_footer.php</code> instead of the core file, so core security fixes to message display don\'t reach it. Make sure it never writes request text (such as <code>?err=</code> or <code>?msg=</code>) into the page as HTML.',
+        'link_text' => 'Disable Override',
+        'link_url' => '#',
+        'modal' => 'confirm-disable_toast_override',
+        'level' => 'warning',
+        'icon' => 'fa-bug'
+    ];
+}
+
+// Session cookie Secure flag recommendation. The snippet is proxy-aware, so
+// it applies behind a proxy too.
+if (!$init_has_cookie_secure) {
     $recommendations[] = [
         'title' => 'Add Secure Cookie Flag',
         'text' => 'Your <code>users/init.php</code> is missing <code>session.cookie_secure</code>. This flag ensures session cookies are only sent over HTTPS connections, preventing them from being intercepted over plain HTTP.',
@@ -1628,6 +1816,11 @@ if ($deprecated_files_present) {
         color: inherit;
     }
 
+    .quick-action-btn:focus-visible {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 2px;
+    }
+
     .quick-action-btn .icon {
         font-size: 2rem;
         margin-bottom: 0.5rem;
@@ -1651,11 +1844,11 @@ if ($deprecated_files_present) {
 
     .security-metric .metric-label {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
     }
 
     .rate-limit-item {
-        border-left: 3px solid #007bff;
+        border-left: 3px solid var(--bs-primary);
         padding-left: 0.75rem;
         margin-bottom: 0.75rem;
     }
@@ -1663,7 +1856,7 @@ if ($deprecated_files_present) {
     .rate-limit-value {
         font-family: 'Courier New', monospace;
         font-weight: bold;
-        color: #0d6efd;
+        color: var(--bs-primary-text-emphasis);
     }
 
     .recommendation-item {
@@ -1711,8 +1904,8 @@ if ($deprecated_files_present) {
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="security-metric">
-                            <div class="metric-value text-<?= isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'success' : 'danger' ?>">
-                                <?= isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'HTTPS' : 'HTTP' ?>
+                            <div class="metric-value text-<?= ClientIP::isHttps() ? 'success' : 'danger' ?>">
+                                <?= ClientIP::isHttps() ? 'HTTPS' : 'HTTP' ?>
                             </div>
                             <div class="metric-label">Connection</div>
                         </div>
@@ -1992,7 +2185,7 @@ if ($deprecated_files_present) {
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>HTTPS Connection:</strong></div>
                     <div class="col-sm-6 text-end">
-                        <?php if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') : ?>
+                        <?php if (ClientIP::isHttps()) : ?>
                             <span class="badge bg-success">Active</span>
                         <?php else : ?>
                             <span class="badge bg-danger">Inactive</span>
@@ -2073,7 +2266,7 @@ if ($deprecated_files_present) {
                     ];
                 }
 
-                if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+                if (!ClientIP::isHttps()) {
                     $alerts[] = [
                         'level' => 'danger',
                         'icon' => 'fas fa-lock-open',
@@ -2398,12 +2591,16 @@ if ($deprecated_files_present) {
                         <?php elseif ($rl_ip_config['source'] === 'file'): ?>
                             Proxy headers &mdash; managed by <code>usersc/includes/trusted_proxies.php</code>
                         <?php else: ?>
-                            Proxy headers &mdash; database settings (<?= $rl_proxy_count ?> trusted source<?= $rl_proxy_count == 1 ? '' : 's' ?>)
+                            Proxy headers &mdash; database settings (<?= (int)$rl_proxy_count ?> trusted source<?= $rl_proxy_count == 1 ? '' : 's' ?>)
                         <?php endif; ?>
+                        <?php if ($rl_proxy_enabled && !empty($rl_ip_config['presets'])): ?>
+                            <br><small>Presets: <?= safeReturn(implode(', ', $rl_ip_config['presets'])) ?></small>
+                        <?php endif; ?>
+                        <br><a href="<?= $us_url_root ?>users/admin.php?view=proxy" class="small">Proxy &amp; CDN settings</a>
                     </div>
                 </div>
                 <hr>
-                <?php if ($rl_proxy_enabled && ($mod_remoteip_active || $upstream_resolved)): ?>
+                <?php if ($upstream_resolved): ?>
                     <div class="alert alert-warning p-2">
                         <strong><i class="fas fa-exclamation-triangle me-1"></i>Both proxy layers appear to be enabled.</strong><br>
                         <p class="mb-0">
@@ -2412,7 +2609,7 @@ if ($deprecated_files_present) {
                             <?php else: ?>
                                 On this request, REMOTE_ADDR already matches the trusted forwarded header, which usually means the web server (<code>mod_remoteip</code>, nginx <code>real_ip</code>, or similar) resolved the client address before PHP ran.
                             <?php endif; ?>
-                            With the "Behind Reverse Proxy" setting also enabled, the trusted proxy check compares against the already-resolved client address and always falls back. Disable one layer: keep the web server module and turn off "Behind Reverse Proxy", or remove the module and let UserSpice resolve the address.
+                            With PHP proxy mode (on the Proxy &amp; CDN page) also enabled, the trusted proxy check compares against the already-resolved client address and always falls back. Disable one layer: keep the web server module and turn off PHP proxy mode, or remove the module and let UserSpice resolve the address.
                         </p>
                     </div>
                 <?php endif; ?>
@@ -2498,7 +2695,7 @@ if ($deprecated_files_present) {
                 <?php endif; ?>
                 <div class="alert alert-info p-2">
                     <strong>Example <code>.htaccess</code> snippet:</strong>
-                    <pre class="mt-2 mb-0" style="font-size: .8rem;"><code>Header always set X-Frame-Options "SAMEORIGIN"
+                    <pre class="mt-2 mb-0" style="font-size: .8rem;" tabindex="0"><code>Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Strict-Transport-Security "max-age=31536000"
 Header always set Referrer-Policy "no-referrer-when-downgrade"</code></pre>
@@ -2758,6 +2955,36 @@ if ($curl_backup_exists)    generate_backup_modal('curl',    $backup_configs['cu
 </div>
 <?php endif; ?>
 
+<?php if ($hsts_proxy_fixable) : ?>
+<div class="modal fade" id="confirm-fix_hsts_proxy" tabindex="-1" aria-labelledby="confirm-fix_hsts_proxy-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-fix_hsts_proxy-label">Send HSTS Behind Your Proxy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This replaces the HTTPS check in <code>usersc/includes/security_headers.php</code> with <code>ClientIP::isHttps()</code>, which also counts HTTPS reported by your trusted proxy. The rest of the file is left as it is.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-save me-2" aria-hidden="true"></i>
+                    <strong>Backup:</strong> your current file is saved as <code>usersc/includes/security_headers.BACKUP.php</code> first.
+                </div>
+                <p class="mb-0">HSTS tells browsers to use HTTPS for this site for a year. Only continue if every page on this host works over HTTPS.</p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="fix_hsts_proxy" class="btn btn-primary">
+                        <i class="fas fa-wrench me-1" aria-hidden="true"></i>Fix Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php if (!$extra_curl_security_enabled) : ?>
 <div class="modal fade" id="confirm-enable_curl_security" tabindex="-1" aria-labelledby="confirm-enable_curl_security-label" aria-hidden="true">
     <div class="modal-dialog">
@@ -2861,7 +3088,7 @@ if ($curl_backup_exists)    generate_backup_modal('curl',    $backup_configs['cu
                     When users visit a protected page while logged out, <code>securePage()</code> stores their intended destination. After login, you can redirect them back to that page.
                 </div>
                 <p>Add this code to your <code>usersc/scripts/custom_login_script.php</code>:</p>
-                <pre class="bg-dark text-light p-3 rounded"><code>if (isset($dest) && !empty($dest)) {
+                <pre class="bg-dark text-light p-3 rounded" tabindex="0"><code>if (isset($dest) && !empty($dest)) {
     // User was redirected to login from a protected page - send them back there
     Redirect::sanitized($dest);
 } elseif (hasPerm([2], $user->data()->id)) {
@@ -2913,7 +3140,34 @@ if ($curl_backup_exists)    generate_backup_modal('curl',    $backup_configs['cu
 </div>
 <?php endif; ?>
 
-<?php if (!$init_has_cookie_secure && !$proxy_enabled): ?>
+<?php if (in_array($toast_override_state, ['vulnerable', 'unknown'], true)): ?>
+<div class="modal fade" id="confirm-disable_toast_override" tabindex="-1" aria-labelledby="confirm-disable_toast_override-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-disable_toast_override-label">Disable Message Footer Override</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This renames <code>usersc/includes/system_messages_footer.php</code> to <code>system_messages_footer.php.disabled-&lt;date&gt;</code> in the same folder, so UserSpice loads its own fixed version.</p>
+                <p>Nothing is deleted. If your override had visual customizations, copy them into a fresh copy of <code>users/includes/system_messages_footer.php</code>, keeping the step marked <code>US_TOAST_ESCAPE_V1</code>.</p>
+                <p><strong>Are you sure you want to proceed?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form action="" method="post">
+                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="disable_toast_override" class="btn btn-danger">
+                        <i class="fas fa-wrench me-1" aria-hidden="true"></i>Disable Override
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!$init_has_cookie_secure): ?>
 <div class="modal fade" id="confirm-fix_cookie_secure" tabindex="-1" aria-labelledby="confirm-fix_cookie_secure-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -2927,7 +3181,7 @@ if ($curl_backup_exists)    generate_backup_modal('curl',    $backup_configs['cu
                     This will add HTTPS detection and <code>session.cookie_secure</code> to your <code>users/init.php</code>.
                 </div>
                 <p>The following code will be inserted before <code>session_start();</code>:</p>
-                <pre class="bg-dark text-light p-3 rounded"><code>if (Server::get('HTTPS') !== '' && Server::get('HTTPS') !== 'off') {
+                <pre class="bg-dark text-light p-3 rounded" tabindex="0"><code>if (ClientIP::requestLooksHttps()) {
 	ini_set('session.cookie_secure', 1);
 }</code></pre>
                 <p>When the server detects an HTTPS connection, session cookies will be flagged as secure, preventing them from being sent over plain HTTP.</p>

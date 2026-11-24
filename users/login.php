@@ -229,14 +229,17 @@ if (!empty($_POST)) {
                     'password' => array('display' => lang('GEN_PASS'), 'required' => true)
                 )
             );
-            $validated = $validation->passed();
-
             $username = Input::get('username');
             $password = trim(Input::get('password'));
             $remember = false;
             $totpCode = Input::get('totp_code');
 
             includeHook($hooks, 'post');
+            if (isset($hookData['validation'])) {
+                $validation = $hookData['validation'];
+            }
+            // Read passed() after the hook so plugin addError() calls (e.g. reCAPTCHA) are enforced
+            $validated = $validation->passed();
 
             if ($validated) {
                 // Check rate limit for login attempts
@@ -391,9 +394,6 @@ if (!empty($_POST)) {
     sessionValMessages($errors, $successes, NULL);
 }
 
-// Get destination from session (set by securePage) for passkey redirect
-$dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
-
 ?>
 <style media="screen" nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
     .img-responsive {
@@ -534,9 +534,9 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                                 <div class="input-group">
                                     <input type="password" id="password" name="password" class="form-control form-control-lg"
                                         value="" autocomplete="current-password">
-                                    <span class="input-group-addon input-group-text see-pw" id="togglePassword">
-                                        <i class="fa fa-eye" id="togglePasswordIcon"></i>
-                                    </span>
+                                    <button type="button" class="input-group-addon input-group-text see-pw" id="togglePassword" aria-label="<?= lang('PW_SHOW') ?>" aria-controls="password" aria-pressed="false">
+                                        <i class="fa fa-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -626,6 +626,7 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                 togglePassword.addEventListener('click', function(e) {
                     const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
                     password.setAttribute('type', type);
+                    togglePassword.setAttribute('aria-pressed', type === 'text' ? 'true' : 'false');
 
                     if (type == "password") {
                         togglePasswordIcon.classList.add('fa-eye');
@@ -635,6 +636,14 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
                         togglePasswordIcon.classList.remove('fa-eye');
                     }
                 });
+                // never submit the password as plain text
+                if (password.form) {
+                    password.form.addEventListener('submit', function() {
+                        if (password.getAttribute('type') !== 'password') {
+                            togglePassword.click();
+                        }
+                    });
+                }
             }
         <?php endif; ?>
 
@@ -731,8 +740,6 @@ $dest = $_SESSION[$currentSessionName . '_login_dest'] ?? '';
 async function authenticatePasskeyLogin() {
     showPasskeyStatus('Requesting authentication challenge...');
     try {
-        const dest = <?= json_encode($dest, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-        
         // First request - get challenge using POST
         const challengeData = {
             action: 'auth',
@@ -784,8 +791,7 @@ async function authenticatePasskeyLogin() {
             credentialId: arrayBufferToBase64(credential.rawId),
             authenticatorData: arrayBufferToBase64(credential.response.authenticatorData),
             signature: arrayBufferToBase64(credential.response.signature),
-            clientDataJSON: new TextDecoder().decode(credential.response.clientDataJSON),
-            dest: dest
+            clientDataJSON: new TextDecoder().decode(credential.response.clientDataJSON)
         };
 
         const verifyResponse = await fetch('auth/parsers/passkey_parser.php', {
@@ -800,11 +806,9 @@ async function authenticatePasskeyLogin() {
 
         if (result.success) {
             showPasskeyStatus('Login successful! Redirecting...', 'success');
-            if (result.redirect) {
-                window.location.href = result.redirect;
-            } else {
-                window.location.href = '<?= $us_url_root . $settings->redirect_uri_after_login ?>';
-            }
+            // One passkey finisher: it runs custom_login_script.php and sends
+            // the user to the page captured before login (held in the session).
+            window.location.href = <?= json_encode($us_url_root . 'users/passkeys.php?passkeySuccess=true', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         } else {
             showPasskeyStatus('Login failed: ' + (result.error || 'No matching passkey found or verification failed.'), 'error');
         }

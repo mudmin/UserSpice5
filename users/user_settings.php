@@ -177,7 +177,7 @@ if (!empty($_POST)) {
           ],
         ]);
         if ($validation->passed()) {
-          if ($emailR->email_act == 0) {
+          if ($emailR->email_act == 0 && $allowPasswords) {
             $db->update('users', $userId, $fields);
             $successes[] = lang('GEN_EMAIL') . ' ' . lang('GEN_UPDATED');
             logger($user->data()->id, 'User', "Changed email from $userdetails->email to $email.");
@@ -206,11 +206,11 @@ if (!empty($_POST)) {
             if ($emailR->email_act == 1) {
               logger($user->data()->id, 'User', "Requested change email from $userdetails->email to $email. Verification email sent.");
             }
-          } else {
-            //validation did not pass
-            foreach ($validation->errors() as $error) {
-              $errors[] = $error;
-            }
+          }
+        } else {
+          //validation did not pass
+          foreach ($validation->errors() as $error) {
+            $errors[] = $error;
           }
         }
       }
@@ -280,6 +280,9 @@ if (!empty($_POST)) {
       <h1><?= lang('SET_UPDATE'); ?></h1>
       <?php
       if (!pluginActive('profile_pic', true)) {
+        // the link lives inside the translated string, so color it here: plain link
+        // blue fails contrast on the alert background; the alert's own link color passes
+        echo "<style nonce='" . htmlspecialchars($userspice_nonce ?? '') . "'>.alert.gravitar-message a:not(.btn):not(.nav-link){color:var(--bs-alert-link-color);font-weight:600;}</style>";
         echo "<div class='alert alert-info gravitar-message p-3 mt-3 mb-4'>" . lang('SET_GRAVITAR') . "</div>";
       }
       if ($errors) {
@@ -352,16 +355,17 @@ if (!empty($_POST)) {
               <label for="password" class="col-form-label col-12 col-md-3text-end"><?= lang('PW_NEW'); ?></label>
               <div class="col-12 <?= $secondCol ?>">
                 <div class="input-group">
-                  <span class="btn btn-secondary input-group-addon password_view_control"><span class="fa fa-eye"></span></span>
-                  <input class="form-control" type="password" name="password" id="password" aria-describedby="passwordhelp" autocomplete="off">
+                  <button type="button" class="btn btn-secondary input-group-addon password_view_control" aria-label="<?= lang('PW_SHOWS'); ?>" aria-controls="password confirm"><span class="fa fa-eye" aria-hidden="true"></span></button>
+                  <input class="form-control" type="password" name="password" id="password" <?= ($pw_settings->meter_active == 1) ? 'aria-describedby="passwordhelp"' : '' ?> autocomplete="off">
                 </div>
 
                 <label for="confirm" class="col-form-label col-12 col-md-3text-end"><?= lang('PW_CONF'); ?></label>
 
                 <div class="input-group">
-                  <span class="btn btn-secondary input-group-addon password_view_control"><span class="fa fa-eye"></span></span>
-                  <input type="password" id="confirm" name="confirm" class="form-control" autocomplete="new-password">
-                  <span class="btn btn-secondary input-group-addon" data-toggle="tooltip" title="<?= lang('SET_PW_MATCH'); ?>">?</span>
+                  <button type="button" class="btn btn-secondary input-group-addon password_view_control" aria-label="<?= lang('PW_SHOWS'); ?>" aria-controls="password confirm"><span class="fa fa-eye" aria-hidden="true"></span></button>
+                  <input type="password" id="confirm" name="confirm" class="form-control" autocomplete="new-password" aria-describedby="confirm-help">
+                  <span id="confirm-help" class="visually-hidden"><?= lang('SET_PW_MATCH'); ?></span>
+                  <span class="btn btn-secondary input-group-addon" data-toggle="tooltip" title="<?= lang('SET_PW_MATCH'); ?>" aria-hidden="true">?</span>
                 </div>
               </div>
               <?php if ($pw_settings->meter_active == 1) { ?>
@@ -404,16 +408,6 @@ if (!empty($_POST)) {
     // $('body').removeClass('is-collapsed');
     // $('.meetingPag').DataTable({searching: false, paging: false, info: false});
 
-    <?php if ($allowPasswords) { ?>
-      $('.password_view_control').hover(function() {
-        $('#password').attr('type', 'text');
-        $('#confirm').attr('type', 'text');
-      }, function() {
-        $('#password').attr('type', 'password');
-        $('#confirm').attr('type', 'password');
-      });
-    <?php } ?>
-
     $('[data-toggle="popover"], .pwpopover').popover();
     $('.pwpopover').on('click', function(e) {
       $('.pwpopover').not(this).popover('hide');
@@ -423,4 +417,5 @@ if (!empty($_POST)) {
     });
   });
 </script>
+<script nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>" src="<?= $us_url_root ?>users/js/password-view.js?v=<?= filemtime($abs_us_root . $us_url_root . 'users/js/password-view.js') ?>"></script>
 <?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>

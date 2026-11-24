@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#1c3c47',
 
   'headings-color' => '#eef6f9',
+  'link-color' => '#4fc0dc',
+  'link-hover-color' => '#7dd3e8',
 
   'custom_css' => "
 /* === HARBOR DARK === cool-blue professional, dark */
@@ -127,7 +129,5 @@ return array (
 }
 
 .navbar { box-shadow: 0 1px 3px rgba(0,0,0,0.45); }
-a:not(.btn):not(.nav-link) { color: #4fc0dc; }
-a:not(.btn):not(.nav-link):hover { color: #7dd3e8; }
 ",
 );

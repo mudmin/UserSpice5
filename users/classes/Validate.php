@@ -424,14 +424,16 @@ class Validate
 	}
 
 	public function display_errors() {
+		global $userspice_nonce;
+		$nonce = htmlspecialchars($userspice_nonce ?? '', ENT_QUOTES, 'UTF-8');
 		$html = "<UL CLASS='bg-danger'>";
 	
 		foreach($this->_errors as $error) {
 			if (is_array($error)) {
 				$sanitizedErrorMessage = Input::sanitize($error[0]);
-				$sanitizedElementId = Input::sanitize($error[1]);
+				$elementId = json_encode((string)$error[1], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>
-				<SCRIPT>jQuery('document').ready(function(){jQuery('#{$sanitizedElementId}').parent().closest('div').addClass('has-error');});</SCRIPT>";
+				<SCRIPT nonce='{$nonce}'>jQuery(function(){jQuery(document.getElementById({$elementId})).parent().closest('div').addClass('has-error');});</SCRIPT>";
 			} else {
 				$sanitizedErrorMessage = Input::sanitize($error);
 				$html .= "<LI CLASS=''>{$sanitizedErrorMessage}</LI>";

@@ -1,13 +1,14 @@
 <?php
 /*
- * UltraMenu snippet — light / dark colour-mode toggle.
+ * UltraMenu snippet — light / dark color-mode toggle.
  *
  * Rendered as a "snippet" menu item (added to the Main and Dashboard menus by
  * the 2026-05-17b update component). Menu.php includes this file and injects
- * its output straight into the menu <ul>.
+ * its output straight into the menu <ul>, so everything it emits (including
+ * the one-time <style>/<script>) stays inside its <li>.
  *
  * Self-gating: the toggle is emitted only when the ACTIVE template advertises
- * a dark colour scheme via usersc/templates/<template>/dark_mode.php — a file
+ * a dark color scheme via usersc/templates/<template>/dark_mode.php — a file
  * that returns a truthy value. On any template without that marker this file
  * outputs nothing, so the menu item is present but invisible (no dead link,
  * no stock-Bootstrap dark mode clashing with a light-only theme).
@@ -27,47 +28,48 @@ if ($tpl === '') {
 }
 
 // Neutral capability marker — see core_update_plan.md. The active template
-// (e.g. the customizer) writes this when it ships a dark colour scheme.
+// (e.g. the customizer) writes this when it ships a dark color scheme.
 $marker = $abs_us_root . $us_url_root . 'usersc/templates/' . $tpl . '/dark_mode.php';
 if (!is_file($marker) || !(require $marker)) {
-    return; // active template has no dark colour scheme — emit nothing
+    return; // active template has no dark color scheme — emit nothing
 }
 
 $GLOBALS['usThemeToggleRendered'] = true;
 $nonce = htmlspecialchars($userspice_nonce ?? '', ENT_QUOTES, 'UTF-8');
 ?>
-<li class="ms-2 me-2 us-theme-toggle-item">
-  <button type="button" class="nav-link us-theme-toggle" aria-pressed="false"
-          aria-label="Toggle light or dark mode" title="Switch light / dark mode">
+<li class="us-theme-toggle-item">
+  <?php
+  // An <a role="button"> rather than a <button> so every menu theme's link rules
+  // (color, hover, padding) style it exactly like its neighbors. A fixed color
+  // such as --bs-primary is a fill color and fails text contrast on dark menus.
+  // theme-toggle.js adds the Space key and suppresses the "#" navigation.
+  ?>
+  <a href="#" role="button" class="us-theme-toggle" aria-pressed="false"
+     aria-label="Toggle light or dark mode" title="Switch light / dark mode">
     <i class="fas fa-moon" aria-hidden="true"></i>
     <span class="labelText">Light / Dark Mode</span>
-  </button>
-</li>
+  </a>
 <?php
 // Load the wiring + scoped styling once, even if the toggle appears in more
-// than one menu on the same page (Main + Dashboard). The colour uses the
-// theme's own --bs-primary variable, so it stays on-theme in light and dark.
+// than one menu on the same page (Main + Dashboard).
 if (empty($GLOBALS['usThemeToggleJsLoaded'])) {
     $GLOBALS['usThemeToggleJsLoaded'] = true;
-    // Desktop: button is icon-only (label hidden). Mobile expanded view: button
-    // takes full row width with the menu's standard item padding and the label
-    // becomes visible so it stops looking like a stray icon.
+    // Desktop: icon-only (label hidden, so drop the icon's label gap). Mobile
+    // expanded view: the label becomes visible so it stops looking like a stray icon.
     echo '<style nonce="' . $nonce . '">'
-       . '.us-theme-toggle-item .us-theme-toggle{'
-       . 'background:transparent;border:0;cursor:pointer;'
-       . 'color:var(--bs-primary);}'
-       . '.us-theme-toggle-item .us-theme-toggle:hover{'
-       . 'color:var(--bs-primary);opacity:.7;}'
+       . 'ul.us_menu .us-theme-toggle-item .us-theme-toggle i{margin-right:0;}'
        . '.us-theme-toggle-item .us-theme-toggle .labelText{display:none;}'
        . '@media screen and (max-width:992px){'
-       . 'ul.us_menu .us-theme-toggle-item{margin-left:0;margin-right:0;}'
-       . 'ul.us_menu .us-theme-toggle-item .us-theme-toggle{'
-       . 'width:100%;padding:5px 18px;}'
+       . 'ul.us_menu .us-theme-toggle-item .us-theme-toggle i{margin-right:10px;}'
        . 'ul.us_menu .us-theme-toggle-item .us-theme-toggle .labelText{'
        . 'display:inline;margin-right:0;}'
        . '}'
        . '</style>';
     echo '<script nonce="' . $nonce . '" defer src="'
        . htmlspecialchars($us_url_root, ENT_QUOTES, 'UTF-8')
-       . 'users/js/theme-toggle.js"></script>';
+       . 'users/js/theme-toggle.js?v='
+       . filemtime($abs_us_root . $us_url_root . 'users/js/theme-toggle.js')
+       . '"></script>';
 }
+?>
+</li>

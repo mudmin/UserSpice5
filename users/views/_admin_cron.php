@@ -129,22 +129,23 @@ $count = $query->count();
     <ol class="mb-0">
       <li>Place your PHP script in <code>users/cron/</code> (e.g., <code>my_task.php</code>).</li>
       <li>Click <strong>Add</strong> above to register it with a name, filename, and sort order.</li>
-      <li>Configure your server's cron to request <code><?= $cronUrl ?></code> at your desired interval.</li>
-      <li>Check <a href="admin.php?view=logs">the system logs</a> for the <strong>rejected IP address</strong> from your first cron attempt.</li>
+      <li>Configure your server's cron to request <code><?= safeReturn($cronUrl) ?></code> at your desired interval. If cron runs on this same server, request <code>http://localhost<?= safeReturn($us_url_root) ?>users/cron/cron.php</code> instead, or run <code>cd <?= safeReturn($abs_us_root . $us_url_root) ?>users/cron &amp;&amp; php cron.php</code> from the command line; local requests are always allowed.</li>
+      <li>For a cron server elsewhere, check <a href="admin.php?view=logs">the system logs</a> for the <strong>rejected IP address</strong> from your first cron attempt.</li>
       <li>Go to <a href="admin.php?view=general">the admin dashboard</a> and whitelist that IP in the <strong>"Only allow cron jobs from the following IP"</strong> field.</li>
     </ol>
+    <p class="mt-2 mb-0 small text-body-secondary">If the rejected address is <code>127.0.0.1</code> or <code>::1</code> and the log says the request came through a proxy, a proxy or tunnel on this server is in front of PHP. Entering 127.0.0.1 won't let it through (that would let every visitor run your crons). Use the localhost URL or the command line instead.</p>
   </div>
 </div>
 <?php } ?>
 
-<div id="addcron" class="modal fade" role="dialog">
+<div id="addcron" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="addcron-title">
   <div class="modal-dialog">
 
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">New Cron</h4>
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal">&times;</button>
+        <h4 class="modal-title" id="addcron-title">New Cron</h4>
+        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <form class="form-signup" action="" method="POST">
         <div class="modal-body">

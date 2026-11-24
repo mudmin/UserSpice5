@@ -138,6 +138,14 @@ switch ($view) {
       echo '</div>'; // what is this for?
     }
     break;
+  case 'ai':
+    $path = usView('_admin_ai.php');
+    include $path;
+    break;
+  case 'proxy':
+    $path = usView('_admin_proxy.php');
+    include $path;
+    break;
    case 'rate_limits':
     $path = usView('_admin_rate_limits.php');
     include $path;

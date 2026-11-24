@@ -236,7 +236,7 @@ $desiredLabel = !empty($pageLangKey) ? '{{' . $pageLangKey . '}}' : ($pageDetail
   <h2>Page Permissions</h2>
   <div class="row">
     <div class="col-12 col-sm-6">
-      <h4><a href="<?= safeReturn($us_url_root . $pageDetails->page) ?>" target="_blank"><span style="color:blue;"><?= safeReturn($pageDetails->page) ?></span></a></h4>
+      <h4><a href="<?= safeReturn($us_url_root . $pageDetails->page) ?>" target="_blank"><span class="text-primary-emphasis"><?= safeReturn($pageDetails->page) ?></span></a></h4>
       <h5>Page ID: <?= $pageDetails->id ?></h5>
     </div>
     <div class="col-12 col-sm-6">
@@ -250,18 +250,18 @@ $desiredLabel = !empty($pageLangKey) ? '{{' . $pageLangKey . '}}' : ($pageDetail
   <div class="row">
     <div class="col-12 col-md-6">
       <div class="form-group">
-        <label for="title">Page Title:</label> <span class="small">(This is the text that's displayed on the browser's titlebar or tab)</span>
+        <label for="changeTitle">Page Title:</label> <span class="small">(This is the text that's displayed on the browser's titlebar or tab)</span>
 
-        <input type="text" class="form-control" name="changeTitle" maxlength="50" value="<?php echo $pageDetails->title; ?>" />
+        <input type="text" class="form-control" name="changeTitle" id="changeTitle" maxlength="50" value="<?php echo $pageDetails->title; ?>" />
       </div>
       <div class="form-group">
-        <label for="langKey">Language Key:</label> <span class="small">(Optional - if set, this lang() key will be used instead of the title above)</span>
+        <label for="changeLangKey">Language Key:</label> <span class="small">(Optional - if set, this lang() key will be used instead of the title above)</span>
 
-        <input type="text" class="form-control" name="changeLangKey" maxlength="100" value="<?php echo htmlspecialchars($pageDetails->lang_key ?? ''); ?>" placeholder="e.g. PAGE_TITLE_HOME" />
+        <input type="text" class="form-control" name="changeLangKey" id="changeLangKey" maxlength="100" value="<?php echo htmlspecialchars($pageDetails->lang_key ?? ''); ?>" placeholder="e.g. PAGE_TITLE_HOME" />
       </div>
       <div class="form-group">
-        <label for="">Set this page as private?</label>
-        <select class="form-control mb-2" name="private" required>
+        <label for="private">Set this page as private?</label>
+        <select class="form-control mb-2" name="private" id="private" required>
           <option value="0" <?php if ($pageDetails->private == 0) {
                               echo "selected='selected'";
                             } ?>>This Page is Public</option>
@@ -365,7 +365,7 @@ $desiredLabel = !empty($pageLangKey) ? '{{' . $pageLangKey . '}}' : ($pageDetail
       </div>
       <div class="row">
         <div class="col-12 col-md-6">
-          <label for="">Remove Permission</label>
+          <label>Remove Permission</label>
           <div class="form-group">
             <?php
             // Display list of permission levels with access
@@ -375,20 +375,20 @@ $desiredLabel = !empty($pageLangKey) ? '{{' . $pageLangKey . '}}' : ($pageDetail
             }
             foreach ($permissionData as $v1) {
               if (in_array($v1->id, $perm_ids)) { ?>
-                <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br />
+                <label class="normal"><input type='checkbox' name='removePermission[]' id='removePermission_<?php echo $v1->id; ?>' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br />
             <?php }
             } ?>
           </div>
         </div>
 
         <div class="col-12 col-md-6">
-          <label for="">Add Permissions</label>
+          <label>Add Permissions</label>
           <div class="form-group">
             <?php
             // Display list of permission levels without access
             foreach ($permissionData as $v1) {
               if (!in_array($v1->id, $perm_ids)) { ?>
-                <?php if ($settings->page_permission_restriction == 0) { ?><label class="normal"><input type='checkbox' name='addPermission[]' id='addPermission[]' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br /><?php } ?>
+                <?php if ($settings->page_permission_restriction == 0) { ?><label class="normal"><input type='checkbox' name='addPermission[]' id='addPermission_<?php echo $v1->id; ?>' value='<?php echo $v1->id; ?>'> <?php echo $v1->name; ?></label><br /><?php } ?>
 
                 <?php if ($settings->page_permission_restriction == 1) { ?><label class="normal"><input type="radio" name="addPermission[]" id="addPermission[]" value="<?php echo $v1->id; ?>" <?php if ($countCountQ > 0 || $pageDetails->private == 0) { ?> disabled <?php } ?>>
                     <?php echo $v1->name; ?></label><br />

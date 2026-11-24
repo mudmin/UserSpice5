@@ -100,7 +100,7 @@ $usersWith = $usersWithQ->results();
     <div class="col-12 col-md-6">
 
       <h5>Users with the <?= $tag->tag ?> Tag ( <?=$usersWithC?> )</h5>
-      Visit the <a href="<?=$us_url_root?>users/admin.php?view=users" style="color:blue;">User Manager</a> to add or remove tags from a user.
+      Visit the <a href="<?=$us_url_root?>users/admin.php?view=users">User Manager</a> to add or remove tags from a user.
       <?php if($usersWithC > 0) { ?>
    
 

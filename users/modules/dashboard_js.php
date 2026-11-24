@@ -9,6 +9,45 @@
       return new bootstrap.Tooltip(tooltipTriggerEl)
     });
 
+    // Settings help buttons (WCAG 1.4.13, content on hover or focus): shown on hover
+    // or focus, kept open while the pointer moves onto the tooltip, and dismissed
+    // with Escape without moving focus. Bootstrap's own triggers do neither of the last two.
+    var helpTips = [];
+    document.querySelectorAll('[data-us-help-tip]').forEach(function(btn) {
+      var tip = new bootstrap.Tooltip(btn, { trigger: 'manual' });
+      var timer = null;
+      var tipEl = function() { return document.getElementById(btn.getAttribute('aria-describedby') || ''); };
+      var show = function() { clearTimeout(timer); tip.show(); };
+      var hideSoon = function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() {
+          var el = tipEl();
+          if (btn.matches(':hover') || document.activeElement === btn || (el && el.matches(':hover'))) {
+            return;
+          }
+          tip.hide();
+        }, 250);
+      };
+      btn.addEventListener('mouseenter', show);
+      btn.addEventListener('focus', show);
+      btn.addEventListener('mouseleave', hideSoon);
+      btn.addEventListener('blur', hideSoon);
+      btn.addEventListener('shown.bs.tooltip', function() {
+        var el = tipEl();
+        if (el && !el.dataset.usHelpBound) {
+          el.dataset.usHelpBound = '1';
+          el.addEventListener('mouseenter', function() { clearTimeout(timer); });
+          el.addEventListener('mouseleave', hideSoon);
+        }
+      });
+      helpTips.push(tip);
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        helpTips.forEach(function(tip) { tip.hide(); });
+      }
+    });
+
 
     function messages(data) {
       console.log(data.msg);

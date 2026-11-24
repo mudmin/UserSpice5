@@ -37,7 +37,7 @@ return [
                 'outline' => [
                     'selector' => '.btn-outline-{color}',
                     'properties' => [
-                        '--bs-btn-color' => 'var(--bs-{color})',
+                        '--bs-btn-color' => '{outline_text}',
                         '--bs-btn-border-color' => 'var(--bs-{color})',
                         '--bs-btn-hover-color' => '{text_color}',
                         '--bs-btn-hover-bg' => 'var(--bs-{color}-hover, var(--bs-{color}))',
@@ -53,6 +53,9 @@ return [
                             'warning' => 'var(--bs-dark)',
                             'info' => 'var(--bs-dark)',
                             'default' => '#fff'
+                        ],
+                        'outline_text' => [
+                            'default' => 'var(--bs-{color})'
                         ]
                     ]
                 ]
@@ -67,7 +70,13 @@ return [
                         '--bs-alert-color'        => 'var(--bs-{color}-text-emphasis, var(--bs-{color}))',
                         '--bs-alert-bg'           => 'var(--bs-{color}-bg-subtle, rgba(var(--bs-{color}-rgb), 0.1))',
                         '--bs-alert-border-color' => 'var(--bs-{color}-border-subtle, rgba(var(--bs-{color}-rgb), 0.2))',
-                        '--bs-alert-link-color'   => 'var(--bs-{color}-text-emphasis, var(--bs-{color}))'
+                        '--bs-alert-link-color'   => 'var(--bs-{color}-text-emphasis, var(--bs-{color}))',
+                        '--bs-code-color'         => '{alert_code}'
+                    ],
+                    'values' => [
+                        'alert_code' => [
+                            'default' => ''
+                        ]
                     ]
                 ]
             ]

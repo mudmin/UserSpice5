@@ -451,7 +451,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                    => "Kunne ikke hente godkendelseshemmelighed. Prøv venligst igen.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"       => "Backup-kode verificeret men kunne ikke ugyldiggøre. Kontakt venligst support.",
     "2FA_ERR_NO_CODE_PROVIDED"             => "Ingen godkendelseskode angivet.",
-    "RATE_LIMIT_LOGIN"              => "For mange mislykkede login forsøg. Vent venligst før du prøver igen.",
+    "RATE_LIMIT_LOGIN"              => "For mange login forsøg. Vent venligst før du prøver igen.",
     "RATE_LIMIT_TOTP"               => "For mange forkerte godkendelseskoder. Vent venligst før du prøver igen.",
     "RATE_LIMIT_PASSKEY"            => "For mange adgangsnøgle godkendelsesforsøg. Vent venligst før du prøver igen.",
     "RATE_LIMIT_PASSKEY_STORE"      => "For mange adgangsnøgle registreringsforsøg. Vent venligst før du prøver igen.",
@@ -462,6 +462,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"       => "For mange email ændringsanmodninger. Vent venligst før du prøver igen.",
     "RATE_LIMIT_PASSWORD_CHANGE"    => "For mange adgangskode ændringsforsøg. Vent venligst før du prøver igen.",
     "RATE_LIMIT_GENERIC"            => "For mange forsøg. Vent venligst før du prøver igen.",
+    "SOCIAL_EMAIL_IN_USE"           => "Denne e-mailadresse tilhører allerede en konto, og din login-udbyder har ikke bekræftet, at den er din. Log i stedet ind med adgangskoden til den konto.",
 ));
 
 
@@ -647,6 +648,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Har du problemer med din godkendelsesapp?",
 	"2FA_BACKUP_CODE_HELP" => "Indtast en af dine gemte sikkerhedskoder",
 	"2FA_USE_BACKUP_BTN"   => "Brug sikkerhedskode",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "%m1% forside",
+	"MENU_EMAIL"     => "E-mail til %m1%",
+	"MENU_CALL"      => "Ring til %m1%",
+	"SKIP_TO_MAIN"   => "Spring til hovedindhold",
+	"PW_REQ_MET"     => "opfyldt",
+	"PW_REQ_NOT_MET" => "ikke opfyldt",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

@@ -10,7 +10,7 @@
 return array (
   'primary' => '#5f9bbe',
   'primary-hover' => '#3c7499',
-  'primary-text-emphasis' => '#234657',
+  'primary-text-emphasis' => '#386c8a',
   'primary-bg-subtle' => '#dce9f0',
   'primary-border-subtle' => '#a8cbdd',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#51a192',
   'success-hover' => '#3c8073',
-  'success-text-emphasis' => '#234c44',
+  'success-text-emphasis' => '#3a7268',
   'success-bg-subtle' => '#dcefeb',
   'success-border-subtle' => '#a8d4cc',
 
   'info' => '#5b9bd5',
   'info-hover' => '#4a80b0',
-  'info-text-emphasis' => '#2c4d6b',
+  'info-text-emphasis' => '#2a6ba6',
   'info-bg-subtle' => '#dfecf7',
   'info-border-subtle' => '#b1cfe9',
 
   'warning' => '#c89a4a',
   'warning-hover' => '#a87f3c',
-  'warning-text-emphasis' => '#5e4920',
+  'warning-text-emphasis' => '#836228',
   'warning-bg-subtle' => '#f3e8d2',
   'warning-border-subtle' => '#e1c896',
 
   'danger' => '#b5485b',
   'danger-hover' => '#963b4b',
-  'danger-text-emphasis' => '#5a242e',
+  'danger-text-emphasis' => '#a34152',
   'danger-bg-subtle' => '#f1dadf',
   'danger-border-subtle' => '#dca6b0',
 
@@ -76,7 +76,9 @@ return array (
   'us-menu-custom-divider' => '#2e404e',
   'us-menu-custom-submenu-border' => '#2e404e',
 
-  'headings-color' => 'var(--bs-primary)',
+  'headings-color' => '#396e8d',
+  'link-color' => '#396e92',
+  'link-hover-color' => '#2b3a47',
 
   'custom_css' => "
 /* === WINTER FROST === cool pale, crisp */
@@ -115,7 +117,5 @@ body {
 }
 .alert { border-radius: 8px; }
 hr { border-color: #d2e0e8; }
-a:not(.btn):not(.nav-link) { color: #3c7499; }
-a:not(.btn):not(.nav-link):hover { color: #2b3a47; }
 ",
 );

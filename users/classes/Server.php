@@ -281,32 +281,57 @@ final class Server
     {
         $rip = self::get('REMOTE_ADDR', '');
         if ($rip === '' || !$cidrs) return false;
-        foreach ($cidrs as $c) {
-            if (self::ip_in_cidr($rip, $c)) return true;
-        }
-        return false;
+        // ClientIP::inRange rejects malformed masks ('10.0.0.5/', '/abc')
+        // instead of treating them as /0.
+        return ClientIP::isTrustedProxy($rip, array_values(array_filter($cidrs, 'is_string')));
     }
 
-    /** Best-effort client IP respecting trusted proxies. */
-    public static function getClientIp(array $trustedProxyCidrs = []): string
+    /**
+     * Best-effort client IP respecting trusted proxies.
+     *
+     * With no argument this defers to ClientIP, so it follows the site's proxy
+     * configuration (Proxy settings / trusted_proxies.php) and returns raw
+     * REMOTE_ADDR when proxy mode is off. With an explicit CIDR list, forwarded
+     * chains are walked from the right; the leftmost entry is client-controlled
+     * and is never taken on its own.
+     *
+     * Pass $header ('X-Forwarded-For' or 'Forwarded') to read only the header
+     * your proxy actually writes. Otherwise Forwarded is tried, then
+     * X-Forwarded-For, and a client could supply whichever one the proxy
+     * passes through untouched.
+     */
+    public static function getClientIp(array $trustedProxyCidrs = [], ?string $header = null): string
     {
+        if (!$trustedProxyCidrs) {
+            return ClientIP::isProxied() ? ClientIP::get() : self::get('REMOTE_ADDR', '');
+        }
         if (self::clientIsFromTrustedProxy($trustedProxyCidrs)) {
+            $useHeader = $header === null ? null : strtolower($header);
             // RFC 7239 Forwarded: for=
-            $fwd = self::get('HTTP_FORWARDED', '');
-            if ($fwd !== '') {
-                $ip = self::extract_ip_from_forwarded($fwd);
-                if ($ip !== '') return $ip;
+            $fwd = (string)($_SERVER['HTTP_FORWARDED'] ?? '');
+            if ($fwd !== '' && ($useHeader === null || $useHeader === 'forwarded')) {
+                $ip = ClientIP::walkForwarded(ClientIP::forwardedForList($fwd), $trustedProxyCidrs);
+                if ($ip !== null) return $ip;
             }
-            // X-Forwarded-For: first IP
-            $xff = self::get('HTTP_X_FORWARDED_FOR', '');
-            if ($xff !== '') return $xff; // already sanitized to first valid IP
+            $xff = (string)($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
+            if ($xff !== '' && ($useHeader === null || $useHeader === 'x-forwarded-for')) {
+                $ip = ClientIP::walkForwarded($xff, $trustedProxyCidrs);
+                if ($ip !== null) return $ip;
+            }
         }
         return self::get('REMOTE_ADDR', '');
     }
 
-    /** http|https, proxy-aware. */
+    /**
+     * http|https, proxy-aware. With no argument this defers to ClientIP and
+     * honors forwarded proto headers only from the site's trusted proxies.
+     */
     public static function getScheme(array $trustedProxyCidrs = []): string
     {
+        if (!$trustedProxyCidrs) {
+            return ClientIP::scheme();
+        }
+
         // Start with direct TLS signal
         $https = self::get('HTTPS', '');
         if ($https !== '') return 'https';
@@ -548,17 +573,6 @@ final class Server
 
     // ------------------ PARSERS for Forwarded: header ------------------
 
-    private static function extract_ip_from_forwarded(string $forwarded): string
-    {
-        // Look for for= value per RFC 7239; allow quoted and bracketed IPv6.
-        // Example: for=192.0.2.60;proto=https;by=203.0.113.43
-        if (preg_match('/\bfor=(?:"?\[?)([0-9a-fA-F:.]+)(?:\]?"?)/', $forwarded, $m)) {
-            $ip = self::sanitize_ip($m[1]);
-            return $ip;
-        }
-        return '';
-    }
-
     private static function extract_proto_from_forwarded(string $forwarded): string
     {
         if (preg_match('/\bproto="?([A-Za-z]+)"?/', $forwarded, $m)) {
@@ -575,35 +589,6 @@ final class Server
             return $h;
         }
         return '';
-    }
-
-    // ------------------ CIDR helpers ------------------
-
-    private static function ip_in_cidr(string $ip, string $cidr): bool
-    {
-        if (strpos($ip, ':') !== false || strpos($cidr, ':') !== false) {
-            [$subnet, $maskBits] = array_pad(explode('/', $cidr, 2), 2, '128');
-            $maskBits = (int)$maskBits;
-            if ($maskBits < 0 || $maskBits > 128) return false;
-            $ipBin  = @inet_pton($ip);
-            $netBin = @inet_pton($subnet);
-            if ($ipBin === false || $netBin === false) return false;
-            $bytes = intdiv($maskBits, 8);
-            $bits  = $maskBits % 8;
-            if ($bytes && substr($ipBin, 0, $bytes) !== substr($netBin, 0, $bytes)) return false;
-            if ($bits === 0) return true;
-            $mask = chr((0xFF << (8 - $bits)) & 0xFF);
-            return (ord($ipBin[$bytes]) & ord($mask)) === (ord($netBin[$bytes]) & ord($mask));
-        }
-
-        [$subnet, $maskBits] = array_pad(explode('/', $cidr, 2), 2, '32');
-        $maskBits = (int)$maskBits;
-        if ($maskBits < 0 || $maskBits > 32) return false;
-        $ipL  = ip2long($ip);
-        $netL = ip2long($subnet);
-        if ($ipL === false || $netL === false) return false;
-        $mask = $maskBits === 0 ? 0 : ((~0 << (32 - $maskBits)) & 0xFFFFFFFF);
-        return (($ipL & $mask) === ($netL & $mask));
     }
 
     private static function sanitize_fs_path(string $path, bool $mustExist = true, bool $requireDir = true, bool $absoluteOnly = true): string

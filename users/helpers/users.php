@@ -290,9 +290,18 @@ if (!function_exists("usersWithTag")) {
 
 
 if (!function_exists('socialLogin')) {
-  function socialLogin($email, $username, $idArray, $fields, $loginMethod = null)
+  /**
+   * $emailVerified: whether the provider says it verified $email. Pass false when
+   * it hasn't (or the provider can't say): the account is then matched by
+   * provider id only, a login whose email belongs to another account is
+   * refused, and a new account starts with email_verified = 0.
+   */
+  function socialLogin($email, $username, $idArray, $fields, $loginMethod = null, $emailVerified = true)
   {
-    global $db, $settings, $abs_us_root, $us_url_root;
+    // custom_login_script.php is included inside this function, so it only
+    // sees what is listed here plus the locals ($user, $dest). Sites that set
+    // their own top-level variables (e.g. $us_session_var) need them here.
+    global $db, $settings, $abs_us_root, $us_url_root, $us_session_var;
 
     // =========================================================================
     // #1: Sanitize $idArray - only allow valid column names from users table
@@ -369,13 +378,15 @@ if (!function_exists('socialLogin')) {
       }
     }
 
-    // Fall back to email OR provider ID lookup if provider-first didn't match
+    // Fall back to email OR provider ID lookup if provider-first didn't match.
+    // An unverified email is never used to match an account.
+    $matchByEmail = $hasValidEmail && $emailVerified;
     if ($existingUser === null) {
-      if ($hasValidEmail && !empty($idConditions)) {
+      if ($matchByEmail && !empty($idConditions)) {
         // email OR provider_id OR provider_id2 ...
         $whereClause = "email = ? OR " . implode(' OR ', $idConditions);
         $findExistingUS = $db->query("SELECT * FROM users WHERE " . $whereClause . " LIMIT 1", array_merge([$email], $idParams)); // nosemgrep: userspice-raw-query-concat - $whereClause built from safe column references with parameterized values
-      } elseif ($hasValidEmail) {
+      } elseif ($matchByEmail) {
         // email only
         $findExistingUS = $db->query("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
       } elseif (!empty($idConditions)) {
@@ -389,6 +400,18 @@ if (!function_exists('socialLogin')) {
       if ($findExistingUS !== null && $findExistingUS->count() > 0) {
         $existingUser = $findExistingUS->first();
       }
+    }
+
+    // An unverified email that already belongs to an account can't sign in to
+    // it or create a second account with the same address.
+    if ($existingUser === null && $hasValidEmail && !$emailVerified
+      && $db->query("SELECT id FROM users WHERE email = ? LIMIT 1", [$email])->count() > 0) {
+      logger(0, 'Social Login', 'Refused: the provider did not verify an email that belongs to an existing account', ['method' => $loginMethod]);
+      $_SESSION = [];
+      session_regenerate_id(true);
+      usError(lang('SOCIAL_EMAIL_IN_USE'));
+      Redirect::to($us_url_root . 'users/login.php');
+      die();
     }
 
     // Handle no registration allowed
@@ -504,7 +527,7 @@ if (!function_exists('socialLogin')) {
         'logins' => 0,
         'join_date' => $date,
         'last_login' => $date,
-        'email_verified' => 1,
+        'email_verified' => $emailVerified ? 1 : 0,
       ];
 
       // Merge: defaults first, then filtered OAuth fields (can add profile fields but not override security)
@@ -512,7 +535,7 @@ if (!function_exists('socialLogin')) {
 
       // Re-apply protected defaults that OAuth shouldn't override
       $createFields['permissions'] = 1;
-      $createFields['email_verified'] = 1;
+      $createFields['email_verified'] = $emailVerified ? 1 : 0;
       $createFields['join_date'] = $date;
       $createFields['last_login'] = $date;
       $createFields['logins'] = 0;
@@ -541,9 +564,6 @@ if (!function_exists('socialLogin')) {
       logger($theNewId, 'User', 'Registration completed using Social Login.');
     }
     $user->login();
-    if (!isset($_SESSION['redirect'])) {
-      $_SESSION['redirect'] = null;
-    }
 
     if ($loginMethod !== null) {
       setLoginMethod($loginMethod);
@@ -575,10 +595,12 @@ if (!function_exists('socialLogin')) {
     }
 
     // =========================================================================
-    // #5 & #6: Redirect handling - use Redirect::sanitized() for safe redirects
+    // #5 & #6: Redirect handling. The destination is the page captured before
+    // login (session only, set by securePage()); a request parameter can never
+    // choose it. Redirect::sanitized() keeps it same-origin.
     // =========================================================================
-    $redirect = $_SESSION['redirect'] ?? Input::get('redirect');
-    $dest = $_SESSION['dest'] ?? $settings->redirect_uri_after_login;
+    $dest = consumeLoginDest();
+    unset($_SESSION['redirect'], $_SESSION['dest']); // left over from older versions
 
     $hooks = getMyHooks(['page' => 'loginSuccess']);
     includeHook($hooks, 'body');
@@ -591,13 +613,60 @@ if (!function_exists('socialLogin')) {
     }
 
     // Use Redirect::sanitized() which enforces same-origin, blocks schemes, normalizes paths
-    if (!empty($redirect)) {
-      Redirect::sanitized($redirect);
-    } elseif (!empty($dest)) {
+    if ($dest !== '') {
       Redirect::sanitized($dest);
     }
 
     Redirect::sanitized($settings->redirect_uri_after_login);
+  }
+}
+
+if (!function_exists('verifyLoginCredentials')) {
+  /**
+   * Check a username (or email) and password the way users/login.php does,
+   * without logging in: login_attempt rate limit, password, banned account.
+   * Use this instead of User::login() when a plugin only needs to know whether
+   * the credentials are valid.
+   *
+   * Returns ['ok' => bool, 'user_id' => ?int, 'rate_limited' => bool, 'totp_required' => bool].
+   * When totp_required is true, the caller must still verify a TOTP code before
+   * treating the user as signed in.
+   */
+  function verifyLoginCredentials($username, $rawPassword)
+  {
+    global $db, $settings, $abs_us_root, $us_url_root;
+
+    $result = ['ok' => false, 'user_id' => null, 'rate_limited' => false, 'totp_required' => false];
+    $username = trim((string)$username);
+    $rawPassword = (string)$rawPassword;
+    if ($username === '' || $rawPassword === '') {
+      return $result;
+    }
+
+    $record = $db->query("SELECT id FROM users WHERE username = ? OR email = ?", [$username, $username])->first();
+    $userId = $record ? (int)$record->id : null;
+    if (!checkRateLimit('login_attempt', $userId, $username)) {
+      $result['rate_limited'] = true;
+      return $result;
+    }
+
+    $checker = new User();
+    $id = $checker->checkCredentials($username, trim(Input::sanitize($rawPassword)), $rawPassword);
+    $banned = $id && (int)($db->query("SELECT permissions FROM users WHERE id = ?", [$id])->first()->permissions ?? 0) === 0;
+    if (!$id || $banned) {
+      handleAuthFailure('login_attempt', $userId, $username, [], ['method' => 'credential_check']);
+      return $result;
+    }
+
+    handleAuthSuccess('login_attempt', $id, $username, [], ['method' => 'credential_check']);
+    $result['ok'] = true;
+    $result['user_id'] = $id;
+
+    if (isset($settings->totp) && $settings->totp > 0 && version_compare(PHP_VERSION, '8.2.0', '>=')) {
+      require_once $abs_us_root . $us_url_root . 'users/includes/totp_enforcement.php';
+      $result['totp_required'] = isTotpRequired($settings, 'password', loadTotpRequirements($id), $id);
+    }
+    return $result;
   }
 }
 

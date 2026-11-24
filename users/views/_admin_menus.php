@@ -47,7 +47,7 @@ $codeUsage = '<?php
     <div class="row">
       <div class="col-md-12">
         <?php if ($dupes != []) { ?>
-          <p><b style="color:red;">WARNING: </b> Z-indexes should not be repeated. We have turned your repeated indexes red.</p>
+          <p><b class="text-danger-emphasis">WARNING: </b> Z-indexes should not be repeated. We have turned your repeated indexes red.</p>
         <?php } ?>
         <table class="table table-bordered table-hover table-condensed" id="menuTable">
           <thead>
@@ -88,9 +88,9 @@ $codeUsage = '<?php
                 <td class="text-end">
                   <a class="btn btn-sm btn-outline-dark mr-1" href="admin.php?view=edit_menu&menu_id=<?= $menu->id ?>" title="edit"><i class="fa fa-pencil"></i></a>
                   <?php if ($menu->id != 1 && $menu->id != 2) { ?>
-                    <button type="button" class="btn btn-sm btn-outline-danger" data-us-delete-menu="<?= $menu->id ?>" title="delete"><i class="fa fa-close"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-us-delete-menu="<?= $menu->id ?>" title="delete" aria-label="Delete menu <?= safeReturn($menu->menu_name, true) ?>"><i class="fa fa-close" aria-hidden="true"></i></button>
                   <?php } else {  ?>
-                    <button disabled class="btn btn-sm btn-outline-secondary"><i class="fa fa-close"></i></button>
+                    <button disabled class="btn btn-sm btn-outline-secondary" aria-label="Delete menu <?= safeReturn($menu->menu_name, true) ?> (unavailable)"><i class="fa fa-close" aria-hidden="true"></i></button>
                   <?php } ?>
               </tr>
             <?php endforeach; ?>
@@ -112,7 +112,20 @@ $codeUsage = '<?php
         </button>
       </div>
       <div class="modal-body">
-        <?php highlight_string($codeUsage); ?>
+        <?php
+        // highlight_string() colors are made for a white background, so the sample
+        // keeps a white panel in dark mode (!important beats themes that color pre/code).
+        // The wrapper scrolls and takes focus, so keyboard users can scroll it; this
+        // works whatever markup the PHP version emits (<pre><code> on 8.3+, <code> before).
+        // PHP's default comment orange is 2.5:1 on white, so it is darkened to pass AA.
+        ?>
+        <style nonce="<?= htmlspecialchars($userspice_nonce ?? '') ?>">
+          .us-php-sample, .us-php-sample pre, .us-php-sample code { background-color: #fff !important; }
+          .us-php-sample pre { margin: 0; overflow: visible; }
+        </style>
+        <div class="us-php-sample p-2 rounded overflow-auto" tabindex="0">
+          <?= str_ireplace('color: #FF8000', 'color: #a65300', highlight_string($codeUsage, true)) ?>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>

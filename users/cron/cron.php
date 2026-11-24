@@ -4,12 +4,13 @@ $db = DB::getInstance();
 $ip = ipCheck();
 logger("","CronRequest","Cron request from $ip.");
 
-if($settings->cron_ip != ''){
-if($ip != $settings->cron_ip && $ip != '127.0.0.1'){
-	logger("","CronRequest","Cron request DENIED from $ip.");
+if(!cronCallerAllowed()){
+	$cronProxied = ClientIP::hasForwardingHeaders() ? " The request came through a proxy; run cron from the command line or request http://localhost/ directly." : "";
+	logger("","CronRequest","Cron request DENIED from $ip.$cronProxied");
 	die;
-	}
 }
+// Cron files included below can skip their own direct-request gate
+define('US_CRON_RUNNER', true);
 $from = Input::get('from');
 $primaryquery = $db->query("SELECT file FROM crons WHERE active = ? ORDER BY sort",array(1));
 $querycount = $primaryquery->count();

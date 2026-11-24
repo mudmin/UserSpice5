@@ -25,9 +25,12 @@ $isSameUser = $userId == $user->data()->id;
 $canEdit = true;
 if ($isProtectedProfile) {
 
-  $protectedStyle = 'style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom:1rem;"';
+  // theme variables so the box stays readable in dark mode (a fixed pink did not)
+  $protectedStyle = 'style="background-color: var(--bs-danger-bg-subtle); border: 1px solid var(--bs-danger-border-subtle); padding: 10px; border-radius: 5px; margin-bottom:1rem;"';
   $protectedMsg = "<h3 class='pt-4 text-danger text-center'>This profile is protected</h3>";
   $buttonClass = " disabled";
+  // the class only dims a button; the attribute actually stops keyboard/AT activation
+  $buttonAttr = " disabled";
 
   // If profile is protected, only master accounts can change the protected status
   // All other edits are blocked until protection is removed
@@ -44,6 +47,7 @@ if ($isProtectedProfile) {
   $protectedStyle = '';
   $protectedMsg = '';
   $buttonClass = "";
+  $buttonAttr = "";
 }
 
 // Resume a cloak that was interrupted by a forceReauth() round-trip started in
@@ -282,7 +286,7 @@ if (!empty($_POST)) {
           'confirm' => [
             'display' => 'Confirm New Password',
             'required' => true,
-            'matches' => 'confirm',
+            'matches' => 'pwx',
           ],
         ]);
 
@@ -432,8 +436,10 @@ if (!empty($_POST)) {
         }
       }
 
+      // Only master accounts may grant or revoke cloaking. The form disables the
+      // select for everyone else, so enforce the same rule server-side.
       $cloak_allowed = Input::get('cloak_allowed');
-      if ($userdetails->cloak_allowed != $cloak_allowed) {
+      if ($isMasterAccount && ($cloak_allowed === '0' || $cloak_allowed === '1') && $userdetails->cloak_allowed != $cloak_allowed) {
         $fields = ['cloak_allowed' => $cloak_allowed];
         $db->update('users', $userId, $fields);
         $successes[] = "Set user cloaking to $cloak_allowed.";
@@ -588,7 +594,7 @@ includeHook($hooks, 'body'); ?>
       <div class="col-12 col-sm-6 col-md-3 mt-2">
         <form class="" action="" method="post" data-us-confirm="Do you really want to do this? It cannot be undone.">
           <?= tokenHere(); ?>
-          <input type="submit" name="delete" id="delete" class="btn btn-danger col-12 <?= $buttonClass ?>" value="Delete User">
+          <input type="submit" name="delete" id="delete" class="btn btn-danger col-12 <?= $buttonClass ?>" value="Delete User"<?= $buttonAttr ?>>
         </form>
       </div>
 
@@ -597,13 +603,13 @@ includeHook($hooks, 'body'); ?>
           <form class="" action="" method="post" data-us-confirm="Do you really want to do this? The user will immediately be blocked from the site.">
             <?= tokenHere(); ?>
             <input type="hidden" name="active" value="0">
-            <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Block User">
+            <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Block User"<?= $buttonAttr ?>>
           </form>
         <?php } else { ?>
           <form class="" action="" method="post" data-us-confirm="Do you really want to do this? The user will immediately have their access to the site restored.">
             <?= tokenHere(); ?>
             <input type="hidden" name="active" value="1">
-            <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Unblock User">
+            <input type="submit" name="blocking" id="blocking" class="btn btn-warning col-12 <?= $buttonClass ?>" value="Unblock User"<?= $buttonAttr ?>>
           </form>
         <?php } ?>
       </div>
@@ -616,6 +622,9 @@ includeHook($hooks, 'body'); ?>
         } else {
           $cloakClass = "btn-primary";
           $disabled = "";
+        }
+        if ($buttonAttr !== "") {
+          $disabled = "disabled"; // protected profile
         }
 
         ?>
@@ -631,7 +640,7 @@ includeHook($hooks, 'body'); ?>
         <form class="" action="" method="post" data-us-confirm="If you continue, the user will be forced to change their password on the next login.">
           <?= tokenHere(); ?>
           <input type="hidden" name="force_pr" value="1">
-          <input type="submit" name="force_the_pr" id="force_the_pr" class="btn btn-secondary col-12 <?= $buttonClass ?>" value="Force PW Reset">
+          <input type="submit" name="force_the_pr" id="force_the_pr" class="btn btn-secondary col-12 <?= $buttonClass ?>" value="Force PW Reset"<?= $buttonAttr ?>>
         </form>
       </div>
       <div class="col-12">
@@ -649,13 +658,13 @@ includeHook($hooks, 'body'); ?>
   <div class="row">
     <div class="col-12 col-sm-6">
       <div class="form-group" id="username-group">
-        <label>Username:</label>
-        <input class='form-control' type='search' name='username' value='<?= safeReturn($userdetails->username, true); ?>' autocomplete="off" />
+        <label for="username">Username:</label>
+        <input class='form-control' type='search' name='username' id="username" value='<?= safeReturn($userdetails->username, true); ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="email-group">
-        <label>Email:</label>
-        <input class='form-control' type='search' name='email' value='<?= safeReturn($userdetails->email, true); ?>' autocomplete="off" />
+        <label for="email">Email:</label>
+        <input class='form-control' type='search' name='email' id="email" value='<?= safeReturn($userdetails->email, true); ?>' autocomplete="off" />
 
         <?php if ($userdetails->email_verified == 0) { ?>
           <div class="alert alert-warning mt-2">
@@ -667,13 +676,13 @@ includeHook($hooks, 'body'); ?>
       </div>
 
       <div class="form-group" id="fname-group">
-        <label>First Name:</label>
-        <input class='form-control' type='search' name='fnx' value='<?= safeReturn($userdetails->fname, true); ?>' autocomplete="off" />
+        <label for="fnx">First Name:</label>
+        <input class='form-control' type='search' name='fnx' id="fnx" value='<?= safeReturn($userdetails->fname, true); ?>' autocomplete="off" />
       </div>
 
       <div class="form-group" id="lname-group">
-        <label>Last Name:</label>
-        <input class='form-control' type='search' name='lnx' value='<?= safeReturn($userdetails->lname, true); ?>' autocomplete="off" />
+        <label for="lnx">Last Name:</label>
+        <input class='form-control' type='search' name='lnx' id="lnx" value='<?= safeReturn($userdetails->lname, true); ?>' autocomplete="off" />
       </div>
 
 
@@ -811,7 +820,7 @@ includeHook($hooks, 'body'); ?>
         <div class="<?= $secondCol ?>">
 
           <div class="form-group">
-            <label>New Password</label>
+            <label for="password">New Password</label>
             <input id="password" class="form-control" type="password" autocomplete="off" name="pwx" <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account)) ||
                                                                                                       (!in_array($user->data()->id, $master_account) && $userdetails->protected == 1) &&
                                                                                                       $userId != $user->data()->id
@@ -820,7 +829,7 @@ includeHook($hooks, 'body'); ?>
                                                                                                     } ?> />
           </div>
           <div class="form-group">
-            <label>Confirm Password</label>
+            <label for="confirm">Confirm Password</label>
             <input id="confirm" class="form-control col-12" type="password" autocomplete="off" name="confirm" <?php if ((!in_array($user->data()->id, $master_account) && in_array($userId, $master_account)) ||
                                                                                                                 (!in_array($user->data()->id, $master_account) && $userdetails->protected == 1) &&
                                                                                                                 $userId != $user->data()->id
@@ -847,8 +856,8 @@ includeHook($hooks, 'body'); ?>
 
 
       <div class="form-group">
-        <label> Is allowed to cloak<a class="nounderline no-disable" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
-        <select name="cloak_allowed" class="form-control">
+        <label for="cloak_allowed"> Is allowed to cloak<a id="cloak_allowed-help" aria-hidden="true" class="nounderline no-disable" data-toggle="tooltip" title="Warning: This is an extremely powerful permission and should not be given lightly!!!"><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
+        <select name="cloak_allowed" id="cloak_allowed" aria-describedby="cloak_allowed-help" class="form-control">
           <option value="1" <?php if ($userdetails->cloak_allowed == 1) {
                               echo "selected='selected'";
                             } else {
@@ -863,8 +872,8 @@ includeHook($hooks, 'body'); ?>
       </div>
 
       <div class="form-group">
-        <label>Dev User<a class="nounderline no-disable" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessible from $user->data()->dev_user."><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
-        <select name="dev_user" class="form-control">
+        <label for="dev_user">Dev User<a id="dev_user-help" aria-hidden="true" class="nounderline no-disable" data-toggle="tooltip" title="This is just a flag that you can set for your own purposes.  It will be accessible from $user->data()->dev_user."><i class="fa fa-question-circle offset-circle font-info"></i></a></label>
+        <select name="dev_user" id="dev_user" aria-describedby="dev_user-help" class="form-control">
           <option <?php if ($userdetails->dev_user == 0) {
                     echo "selected='selected'";
                   } ?> value="0">No</option>
@@ -878,11 +887,11 @@ includeHook($hooks, 'body'); ?>
       <div class="form-group">
 
         <?php if (in_array($user->data()->id, $master_account)) { ?>
-          <label class="normal">Protected Account
-            <a class="nounderline no-disable" data-toggle="tooltip" title="When enabled, this profile can only be edited in the Admin panel. All fields will be locked until protection is disabled. Use this to prevent accidental changes to critical accounts. Only Master Accounts can toggle this feature."><i class="fa fa-question-circle offset-circle font-info me-1"></i></a>
+          <label for="protected" class="normal">Protected Account
+            <a id="protected-help" aria-hidden="true" class="nounderline no-disable" data-toggle="tooltip" title="When enabled, this profile can only be edited in the Admin panel. All fields will be locked until protection is disabled. Use this to prevent accidental changes to critical accounts. Only Master Accounts can toggle this feature."><i class="fa fa-question-circle offset-circle font-info me-1"></i></a>
             <?php if ($userdetails->protected == 1) { ?><span class="text-danger">EDIT DISABLED</span><?php } ?>
           </label>
-          <select name="protected" class="form-control">
+          <select name="protected" id="protected" aria-describedby="protected-help" class="form-control">
             <option <?php if ($userdetails->protected == 0) {
                       echo "selected='selected'";
                     } ?> value="0">No</option>
@@ -893,7 +902,7 @@ includeHook($hooks, 'body'); ?>
         <?php } ?>
       </div>
       <div class="form-group">
-        <label><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email? Will expire in <?= $settings->reset_vericode_expiry; ?> minutes.</label><br>
+        <label for="sendPwReset"><input type="checkbox" name="sendPwReset" id="sendPwReset" /> Send Reset Email? Will expire in <?= $settings->reset_vericode_expiry; ?> minutes.</label><br>
       </div>
       <input type="hidden" class="no-disable" name="csrf" value="<?= Token::generate(); ?>" />
       <div class="pull-right mt-3">

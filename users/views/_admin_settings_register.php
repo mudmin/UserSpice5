@@ -8,42 +8,45 @@
         <div class="card-body">
           Please note that you can install the <a href="admin.php?view=spice&search=userinfo">User Info</a> plugin to alter your registration fields.<br><br>
           <div class="form-group d-flex justify-content-between align-items-center">
+            <?php // label + help kept together: this row spreads its children across with justify-content-between ?>
+            <span>
             <label for="registration" class="mb-0">Allow New User Registration
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Registration Switcher! Also controls OAuth (Social Logins). Default: Enabled.">
-                <i class="fa fa-question-circle offset-circle"></i>
-              </a>
-            </label>
+
+            </label> <button type="button" id="registration-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Registration Switcher! Also controls OAuth (Social Logins). Default: Enabled.">
+                <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+              </button>
+            </span>
             <span class="offset-switch">
-              <label class="switch switch-text switch-success">
+              <span class="switch switch-text switch-success">
                 <div class="form-check form-switch">
-                  <input id="registration" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Registration System" <?php if ($settings->registration == 1) echo 'checked="true"'; ?>>
+                  <input id="registration" aria-describedby="registration-help" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Registration System" <?php if ($settings->registration == 1) echo 'checked="true"'; ?>>
                 </div>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
-              </label>
+              </span>
             </span>
           </div>
 
           <div class="form-group">
             <label for="join_vericode_expiry">Registration Vericode Expiry (in hours)
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Length of time in hours for expiration of vericodes to email. Maximum: 999999999 (thats nine 9s!). Default: 24">
-                <i class="fa fa-question-circle offset-circle"></i>
-              </a>
 
-            </label>
+
+            </label> <button type="button" id="join_vericode_expiry-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Length of time in hours for expiration of vericodes to email. Maximum: 999999999 (thats nine 9s!). Default: 24">
+                <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+              </button>
             <div class="input-group">
-              <input type="number" step="1" min="1" max="999999999" class="form-control ajxnum" data-desc="Registration Vericode Expiry" name="join_vericode_expiry" id="join_vericode_expiry" value="<?= $settings->join_vericode_expiry ?>">
+              <input type="number" step="1" min="1" max="999999999" class="form-control ajxnum" data-desc="Registration Vericode Expiry" name="join_vericode_expiry" id="join_vericode_expiry" aria-describedby="join_vericode_expiry-help" value="<?= $settings->join_vericode_expiry ?>">
               <span class="input-group-addon input-group-text">Hours</span>
             </div>
           </div>
 
           <div class="form-group">
             <label for="change_un">Allow users to change their Usernames and Emails
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Controls whether users can change their own username and email on the account settings page. Default: Cannot change username but can change email.">
-                <i class="fa fa-question-circle offset-circle"></i>
-              </a>
-            </label>
-            <select id="change_un" class="form-control ajxnum" data-desc="Allow users to change their Usernames and Emails" name="change_un">
+
+            </label> <button type="button" id="change_un-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Controls whether users can change their own username and email on the account settings page. Default: Cannot change username but can change email.">
+                <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+              </button>
+            <select id="change_un" aria-describedby="change_un-help" class="form-control ajxnum" data-desc="Allow users to change their Usernames and Emails" name="change_un">
               <option value="0" <?php if ($settings->change_un == 0) echo 'selected="selected"'; ?>>Cannot change username but can change email</option>
               <option value="1" <?php if ($settings->change_un == 1) echo 'selected="selected"'; ?>>Can change both username and email</option>
               <option value="2" <?php if ($settings->change_un == 2) echo 'selected="selected"'; ?>>Can change username only once and can change email</option>
@@ -52,21 +55,21 @@
           </div>
 
           <div class="form-group">
-            <label for="change_un">Force users to validate their emails after registering</label>
+            <p class="mb-0 fw-semibold">Force users to validate their emails after registering</p>
             <br>
             <span class="text-body-secondary">
-              This setting is a part of the <a href="admin.php?view=email" style="color:blue;">email settings</a> as it requires your email to be properly configured and testing in order to function.
+              This setting is a part of the <a href="admin.php?view=email">email settings</a> as it requires your email to be properly configured and testing in order to function.
             </span>
           </div>
 
           <div class="form-group">
             <label for="reset_vericode_expiry">Password Reset Vericode Expiry (in minutes)
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="Length of time in minutes for expiration of password reset vericodes to email. Maximum: 999999999 (thats nine 9s!). Default: 15">
-                <i class="fa fa-question-circle offset-circle"></i>
-              </a>
-            </label>
+
+            </label> <button type="button" id="reset_vericode_expiry-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Length of time in minutes for expiration of password reset vericodes to email. Maximum: 999999999 (thats nine 9s!). Default: 15">
+                <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+              </button>
             <div class="input-group">
-              <input type="number" step="1" min="1" max="999999999" class="form-control ajxnum" data-desc="Password Reset Vericode Expiry" name="reset_vericode_expiry" id="reset_vericode_expiry" value="<?= $settings->reset_vericode_expiry ?>">
+              <input type="number" step="1" min="1" max="999999999" class="form-control ajxnum" data-desc="Password Reset Vericode Expiry" name="reset_vericode_expiry" id="reset_vericode_expiry" aria-describedby="reset_vericode_expiry-help" value="<?= $settings->reset_vericode_expiry ?>">
               <span class="input-group-addon input-group-text">Minutes</span>
             </div>
           </div>
@@ -109,77 +112,77 @@
             <div class="form-group d-flex justify-content-between align-items-center">
               <label for="meter_active" class="mb-0">Show Password Meter?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="meter_active" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Show Password Meter" data-table="us_password_strength" <?php if ($pw_settings->meter_active == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
 
             <div class="form-group d-flex justify-content-between align-items-center" id="setting-enforce_rules">
               <label for="enforce_rules" class="mb-0">Enforce Password Rules?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="enforce_rules" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Enforce Password Rules" data-table="us_password_strength" <?php if ($pw_settings->enforce_rules == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
 
             <div class="form-group d-flex justify-content-between align-items-center">
               <label for="require_numbers" class="mb-0">Require a Number in the Password?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="require_numbers" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Require a Number" data-table="us_password_strength" <?php if ($pw_settings->require_numbers == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
             <div class="form-group d-flex justify-content-between align-items-center">
               <label for="require_uppercase" class="mb-0">Require a Capital Letter in the Password?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="require_uppercase" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Require a Capital Letter" data-table="us_password_strength" <?php if ($pw_settings->require_uppercase == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
 
             <div class="form-group d-flex justify-content-between align-items-center">
               <label for="require_lowercase" class="mb-0">Require a Lowercase Letter in the Password?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="require_lowercase" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Require a Lowercase Letter" data-table="us_password_strength" <?php if ($pw_settings->require_lowercase == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
 
             <div class="form-group d-flex justify-content-between align-items-center">
               <label for="require_symbols" class="mb-0">Require a Symbol in the Password?</label>
               <span class="offset-switch">
-                <label class="switch switch-text switch-success">
+                <span class="switch switch-text switch-success">
                   <div class="form-check form-switch">
                     <input id="require_symbols" type="checkbox" role="switch" class="form-check-input switch-input toggle" data-desc="Require a Symbol" data-table="us_password_strength" <?php if ($pw_settings->require_symbols == 1) echo 'checked="true"'; ?>>
                   </div>
                   <span data-on="Yes" data-off="No" class="switch-label"></span>
                   <span class="switch-handle"></span>
-                </label>
+                </span>
               </span>
             </div>
 
@@ -307,7 +310,7 @@
 
             <div class="row mt-3">
               <div class="col-md-6">
-                <label for="">Sample password score tester</label><br>
+                <label for="password">Sample password score tester</label><br>
                 <input type="text" id="password" class="form-control" placeholder="Enter a sample password">
                 <input type="text" id="confirm" class="form-control mt-2" placeholder="Confirm sample password (optional)">
                 <div class="alert alert-warning mt-2" id="meterActiveWarning">Password meter is not active. This is for demonstration purposes only.</div>

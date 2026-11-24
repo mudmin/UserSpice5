@@ -10,7 +10,7 @@
 return array (
   'primary' => '#d97706',
   'primary-hover' => '#b45309',
-  'primary-text-emphasis' => '#5e2e02',
+  'primary-text-emphasis' => '#9f5704',
   'primary-bg-subtle' => '#fbeed4',
   'primary-border-subtle' => '#f0c98a',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#65a30d',
   'success-hover' => '#4d7c0f',
-  'success-text-emphasis' => '#2a4604',
+  'success-text-emphasis' => '#487509',
   'success-bg-subtle' => '#e8f3d0',
   'success-border-subtle' => '#b8d680',
 
   'info' => '#b45309',
   'info-hover' => '#92400e',
-  'info-text-emphasis' => '#4a2304',
+  'info-text-emphasis' => '#a34b08',
   'info-bg-subtle' => '#f5e2c8',
   'info-border-subtle' => '#deb78a',
 
   'warning' => '#ca8a04',
   'warning-hover' => '#a16207',
-  'warning-text-emphasis' => '#4d3002',
+  'warning-text-emphasis' => '#8d6003',
   'warning-bg-subtle' => '#fbeec0',
   'warning-border-subtle' => '#e6c763',
 
   'danger' => '#b91c1c',
   'danger-hover' => '#991b1b',
-  'danger-text-emphasis' => '#5e0808',
+  'danger-text-emphasis' => '#b91c1c',
   'danger-bg-subtle' => '#f6d3d3',
   'danger-border-subtle' => '#e09090',
 
@@ -71,6 +71,8 @@ return array (
   'us-menu-custom-submenu-border' => '#92400e',
 
   'headings-color' => 'var(--bs-secondary)',
+  'link-color' => '#9e5705',
+  'link-hover-color' => '#844904',
 
   'custom_css' => "
 /* === AUTUMN HARVEST === warm, crunchy, gold-edged */
@@ -110,5 +112,6 @@ return array (
 .alert { border-left: 4px solid; border-radius: 4px; }
 .badge { border-radius: 4px; }
 hr { border-color: #e6d4b8; }
+
 ",
 );

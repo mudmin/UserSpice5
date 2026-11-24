@@ -132,7 +132,7 @@ foreach (fetchGroupsByMenu($menuId) as $g) {
 
     <div class="form-group">
       <label>Icon Class (<a href="https://fontawesome.bootstrapcheatsheets.com/" target="_blank">options</a>)</label>
-      Be sure to add <span style="color:red">fa fa-fw </span> before the shortcode to display properly.
+      Be sure to add <span class="text-danger-emphasis">fa fa-fw </span> before the shortcode to display properly.
       <input class='form-control' type='text' name='icon_class' value='<?= $item->icon_class ?>' />
     </div>
 

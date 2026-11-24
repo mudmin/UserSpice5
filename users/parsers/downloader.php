@@ -296,9 +296,8 @@ if (defined('CURLOPT_REDIR_PROTOCOLS') && defined('CURLPROTO_HTTPS')) {
   @curl_setopt($ch_start, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS);
 }
 
-$ip = ipCheck();
 $extra_curl_security_enabled = defined('EXTRA_CURL_SECURITY') && constant('EXTRA_CURL_SECURITY') === true;
-if (($ip == "::1" || $ip == "127.0.0.1") || !$extra_curl_security_enabled) {
+if (ClientIP::isLocal() || !$extra_curl_security_enabled) {
   curl_setopt($ch_start, CURLOPT_SSL_VERIFYHOST, 0);
   curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, false); // nosemgrep: curl-ssl-verifypeer-off - intentionally disabled for localhost or when EXTRA_CURL_SECURITY is off
 } else {
@@ -316,7 +315,6 @@ if (!$page) {
   die;
 }
 
-curl_close($ch_start);
 fclose($zip_resource);
 
 // ------------------------------
@@ -349,7 +347,6 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);
-curl_close($ch);
 
 // Normalize result (existing behavior)
 $result = substr((string)$result, 1, -1);

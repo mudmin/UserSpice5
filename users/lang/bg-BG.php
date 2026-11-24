@@ -691,7 +691,7 @@ $lang = array_merge($lang, array(
 
     "2FA_ERR_NO_CODE_PROVIDED"             => "Не е предоставен код за удостоверяване.",
 
-    "RATE_LIMIT_LOGIN"              => "Твърде много неуспешни опити за вход. Моля, изчакайте преди да опитате отново.",
+    "RATE_LIMIT_LOGIN"              => "Твърде много опити за вход. Моля, изчакайте преди да опитате отново.",
 
     "RATE_LIMIT_TOTP"               => "Твърде много грешни кодове за удостоверяване. Моля, изчакайте преди да опитате отново.",
 
@@ -712,6 +712,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_PASSWORD_CHANGE"    => "Твърде много опити за смяна на парола. Моля, изчакайте преди да опитате отново.",
 
     "RATE_LIMIT_GENERIC"            => "Твърде много опити. Моля, изчакайте преди да опитате отново.",
+    "SOCIAL_EMAIL_IN_USE"           => "Този имейл адрес вече принадлежи на акаунт, а доставчикът, чрез който влизате, не е потвърдил, че е ваш. Вместо това влезте с паролата на този акаунт.",
 
 ));
 
@@ -878,6 +879,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Имате проблеми с приложението за удостоверяване?",
 	"2FA_BACKUP_CODE_HELP" => "Въведете един от запазените резервни кодове",
 	"2FA_USE_BACKUP_BTN"   => "Използване на резервен код",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Меню",
+	"MENU_LOGO_HOME" => "%m1% – начало",
+	"MENU_EMAIL"     => "Имейл до %m1%",
+	"MENU_CALL"      => "Обаждане до %m1%",
+	"SKIP_TO_MAIN"   => "Към основното съдържание",
+	"PW_REQ_MET"     => "изпълнено",
+	"PW_REQ_NOT_MET" => "неизпълнено",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

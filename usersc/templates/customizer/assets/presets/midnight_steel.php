@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#334155',
 
   'headings-color' => 'inherit',
+  'link-color' => '#60a5fa',
+  'link-hover-color' => '#93c5fd',
 
   'custom_css' => "
 /* === MIDNIGHT STEEL === corporate dark */
@@ -116,7 +118,5 @@ return array (
   border: 1px solid #334155;
   color: #d4d4d4;
 }
-a:not(.btn):not(.nav-link) { color: #60a5fa; }
-a:not(.btn):not(.nav-link):hover { color: #93c5fd; }
 ",
 );

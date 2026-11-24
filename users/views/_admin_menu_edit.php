@@ -197,7 +197,7 @@ if ($_POST) {
     $navCheck = $db->query("SELECT navigation_type FROM settings")->first();
     if($navCheck->navigation_type == 0){
     ?>
-    <span style='color:red;'>Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</span>
+    <span class='text-danger-emphasis'>Please note that you have Enable Database-Driven Navigation turned off in your <a href="admin.php?view=general">General Settings</a>. This menu may not display in your template.</span>
   <?php   }} ?>
 <div class="card">
   <div class="card-body">
@@ -212,13 +212,13 @@ if ($_POST) {
               <button type="submit" data-us-dirty="false" class="btn btn-primary save-button">Save</button>
             </div>
             <div class="form-group">
-              <label for="menu_name">Label</label>
+              <label for="label">Label</label>
               <input id="label" name="label" class="form-control" value="<?= $item->label ?>" data-us-dirty="true" />
               <small class="form-text text-body-secondary">For multilanguage, use any language key in users/lang/en-US.php and wrap the key in {{THIS_LANGUAGE}} and it will be translated. Add your own keys in usersc/lang. </small>
             </div>
 
-            <div class="form-group">
-              <label for="permissions">Permissions</label><br>
+            <div class="form-group" role="group" aria-labelledby="item-perms-label">
+              <span id="item-perms-label" class="fw-semibold">Permissions</span><br>
               <div class="form-check form-check-inline">
                 <input class="form-check-input perm-check" type="checkbox" id="permission_0" name="permissions[]" value="0" <?= in_array(0, $item->permissions) ? 'checked' : "" ?>>
                 <label class="form-check-label" for="permission_0">Public</label>
@@ -233,12 +233,12 @@ if ($_POST) {
             </div>
 
             <?php if(pluginActive("usertags",true) && count($tags) > 0){ ?>
-              <div class="form-group">
-              <label for="permissions">Tags</label><br>
+              <div class="form-group" role="group" aria-labelledby="item-tags-label">
+              <span id="item-tags-label" class="fw-semibold">Tags</span><br>
 
               <?php foreach ($tags as $tag) : ?>
                 <div class="form-check form-check-inline">
-                  <input class="form-check-input other-tags tag-check" type="checkbox" id="tag_<?= $perm->id ?>" name="tags[]" value="<?= $tag->id ?>" <?= in_array($tag->id, $item->tags) ? 'checked' : "" ?>>
+                  <input class="form-check-input other-tags tag-check" type="checkbox" id="tag_<?= $tag->id ?>" name="tags[]" value="<?= $tag->id ?>" <?= in_array($tag->id, $item->tags) ? 'checked' : "" ?>>
                   <label class="form-check-label" for="tag_<?= $tag->id ?>"><?= $tag->tag ?></label>
                 </div>
               <?php endforeach; ?>
@@ -285,7 +285,7 @@ if ($_POST) {
 
             <div class="form-group" id="snippet_wrapper">
               <label for="snippet">Snippet</label><br>
-              <small class="form-text text-body-secondary">Snippets can be placed in usersc/hooks/menu or can be found in plugins. They are php files that return html. You can use them to add custom html to your menu. <span class="text-danger">Due to the way snippets are rendered, it is VERY important that you minify whitespace in your snippet files.</span></small>
+              <small class="form-text text-body-secondary">Snippets can be placed in usersc/hooks/menu or can be found in plugins. They are php files that return html. You can use them to add custom html to your menu. A snippet's output goes directly inside the menu list, so it must output complete <code>&lt;li&gt;</code> element(s) and nothing else at the top level (no bare <code>&lt;div&gt;</code>, <code>&lt;a&gt;</code> or text); otherwise the menu becomes invalid HTML for screen readers. <span class="text-danger">Due to the way snippets are rendered, it is VERY important that you minify whitespace in your snippet files.</span></small>
               <select class="form-control" name="snippet" id="snippet" data-us-dirty="true">
                 <option value=""></option>
                 <?php foreach ($snippets as $s) {
@@ -454,10 +454,11 @@ if ($_POST) {
               <h3>Submenu Items</h3>
               <a class="btn btn-sm btn-dark" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=new&parent_id=<?= $childrenParentId ?>">Add Item</a>
             </div>
+            <div id="menu-order-status" class="visually-hidden" aria-live="polite"></div>
             <table class="table table-sm">
               <thead>
                 <tr>
-                  <th></th>
+                  <th><span class="visually-hidden">Drag to reorder</span></th>
                   <th>Label</th>
                   <th>Language Key</th>
                   <th>Permissions</th>
@@ -470,7 +471,7 @@ if ($_POST) {
                   $parsedLabel = parseMenuLabel($child->label);
                 ?>
                   <tr class="child-sortable" data-id="<?= $child->id ?>">
-                    <td class="text-body-secondary"><i class="fa fa-arrows-v"></i></td>
+                    <td class="text-body-secondary"><i class="fa fa-arrows-v" aria-hidden="true"></i></td>
                     <td>
                       <?php if($parsedLabel != ""){
                         echo $parsedLabel;
@@ -517,8 +518,11 @@ if ($_POST) {
                       ?>
                     </td>
                     <td class="text-end">
-                      <a class="btn btn-sm btn-outline-dark mr-1" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=<?= $child->id ?>&parent_id=<?= $child->parent ?>"><i class="fa fa-pencil"></i></a>
-                      <button type="button" class="btn btn-sm btn-outline-danger mr-1" data-us-delete-item="<?= $child->id ?>"><i class="fa fa-trash"></i></button>
+                      <?php // keyboard alternative to dragging the row ?>
+                      <button type="button" class="btn btn-sm btn-outline-secondary mr-1" data-us-move="up" aria-label="Move <?= safeReturn(strip_tags($parsedLabel), true) ?: 'item' ?> up"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+                      <button type="button" class="btn btn-sm btn-outline-secondary mr-1" data-us-move="down" aria-label="Move <?= safeReturn(strip_tags($parsedLabel), true) ?: 'item' ?> down"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>
+                      <a class="btn btn-sm btn-outline-dark mr-1" href="<?= $us_url_root ?>users/admin.php?view=edit_menu&menu_id=<?= $menuId ?>&item_id=<?= $child->id ?>&parent_id=<?= $child->parent ?>" aria-label="Edit <?= safeReturn(strip_tags(parseMenuLabel($child->label)), true) ?: 'item' ?>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                      <button type="button" class="btn btn-sm btn-outline-danger mr-1" data-us-delete-item="<?= $child->id ?>" aria-label="Delete <?= safeReturn(strip_tags(parseMenuLabel($child->label)), true) ?: 'item' ?>"><i class="fa fa-trash" aria-hidden="true"></i></button>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -540,7 +544,7 @@ if ($_POST) {
 <style nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
   .explain {
     font-size: .7rem;
-    color: #999;
+    color: var(--bs-secondary-color);
     line-height: .9rem;
   }
 </style>
@@ -635,6 +639,43 @@ if ($_POST) {
   }
 
   var childrenEl = document.getElementById('menu_items_sortable');
+
+  function saveMenuOrder(order) {
+    $.ajax({
+      url: '<?= $us_url_root ?>users/parsers/menus.php',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        action: 'sort_menu_items',
+        order,
+        menu_id: '<?= $menuId ?>',
+        item_id: '<?= $childrenParentId ?>',
+        token: '<?= Token::generate() ?>'
+      }
+    }).fail(function () {
+      var status = document.getElementById('menu-order-status');
+      if (status) { status.textContent = 'Could not save the new order. Reload the page and try again.'; }
+    });
+  }
+
+  // Move up/down buttons: the keyboard alternative to dragging a row
+  function moveMenuItem(btn) {
+    var row = btn.closest('.child-sortable');
+    var up = btn.getAttribute('data-us-move') === 'up';
+    var sibling = up ? row.previousElementSibling : row.nextElementSibling;
+    var status = document.getElementById('menu-order-status');
+    var rows = function () { return Array.prototype.slice.call(childrenEl.querySelectorAll('.child-sortable')); };
+    if (!sibling) {
+      status.textContent = up ? 'Already first.' : 'Already last.';
+      return;
+    }
+    childrenEl.insertBefore(row, up ? sibling : sibling.nextElementSibling);
+    btn.focus(); // moving the row can drop focus
+    var order = rows();
+    status.textContent = 'Moved to position ' + (order.indexOf(row) + 1) + ' of ' + order.length + '.';
+    saveMenuOrder(order.map(function (r) { return r.getAttribute('data-id'); }));
+  }
+
   new Sortable(childrenEl, {
     sortable: true,
     draggable: '.child-sortable',
@@ -645,19 +686,7 @@ if ($_POST) {
     },
     store: {
       set: (sortable) => {
-        var order = sortable.toArray();
-        $.ajax({
-          url: '<?= $us_url_root ?>users/parsers/menus.php',
-          type: 'POST',
-          dataType: 'json',
-          data: {
-            action: 'sort_menu_items',
-            order,
-            menu_id: '<?= $menuId ?>',
-            item_id: '<?= $childrenParentId ?>',
-            token: '<?= Token::generate() ?>'
-          }
-        });
+        saveMenuOrder(sortable.toArray());
       }
     }
   });
@@ -678,5 +707,7 @@ if ($_POST) {
     if (save) { setDirty(false); }
     var del = e.target.closest && e.target.closest('[data-us-delete-item]');
     if (del) { usDeleteMenuItem(del.getAttribute('data-us-delete-item')); }
+    var move = e.target.closest && e.target.closest('[data-us-move]');
+    if (move) { moveMenuItem(move); }
   }, true);
 </script>

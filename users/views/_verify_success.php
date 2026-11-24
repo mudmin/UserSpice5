@@ -22,8 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 if(!passwordsAllowed($settings->no_passwords)){
 $user = $verify;
 $user->login();
+$hooks = getMyHooks(['page' => 'loginSuccess']);
+includeHook($hooks, 'body');
+// Page captured before login (session only; never from the request)
+$dest = consumeLoginDest();
 if(file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')){
   require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+}
+if ($dest !== '') {
+  Redirect::sanitized($dest);
 }
 Redirect::to($us_url_root . $settings->redirect_uri_after_login);
 }

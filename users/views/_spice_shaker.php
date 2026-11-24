@@ -29,11 +29,11 @@ if (
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}$/", trim($settings->spice_api))
   && !preg_match("/^[\w]{5}-[\w]{5}-[\w]{5}-[\w]{5}-[\w]{4}$/", trim($settings->spice_api))
 ) {
-  echo "<h4><span style='color:red'>The API Key does not appear to be valid.</span> </h4>";
+  echo "<h4><span class='text-danger-emphasis'>The API Key does not appear to be valid.</span> </h4>";
 }
 if ($diag) {
   echo "<h6>Diagnostic Mode Activated</h6><br>";
-  echo "<h6><span style='color:red'>Please Note:</span> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
+  echo "<h6><span class='text-danger-emphasis'>Please Note:</span> Additional diagnostic info may be <a href='admin.php?view=logs'>located in the logs</a>.</h6><br>";
 }
 $type = Input::get('type');
 if ($diag && $type == '' && !isset($_POST['goSearch'])) {
@@ -81,10 +81,6 @@ if ($settings->spice_api != '') {
         echo 'Curl error: ' . safeReturn($apiResponse['curlError']);
       }
     }
-    //close cURL resource
-    if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
-    }
     if (!$apiResponse['success']) {
       $apiError = $apiResponse['error'];
       $apiConnectionFailed = $apiResponse['connectionFailed'];
@@ -128,10 +124,6 @@ if ($settings->spice_api != '') {
       if ($apiResponse['curlErrno']) {
         echo 'Curl error: ' . safeReturn($apiResponse['curlError']);
       }
-    }
-    //close cURL resource
-    if (PHP_VERSION_ID < 80500) {
-       curl_close($ch);
     }
     if (!$apiResponse['success']) {
       $apiError = $apiResponse['error'];
@@ -182,17 +174,17 @@ Spice Shaker allows you to download and automatically install Updates, Plugins, 
 <?php
 $failed = 0;
 if (!function_exists('curl_version')  || !extension_loaded('curl')) {
-  echo "<span style='color:red'>We see that you do not have the PHP curl extension CURL enabled on your server.  Please make sure it is enabled.</span><br>";
+  echo "<span class='text-danger-emphasis'>We see that you do not have the PHP curl extension CURL enabled on your server.  Please make sure it is enabled.</span><br>";
   $failed = 1;
 }
 
 if (!extension_loaded("zip")) {
-  echo "<span style='color:red'>We see that you do not have the PHP zip extension installed on your server.  Please make sure it is enabled.</span><br>";
+  echo "<span class='text-danger-emphasis'>We see that you do not have the PHP zip extension installed on your server.  Please make sure it is enabled.</span><br>";
   $failed = 1;
 }
 
 if (!is_writable($abs_us_root . $us_url_root . 'users/parsers/downloader.php')) {
-  echo "<span style='color:red'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</span><br>";
+  echo "<span class='text-danger-emphasis'>It appears that you cannot write to the users/parsers folder.  If you cannot download plugins, this is why.</span><br>";
   $failed = 1;
 }
 
@@ -230,7 +222,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
         <form class="" action="" method="post">
           <?= tokenHere(); ?>
           <div class="d-flex">
-            <select class="form-control" name="type">
+            <select class="form-control" name="type" aria-label="Browse">
               <option value="featured" <?php if ($type == 'featured') { ?>selected="Selected" <?php } ?>>Browse Featured</option>
               <option value="plugin" <?php if ($type == 'plugin') { ?>selected="Selected" <?php } ?>>Browse Plugins</option>
               <option value="template" <?php if ($type == 'template') { ?>selected="Selected" <?php } ?>>Browse Templates</option>
@@ -343,7 +335,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
               <img class="img-fluid" src="<?= $src ?>" alt="Avatar" />
             </div>
           <?php } ?>
-          <div class="card-body" style="overflow-y: auto">
+          <div class="card-body us-spice-scroll" style="overflow-y: auto">
             <div class="row">
               <div class="<?= $width ?>">
                 <h6 class="card-title"><?= safeReturn(hed($d->project)) ?> v<?= safeReturn(hed($d->version)) . " (" . safeReturn(hed($d->status)) . ")"; ?>
@@ -402,7 +394,7 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
     }
   } else {
     ?>
-    <p align="center"><span style="color:red"><strong>No results found</span></strong></p>
+    <p align="center"><span class="text-danger-emphasis"><strong>No results found</strong></span></p>
 <?php
   }
   echo "</div>";
@@ -410,6 +402,26 @@ if (file_exists($abs_us_root . $us_url_root . "users/parsers/temp.zip")) {
 ?>
 </div> <!-- end .mt-3 -->
 <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>" type="text/javascript">
+  // Only result cards whose text actually overflows become tab stops (so keyboard
+  // users can scroll them), named after the card's title. Re-checked once fonts and
+  // images have loaded and on resize, since both change which cards overflow.
+  function usMarkScrollableSpiceCards() {
+    document.querySelectorAll('.us-spice-scroll').forEach(function (body) {
+      if (body.scrollHeight > body.clientHeight + 1) {
+        var title = body.querySelector('.card-title');
+        body.tabIndex = 0;
+        body.setAttribute('role', 'region');
+        body.setAttribute('aria-label', title ? title.textContent.trim().replace(/\s+/g, ' ') : 'Plugin details');
+      } else if (body.hasAttribute('tabindex')) {
+        body.removeAttribute('tabindex');
+        body.removeAttribute('role');
+        body.removeAttribute('aria-label');
+      }
+    });
+  }
+  usMarkScrollableSpiceCards();
+  window.addEventListener('load', usMarkScrollableSpiceCards);
+  window.addEventListener('resize', usMarkScrollableSpiceCards);
   $(".installme").click(function(event) {
     if ($(this).hasClass("warnme")) {
       if (!confirm("WARNING:  Please understand that this is a community provided addon and the UserSpice developers cannot take any responsibility for any harm it may cause.  Please make sure you understand the risks before using community provided addons")) {

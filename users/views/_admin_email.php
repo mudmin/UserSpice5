@@ -12,7 +12,7 @@ foreach ($lines as $line) {
   }
 }
 
-$urlProtocol = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
+$urlProtocol = ClientIP::isHttps() ? 'https://' : 'http://';
 
 if (!empty($_POST)) {
   $token = $_POST['csrf'];
@@ -199,36 +199,36 @@ foreach ($defaults as $field => $defaultVal) {
         <div class="card-body">
 
           <div class="form-group">
-            <label>Website Name:</label>
+            <label for="website_name">Website Name:</label>
             <input size='50' class='form-control<?= isset($glowFields['website_name']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='website_name' name='website_name' value='<?= $results->website_name; ?>' />
           </div>
           <div class="form-group">
-            <label>SMTP Server:</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='smtp_server' value='<?= $results->smtp_server; ?>' />
+            <label for="smtp_server">SMTP Server:</label>
+            <input size='50' class='form-control' type='text' autocomplete="off" name='smtp_server' id="smtp_server" value='<?= $results->smtp_server; ?>' />
           </div>
           <div class="form-group">
-            <label>SMTP Port:</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='smtp_port' value='<?= $results->smtp_port; ?>' />
+            <label for="smtp_port">SMTP Port:</label>
+            <input size='50' class='form-control' type='text' autocomplete="off" name='smtp_port' id="smtp_port" value='<?= $results->smtp_port; ?>' />
           </div>
-          <label>Email Login/Username:</label>
+          <label for="emx">Email Login/Username:</label>
           <input size='50' class='form-control<?= isset($glowFields['email_login']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='emx' name='emx' value='<?= $results->email_login; ?>' />
           <div class="form-group">
-            <label>Email Password:</label>
+            <label for="emp">Email Password:</label>
             <input size='50' class='form-control<?= isset($glowFields['email_pass']) ? ' default-glow' : '' ?>' type='password' autocomplete="off" id='emp' name='emp' value='<?= $results->email_pass; ?>' />
           </div>
           <div class="form-group">
-            <label>From Name (For Sent Emails):</label>
+            <label for="from_name">From Name (For Sent Emails):</label>
             <button type="button" id="use-website-name" class="btn tiny-button btn-outline-primary">Use Website Name</button>
             <input size='50' class='form-control<?= isset($glowFields['from_name']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='from_name' name='from_name' value='<?= $results->from_name; ?>' />
           </div>
           <div class="form-group">
-            <label>From Email (For Sent Emails):</label>
+            <label for="frome">From Email (For Sent Emails):</label>
             <button type="button" id="use-email-login" class="btn tiny-button btn-outline-primary">Use Email Login</button>
             <input size='50' class='form-control<?= isset($glowFields['from_email']) ? ' default-glow' : '' ?>' type='text' autocomplete="off" id='frome' name='frome' value='<?= $results->from_email; ?>' />
           </div>
           <div class="form-group">
-            <label>PHPMailer Authtype: (Typically CRAM-MD5, LOGIN, PLAIN, or XOAUTH2)</label>
-            <input size='50' class='form-control' type='text' autocomplete="off" name='authtype' value='<?= $results->authtype; ?>' />
+            <label for="authtype">PHPMailer Authtype: (Typically CRAM-MD5, LOGIN, PLAIN, or XOAUTH2)</label>
+            <input size='50' class='form-control' type='text' autocomplete="off" name='authtype' id="authtype" value='<?= $results->authtype; ?>' />
           </div>
         </div>
       </div>
@@ -238,8 +238,8 @@ foreach ($defaults as $field => $defaultVal) {
       <div class="card no-padding">
         <div class="card-body">
           <div class="form-group">
-            <label>Transport</label>
-            <select class="form-control" name="transport">
+            <label for="transport">Transport</label>
+            <select class="form-control" name="transport" id="transport">
               <option value="tls" <?php if ($results->transport == 'tls') {
                                     echo 'selected="selected"';
                                   } ?>>TLS (encrypted)</option>
@@ -249,13 +249,13 @@ foreach ($defaults as $field => $defaultVal) {
             </select>
           </div>
           <div class="form-group">
-            <label>Email Debugging Level
-              <a tabindex="-1" data-trigger="focus" data-bs-trigger="focus" data-placement="top" class="btn btn-link text-info px-0" title="0=Off, 1=Client Messages, 2=Normal Debug, 3=More Verbose, 4=Extremely Verbose.
+            <label for="debug_level">Email Debugging Level
+
+            </label> <button type="button" id="debug_level-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="0=Off, 1=Client Messages, 2=Normal Debug, 3=More Verbose, 4=Extremely Verbose.
                 Debugging should be off in production projects for security reasons">
-                <i class="fa fa-question-circle offset-circle"></i>
-              </a>
-            </label>
-            <select class="form-control" width="100%" name="debug_level">
+                <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+              </button>
+            <select class="form-control" width="100%" name="debug_level" id="debug_level" aria-describedby="debug_level-help">
               <option value="<?= $results->debug_level; ?>"><?= $results->debug_level; ?></option>
               <option value="0">0</option>
               <option value="1">1</option>
@@ -265,18 +265,13 @@ foreach ($defaults as $field => $defaultVal) {
             </select>
           </div>
           <div class="form-group">
-            <label>Use isSMTP Feature 
-            <a tabindex="-1" 
-              data-trigger="focus" 
-              data-bs-trigger="focus" 
-              data-placement="top" 
-              class="btn btn-link text-info px-0" 
-              title="Use this if your email keeps failing and you know your credentials are correct.">
-              <i class="fa fa-question-circle offset-circle"></i>
-            </a>
+            <label for="isSMTP">Use isSMTP Feature 
 
-          </label>
-            <select class="form-control" width="100%" name="isSMTP">
+
+          </label> <button type="button" id="isSMTP-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Use this if your email keeps failing and you know your credentials are correct.">
+              <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+            </button>
+            <select class="form-control" width="100%" name="isSMTP" id="isSMTP" aria-describedby="isSMTP-help">
               <?php if ($results->isSMTP == 0) {
                 echo "<option value='0'>No</option>";
                 echo "<option value='1'>Yes</option>";
@@ -287,8 +282,8 @@ foreach ($defaults as $field => $defaultVal) {
             </select>
           </div>
           <div class="form-group">
-            <label>Use SMTP Authentication: (Almost always, yes)</label>
-            <select class="form-control" width="100%" name="useSMTPauth">
+            <label for="useSMTPauth">Use SMTP Authentication: (Almost always, yes)</label>
+            <select class="form-control" width="100%" name="useSMTPauth" id="useSMTPauth">
               <?php if ($results->useSMTPauth == 'false') {
                 echo "<option value='false'>No</option>";
                 echo "<option value='true'>Yes</option>";
@@ -299,8 +294,8 @@ foreach ($defaults as $field => $defaultVal) {
             </select>
           </div>
           <div class="form-group">
-            <label>Send email as HTML by default</label>
-            <select class="form-control" width="100%" name="isHTML">
+            <label for="isHTML">Send email as HTML by default</label>
+            <select class="form-control" width="100%" name="isHTML" id="isHTML">
               <?php if ($results->isHTML == 'false') {
                 echo "<option value='false'>No</option>";
                 echo "<option value='true'>Yes</option>";
@@ -311,7 +306,7 @@ foreach ($defaults as $field => $defaultVal) {
             </select>
           </div>
           <div class="form-group">
-            <label>Root URL of your UserSpice install 
+            <label for="verify-url">Root URL of your UserSpice install 
             <?php 
             $example_root = $urlProtocol . Server::get('HTTP_HOST') . $us_url_root;
             //if last character is not / add it
@@ -320,23 +315,18 @@ foreach ($defaults as $field => $defaultVal) {
             }
             ?>
 
-            <a tabindex="-1" 
-              data-trigger="focus" 
-              data-bs-trigger="focus" 
-              data-placement="top" 
-              class="btn btn-link text-info px-0" 
-              title="Including http or https protocol (VERY Important). Default location would be: <?= $example_root?>">
-              <i class="fa fa-question-circle offset-circle"></i>
-            </a>
-          </label>
+
+          </label> <button type="button" id="verify-url-help" class="btn btn-link text-info px-0" data-us-help-tip data-bs-placement="top" title="Including http or https protocol (VERY Important). Default location would be: <?= $example_root?>">
+              <i class="fa fa-question-circle offset-circle" aria-hidden="true"></i>
+            </button>
             <small class="form-text text-body-secondary">
               Put http://yourdomain.com/ with the final / below: <br>
               Example: <span id="most-likely-url" class="fw-bold"><?= $example_root?></span> <button id="set-most-likely-url" class="btn tiny-button btn-outline-primary">Use This</button>
             </small>
-            <input size='50' class='form-control<?= isset($glowFields['verify_url']) ? ' default-glow' : '' ?>' id="verify-url" type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
+            <input size='50' class='form-control<?= isset($glowFields['verify_url']) ? ' default-glow' : '' ?>' id="verify-url" aria-describedby="verify-url-help" type='text' name='verify_url' value='<?= $results->verify_url; ?>' />
           </div>
-          <div class="form-group">
-            <label for="email_act">Require User to Verify Their Email</label>
+          <div class="form-group" role="radiogroup" aria-labelledby="email_act_label">
+            <label id="email_act_label">Require User to Verify Their Email</label>
             <label for="email_act_yes"><input type="radio" id="email_act_yes" name="email_act" value="1" <?php echo ($results->email_act == 1) ? 'checked' : ''; ?> size="25" />&nbsp;Yes</label>&nbsp;
             <label for="email_act_no"><input type="radio" id="email_act_no" name="email_act" value="0" <?php echo ($results->email_act == 0) ? 'checked' : ''; ?> size="25" />&nbsp;No</label>
           </div>

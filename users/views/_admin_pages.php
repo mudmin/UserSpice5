@@ -244,16 +244,16 @@ foreach ((array) $permRows as $pr) {
             <td><span class="hideMe"><?= sprintf('%08d', $dbpages[$count]->id) ?></span>
               <?= $dbpages[$count]->id; ?></td>
             <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= safeReturn($dbpages[$count]->page) ?></a></td>
-            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title; ?></a></td>
+            <td><a class="nounderline text-body" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'><?= $dbpages[$count]->title != '' ? $dbpages[$count]->title : '<span class="text-body-secondary">(no title)</span>'; ?></a></td>
             <td><?= htmlspecialchars($dbpages[$count]->lang_key ?? ''); ?></td>
             <td>
               <a class="nounderline" href='admin.php?view=page&id=<?= $dbpages[$count]->id; ?>'>
                 <?php
                 //Show public/private setting of page
                 if ($dbpages[$count]->private == 0) {
-                  echo "<span style='color:green'>Public</span>";
+                  echo "<span class='text-success-emphasis'>Public</span>";
                 } else {
-                  echo "<span style='color:red'>Private</span>";
+                  echo "<span class='text-danger-emphasis'>Private</span>";
                 } ?>
               </a>
             </td>

@@ -2,6 +2,28 @@
 $noMaintenanceRedirect = true;
 require_once '../users/init.php';
 
+// Passkey login finisher. Both the standalone passkey page and the inline
+// passkey button on login.php land here after passkey_parser.php has logged
+// the user in. It runs before the management gate and before any output, so
+// it always completes with a real redirect: back to the page captured before
+// login (session only; never from the request), else the default page.
+if (isset($user) && $user->isLoggedIn() && Input::get('passkeySuccess') == 'true') {
+    $dest = consumeLoginDest();
+    if (!empty($_SESSION[INSTANCE . '_passkey_login_hooks'])) {
+        unset($_SESSION[INSTANCE . '_passkey_login_hooks']);
+        $hooks = getMyHooks(['page' => 'loginSuccess']);
+        includeHook($hooks, 'body');
+    }
+    if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+        require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
+    }
+    if ($dest !== '') {
+        Redirect::sanitized($dest);
+    }
+    $final_location = $settings->redirect_uri_after_login;
+    Redirect::to($us_url_root . ($final_location != '' ? $final_location : 'users/account.php'));
+}
+
 // Step-up gate for the authenticated passkey-management branch. Guests fall
 // through (forceReauth no-ops when not logged in) so anonymous passkey LOGIN
 // still works. A cloaked admin skips reauth (already authenticated to cloak)
@@ -21,17 +43,6 @@ if (isset($user) && $user->isLoggedIn()) {
 }
 
 require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
-if(isset($user) && $user->isLoggedIn() && Input::get('passkeySuccess') == 'true'){
-    if(file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')){
-        require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
-    }
-    //if you're still here, redirect somewhere
-    $final_location = $settings->redirect_uri_after_login;
-    if($final_location == ""){
-        $final_location = $us_url_root . 'users/account.php';
-    }
-     Redirect::to($final_location);
-}
 require_once $abs_us_root.$us_url_root.'users/auth/PasskeyHandler.php';
 
 // Ensure $userId is defined for use throughout the page

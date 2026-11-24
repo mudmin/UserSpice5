@@ -1,15 +1,16 @@
+/* Theme variables throughout so the block reads in both light and dark mode; fallbacks cover pre-5.3 Bootstrap templates */
 .separator {
     display: flex;
     align-items: center;
     text-align: center;
-    color: #747487;
+    color: var(--bs-secondary-color, #747487);
   }
   
   .separator::before,
   .separator::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #747487;
+    border-bottom: 1px solid var(--bs-border-color, #747487);
   }
   
   .separator:not(:empty)::before {
@@ -31,19 +32,19 @@
       line-height: 25px;
       margin-top: 20px;
       padding: 0;
-      color: #747487;
+      color: var(--bs-secondary-color, #747487);
       text-align: center;
       text-decoration: none !important;
   }
   
   .userspice-social-logins-item:hover {
       text-decoration: none;
-      color: #000000;
+      color: var(--bs-emphasis-color, #000000);
   }
   
   .userspice-social-logins-icon:hover{
-     background-color:#D3D3D3;
-     color: #000000;
+     background-color: var(--bs-tertiary-bg, #D3D3D3);
+     color: var(--bs-emphasis-color, #000000);
   }
   
   .userspice-social-logins-icon {
@@ -52,9 +53,9 @@
       padding: 13px;
       margin-left: auto;
       margin-right: auto;
-      border: 1px solid #747487;
+      border: 1px solid var(--bs-secondary-color, #747487);
       border-radius: 16px;
-      color: #000000;
+      color: var(--bs-emphasis-color, #000000);
       display: inline-block;
   }
   

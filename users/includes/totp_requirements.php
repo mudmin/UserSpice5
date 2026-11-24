@@ -66,17 +66,25 @@ if (in_array($user_id, $sample_accounts)) {
 
 }
 
-// Require TOTP based on IP ranges
-$client_ip = Server::get('REMOTE_ADDR', '');
-if (!in_array($client_ip, ['192.168.1.0/24', '10.0.0.0/8')) {
+// Require TOTP based on IP ranges. Use ClientIP::peer() (the raw connection
+// address, never header-derived) for decisions that relax security, and
+// ClientIP::inRange() because in_array() cannot match CIDR ranges.
+// Behind a load balancer, Docker, or a k8s ingress every visitor's peer is
+// the proxy's private address, so an "office" range must also require that
+// no proxy was involved, or it would exempt the whole internet.
+$client_ip = ClientIP::peer();
+$office = !ClientIP::hasForwardingHeaders()
+    && (ClientIP::inRange($client_ip, '192.168.1.0/24') || ClientIP::inRange($client_ip, '10.0.0.0/8'));
+if (!$office) {
     // External IPs require TOTP for all login methods
     foreach ($totp_requirements['login_methods'] as $method => $required) {
         $totp_requirements['login_methods'][$method] = true;
     }
 }
 
-// Prevent TOTP on localhost
-if (strpos($client_ip, '127.0.0.') === 0 || strpos($client_ip, '::1') === 0) {
+// Prevent TOTP on localhost. isLocal() is false for anything that came
+// through a proxy or tunnel, which would otherwise arrive from 127.0.0.1.
+if (ClientIP::isLocal()) {
     foreach ($totp_requirements['login_methods'] as $method => $required) {
         $totp_requirements['login_methods'][$method] = false;
     }

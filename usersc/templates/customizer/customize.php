@@ -63,6 +63,14 @@ if (!empty($_POST)) {
   }
 }
 
+// Replace unedited copies of presets that a theme update changed (edited copies
+// are never touched). Live stylesheets are compiled, so a surface that uses a
+// repaired theme is queued for the "Rebuild live stylesheets" banner instead of
+// being rebuilt here - nothing visitors see changes until an admin clicks it.
+// Runs after the CSRF check, so a forged POST is rejected before anything is written.
+$presetRepair = repairCustomizerPresets($abs_us_root . $us_url_root . 'usersc/templates/' . $template_override);
+
+
 // ---------------------------------------------------------------------------
 // Apply a theme PAIR to a surface. The "Site Themes" panel is the only place a
 // theme goes live: the front end (public site) and the backend (admin
@@ -139,6 +147,35 @@ if (!empty($_POST['apply_frontend_pair']) || !empty($_POST['apply_backend_pair']
 
   usSuccess(($isBackend ? 'Backend dashboard' : 'Front-end') . ' theme pair applied.');
   Redirect::to($returnUrl);
+}
+
+// Rebuild every surface queued by repairCustomizerPresets() (the banner button).
+if (!empty($_POST['rebuild_live_themes'])) {
+  require_once $abs_us_root . $us_url_root . 'usersc/templates/' . $template_override . '/assets/css/compiler.php';
+  $rebuilt = [];
+  foreach (readCustomizerRebuildPending() as $key => $names) {
+    if ($key === 'frontend') {
+      compileCustomizerTheme('');
+      $rebuilt[] = 'front-end';
+    } elseif ($key === 'backend') {
+      compileCustomizerTheme('dashboard');
+      $rebuilt[] = 'backend dashboard';
+    } elseif ($key === 'child_themes' && is_array($names)) {
+      foreach ($names as $name) {
+        $name = preg_replace('/[^a-zA-Z0-9_]/', '_', $name);
+        if (is_file($childThemesDir . '/' . $name . '.php')) {
+          compileCustomizerTheme($name);
+          $rebuilt[] = $name;
+        }
+      }
+    }
+  }
+  writeCustomizerRebuildPending([]);
+  if (!empty($rebuilt)) {
+    usSuccess('Rebuilt the stylesheets for ' . implode(', ', $rebuilt) . ' with the updated themes.');
+  }
+  Redirect::to($us_url_root . 'usersc/templates/' . $template_override . '/customize.php'
+    . (!empty(Input::get('child_theme')) ? '?child_theme=' . urlencode(Input::get('child_theme')) : ''));
 }
 
 // Delete a child theme
@@ -221,9 +258,9 @@ $importPendingContent = '';
 // Load a child theme
 if (!empty($_POST['load_child_theme'])) {
   $selectedTheme = Input::get('child_theme_select');
-  $customizationFile = $childThemesDir . '/' . $selectedTheme . '.php';
+  $customizationFile = customizerChildThemePath($childThemesDir, $selectedTheme);
 
-  if (file_exists($customizationFile)) {
+  if ($customizationFile !== false && file_exists($customizationFile)) {
     // Load this theme's customizations directly from the child theme file
     $customizations = require $customizationFile;
 
@@ -314,7 +351,8 @@ if (!empty($_POST['save_child_theme'])) {
 if (!empty($_POST['reset_defaults'])) {
   if (isset($_POST['active_child_theme']) && $_POST['active_child_theme'] != "") {
 
-    $customizationFile = $childThemesDir . '/' . Input::get('active_child_theme') . '.php';
+    // false for an invalid name, so the write below is skipped.
+    $customizationFile = customizerChildThemePath($childThemesDir, Input::get('active_child_theme'));
   } else {
 
     $customizationFile = $abs_us_root . $us_url_root . 'usersc/templates/' . $template_override . '/assets/css/customizations.php';
@@ -325,7 +363,7 @@ if (!empty($_POST['reset_defaults'])) {
 return array (
 );
  */
-  if (file_exists($customizationFile)) {
+  if ($customizationFile !== false && file_exists($customizationFile)) {
     file_put_contents($customizationFile, "<?php\nreturn array (\n);\n");
     // Invalidate OPcache so new values are loaded immediately
     if (function_exists('opcache_invalidate')) {
@@ -658,6 +696,7 @@ function getThemeMeta($childThemesDir, $themeName)
     'mode'        => '',
     'category'    => '',
     'wcag'        => '',
+    'wcag_note'   => '',
   ];
 
   $file = $childThemesDir . '/' . $themeName . '.php';
@@ -686,8 +725,9 @@ function getThemeMeta($childThemesDir, $themeName)
   if (preg_match('/Category:\s*(.+)/', $head, $m)) {
     $meta['category'] = trim($m[1]);
   }
-  if (preg_match('/WCAG:\s*(\w+)/', $head, $m)) {
+  if (preg_match('/WCAG:\s*(\w+)(?:\s*-\s*(.+))?/', $head, $m)) {
     $meta['wcag'] = strtolower(trim($m[1]));
+    $meta['wcag_note'] = isset($m[2]) ? trim($m[2]) : '';
   }
 
   return $meta;
@@ -834,9 +874,32 @@ function customizerThemeOptions(array $themeMetas, $selected, $firstValue, $firs
  * New files (and headerless ones) get a "My Themes" docblock so user-saved
  * themes group separately from the shipped presets in the gallery.
  */
+/**
+ * Resolve a child theme name to its .php file inside $childThemesDir.
+ * Returns false for any name outside [A-Za-z0-9_] or a path that would leave
+ * the directory. Rejects rather than rewrites, so a mangled name can never
+ * point at a different, existing theme.
+ */
+function customizerChildThemePath($childThemesDir, $name)
+{
+  if (!is_string($name) || !preg_match('/^[A-Za-z0-9_]+$/', $name)) {
+    return false;
+  }
+  $file = $childThemesDir . '/' . $name . '.php';
+  $dirReal = realpath($childThemesDir);
+  if ($dirReal === false || realpath(dirname($file)) !== $dirReal) {
+    return false;
+  }
+  return $file;
+}
+
 function writeChildThemeFile($file, array $customizations, $themeName, $authorName = '')
 {
   $header = '';
+  // The name lands in a PHP docblock. Strip control characters (newlines
+  // included) and break up any "*/" so a profile name can never close the
+  // comment and inject code. "* /" can't recombine into a new "*/".
+  $authorName = trim(str_replace('*/', '* /', preg_replace('/\p{C}+/u', '', (string)$authorName) ?? ''));
 
   // Preserve an existing docblock so re-saving a shipped preset keeps its category.
   if (file_exists($file)) {
@@ -1192,6 +1255,7 @@ function renderInputField($name, $set)
           .customizer-badge-light  { background: #f1f3f5; color: #212529; border: 1px solid #ced4da; }
           .customizer-badge-system { background: #0dcaf0; color: #043b45; }
           .customizer-badge-active { background: #ffc107; color: #3d2e00; }
+          .customizer-badge-update { background: #cfe2ff; color: #052c65; }
           .customizer-badge-tag    {
             background: #f1f3f5;
             color: #495057;
@@ -1212,6 +1276,44 @@ function renderInputField($name, $set)
           $pairThemeMetas[$ptName] = getThemeMeta($childThemesDir, $ptName);
         }
         ?>
+        <?php
+        // Theme-update notices from repairCustomizerPresets() (run at the top of this page).
+        $rebuildPending = readCustomizerRebuildPending();
+        $themeTitles = function (array $names) use ($childThemesDir) {
+          return implode(', ', array_map(function ($n) use ($childThemesDir) {
+            return htmlspecialchars(getThemeMeta($childThemesDir, $n)['title']);
+          }, $names));
+        };
+        $surfaceLabels = ['frontend' => 'Front end', 'backend' => 'Backend dashboard', 'child_themes' => 'Themes pages load directly'];
+        ?>
+        <?php if (!empty($rebuildPending)) : ?>
+          <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2" role="status">
+            <div>
+              <strong><i class="fas fa-arrows-rotate me-1" aria-hidden="true"></i>Theme updates are ready to go live.</strong>
+              A theme update replaced unedited copies of themes your site uses. Their compiled stylesheets still use the previous versions until you rebuild them.
+              <ul class="mb-0 mt-1">
+                <?php foreach ($rebuildPending as $surface => $names) : ?>
+                  <?php if (isset($surfaceLabels[$surface]) && is_array($names)) : ?>
+                    <li><?= $surfaceLabels[$surface] ?>: <?= $themeTitles($names) ?></li>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+            <form method="post" action="" class="m-0">
+              <?= tokenHere(); ?>
+              <button type="submit" name="rebuild_live_themes" value="1" class="btn btn-sm btn-primary">
+                <i class="fas fa-hammer me-1" aria-hidden="true"></i>Rebuild live stylesheets
+              </button>
+            </form>
+          </div>
+        <?php elseif (!empty($presetRepair['repaired'])) : ?>
+          <div class="alert alert-info" role="status">
+            <i class="fas fa-circle-info me-1" aria-hidden="true"></i>
+            Updated unedited gallery themes to their latest versions: <?= $themeTitles($presetRepair['repaired']) ?>.
+            None of them has a compiled stylesheet, so nothing on your site changed.
+          </div>
+        <?php endif; ?>
+
         <!-- Site Themes: the live light/dark pair for each surface -->
         <div class="card mb-4 border-primary">
           <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center customizer-collapse-toggle"
@@ -1372,7 +1474,7 @@ function renderInputField($name, $set)
                               <strong class="small text-truncate" title="<?= htmlspecialchars($meta['title']) ?>"><?= htmlspecialchars($meta['title']) ?></strong>
                               <span class="d-flex align-items-center gap-1 flex-shrink-0">
                                 <?php if ($meta['wcag'] === 'marginal') : ?>
-                                  <i class="fas fa-triangle-exclamation text-warning" title="Faithful palette reproduction — some button labels fall just below WCAG AA contrast"></i>
+                                  <i class="fas fa-triangle-exclamation text-warning" title="<?= htmlspecialchars($meta['wcag_note'] !== '' ? ucfirst($meta['wcag_note']) : 'Some colors fall below WCAG AA contrast') ?>"></i>
                                 <?php endif; ?>
                                 <?php if (isset($pairedThemes[$theme])) : ?>
                                   <i class="fas fa-circle-half-stroke text-primary" title="Paired theme &mdash; ships in both light and dark"></i>
@@ -1388,6 +1490,12 @@ function renderInputField($name, $set)
                               <span class="customizer-meta-badge customizer-badge-active mt-1 align-self-start"><i class="fas fa-pen me-1"></i>Editing</span>
                             <?php elseif ($theme === 'dashboard') : ?>
                               <span class="customizer-meta-badge customizer-badge-system mt-1 align-self-start">System</span>
+                            <?php endif; ?>
+                            <?php if (in_array($theme, $presetRepair['customized'], true)) : ?>
+                              <span class="customizer-meta-badge customizer-badge-update mt-1 align-self-start"
+                                    title="This copy differs from the version that ships with the theme, so theme updates leave it alone. To switch to the shipped version, export your copy, delete it, and reload: the shipped version is reinstalled automatically.">
+                                <i class="fas fa-pen-ruler me-1" aria-hidden="true"></i>Customized
+                              </span>
                             <?php endif; ?>
                             <?php if ($meta['description'] !== '') : ?>
                               <div class="customizer-card-desc text-muted mt-1"><?= htmlspecialchars($meta['description']) ?></div>

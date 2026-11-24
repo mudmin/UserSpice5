@@ -61,6 +61,10 @@ if (session_status() == PHP_SESSION_NONE) {
 $_SESSION['oauth_state'] = $state;
 $_SESSION['oauth_client_id'] = $oSettings->id; // Store which client was used
 
+// PKCE (RFC 7636, S256). Servers that don't require it ignore these parameters.
+$codeVerifier = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+$_SESSION['oauth_code_verifier'] = $codeVerifier;
+
 // Step-up re-authentication mode (see users/reauth.php). When set, the
 // callback confirms the returned identity matches the already-logged-in user
 // instead of starting a fresh login session.
@@ -75,9 +79,11 @@ if (Input::get('reauth') == 1 && isset($user) && $user->isLoggedIn()) {
 $authParams = [
     'response_type' => 'code',
     'client_id' => $oSettings->client_id,
-    'redirect_uri' => $oSettings->redirect_uri,
+    'redirect_uri' => hed((string)$oSettings->redirect_uri),
     'state' => $state,
-    'scope' => 'profile email' // Add any scopes you need
+    'scope' => 'profile email', // Add any scopes you need
+    'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '='),
+    'code_challenge_method' => 'S256'
 ];
 
 $authUrl = $authEndpoint . '?' . http_build_query($authParams);

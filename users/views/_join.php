@@ -96,24 +96,21 @@ Special thanks to John Bovey for the basis of the password strength feature.
             </div>
             <div class="col-12 col-sm-6 col-lg-7 col-xl-8">
               <div class="row mb-3">
-                <label for="password" id="password-label" class="form-label col-12"><?= lang("GEN_PASS"); ?>
-                  *
-                  <a class="password_view_control ms-2" style="cursor: pointer; color:black; font-size:.8rem; text-decoration:none;">
-                    <span class="fa fa-eye"></span>
-                  </a>
-                </label>
                 <div class="col-12">
-                  <input class="form-control" type="password" name="password" id="password" placeholder="<?= lang("GEN_PASS"); ?>" required autocomplete="new-password" aria-describedby="passwordhelp">
+                  <label for="password" id="password-label" class="form-label"><?= lang("GEN_PASS"); ?> *</label>
+                  <?php // a button outside the label: keyboard reachable, and not folded into the field's name ?>
+                  <button type="button" class="password_view_control btn btn-link btn-sm p-0 ms-2 text-body" aria-label="<?= lang('PW_SHOWS'); ?>" aria-controls="password confirm"><span class="fa fa-eye" aria-hidden="true"></span></button>
+                </div>
+                <div class="col-12">
+                  <input class="form-control" type="password" name="password" id="password" placeholder="<?= lang("GEN_PASS"); ?>" required autocomplete="new-password" <?= ($pw_settings->meter_active == 1) ? 'aria-describedby="passwordhelp"' : '' ?>>
 
                 </div>
               </div>
               <div class="row mb-3">
-                <label for="confirm" id="confirm-label" class="form-label col-12"><?= lang("PW_CONF"); ?>
-                  *
-                  <a class="password_view_control ms-2" style="cursor: pointer; color:black; font-size:.8rem; text-decoration:none;">
-                    <span class="fa fa-eye"></span>
-                  </a>
-                </label>
+                <div class="col-12">
+                  <label for="confirm" id="confirm-label" class="form-label"><?= lang("PW_CONF"); ?> *</label>
+                  <button type="button" class="password_view_control btn btn-link btn-sm p-0 ms-2 text-body" aria-label="<?= lang('PW_SHOWS'); ?>" aria-controls="password confirm"><span class="fa fa-eye" aria-hidden="true"></span></button>
+                </div>
                 <div class="col-12">
                   <input type="password" id="confirm" name="confirm" class="form-control" placeholder="<?= lang("PW_CONF"); ?>" required autocomplete="new-password">
                 </div>

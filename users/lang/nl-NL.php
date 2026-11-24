@@ -437,7 +437,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "Kon het authenticatiegeheim niet ophalen. Probeer opnieuw.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Back-upcode geverifieerd maar kon niet worden ongeldig gemaakt. Neem contact op met ondersteuning.",
     "2FA_ERR_NO_CODE_PROVIDED" => "Geen authenticatiecode opgegeven.",
-    "RATE_LIMIT_LOGIN"   => "Te veel mislukte inlogpogingen. Wacht even voordat je opnieuw probeert.",
+    "RATE_LIMIT_LOGIN"   => "Te veel inlogpogingen. Wacht even voordat je opnieuw probeert.",
     "RATE_LIMIT_TOTP"    => "Te veel onjuiste authenticatiecodes. Wacht even voordat je opnieuw probeert.",
     "RATE_LIMIT_PASSKEY" => "Te veel passkey-authenticatiepogingen. Wacht even voordat je opnieuw probeert.",
     "RATE_LIMIT_PASSKEY_STORE" => "Te veel passkey-registratiepogingen. Wacht even voordat je opnieuw probeert.",
@@ -448,6 +448,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Te veel verzoeken om e-mailwijziging. Wacht even voordat je opnieuw probeert.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Te veel pogingen voor wachtwoordwijziging. Wacht even voordat je opnieuw probeert.",
     "RATE_LIMIT_GENERIC" => "Te veel pogingen. Wacht even voordat je opnieuw probeert.",
+    "SOCIAL_EMAIL_IN_USE" => "Dit e-mailadres hoort al bij een account en je inlogprovider heeft niet bevestigd dat het van jou is. Log in plaats daarvan in met het wachtwoord van dat account.",
 ));
 
 // Omleidingsberichten - deze krijgen een plus tussen elk woord
@@ -632,6 +633,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Problemen met uw authenticator-app?",
 	"2FA_BACKUP_CODE_HELP" => "Voer een van uw opgeslagen back-upcodes in",
 	"2FA_USE_BACKUP_BTN"   => "Back-upcode gebruiken",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "Startpagina van %m1%",
+	"MENU_EMAIL"     => "E-mail %m1%",
+	"MENU_CALL"      => "Bel %m1%",
+	"SKIP_TO_MAIN"   => "Naar de hoofdinhoud",
+	"PW_REQ_MET"     => "voldaan",
+	"PW_REQ_NOT_MET" => "niet voldaan",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

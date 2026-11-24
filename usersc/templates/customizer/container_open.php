@@ -1,1 +1,1 @@
-<div class="<?=$settings->container_open_class; ?>">
+<div id="main-content" class="<?=$settings->container_open_class; ?>">

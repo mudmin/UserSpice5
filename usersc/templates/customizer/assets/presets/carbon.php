@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#2a2a2a',
 
   'headings-color' => 'inherit',
+  'link-color' => '#00b4ff',
+  'link-hover-color' => '#33c4ff',
 
   'custom_css' => "
 /* === CARBON === restrained dark, one accent */
@@ -114,7 +116,5 @@ return array (
   border: 1px solid #2a2a2a;
   color: #e6e6e6;
 }
-a:not(.btn):not(.nav-link) { color: #00b4ff; }
-a:not(.btn):not(.nav-link):hover { color: #33c4ff; }
 ",
 );

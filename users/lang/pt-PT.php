@@ -438,7 +438,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "Não foi possível recuperar o segredo de autenticação. Por favor, tenta novamente.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Código de reserva verificado, mas falha ao invalidar. Por favor, contacta o suporte.",
     "2FA_ERR_NO_CODE_PROVIDED" => "Nenhum código de autenticação fornecido.",
-    "RATE_LIMIT_LOGIN"   => "Demasiadas tentativas de início de sessão falhadas. Por favor, espera antes de tentar novamente.",
+    "RATE_LIMIT_LOGIN"   => "Demasiadas tentativas de início de sessão. Por favor, espera antes de tentar novamente.",
     "RATE_LIMIT_TOTP"    => "Demasiados códigos de autenticação incorretos. Por favor, espera antes de tentar novamente.",
     "RATE_LIMIT_PASSKEY" => "Demasiadas tentativas de autenticação com chave de acesso. Por favor, espera antes de tentar novamente.",
     "RATE_LIMIT_PASSKEY_STORE" => "Demasiadas tentativas de registo de chave de acesso. Por favor, espera antes de tentar novamente.",
@@ -449,6 +449,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Demasiados pedidos de alteração de e-mail. Por favor, espera antes de tentar novamente.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Demasiadas tentativas de alteração de palavra-passe. Por favor, espera antes de tentar novamente.",
     "RATE_LIMIT_GENERIC" => "Demasiadas tentativas. Por favor, espera antes de tentar novamente.",
+    "SOCIAL_EMAIL_IN_USE" => "Este endereço de e-mail já pertence a uma conta e o teu fornecedor de início de sessão não confirmou que é teu. Em vez disso, inicia sessão com a palavra-passe dessa conta.",
 ));
 
 $lang = array_merge($lang, array(
@@ -592,6 +593,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Está com problemas com a sua aplicação de autenticação?",
 	"2FA_BACKUP_CODE_HELP" => "Introduza um dos seus códigos de segurança guardados",
 	"2FA_USE_BACKUP_BTN"   => "Utilizar código de segurança",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menu",
+	"MENU_LOGO_HOME" => "Página inicial de %m1%",
+	"MENU_EMAIL"     => "Enviar e-mail para %m1%",
+	"MENU_CALL"      => "Ligar para %m1%",
+	"SKIP_TO_MAIN"   => "Saltar para o conteúdo principal",
+	"PW_REQ_MET"     => "cumprido",
+	"PW_REQ_NOT_MET" => "não cumprido",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

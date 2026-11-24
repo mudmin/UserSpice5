@@ -153,26 +153,22 @@ if (Input::exists('get')) {
                 // logger($user_id, "Passwordless Debug", "Login Success");
             }
 
-            $dest = sanitizedDest('dest');
             reauthMarkConfirmed();
 
             if ($search->email_verified == 0) {
                 $db->update("users", $user_id, ["email_verified" => 1]);
             }
             setLoginMethod("email");
-            if (!empty($dest)) {
-                $redirect = Input::get('redirect');
-                if (!empty($redirect)) {
-                    Redirect::sanitized($redirect);
-                } else {
-                    Redirect::to($dest);
-                }
-            } elseif (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
+            // Page captured before login (session only; never from the
+            // request). The custom login script always runs, with $dest set.
+            $dest = consumeLoginDest();
+            if (file_exists($abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php')) {
                 require_once $abs_us_root . $us_url_root . 'usersc/scripts/custom_login_script.php';
-            } else {
-                $dest = Config::get('homepage') ?: 'account.php';
-                Redirect::to($dest);
             }
+            if ($dest !== '') {
+                Redirect::sanitized($dest);
+            }
+            Redirect::to(Config::get('homepage') ?: 'account.php');
         }
     }
 

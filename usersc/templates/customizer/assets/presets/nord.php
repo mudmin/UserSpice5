@@ -78,6 +78,8 @@ return array (
   'us-menu-custom-submenu-border' => '#4c566a',
 
   'headings-color' => 'var(--bs-light)',
+  'link-color' => '#93c6d4',
+  'link-hover-color' => '#a3d0dc',
 
   'custom_css' => "
 /* === NORD === Arctic Ice Studio palette */
@@ -118,9 +120,7 @@ return array (
 }
 code, pre, kbd {
   background-color: #434c5e;
-  color: #88c0d0;
+  color: #93c6d4;
 }
-a:not(.btn):not(.nav-link) { color: #88c0d0; }
-a:not(.btn):not(.nav-link):hover { color: #a3d0dc; }
 ",
 );

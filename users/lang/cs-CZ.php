@@ -469,7 +469,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Nepodařilo se získat ověřovací tajemství. Zkuste to prosím znovu.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Záložní kód byl ověřen, ale nepodařilo se jej zneplatnit. Kontaktujte prosím podporu.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Nebyl poskytnut žádný ověřovací kód.",
-    "RATE_LIMIT_LOGIN"                   => "Příliš mnoho neúspěšných pokusů o přihlášení. Počkejte prosím, než to zkusíte znovu.",
+    "RATE_LIMIT_LOGIN"                   => "Příliš mnoho pokusů o přihlášení. Počkejte prosím, než to zkusíte znovu.",
     "RATE_LIMIT_TOTP"                    => "Příliš mnoho nesprávných ověřovacích kódů. Počkejte prosím, než to zkusíte znovu.",
     "RATE_LIMIT_PASSKEY"                 => "Příliš mnoho pokusů o ověření přístupovým klíčem. Počkejte prosím, než to zkusíte znovu.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Příliš mnoho pokusů o registraci přístupového klíče. Počkejte prosím, než to zkusíte znovu.",
@@ -480,6 +480,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Příliš mnoho žádostí o změnu e-mailu. Počkejte prosím, než to zkusíte znovu.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Příliš mnoho pokusů o změnu hesla. Počkejte prosím, než to zkusíte znovu.",
     "RATE_LIMIT_GENERIC"                 => "Příliš mnoho pokusů. Počkejte prosím, než to zkusíte znovu.",
+    "SOCIAL_EMAIL_IN_USE"                => "Tato e-mailová adresa je již přiřazena k účtu a váš poskytovatel přihlášení nepotvrdil, že patří vám. Přihlaste se raději heslem k tomuto účtu.",
 ));
 
 
@@ -666,6 +667,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Máte potíže s autentizační aplikací?",
 	"2FA_BACKUP_CODE_HELP" => "Zadejte jeden z uložených záložních kódů",
 	"2FA_USE_BACKUP_BTN"   => "Použít záložní kód",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Nabídka",
+	"MENU_LOGO_HOME" => "%m1% – úvodní stránka",
+	"MENU_EMAIL"     => "E-mail na %m1%",
+	"MENU_CALL"      => "Volat %m1%",
+	"SKIP_TO_MAIN"   => "Přejít na hlavní obsah",
+	"PW_REQ_MET"     => "splněno",
+	"PW_REQ_NOT_MET" => "nesplněno",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

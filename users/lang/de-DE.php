@@ -453,7 +453,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET"                  => "Authentifizierungsgeheimnis konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL"     => "Backup-Code verifiziert, aber Fehler beim Ungültigmachen. Bitte kontaktieren Sie den Support.",
     "2FA_ERR_NO_CODE_PROVIDED"           => "Kein Authentifizierungscode angegeben.",
-    "RATE_LIMIT_LOGIN"                   => "Zu viele fehlgeschlagene Anmeldeversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "RATE_LIMIT_LOGIN"                   => "Zu viele Anmeldeversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
     "RATE_LIMIT_TOTP"                    => "Zu viele falsche Authentifizierungscodes. Bitte warten Sie, bevor Sie es erneut versuchen.",
     "RATE_LIMIT_PASSKEY"                 => "Zu viele Passkey-Authentifizierungsversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
     "RATE_LIMIT_PASSKEY_STORE"           => "Zu viele Passkey-Registrierungsversuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
@@ -464,6 +464,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE"            => "Zu viele Anfragen zur E-Mail-Änderung. Bitte warten Sie, bevor Sie es erneut versuchen.",
     "RATE_LIMIT_PASSWORD_CHANGE"         => "Zu viele Versuche zur Passwortänderung. Bitte warten Sie, bevor Sie es erneut versuchen.",
     "RATE_LIMIT_GENERIC"                 => "Zu viele Versuche. Bitte warten Sie, bevor Sie es erneut versuchen.",
+    "SOCIAL_EMAIL_IN_USE"                => "Diese E-Mail-Adresse gehört bereits zu einem Konto, und Ihr Anmeldeanbieter hat nicht bestätigt, dass sie Ihnen gehört. Melden Sie sich stattdessen mit dem Passwort dieses Kontos an.",
 ));
 
 
@@ -638,6 +639,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "Probleme mit Ihrer Authentifizierungs-App?",
 	"2FA_BACKUP_CODE_HELP" => "Geben Sie einen Ihrer gespeicherten Backup-Codes ein",
 	"2FA_USE_BACKUP_BTN"   => "Backup-Code verwenden",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menü",
+	"MENU_LOGO_HOME" => "%m1% Startseite",
+	"MENU_EMAIL"     => "E-Mail an %m1%",
+	"MENU_CALL"      => "%m1% anrufen",
+	"SKIP_TO_MAIN"   => "Zum Hauptinhalt springen",
+	"PW_REQ_MET"     => "erfüllt",
+	"PW_REQ_NOT_MET" => "nicht erfüllt",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

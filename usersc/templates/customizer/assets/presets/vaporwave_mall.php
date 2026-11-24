@@ -10,7 +10,7 @@
 return array (
   'primary' => '#ff6b9d',
   'primary-hover' => '#f25590',
-  'primary-text-emphasis' => '#7a2950',
+  'primary-text-emphasis' => '#c90044',
   'primary-bg-subtle' => '#ffdbe7',
   'primary-border-subtle' => '#ffb0cb',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#aed581',
   'success-hover' => '#98c267',
-  'success-text-emphasis' => '#4a6029',
+  'success-text-emphasis' => '#4f7226',
   'success-bg-subtle' => '#e8f3d8',
   'success-border-subtle' => '#cce4ab',
 
   'info' => '#b39ddb',
   'info-hover' => '#9c84c4',
-  'info-text-emphasis' => '#43325f',
+  'info-text-emphasis' => '#764fbe',
   'info-bg-subtle' => '#ebe2f4',
   'info-border-subtle' => '#cebde6',
 
   'warning' => '#ffd54f',
   'warning-hover' => '#f0c33b',
-  'warning-text-emphasis' => '#6e5a14',
+  'warning-text-emphasis' => '#836400',
   'warning-bg-subtle' => '#fff3cf',
   'warning-border-subtle' => '#fee49a',
 
   'danger' => '#ff8a80',
   'danger-hover' => '#f47670',
-  'danger-text-emphasis' => '#7a2620',
+  'danger-text-emphasis' => '#cc1000',
   'danger-bg-subtle' => '#ffdfdd',
   'danger-border-subtle' => '#ffb6b0',
 
@@ -70,7 +70,9 @@ return array (
   'us-menu-custom-divider' => 'rgba(255, 107, 157, 0.3)',
   'us-menu-custom-submenu-border' => '#4dd0e1',
 
-  'headings-color' => 'var(--bs-primary)',
+  'headings-color' => '#cb0044',
+  'link-color' => '#cb0044',
+  'link-hover-color' => '#af003b',
 
   'custom_css' => "
 /* === VAPORWAVE MALL === pastel dream, no neon */
@@ -95,7 +97,7 @@ h1, h2, h3, .h1, .h2, .h3 {
   box-shadow: 0 4px 18px rgba(255, 107, 157, 0.12);
 }
 .card-header {
-  background: linear-gradient(120deg, #ff6b9d, #b39ddb, #4dd0e1) !important;
+  background: linear-gradient(120deg, #e8004e, #8562c5, #18808e) !important;
   color: #ffffff !important;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -121,5 +123,10 @@ h1, h2, h3, .h1, .h2, .h3 {
 .modal-content { border-radius: 22px; border: none; }
 .badge { border-radius: 14px; }
 .alert { border-radius: 16px; border: none; }
+
+
+/* Links inside the decorative card header take the header's own text color
+   (checked for contrast against every gradient stop), underlined to stay links. */
+.card-header a:not(.btn) { color: inherit; text-decoration: underline; }
 ",
 );

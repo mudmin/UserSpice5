@@ -10,7 +10,7 @@
 return array (
   'primary' => '#a8633c',
   'primary-hover' => '#8d5230',
-  'primary-text-emphasis' => '#5c3621',
+  'primary-text-emphasis' => '#905533',
   'primary-bg-subtle' => '#f0e0d3',
   'primary-border-subtle' => '#d9b196',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#6d7b3e',
   'success-hover' => '#5a6633',
-  'success-text-emphasis' => '#3a4221',
+  'success-text-emphasis' => '#5f6c36',
   'success-bg-subtle' => '#e7ead5',
   'success-border-subtle' => '#c2c897',
 
   'info' => '#5c7988',
   'info-hover' => '#4d6671',
-  'info-text-emphasis' => '#313f47',
+  'info-text-emphasis' => '#506977',
   'info-bg-subtle' => '#e0e8eb',
   'info-border-subtle' => '#b3c5cc',
 
   'warning' => '#c08a2e',
   'warning-hover' => '#a07325',
-  'warning-text-emphasis' => '#5e4416',
+  'warning-text-emphasis' => '#866120',
   'warning-bg-subtle' => '#f5e8cd',
   'warning-border-subtle' => '#e3c587',
 
   'danger' => '#a8412f',
   'danger-hover' => '#8a3527',
-  'danger-text-emphasis' => '#561f17',
+  'danger-text-emphasis' => '#a43f2e',
   'danger-bg-subtle' => '#f1d7d1',
   'danger-border-subtle' => '#d69e93',
 
@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#423b2e',
 
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#8d5230',
+  'link-hover-color' => '#6f3f23',
 
   'custom_css' => "
 /* === SANDSTONE === warm light neutral */
@@ -101,7 +103,5 @@ return array (
   --bs-table-striped-bg: #f5f0e6;
 }
 hr { border-color: #e0d6c4; }
-a:not(.btn):not(.nav-link) { color: #a8633c; }
-a:not(.btn):not(.nav-link):hover { color: #8d5230; }
 ",
 );

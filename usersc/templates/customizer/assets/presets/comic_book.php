@@ -10,7 +10,7 @@
 return array (
   'primary' => '#1854c4',
   'primary-hover' => '#1342a0',
-  'primary-text-emphasis' => '#0c2c6b',
+  'primary-text-emphasis' => '#1854c4',
   'primary-bg-subtle' => '#d3e0f5',
   'primary-border-subtle' => '#141414',
 
@@ -22,25 +22,25 @@ return array (
 
   'success' => '#2fa84f',
   'success-hover' => '#258840',
-  'success-text-emphasis' => '#185729',
+  'success-text-emphasis' => '#217437',
   'success-bg-subtle' => '#d5efdc',
   'success-border-subtle' => '#141414',
 
   'info' => '#18b5d8',
   'info-hover' => '#1494b0',
-  'info-text-emphasis' => '#0c5e70',
+  'info-text-emphasis' => '#0f6f84',
   'info-bg-subtle' => '#d2eef5',
   'info-border-subtle' => '#141414',
 
   'warning' => '#ffce00',
   'warning-hover' => '#d6ad00',
-  'warning-text-emphasis' => '#6b5700',
+  'warning-text-emphasis' => '#7a6300',
   'warning-bg-subtle' => '#fff3c4',
   'warning-border-subtle' => '#141414',
 
   'danger' => '#e42029',
   'danger-hover' => '#c01622',
-  'danger-text-emphasis' => '#730d13',
+  'danger-text-emphasis' => '#bf171f',
   'danger-bg-subtle' => '#fad4d6',
   'danger-border-subtle' => '#141414',
 
@@ -77,6 +77,8 @@ return array (
   'us-menu-custom-submenu-border' => '#141414',
 
   'headings-color' => 'var(--bs-dark)',
+  'link-color' => '#1854c4',
+  'link-hover-color' => '#b4131b',
 
   'custom_css' => "
 /* === COMIC BOOK === pop-art, ink borders, halftone */
@@ -143,11 +145,9 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 .table > :not(caption) > * > * { border-width: 2px; }
 a:not(.btn):not(.nav-link) {
-  color: #1854c4;
   font-weight: 700;
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
-a:not(.btn):not(.nav-link):hover { color: #e8202a; }
 ",
 );

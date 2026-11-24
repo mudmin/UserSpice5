@@ -438,7 +438,7 @@ $lang = array_merge($lang, array(
     "2FA_ERR_NO_SECRET" => "No se pudo recuperar el secreto de autenticación. Por favor, intenta de nuevo.",
     "2FA_ERR_BACKUP_INVALIDATE_FAIL" => "Código de respaldo verificado pero no se pudo invalidar. Por favor, contacta al soporte.",
     "2FA_ERR_NO_CODE_PROVIDED" => "No se proporcionó ningún código de autenticación.",
-    "RATE_LIMIT_LOGIN"   => "Demasiados intentos de inicio de sesión fallidos. Por favor, espera antes de intentar de nuevo.",
+    "RATE_LIMIT_LOGIN"   => "Demasiados intentos de inicio de sesión. Por favor, espera antes de intentar de nuevo.",
     "RATE_LIMIT_TOTP"    => "Demasiados códigos de autenticación incorrectos. Por favor, espera antes de intentar de nuevo.",
     "RATE_LIMIT_PASSKEY" => "Demasiados intentos de autenticación con clave de acceso. Por favor, espera antes de intentar de nuevo.",
     "RATE_LIMIT_PASSKEY_STORE" => "Demasiados intentos de registro de clave de acceso. Por favor, espera antes de intentar de nuevo.",
@@ -449,6 +449,7 @@ $lang = array_merge($lang, array(
     "RATE_LIMIT_EMAIL_CHANGE" => "Demasiadas solicitudes de cambio de correo electrónico. Por favor, espera antes de intentar de nuevo.",
     "RATE_LIMIT_PASSWORD_CHANGE" => "Demasiados intentos de cambio de contraseña. Por favor, espera antes de intentar de nuevo.",
     "RATE_LIMIT_GENERIC" => "Demasiados intentos. Por favor, espera antes de intentar de nuevo.",
+    "SOCIAL_EMAIL_IN_USE" => "Esta dirección de correo electrónico ya pertenece a una cuenta y tu proveedor de inicio de sesión no ha confirmado que sea tuya. En su lugar, inicia sesión con la contraseña de esa cuenta.",
 ));
 
 $lang = array_merge($lang, array(
@@ -603,6 +604,17 @@ $lang = array_merge($lang, array(
 	"2FA_VERIFY_TROUBLE"   => "¿Tienes problemas con tu aplicación de autenticación?",
 	"2FA_BACKUP_CODE_HELP" => "Introduce uno de tus códigos de respaldo guardados",
 	"2FA_USE_BACKUP_BTN"   => "Usar código de respaldo",
+));
+
+// Accessibility labels (menu, skip link, password requirements)
+$lang = array_merge($lang, array(
+	"MENU_MENU"      => "Menú",
+	"MENU_LOGO_HOME" => "Inicio de %m1%",
+	"MENU_EMAIL"     => "Enviar correo a %m1%",
+	"MENU_CALL"      => "Llamar a %m1%",
+	"SKIP_TO_MAIN"   => "Saltar al contenido principal",
+	"PW_REQ_MET"     => "cumplido",
+	"PW_REQ_NOT_MET" => "no cumplido",
 ));
 
 if (file_exists($abs_us_root . $us_url_root . "usersc/lang/" . $lang["THIS_CODE"] . ".php")) {

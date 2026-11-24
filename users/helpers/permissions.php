@@ -15,6 +15,19 @@ if (!function_exists('safelyCaptureDest')) {
             session_start();
         }
 
+        // Only remember top-level page loads. A logged-out POST, or a
+        // background fetch()/XHR to a private endpoint, would otherwise
+        // overwrite the saved page and land the user on a form handler or
+        // JSON endpoint after login. fetch/XHR send Sec-Fetch-Dest: empty;
+        // browsers that send no header are treated as a page load.
+        if (Server::get('REQUEST_METHOD') !== 'GET') {
+            return;
+        }
+        $fetchDest = strtolower((string)($_SERVER['HTTP_SEC_FETCH_DEST'] ?? ''));
+        if (!in_array($fetchDest, ['', 'document'], true)) {
+            return;
+        }
+
         // Get current page path relative to us_url_root
         $uri = Server::get('PHP_SELF');
         $urlRootLength = strlen($us_url_root);
@@ -27,6 +40,24 @@ if (!function_exists('safelyCaptureDest')) {
         }
 
         $_SESSION[Config::get('session/session_name') . '_login_dest'] = $page;
+    }
+}
+
+//Return the page captured by safelyCaptureDest() and clear it ('' when none).
+//Every login exit (password form, passkeys, social, passwordless, verify,
+//OAuth) uses this, so a request parameter can never choose where a user lands.
+//Pattern at a login exit, after the user is logged in:
+//  $dest = consumeLoginDest();
+//  if (file_exists(...custom_login_script.php)) { require_once ...; }
+//  if ($dest !== '') { Redirect::sanitized($dest); }
+//  Redirect::to(<default page>);
+if (!function_exists('consumeLoginDest')) {
+    function consumeLoginDest(): string
+    {
+        $key = Config::get('session/session_name') . '_login_dest';
+        $dest = $_SESSION[$key] ?? '';
+        unset($_SESSION[$key]);
+        return is_string($dest) ? $dest : '';
     }
 }
 
@@ -310,17 +341,12 @@ if (!function_exists('securePage')) {
         global $db, $user, $master_account, $us_url_root, $abs_us_root;
     $urlRootLength = strlen($us_url_root);
     $page = substr($uri, $urlRootLength, strlen($uri) - $urlRootLength);
-    $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+    $protocol = ClientIP::isHttps() ? 'https' : 'http';
     $dest = encodeURIComponent($protocol . "://" . Server::get('HTTP_HOST') . Server::get('REQUEST_URI'));
         $id = null;
         $private = null;
 
-        if (isset($user) && $user->data() != null) {
-            if ($user->data()->permissions == 0) {
-                Redirect::to($us_url_root . 'usersc/scripts/banned.php');
-                die();
-            }
-        }
+        // Banned/inactive users are handled in users/includes/loader.php.
         //retrieve page details
         $query = $db->query('SELECT id, page, private FROM pages WHERE page = ?', [$page]);
         $count = $query->count();

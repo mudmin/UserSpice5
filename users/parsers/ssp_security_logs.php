@@ -97,7 +97,7 @@ foreach ($logs as $l) {
                 $userDisplay = 'IP last used by User ID: ' . $lastUser->user_id;
             }
         } else {
-            $userDisplay = '<span style="color:red">Unknown IP</span>';
+            $userDisplay = '<span class="text-danger-emphasis">Unknown IP</span>';
         }
     }
     $row[] = $userDisplay;

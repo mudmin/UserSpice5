@@ -19,153 +19,18 @@ if (isset($rateLimits['login_attempt']['ip_max']) && $rateLimits['login_attempt'
 // Get proxy configuration status
 $ip_config = ClientIP::config();
 $file_mode = ($ip_config['source'] === 'file');
-$proxy_config_file = ClientIP::configFile();
-$file_writable = $file_mode ? is_writable($proxy_config_file) : is_writable(dirname($proxy_config_file));
 $proxy_enabled = $ip_config['enabled'];
 if ($file_mode) {
-    $proxy_config_count = count($ip_config['trusted_proxies']);
+    $proxy_config_count = count($ip_config['trusted_proxies']) + count($ip_config['file_bindings']);
 } else {
     $proxy_config_count = $db->query("SELECT COUNT(*) as count FROM us_rate_limit_proxy_settings WHERE enabled = 1")->first()->count ?? 0;
 }
+$proxy_config_count += count($ip_config['presets']);
 
 // Handle form submissions
 if (!empty($_POST)) {
     if (!Token::check($_POST['csrf'] ?? '')) {
         usError("Token failed");
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Handle proxy settings toggle
-    if (isset($_POST['toggle_proxy'])) {
-        $new_val = $proxy_enabled ? 0 : 1;
-        if ($file_mode && $ip_config['enabled_from_file']) {
-            if ($file_writable && ClientIP::writeConfigFile($ip_config['trusted_proxies'], $ip_config['trusted_headers'], (bool)$new_val)) {
-                usSuccess("Configuration updated in the trusted proxy config file.");
-                logger($user->data()->id, 'RateLimit', "Toggled proxy mode to $new_val in trusted_proxies.php");
-            } else {
-                usError("This setting is controlled by usersc/includes/trusted_proxies.php, which is not writable.");
-            }
-        } else {
-            $db->update('settings', 1, ['behind_reverse_proxy' => $new_val]);
-            $message = $new_val ? "Configuration updated: UserSpice is now set as being behind a reverse proxy." : "Configuration updated: UserSpice is no longer set as being behind a reverse proxy.";
-            usSuccess($message);
-            logger($user->data()->id, 'RateLimit', "Toggled 'behind_reverse_proxy' setting to $new_val");
-        }
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Handle proxy configuration
-    if (isset($_POST['add_proxy'])) {
-        $proxy_ip = Input::get('proxy_ip');
-        $header_name = Input::get('header_name');
-        $priority = (int)Input::get('priority');
-
-        if ($header_name === 'custom') {
-            $header_name = Input::get('custom_header_name');
-        }
-
-        if (empty(trim($header_name))) {
-            usError("The HTTP header name cannot be empty.");
-            Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9\-]+$/', $header_name)) {
-            usError("Invalid HTTP header name format. Only letters, numbers, and hyphens are allowed.");
-            Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-        }
-
-        if (ClientIP::validCidr($proxy_ip)) {
-            if ($file_mode) {
-                $proxies = $ip_config['trusted_proxies'];
-                $headers = $ip_config['trusted_headers'];
-                if (!in_array($proxy_ip, $proxies, true)) {
-                    $proxies[] = $proxy_ip;
-                }
-                $headers[$header_name] = $priority;
-                if ($file_writable && ClientIP::writeConfigFile($proxies, $headers)) {
-                    usSuccess("Trusted proxy source added to the config file");
-                    logger($user->data()->id, 'RateLimit', "Added proxy $proxy_ip using header $header_name to trusted_proxies.php");
-                } else {
-                    usError("The trusted proxy config file is not writable");
-                }
-            } else {
-                $db->insert('us_rate_limit_proxy_settings', [
-                    'proxy_ip' => $proxy_ip,
-                    'header_name' => $header_name,
-                    'priority' => $priority,
-                    'enabled' => 1
-                ]);
-                usSuccess("Trusted proxy source added successfully");
-                logger($user->data()->id, 'RateLimit', "Added proxy config: $proxy_ip using header $header_name");
-            }
-        } else {
-            usError("Invalid IP address or CIDR format");
-        }
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Handle proxy deletion
-    if (isset($_POST['delete_proxy'])) {
-        $proxy_id = (int)Input::get('proxy_id');
-        $db->delete('us_rate_limit_proxy_settings', ['id' => $proxy_id]);
-        usSuccess("Proxy configuration removed");
-        logger($user->data()->id, 'RateLimit', "Deleted proxy config ID: $proxy_id");
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Handle file-based proxy entry deletion
-    if (isset($_POST['delete_proxy_entry']) && $file_mode) {
-        $entry = Input::get('proxy_entry');
-        $proxies = array_values(array_diff($ip_config['trusted_proxies'], [$entry]));
-        if ($file_writable && ClientIP::writeConfigFile($proxies, $ip_config['trusted_headers'])) {
-            usSuccess("Proxy removed from the config file");
-            logger($user->data()->id, 'RateLimit', "Removed proxy $entry from trusted_proxies.php");
-        } else {
-            usError("The trusted proxy config file is not writable");
-        }
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Handle file-based header entry deletion
-    if (isset($_POST['delete_header_entry']) && $file_mode) {
-        $header_entry = Input::get('header_entry');
-        $headers = $ip_config['trusted_headers'];
-        unset($headers[$header_entry]);
-        if ($file_writable && ClientIP::writeConfigFile($ip_config['trusted_proxies'], $headers)) {
-            usSuccess("Header removed from the config file");
-            logger($user->data()->id, 'RateLimit', "Removed header $header_entry from trusted_proxies.php");
-        } else {
-            usError("The trusted proxy config file is not writable");
-        }
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Export database proxy settings to the config file
-    if (isset($_POST['export_proxy_file']) && !$file_mode) {
-        $rows = $db->query("SELECT proxy_ip, header_name, priority FROM us_rate_limit_proxy_settings WHERE enabled = 1 ORDER BY priority ASC")->results();
-        $proxies = [];
-        $headers = [];
-        foreach ($rows as $row) {
-            $proxies[] = trim($row->proxy_ip);
-            $headers[$row->header_name] = (int)$row->priority;
-        }
-        if (ClientIP::writeConfigFile($proxies, $headers)) {
-            usSuccess("Trusted proxy configuration exported to usersc/includes/trusted_proxies.php. The file is now the authoritative source.");
-            logger($user->data()->id, 'RateLimit', "Exported proxy config to trusted_proxies.php");
-        } else {
-            usError("Could not write usersc/includes/trusted_proxies.php. Check directory permissions.");
-        }
-        Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
-    }
-
-    // Remove the config file and fall back to database settings
-    if (isset($_POST['remove_proxy_file']) && $file_mode) {
-        if (is_writable(dirname($proxy_config_file)) && unlink($proxy_config_file)) {
-            usSuccess("Trusted proxy config file removed. Database settings are now active.");
-            logger($user->data()->id, 'RateLimit', "Removed trusted_proxies.php; reverted to database proxy config");
-        } else {
-            usError("Could not remove the trusted proxy config file. Check directory permissions.");
-        }
         Redirect::to($us_url_root . "users/admin.php?view=rate_limits");
     }
 
@@ -224,18 +89,6 @@ if (!empty($_POST)) {
     }
 }
 
-// Detect if init.php uses the old HTTPS detection pattern vs Server::getScheme
-$init_file = $abs_us_root . $us_url_root . 'users/init.php';
-$init_uses_getscheme = false;
-$init_missing_samesite = false;
-$init_missing_secure = false;
-if (file_exists($init_file)) {
-    $init_contents = file_get_contents($init_file);
-    $init_uses_getscheme = (strpos($init_contents, 'Server::getScheme') !== false);
-    $init_missing_samesite = (strpos($init_contents, 'session.cookie_samesite') === false);
-    $init_missing_secure = (strpos($init_contents, 'session.cookie_secure') === false);
-}
-
 // Get current IP for testing
 $current_ip = ClientIP::peer();
 $real_ip = ClientIP::get();
@@ -249,16 +102,6 @@ $recent_activity = $db->query("
     ORDER BY last_attempt DESC
     LIMIT 20
 ")->results();
-
-// Get proxy configurations
-$proxy_configs = [];
-if (!$file_mode) {
-    $proxy_configs = $db->query("
-        SELECT * FROM us_rate_limit_proxy_settings
-        WHERE enabled = 1
-        ORDER BY priority ASC
-    ")->results();
-}
 
 ?>
 
@@ -277,28 +120,24 @@ if (!$file_mode) {
         font-family: 'Courier New', monospace;
     }
 
+    /* theme variables, not fixed light grays, so the text stays readable in dark mode */
     .action-header {
-        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-        border-left: 4px solid #007bff;
-    }
-
-    .proxy-item {
-        border-left: 3px solid #28a745;
-        background: #f8f9fa;
+        background: var(--bs-tertiary-bg);
+        border-left: 4px solid var(--bs-primary);
     }
 
     .status-good {
-        color: #28a745;
+        color: var(--bs-success-text-emphasis);
         font-weight: bold;
     }
 
     .status-warning {
-        color: #ffc107;
+        color: var(--bs-warning-text-emphasis);
         font-weight: bold;
     }
 
     .status-danger {
-        color: #dc3545;
+        color: var(--bs-danger-text-emphasis);
         font-weight: bold;
     }
 
@@ -373,85 +212,6 @@ if (!$file_mode) {
     </div>
 </div>
 
-<?php if ($file_mode): ?>
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="alert alert-info mb-0">
-            <i class="fas fa-file-code me-2"></i>
-            <strong>File-based proxy configuration active.</strong> Trusted proxy settings are loaded from <code>usersc/includes/trusted_proxies.php</code>, and the database proxy settings are ignored while this file exists. Changes made on this page are written to the file.
-            <?php if (!$file_writable): ?>
-                <br><span class="text-danger"><i class="fas fa-lock me-1"></i>The file is not writable, so this page is read-only. Edit the file directly or adjust its permissions.</span>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<?php if ($proxy_enabled && !$init_uses_getscheme): ?>
-<?php
-    // Build dynamic trusted proxies array from configured proxies
-    $trusted_proxy_ips = [];
-    if ($file_mode) {
-        $trusted_proxy_ips = $ip_config['trusted_proxies'];
-    } elseif (!empty($proxy_configs)) {
-        foreach ($proxy_configs as $pc) {
-            $trusted_proxy_ips[] = $pc->proxy_ip;
-        }
-    }
-    $proxy_array_str = "[\n";
-    if (!empty($trusted_proxy_ips)) {
-        foreach ($trusted_proxy_ips as $ip) {
-            $proxy_array_str .= "    '" . htmlspecialchars($ip) . "',\n";
-        }
-    } else {
-        $proxy_array_str .= "    // Add your proxy IPs here, e.g.:\n";
-        $proxy_array_str .= "    // '10.0.0.1',\n";
-        $proxy_array_str .= "    // '192.168.1.0/24',\n";
-    }
-    $proxy_array_str .= "]";
-?>
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-warning">
-            <div class="card-header bg-warning bg-opacity-25">
-                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Proxy Session Security - Action Recommended</h5>
-            </div>
-            <div class="card-body">
-                <p>Your site is configured as being <strong>behind a reverse proxy</strong>, but your <code>users/init.php</code> is using the standard HTTPS detection method. This means session cookies may not be marked as secure when your proxy terminates SSL, because the connection between the proxy and PHP is typically plain HTTP.</p>
-
-                <p>Update the session cookie block in your <code>users/init.php</code> to use <code>Server::getScheme()</code> which is proxy-aware and checks <code>X-Forwarded-Proto</code> from trusted sources:</p>
-
-                <pre class="bg-dark text-light p-3 rounded position-relative"><code>// Define your trusted proxy IPs (e.g., your Load Balancer's internal IP)
-$trustedProxies = <?= $proxy_array_str ?>;
-
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Lax');
-
-// Use the helper method which handles X-Forwarded-Proto for you
-if (Server::getScheme($trustedProxies) === 'https') {
-    ini_set('session.cookie_secure', 1);
-}</code></pre>
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-us-copy-init><i class="fas fa-copy me-1"></i>Copy to Clipboard</button>
-
-                <?php if ($init_missing_samesite || $init_missing_secure): ?>
-                <div class="alert alert-info mt-3 mb-0 p-2 small">
-                    <i class="fas fa-info-circle me-1"></i>
-                    <strong>Additionally detected:</strong>
-                    <?php if ($init_missing_samesite): ?>
-                        Your <code>init.php</code> is missing <code>session.cookie_samesite</code>.
-                    <?php endif; ?>
-                    <?php if ($init_missing_secure): ?>
-                        Your <code>init.php</code> is missing <code>session.cookie_secure</code>.
-                    <?php endif; ?>
-                    The snippet above includes both of these recommended settings.
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
@@ -460,31 +220,21 @@ if (Server::getScheme($trustedProxies) === 'https') {
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-12 col-md-3">
-                        <form method="post" class="h-100">
-                            <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                            <button type="submit" name="toggle_proxy" class="btn btn-<?= $proxy_enabled ? 'success' : 'outline-secondary' ?> d-flex flex-column align-items-center justify-content-center h-100 w-100">
-                                <i class="fas fa-server mb-2" style="font-size: 1.5rem;"></i>
-                                <div>UserSpice is Behind Proxy</div>
-                                <small><?= $proxy_enabled ? 'Enabled' : 'Disabled' ?></small>
-                            </button>
-                        </form>
+                    <div class="col-12 col-md-4">
+                        <a href="<?= $us_url_root ?>users/admin.php?view=proxy" class="btn btn-<?= $proxy_enabled ? 'success' : 'outline-secondary' ?> d-flex flex-column align-items-center justify-content-center h-100 w-100">
+                            <i class="fas fa-network-wired mb-2" style="font-size: 1.5rem;" aria-hidden="true"></i>
+                            <div>Proxy &amp; CDN Settings</div>
+                            <small><?= $proxy_enabled ? 'Proxy mode on' : 'Proxy mode off' ?></small>
+                        </a>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <button id="addProxyBtn" type="button" class="btn btn-outline-primary d-flex flex-column align-items-center justify-content-center h-100 w-100">
-                            <i class="fas fa-plus mb-2" style="font-size: 1.5rem;"></i>
-                            <div>Add Trusted Proxy</div>
-                            <small>Configure Source IP</small>
-                        </button>
-                    </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-4">
                         <button id="cleanupLogsBtn" type="button" class="btn btn-outline-warning d-flex flex-column align-items-center justify-content-center h-100 w-100">
                             <i class="fas fa-broom mb-2" style="font-size: 1.5rem;"></i>
                             <div>Cleanup Logs</div>
                             <small>Remove Old Records</small>
                         </button>
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-4">
                         <button type="button" class="btn btn-outline-info autoConfigBtn d-flex flex-column align-items-center justify-content-center h-100 w-100">
                             <i class="fas fa-magic mb-2" style="font-size: 1.5rem;"></i>
                             <div>Auto-Configure Limits</div>
@@ -521,7 +271,10 @@ if (Server::getScheme($trustedProxies) === 'https') {
                 <form method="post" id="rateLimitsForm">
                     <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
 
-                    <?php foreach ($rateLimits as $action => $limits): ?>
+                    <?php foreach ($rateLimits as $action => $limits):
+                        // Accessible-name prefix for every input in this action's block
+                        $actionLabel = safeReturn(ucwords(str_replace('_', ' ', $action)));
+                    ?>
                         <div class="action-header p-3 mb-3 rounded">
                             <h6 class="mb-3 text-primary">
                                 <i class="fas fa-cog me-2"></i><?= ucwords(str_replace('_', ' ', $action)) ?>
@@ -534,12 +287,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                         <label class="form-label fw-bold">IP-Based Limits</label>
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text">Max Failures</span>
-                                            <input type="number" name="limits[<?= $action ?>][ip_max]" value="<?= $limits['ip_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                            <input type="number" name="limits[<?= $action ?>][ip_max]" aria-label="<?= $actionLabel ?>: IP-based max failures (attempts)" value="<?= $limits['ip_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                             <span class="input-group-text">attempts</span>
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Window</span>
-                                            <input type="number" name="limits[<?= $action ?>][ip_window]" value="<?= $limits['ip_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                            <input type="number" name="limits[<?= $action ?>][ip_window]" aria-label="<?= $actionLabel ?>: IP-based window (seconds)" value="<?= $limits['ip_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                             <span class="input-group-text">seconds</span>
                                         </div>
                                     </div>
@@ -550,12 +303,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                         <label class="form-label fw-bold">User-Based Limits</label>
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text">Max Failures</span>
-                                            <input type="number" name="limits[<?= $action ?>][user_max]" value="<?= $limits['user_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                            <input type="number" name="limits[<?= $action ?>][user_max]" aria-label="<?= $actionLabel ?>: User-based max failures (attempts)" value="<?= $limits['user_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                             <span class="input-group-text">attempts</span>
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Window</span>
-                                            <input type="number" name="limits[<?= $action ?>][user_window]" value="<?= $limits['user_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                            <input type="number" name="limits[<?= $action ?>][user_window]" aria-label="<?= $actionLabel ?>: User-based window (seconds)" value="<?= $limits['user_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                             <span class="input-group-text">seconds</span>
                                         </div>
                                     </div>
@@ -566,12 +319,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                         <label class="form-label fw-bold">Email-Based Limits</label>
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text">Max Attempts</span>
-                                            <input type="number" name="limits[<?= $action ?>][email_max]" value="<?= $limits['email_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                            <input type="number" name="limits[<?= $action ?>][email_max]" aria-label="<?= $actionLabel ?>: Email-based max attempts" value="<?= $limits['email_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                             <span class="input-group-text">attempts</span>
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Window</span>
-                                            <input type="number" name="limits[<?= $action ?>][email_window]" value="<?= $limits['email_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                            <input type="number" name="limits[<?= $action ?>][email_window]" aria-label="<?= $actionLabel ?>: Email-based window (seconds)" value="<?= $limits['email_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                             <span class="input-group-text">seconds</span>
                                         </div>
                                     </div>
@@ -582,12 +335,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                         <label class="form-label fw-bold">Token-Based Limits</label>
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text">Max Attempts</span>
-                                            <input type="number" name="limits[<?= $action ?>][token_max]" value="<?= $limits['token_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                            <input type="number" name="limits[<?= $action ?>][token_max]" aria-label="<?= $actionLabel ?>: Token-based max attempts" value="<?= $limits['token_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                             <span class="input-group-text">attempts</span>
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Window</span>
-                                            <input type="number" name="limits[<?= $action ?>][token_window]" value="<?= $limits['token_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                            <input type="number" name="limits[<?= $action ?>][token_window]" aria-label="<?= $actionLabel ?>: Token-based window (seconds)" value="<?= $limits['token_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                             <span class="input-group-text">seconds</span>
                                         </div>
                                     </div>
@@ -598,12 +351,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                         <label class="form-label fw-bold">Credential-Based Limits</label>
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text">Max Attempts</span>
-                                            <input type="number" name="limits[<?= $action ?>][credential_max]" value="<?= $limits['credential_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                            <input type="number" name="limits[<?= $action ?>][credential_max]" aria-label="<?= $actionLabel ?>: Credential-based max attempts" value="<?= $limits['credential_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                             <span class="input-group-text">attempts</span>
                                         </div>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Window</span>
-                                            <input type="number" name="limits[<?= $action ?>][credential_window]" value="<?= $limits['credential_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                            <input type="number" name="limits[<?= $action ?>][credential_window]" aria-label="<?= $actionLabel ?>: Credential-based window (seconds)" value="<?= $limits['credential_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                             <span class="input-group-text">seconds</span>
                                         </div>
                                     </div>
@@ -619,14 +372,14 @@ if (Server::getScheme($trustedProxies) === 'https') {
                                                 <div class="col-md-6">
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text">Max Total</span>
-                                                        <input type="number" name="limits[<?= $action ?>][total_max]" value="<?= $limits['total_max'] ?>" class="form-control limit-input" min="1" max="50000">
+                                                        <input type="number" name="limits[<?= $action ?>][total_max]" aria-label="<?= $actionLabel ?>: Circuit breaker max total attempts" value="<?= $limits['total_max'] ?>" class="form-control limit-input" min="1" max="50000">
                                                         <span class="input-group-text">attempts</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text">Window</span>
-                                                        <input type="number" name="limits[<?= $action ?>][total_window]" value="<?= $limits['total_window'] ?>" class="form-control limit-input" min="60" max="86400">
+                                                        <input type="number" name="limits[<?= $action ?>][total_window]" aria-label="<?= $actionLabel ?>: Circuit breaker window (seconds)" value="<?= $limits['total_window'] ?>" class="form-control limit-input" min="60" max="86400">
                                                         <span class="input-group-text">seconds</span>
                                                     </div>
                                                 </div>
@@ -685,12 +438,12 @@ if (Server::getScheme($trustedProxies) === 'https') {
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <strong>Server IP:</strong> <code><?= $current_ip ?></code>
+                    <strong>Server IP:</strong> <code><?= safeReturn($current_ip) ?></code>
                 </div>
                 <div class="mb-3">
-                    <strong>Detected IP:</strong> <code class="<?= $real_ip !== $current_ip ? 'text-warning' : 'text-success' ?>"><?= $real_ip ?: 'Unable to detect' ?></code>
+                    <strong>Detected IP:</strong> <code class="<?= $real_ip !== $current_ip ? 'text-warning' : 'text-success' ?>"><?= $real_ip !== '' ? safeReturn($real_ip) : 'Unable to detect' ?></code>
                 </div>
-                <?php if (in_array($current_ip, ['127.0.0.1', '::1']) || $current_ip === 'localhost' || !$real_ip): ?>
+                <?php if (ClientIP::isLocal() || !$real_ip): ?>
                     <div class="alert alert-info p-2 mb-3 small">
                         <i class="fas fa-info-circle me-1"></i>
                         <strong>Development Environment Detected:</strong> IP detection may not work as expected on localhost. This is normal and will function correctly in production with real client IPs.
@@ -702,121 +455,18 @@ if (Server::getScheme($trustedProxies) === 'https') {
                     </div>
                 <?php endif; ?>
 
-                <h6>Behind Reverse Proxy</h6>
+                <h6>Proxy &amp; CDN</h6>
                 <div class="mb-2">
-                    <strong>Status:</strong>
+                    <strong>Proxy mode:</strong>
                     <span class="badge bg-<?= $proxy_enabled ? 'success' : 'secondary' ?>">
-                        <?= $proxy_enabled ? 'Enabled' : 'Disabled' ?>
+                        <?= $proxy_enabled ? 'On' : 'Off' ?>
                     </span>
+                    <span class="badge bg-info"><?= (int)$proxy_config_count ?> trusted source<?= $proxy_config_count == 1 ? '' : 's' ?></span>
                 </div>
-                <div class="mb-3">
-                    <strong>Trusted Sources:</strong>
-                    <span class="badge bg-info"><?= $proxy_config_count ?> configured</span>
-                </div>
-                <small class="text-body-secondary">Enable this if UserSpice sits behind a load balancer, CDN, or reverse proxy that forwards client IPs via headers.</small>
-
-                <?php if ($proxy_enabled && $proxy_config_count == 0): ?>
-                    <div class="alert alert-warning p-2 small mt-2">
-                        The 'Behind Proxy' setting is enabled, but no trusted proxy sources are configured. IP detection will fall back to the standard server IP.
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!$file_mode && $proxy_config_count > 0): ?>
-                    <form method="post" class="mt-3">
-                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                        <button type="submit" name="export_proxy_file" class="btn btn-sm btn-outline-secondary" data-us-confirm="Write the current proxy settings to usersc/includes/trusted_proxies.php? The file will become the authoritative source, and provisioning scripts can then manage it directly.">
-                            <i class="fas fa-file-export me-1"></i>Export to Config File
-                        </button>
-                    </form>
-                <?php endif; ?>
+                <p class="small text-body-secondary mb-2">Rate limits key on the resolved visitor address. Behind Cloudflare, a load balancer, or a same-server proxy, configure trusted proxies so visitors aren't all counted as one address.</p>
+                <a href="<?= $us_url_root ?>users/admin.php?view=proxy" class="btn btn-sm btn-outline-primary"><i class="fas fa-network-wired me-1" aria-hidden="true"></i>Proxy &amp; CDN settings</a>
             </div>
         </div>
-
-        <?php if ($file_mode): ?>
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Trusted Proxy Sources</h5>
-                    <span class="badge bg-info">From File</span>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (empty($ip_config['trusted_proxies']) && empty($ip_config['trusted_headers'])): ?>
-                        <div class="p-3 small text-body-secondary">No trusted proxies or headers are defined in the config file.</div>
-                    <?php endif; ?>
-                    <?php foreach ($ip_config['trusted_proxies'] as $entry): ?>
-                        <div class="proxy-item p-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong><?= htmlspecialchars($entry) ?></strong>
-                                    <br><small class="text-body-secondary">Trusted proxy</small>
-                                </div>
-                                <?php if ($file_writable): ?>
-                                    <form method="post" class="d-inline">
-                                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                                        <input type="hidden" name="proxy_entry" value="<?= htmlspecialchars($entry) ?>">
-                                        <button type="submit" name="delete_proxy_entry" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this proxy from the config file?">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                    <?php foreach ($ip_config['trusted_headers'] as $header_name => $priority): ?>
-                        <div class="p-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong><?= htmlspecialchars($header_name) ?></strong>
-                                    <br><small class="text-body-secondary">Header &middot; Priority: <?= (int)$priority ?></small>
-                                </div>
-                                <?php if ($file_writable): ?>
-                                    <form method="post" class="d-inline">
-                                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                                        <input type="hidden" name="header_entry" value="<?= htmlspecialchars($header_name) ?>">
-                                        <button type="submit" name="delete_header_entry" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this header from the config file?">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <div class="card-footer">
-                    <form method="post">
-                        <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                        <button type="submit" name="remove_proxy_file" class="btn btn-sm btn-outline-danger" data-us-confirm="Delete the trusted proxy config file and switch back to database-managed settings?">
-                            <i class="fas fa-database me-1"></i>Switch Back to Database Config
-                        </button>
-                    </form>
-                </div>
-            </div>
-        <?php elseif (!empty($proxy_configs)): ?>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Trusted Proxy Sources</h5>
-                </div>
-                <div class="card-body p-0">
-                    <?php foreach ($proxy_configs as $conf): ?>
-                        <div class="proxy-item p-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <strong><?= htmlspecialchars($conf->proxy_ip) ?></strong>
-                                    <br><small class="text-body-secondary">Header: <?= htmlspecialchars($conf->header_name) ?></small>
-                                    <br><small class="text-body-secondary">Priority: <?= $conf->priority ?></small>
-                                </div>
-                                <form method="post" class="d-inline">
-                                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-                                    <input type="hidden" name="proxy_id" value="<?= $conf->id ?>">
-                                    <button type="submit" name="delete_proxy" class="btn btn-sm btn-outline-danger" data-us-confirm="Remove this proxy configuration?">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        <?php endif; ?>
 
         <div class="card mb-4">
             <div class="card-header">
@@ -864,11 +514,11 @@ if (Server::getScheme($trustedProxies) === 'https') {
                     ];
                 }
 
-                if (!$proxy_enabled && in_array($current_ip, ['127.0.0.1', '::1'])) {
+                if (!$proxy_enabled && in_array($current_ip, ['127.0.0.1', '::1'], true) && !ClientIP::isLocal()) {
                     $recommendations[] = [
                         'level' => 'warning',
                         'icon' => 'fas fa-server',
-                        'text' => 'Consider enabling the \'Behind a Proxy\' setting if you are using a load balancer.'
+                        'text' => 'Requests arrive from loopback through a proxy or tunnel on this server. Configure it under <a href="' . $us_url_root . 'users/admin.php?view=proxy">Proxy &amp; CDN</a>.'
                     ];
                 }
 
@@ -957,67 +607,6 @@ if (Server::getScheme($trustedProxies) === 'https') {
     </div>
 </div>
 
-<div class="modal fade" id="addProxyModal" tabindex="-1" aria-labelledby="addProxyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addProxyModalLabel">Add Trusted Proxy Source</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="csrf" value="<?= Token::generate() ?>">
-
-                    <div class="mb-3">
-                        <label for="proxy_ip" class="form-label">Proxy IP Address or CIDR</label>
-                        <input type="text" class="form-control" id="proxy_ip" name="proxy_ip" required
-                            placeholder="192.168.1.1 or 10.0.0.0/8">
-                        <div class="form-text">Single IP address or CIDR notation for IP ranges</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="header_name" class="form-label">Header Name</label>
-                        <select class="form-select" id="header_name" name="header_name" required>
-                            <option value="X-Forwarded-For">X-Forwarded-For</option>
-                            <option value="X-Real-IP">X-Real-IP</option>
-                            <option value="CF-Connecting-IP">CF-Connecting-IP (Cloudflare)</option>
-                            <option value="X-Client-IP">X-Client-IP</option>
-                            <option value="X-Originating-IP">X-Originating-IP</option>
-                            <option value="True-Client-IP">True-Client-IP (Akamai)</option>
-                            <option value="X-Azure-ClientIP">X-Azure-ClientIP (Azure)</option>
-                            <option value="X-Cluster-Client-IP">X-Cluster-Client-IP (GCP)</option>
-                            <option value="custom">Custom Header...</option>
-                        </select>
-                        <div class="form-text">HTTP header used to detect the real client IP</div>
-                    </div>
-
-                    <div class="mb-3 d-none" id="customHeaderDiv">
-                        <label for="custom_header_name" class="form-label">Custom Header Name</label>
-                        <input type="text" class="form-control" id="custom_header_name" name="custom_header_name"
-                            placeholder="X-Your-Custom-Header">
-                        <div class="form-text">Enter the exact header name. Standard practice is Title-Case, e.g. X-Real-IP.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="priority" class="form-label">Priority</label>
-                        <input type="number" class="form-control" id="priority" name="priority" value="0" min="0" max="100">
-                        <div class="form-text">Lower numbers = higher priority (checked first)</div>
-                    </div>
-
-                    <div class="alert alert-warning p-2">
-                        <strong>Security Note:</strong> Only add IP addresses you trust completely.
-                        Malicious proxies can spoof client IPs and bypass rate limiting.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="add_proxy" class="btn btn-primary">Add Trusted Proxy</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="cleanupModal" tabindex="-1" aria-labelledby="cleanupModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1065,35 +654,7 @@ if (Server::getScheme($trustedProxies) === 'https') {
 </div>
 
 <script nonce="<?=htmlspecialchars($userspice_nonce ?? '')?>">
-    // Copy init.php snippet to clipboard
-    function copyInitSnippet(btn) {
-        const pre = btn.previousElementSibling;
-        const code = pre?.querySelector('code')?.textContent || pre?.textContent || '';
-        navigator.clipboard.writeText(code).then(() => {
-            const origHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
-            btn.classList.replace('btn-outline-secondary', 'btn-success');
-            setTimeout(() => {
-                btn.innerHTML = origHTML;
-                btn.classList.replace('btn-success', 'btn-outline-secondary');
-            }, 2000);
-        });
-    }
-
-    // CSP-friendly bindings (replace inline onclick/onchange attributes)
-    document.addEventListener('click', function (e) {
-        var initBtn = e.target.closest && e.target.closest('[data-us-copy-init]');
-        if (initBtn) { copyInitSnippet(initBtn); }
-    });
-    var headerSel = document.getElementById('header_name');
-    if (headerSel) { headerSel.addEventListener('change', toggleCustomHeader); }
-
     // Define functions first to avoid reference errors
-    function showAddProxyModal() {
-        const modal = new bootstrap.Modal(document.getElementById('addProxyModal'));
-        modal.show();
-    }
-
     function showCleanupModal() {
         const modal = new bootstrap.Modal(document.getElementById('cleanupModal'));
         modal.show();
@@ -1104,22 +665,6 @@ if (Server::getScheme($trustedProxies) === 'https') {
         modal.show();
     }
 
-
-    function toggleCustomHeader() {
-        const select = document.getElementById('header_name');
-        const customDiv = document.getElementById('customHeaderDiv');
-        const customInput = document.getElementById('custom_header_name');
-
-        if (select.value === 'custom') {
-            customDiv.classList.remove('d-none');
-            customInput.required = true;
-            customInput.focus();
-        } else {
-            customDiv.classList.add('d-none');
-            customInput.required = false;
-            customInput.value = '';
-        }
-    }
 
     function applyRateLimitProfile(profileName) {
         const profiles = {
@@ -1336,7 +881,6 @@ if (Server::getScheme($trustedProxies) === 'https') {
     // Event listeners after DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
         // Attach listeners for quick action buttons
-        document.getElementById('addProxyBtn')?.addEventListener('click', showAddProxyModal);
         document.getElementById('cleanupLogsBtn')?.addEventListener('click', showCleanupModal);
         document.querySelectorAll('.autoConfigBtn').forEach(btn => {
             btn.addEventListener('click', showAutoConfigModal);
